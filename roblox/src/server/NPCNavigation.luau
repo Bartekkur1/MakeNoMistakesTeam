@@ -29,11 +29,14 @@ export type ArbiterConfig = {
 export type Arbiter = {
 	getOwner: () -> Player?,
 	tryClaim: (player: Player, revision: number?) -> boolean,
-	releaseOwner: (player: Player) -> (),
+	enqueue: (player: Player) -> (),
+	advanceQueue: () -> Player?,
+	releaseOwner: (player: Player) -> Player?,
 	cancelPlayer: (player: Player) -> (),
 	isOwner: (player: Player) -> boolean,
 	getToken: (player: Player) -> NavigationToken?,
 	createToken: (player: Player, revision: number) -> NavigationToken,
+	getQueueLength: () -> number,
 }
 
 function NPCNavigation.createToken(revision: number?): NavigationToken
@@ -50,6 +53,8 @@ end
 function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 	local currentOwner: Player? = nil
 	local ownerTokens: { [Player]: NavigationToken } = {}
+	local queue: { Player } = {}
+	local queueTimes: { [Player]: number } = {}
 
 	local arbiter: Arbiter = {} :: Arbiter
 
@@ -65,6 +70,10 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 		return ownerTokens[player]
 	end
 
+	function arbiter.getQueueLength(): number
+		return #queue
+	end
+
 	function arbiter.createToken(player: Player, revision: number): NavigationToken
 		local prevToken = ownerTokens[player]
 		if prevToken then
@@ -76,6 +85,29 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 		return token
 	end
 
+	function arbiter.enqueue(player: Player)
+		if currentOwner == player then
+			return
+		end
+		for _, p in ipairs(queue) do
+			if p == player then
+				return
+			end
+		end
+		table.insert(queue, player)
+		queueTimes[player] = os.clock()
+
+		-- Sort FIFO by enqueue time, tie-break by UserId per D-24
+		table.sort(queue, function(a, b)
+			local tA = queueTimes[a] or 0
+			local tB = queueTimes[b] or 0
+			if tA == tB then
+				return a.UserId < b.UserId
+			end
+			return tA < tB
+		end)
+	end
+
 	function arbiter.tryClaim(player: Player, revision: number?): boolean
 		if currentOwner == nil then
 			currentOwner = player
@@ -85,7 +117,20 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 		return currentOwner == player
 	end
 
-	function arbiter.releaseOwner(player: Player)
+	function arbiter.advanceQueue(): Player?
+		while #queue > 0 do
+			local nextPlayer = table.remove(queue, 1)
+			queueTimes[nextPlayer] = nil
+			if nextPlayer and nextPlayer.Parent and nextPlayer.Character then
+				currentOwner = nextPlayer
+				arbiter.createToken(nextPlayer, 1)
+				return nextPlayer
+			end
+		end
+		return nil
+	end
+
+	function arbiter.releaseOwner(player: Player): Player?
 		if currentOwner == player then
 			local token = ownerTokens[player]
 			if token then
@@ -94,9 +139,17 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 			end
 			currentOwner = nil
 		end
+		return arbiter.advanceQueue()
 	end
 
 	function arbiter.cancelPlayer(player: Player)
+		for i, p in ipairs(queue) do
+			if p == player then
+				table.remove(queue, i)
+				queueTimes[player] = nil
+				break
+			end
+		end
 		local token = ownerTokens[player]
 		if token then
 			token.cancel()
@@ -121,8 +174,8 @@ function NPCNavigation.cancelPlayer(player: Player)
 	defaultArbiter.cancelPlayer(player)
 end
 
-function NPCNavigation.releaseOwner(player: Player)
-	defaultArbiter.releaseOwner(player)
+function NPCNavigation.releaseOwner(player: Player): Player?
+	return defaultArbiter.releaseOwner(player)
 end
 
 function NPCNavigation.walkToPlayer(
