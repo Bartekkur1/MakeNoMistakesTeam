@@ -59,7 +59,7 @@ export const STRINGS = Object.freeze({
     conflicting_answers: 'Twoja odpowiedź różni się od prośby rozpoznanej w wiadomości. Nie mamy pewności, jak ją rozumieć; ostrzeżenie o haśle lub kodzie pozostaje.',
   }),
   checkSignals: Object.freeze({
-    none: 'W tych odpowiedziach nie widzę typowych sygnałów oszustwa.',
+    none: 'Nie widzę typowych sygnałów oszustwa w wiadomości ani w Twoich odpowiedziach.',
     password: 'Prośba o hasło to sygnał ostrzegawczy. Nie podawaj go.',
     code: 'Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.',
     credential_password: 'Prośba o hasło to sygnał ostrzegawczy. Nie podawaj go.',
@@ -71,7 +71,7 @@ export const STRINGS = Object.freeze({
     prize: 'Darmową nagrodę warto sprawdzić w znanej Ci oficjalnej aplikacji lub stronie.',
   }),
   checkUnknowns: Object.freeze({
-    none: 'Odpowiedzi nie potwierdzają tożsamości nadawcy ani bezpieczeństwa wiadomości.',
+    none: 'Nie wskazano dodatkowych brakujących informacji. To nie potwierdza tożsamości nadawcy ani bezpieczeństwa wiadomości.',
     sender: 'Nie wiemy jeszcze, kto naprawdę wysłał wiadomość.',
     request: 'Nie wiemy jeszcze, czego nadawca oczekuje.',
     verify: 'Nie wiemy jeszcze, jak sprawdzić wiadomość niezależnie.',
