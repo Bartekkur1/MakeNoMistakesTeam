@@ -18,7 +18,7 @@ Dokończenie pełnej logiki wyborów i konsekwencji w Fazie 2 misji na Robloxie:
 - Selektywny czerwony alarm syreny: uruchamiany wyłącznie przy `helpReceived == true` i wyborze `share_fake_password` (assisted bad), a przy odmowie pochwała Scamerino bez alarmu per D-07, D-22, D-23,
 - Symulacja utraty fikcyjnego konta (`share_fake_password`): wyłącznie bezpieczny przycisk bez zbierania prawdziwych danych (STRIDE T-02-08),
 - Atomowy restart `resetForPlayer(player, revision)` per D-29: teleport do `MissionStart`, podbicie `revision`, reset stanu i NPC,
-- Usunięcie starego kontrolera `ScamerinoDialogueController.client.luau` na rzecz zunifikowanego `MissionController.client.luau`.
+- Zachowanie i koordynacja `ScamerinoDialogueController.client.luau` jako stałego przewodnika edukacyjnego po cyberbezpieczeństwie w lobby (kiedy gracz nie rozmawia ze scammerem), skoordynowanego z panelem misji `MissionController.client.luau`.
 
 ---
 
@@ -56,8 +56,9 @@ Dokończenie pełnej logiki wyborów i konsekwencji w Fazie 2 misji na Robloxie:
    - Teleport gracza na `Workspace.MissionStart`.
    - Zwolnienie ownershipu NPC i powrót modeli na pozycje patrolowe.
    - Wyczyszczenie historii czatów, flagi `helpReceived` i licznika prób quizu.
-5. **Czyszczenie architektury:**
-   - Usunięto przestarzały `roblox/src/client/ScamerinoDialogueController.client.luau`. Całość obsługi obu postaci i zakładek realizuje `MissionController.client.luau`.
+5. **Koordynacja kontrolerów klienta:**
+   - Zachowano `roblox/src/client/ScamerinoDialogueController.client.luau` jako stałego przewodnika edukacyjnego po cyberbezpieczeństwie w lobby (dostępnego poza misją przez [E] / ProximityPrompt).
+   - Wprowadzono blokadę kolizji (`isMissionChatOpen`): dialog przewodnika automatycznie zamyka się i nie otwiera, gdy aktywna jest misja ze scammerem (`MissionController.client.luau`), w której Scamerino działa jako fizyczny pomocnik wzywany do akcji.
 6. **Raport testowy `02-PLAYTEST.md`:**
    - Potwierdzono 8/8 kryteriów weryfikacji planu:
      `help_tracer: PASS`, `all_four_actions: PASS`, `two_refusals: PASS`, `quiz_max_two: PASS`, `no_path_recovery: PASS`, `assisted_bad_alarm_only: PASS`, `two_player_isolation: PASS`, `full_restart: PASS`.
