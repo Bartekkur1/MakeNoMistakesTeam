@@ -3,7 +3,7 @@
 .avatar { width: 64px; height: 64px; padding: 0; border: 0; background: none; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
 .avatar img { width: 64px; height: 64px; -webkit-user-drag: none; pointer-events: none; }
 .avatar:focus-visible { outline: 3px solid var(--color-siren-amber); }
-.panel { position: fixed; width: 320px; max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 16px; border-radius: var(--radius-widget); background: var(--color-surface-card); border: 1px solid var(--color-shield-silver-border); box-shadow: var(--shadow-shield-card); }
+.panel { position: fixed; width: 320px; max-width: calc(100vw - 16px); max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 16px; border-radius: var(--radius-widget); background: var(--color-surface-card); border: 1px solid var(--color-shield-silver-border); box-shadow: var(--shadow-shield-card); }
 .panel header { display: flex; justify-content: flex-end; }
 button { font: inherit; cursor: pointer; padding: 8px 12px; border: 0; border-radius: 12px; }
 .btn-primary { background: var(--color-shark-blue); color: white; border-radius: 12px; }
