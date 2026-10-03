@@ -294,7 +294,7 @@ end
 showPhishingInfo = function()
 	clearButtons()
 	dialogBox.Text =
-		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (np. darmowe Robuxy, rzadki pet, fałszywy link). Gdy gracz połknie haczyk i poda hasło lub kod SMS – oszust przejmuje konto! Zawsze sprawdzaj oferty przez Lupę!"
+		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (np. darmowe Robuxy, rzadki pet, fałszywy link). Gdy ktoś obiecuje Robuxy w zamian za hasło lub kod SMS, chce przejąć konto! Nigdy nie wpisuj hasła w odpowiedzi na taką ofertę."
 
 	createChoiceBtn(1, "⚠️ Jak rozpoznać oszusta?", function()
 		showScamSigns()
@@ -312,7 +312,7 @@ end
 showScamSigns = function()
 	clearButtons()
 	dialogBox.Text =
-		"⚠️ 3 CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe ('Darmowe 10 000 Robuxów!')\n2. ⏱️ Presja czasu ('Tylko 60 sekund!')\n3. 🔑 Prośba o kod SMS lub hasło. Prawdziwy pracownik Roblox NIGDY o to nie pyta!"
+		"⚠️ 3 CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe ('Darmowe 10 000 Robuxów!')\n2. ⏱️ Presja czasu ('Tylko 60 sekund!')\n3. 🔑 Prośba o hasło lub kod SMS. Prawdziwy pracownik Roblox NIGDY o to nie pyta!"
 
 	createChoiceBtn(1, "🚨 Ktoś na placu rozdaje Robuxy!", function()
 		showReportAdvice()

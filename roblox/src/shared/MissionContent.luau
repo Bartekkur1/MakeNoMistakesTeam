@@ -9,16 +9,16 @@ export type ChoiceRecord = {
 local MissionContent = {}
 
 MissionContent.texts = {
-	offer_intro = "Hej! Mam dla Ciebie niesamowitą okazję. Przekaż mi tylko kod ze swojego SMS-a, a wyślę na Twoje konto 10 000 darmowych Robuxów!",
+	offer_intro = "Hej! Mam dla Ciebie niesamowitą okazję. Podaj mi hasło do swojego konta, a dodam Ci 10 000 darmowych Robuxów!",
 	decision = "Co robisz? Oszust czeka na Twoją odpowiedź.",
 	ending_good = "Dobrze! Brawo! Nigdy nie podawaj nikomu swoich haseł, tokenów ani kodów SMS. Prawdziwy Roblox nigdy nie prosi o kody zabezpieczające!",
-	ending_bad = "Dałeś się oszukać! Podanie kodu z SMS-a pozwoliłoby oszustowi przejąć Twoje konto lub zmienić hasło. Na szczęście to tylko ćwiczenie.",
+	ending_bad = "Dałeś się oszukać! Podanie hasła pozwoliłoby oszustowi przejąć Twoje konto. To tylko ćwiczenie: kliknięcie symuluje decyzję — nigdy nie wpisuj tutaj prawdziwego hasła.",
 }
 
 MissionContent.choices = {
 	{
-		id = "share_fake_code",
-		label = "Podaj kod",
+		id = "share_fake_password",
+		label = "Podaj hasło",
 		nextStage = "ending_bad",
 		enabled = true,
 	},
