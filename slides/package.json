@@ -1,0 +1,16 @@
+{
+  "name": "scamerino-slides",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev slides.md --open",
+    "build": "slidev build slides.md",
+    "export": "slidev export slides.md --output scamerino-pitch.pdf --executable-path \"C:/Program Files/Google/Chrome/Application/chrome.exe\""
+  },
+  "devDependencies": {
+    "@slidev/cli": "^53.0.0",
+    "@slidev/theme-default": "^0.25.0",
+    "playwright-chromium": "^1.63.0",
+    "vue": "^3.5.43"
+  }
+}
