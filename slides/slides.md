@@ -131,7 +131,7 @@ Tylko 5 z 57 badań nad grami o cyberbezpieczeństwie dla dzieci miało grupę k
       <div class="stat-label">Dziecko przekazuje sprawę rodzicowi i&nbsp;widzi, co mu udostępnia. Rodzic odpowiada w&nbsp;panelu.</div>
     </div>
   </div>
-  <img src="/scamerino.png" loading="eager" class="w-[300px] h-[345px] object-cover object-top rounded-3xl" style="box-shadow: var(--shadow)" />
+  <img src="/scamerino-trojca.jpg" loading="eager" class="w-[300px] h-[300px] object-cover rounded-3xl" style="box-shadow: var(--shadow)" />
 </div>
 
 <!--
@@ -315,7 +315,7 @@ Nie zastępujemy tych służb, tylko do nich kierujemy: dzieci do 116&nbsp;111, 
 
 ---
 layout: image-right
-image: /scamerino.png
+image: /scamerinio2.jpg
 backgroundSize: contain
 ---
 
