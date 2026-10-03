@@ -15,6 +15,9 @@ import {
   LIMITS,
   REPORT_SOURCES,
   TAKEN_ACTIONS,
+  TRANSITIONS,
+  TRANSITION_COMMENT_REQUIRED,
+  type TransitionAction,
 } from "@/lib/contract/types";
 
 export type TableName = "reports" | "report_history" | "report_comments";
@@ -45,6 +48,7 @@ export interface FakeCall {
 }
 
 export type RpcHandler = (args: Record<string, unknown>, fake: FakeSupabase) => FakeResult;
+export type BeforeRpcCallback = (fake: FakeSupabase) => void;
 
 const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments"];
 
@@ -217,6 +221,8 @@ export class FakeQueryBuilder implements PromiseLike<FakeResult> {
 
     let result: Row[];
     if (this.mode === "insert") {
+      const violation = this.fake.foreignKeyViolation(this.table as TableName, this.pendingRows);
+      if (violation) return { data: null, error: violation };
       const inserted = this.pendingRows.map((row) => this.fake.prepareInsert(this.table as TableName, row));
       rows.push(...inserted);
       if (!this.returning) return { data: null, error: null };
@@ -264,6 +270,7 @@ export class FakeRpcCall implements PromiseLike<FakeResult> {
   }
 
   private async execute(): Promise<FakeResult> {
+    this.fake.runBeforeRpc();
     const injected = this.fake.beginCall({ kind: "rpc", name: this.name, args: clone(this.args), ops: [] });
     if (injected) return injected;
     const handler = this.fake.rpcHandlers[this.name];
@@ -293,6 +300,7 @@ export class FakeSupabase {
   private idQueue: string[] = [];
   private pendingFailure: FakeError | null = null;
   private pendingThrow: { error: unknown } | null = null;
+  private beforeRpc: BeforeRpcCallback | null = null;
 
   readonly client = {
     from: (table: string): FakeQueryBuilder => new FakeQueryBuilder(this, table),
@@ -314,6 +322,7 @@ export class FakeSupabase {
     this.idQueue = [];
     this.pendingFailure = null;
     this.pendingThrow = null;
+    this.beforeRpc = null;
   }
 
   private withSeq(table: SeqTable, rows: Row[]): Row[] {
@@ -339,6 +348,31 @@ export class FakeSupabase {
 
   throwNext(error: unknown): void {
     this.pendingThrow = { error };
+  }
+
+  // Runs `callback` on the fake just before the next rpc executes (before an armed failure is
+  // applied), e.g. to simulate a concurrent change between a route's read and its write.
+  beforeNextRpc(callback: BeforeRpcCallback): void {
+    this.beforeRpc = callback;
+  }
+
+  runBeforeRpc(): void {
+    const callback = this.beforeRpc;
+    this.beforeRpc = null;
+    if (callback) callback(this);
+  }
+
+  // report_history.report_id and report_comments.report_id reference public.reports(id):
+  // an insert naming an unknown report fails with 23503 and stores nothing.
+  foreignKeyViolation(table: TableName, rows: Row[]): FakeError | null {
+    if (!isSeqTable(table)) return null;
+    const known = new Set(this.tables.reports.map((report) => report.id));
+    const orphan = rows.find((row) => !known.has(row.report_id));
+    if (!orphan) return null;
+    return {
+      code: "23503",
+      message: `insert or update on table "${table}" violates foreign key constraint "${table}_report_id_fkey"`,
+    };
   }
 
   setClock(iso: string): void {
@@ -519,4 +553,74 @@ fakeSupabase.rpcHandlers.list_reports = (args, fake) => {
     .sort((a, b) => compareCreatedId(b.created_at, b.id, a.created_at, a.id))
     .slice(0, limit);
   return { data: rows.map((r) => clone(r)), error: null };
+};
+
+// ---------------------------------------------------------------------------
+// Fake public.transition_report (mirrors web-app/supabase/migrations/20261003170100_report_transitions.sql)
+// ---------------------------------------------------------------------------
+
+// The (action, from, to, role) tuples report_history_transition_check allows for transitions.
+function transitionTupleAllowed(action: unknown, from: unknown, to: unknown, role: unknown): boolean {
+  return TRANSITIONS.some(
+    (rule) =>
+      rule.action === action &&
+      rule.to === to &&
+      (rule.from as readonly unknown[]).includes(from) &&
+      (rule.roles as readonly unknown[]).includes(role),
+  );
+}
+
+function historyViolation(constraint: string): FakeResult {
+  return {
+    data: null,
+    error: {
+      code: "23514",
+      message: `new row for relation "report_history" violates check constraint "${constraint}"`,
+    },
+  };
+}
+
+// Updates the report only when it is still in p_from_state (data null otherwise, nothing
+// changed), then inserts the history entry with the same timestamp. A tuple outside the matrix,
+// a missing escalation comment or a bad comment length fails like the CHECK constraints and
+// rolls everything back. Returns { report, entry } as jsonb_build_object would.
+fakeSupabase.rpcHandlers.transition_report = (args, fake) => {
+  const report = fake.tables.reports.find((row) => row.id === args.p_report_id);
+  if (!report || report.state !== args.p_from_state) return { data: null, error: null };
+
+  const action = args.p_action;
+  const comment = args.p_comment ?? null;
+  if (!transitionTupleAllowed(action, args.p_from_state, args.p_to_state, args.p_actor_role)) {
+    return historyViolation("report_history_transition_check");
+  }
+  if (comment !== null) {
+    const length = typeof comment === "string" ? [...comment.trim()].length : 0;
+    if (length < 1 || length > LIMITS.transitionCommentMaxChars) {
+      return historyViolation("report_history_comment_check");
+    }
+  }
+  if (TRANSITION_COMMENT_REQUIRED[action as TransitionAction] && comment === null) {
+    return historyViolation("report_history_escalate_comment_check");
+  }
+  if (typeof args.p_actor_id !== "string") {
+    return { data: null, error: { code: "23502", message: "null value violates not-null constraint" } };
+  }
+
+  const now = fake.now();
+  report.state = args.p_to_state;
+  report.updated_at = now;
+  const entry: Row = {
+    id: fake.nextId(),
+    seq: fake.nextSeq("report_history"),
+    report_id: report.id,
+    action,
+    from_state: args.p_from_state,
+    to_state: args.p_to_state,
+    actor_id: args.p_actor_id,
+    actor_role: args.p_actor_role,
+    comment,
+    created_at: now,
+  };
+  fake.tables.report_history.push(entry);
+  return { data: { report: clone(report), entry: clone(entry) }, error: null };
 };

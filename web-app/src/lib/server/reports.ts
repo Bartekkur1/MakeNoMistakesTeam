@@ -27,6 +27,8 @@ import {
   type ReportSource,
   type ReportState,
   type TakenAction,
+  type TransitionAction,
+  type TransitionResponse,
 } from "@/lib/contract/types";
 import type { ListScope } from "./access";
 import { StorageUnavailableError } from "./errors";
@@ -266,4 +268,19 @@ export async function listReports({ scope, state, cursor, fetchLimit }: ListRepo
     }),
   );
   return mapList(data, mapReport);
+}
+
+export interface TransitionReportInput {
+  reportId: string;
+  action: TransitionAction;
+  fromState: ReportState;
+  toState: ReportState;
+  actorId: string;
+  actorRole: AccountRole;
+  comment: string | null;
+}
+
+// RED skeleton (plan 01-05 Task 1): not implemented yet.
+export async function transitionReport(_input: TransitionReportInput): Promise<TransitionResponse | null> {
+  throw new Error("not implemented");
 }
