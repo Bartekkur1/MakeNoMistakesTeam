@@ -6,7 +6,7 @@ import { buildCase } from '../../src/core/case.js';
 import { detectHints, evaluate } from '../../src/core/check.js';
 const hosts = [];
 afterEach(() => { for (const host of hosts.splice(0)) host.remove(); });
-const setup = () => { const host = document.createElement('div'); document.body.append(host); hosts.push(host); const root=host.attachShadow({mode:'open'}); const handlers=Object.fromEntries(['onClose','onCheck','onHowTo','onBack','onPasteEdit','onPasteNext','onSafetyNext','onAnswer','onQuestionNext','onQuestionBack','onFixAnswers'].map(k=>[k,vi.fn()])); return {root,handlers,panel:panelModule.createPanel({root,strings:STRINGS,handlers})}; };
+const setup = () => { const host = document.createElement('div'); document.body.append(host); hosts.push(host); const root=host.attachShadow({mode:'open'}); const handlers=Object.fromEntries(['onClose','onCheck','onHowTo','onBack','onPasteEdit','onPasteNext','onSafetyNext','onAnswer','onQuestionNext','onQuestionBack','onFixAnswers','onEditCheckContent','onCancelCheckEdit','onCheckNewSelection','onInsertSelection','onEdit','onApprove'].map(k=>[k,vi.fn()])); return {root,handlers,panel:panelModule.createPanel({root,strings:STRINGS,handlers})}; };
 const checkStore = () => {
   const store = createDraftStore(); store.submitPaste({ text: 'Podaj kod do konta', link: '' });
   const c = buildCase(store.get().draft); store.approved(store.beginSubmit(), c);
@@ -155,4 +155,52 @@ test('labelled hints leave controls untouched and mismatch buttons use explicit 
   click(STRINGS.correctAnswer); expect(handlers.onAnswer).toHaveBeenCalledWith('request', 'code');
   click(STRINGS.keepAnswer); expect(handlers.onQuestionNext).toHaveBeenLastCalledWith(true);
   click(STRINGS.next); expect(handlers.onQuestionNext).toHaveBeenLastCalledWith(false);
+});
+
+for (const step of ['safety', 'sender', 'request', 'verify', 'result']) test(`replacement control at ${step} requires a captured selection and invokes only its callback`, () => {
+ const { panel, root, handlers } = setup(); const store = checkStore();
+ if (step !== 'safety') {
+  store.startQuestions();
+  for (const id of ['sender', 'request', 'verify']) {
+   if (step === id) break;
+   store.answer(id, 'unknown'); store.nextQuestion();
+  }
+ }
+ const state = store.get();
+ const find = text => [...root.querySelectorAll('button')].find(button => button.textContent === text);
+ panel.render(state, {}); expect(find(STRINGS.checkNewSelection)).toBeUndefined();
+ expect(find(STRINGS.insertNewSelection)).toBeUndefined();
+ find(STRINGS.editCheckContent).click(); expect(handlers.onEditCheckContent).toHaveBeenCalledOnce();
+ for (const pendingSelection of [{ text: '' }, { text: ' \u00a0 ' }, null]) {
+  panel.render({ ...state, pendingSelection }, {}); expect(find(STRINGS.checkNewSelection)).toBeUndefined();
+ }
+ panel.render({ ...state, pendingSelection: { text: 'Explicitly captured replacement', truncated: false } }, {});
+ expect(find(STRINGS.checkNewSelection)?.textContent).toBe('Sprawdź nowe zaznaczenie');
+ expect(find(STRINGS.checkNewSelection)?.disabled).toBe(false); find(STRINGS.checkNewSelection).click();
+ expect(handlers.onCheckNewSelection).toHaveBeenCalledOnce(); expect(handlers.onInsertSelection).not.toHaveBeenCalled();
+ expect(handlers.onApprove).not.toHaveBeenCalled(); expect(find(STRINGS.insertNewSelection)).toBeUndefined();
+});
+
+for (const kind of ['edit', 'replacement']) test(`${kind} preview returns to checking instead of inserting a new selection`, () => {
+ const { panel, root, handlers } = setup(); const store = checkStore(); store.editCheckContent();
+ const find = text => [...root.querySelectorAll('button')].find(button => button.textContent === text);
+ const state = { ...store.get(), candidateKind: kind, pendingSelection: { text: 'Other capture' } };
+ panel.render(state, { host: 'demo.example' });
+ expect(root.querySelector('textarea').value).toBe(store.get().check.case.content);
+ expect(find(STRINGS.insertNewSelection)).toBeUndefined(); expect(find(STRINGS.checkNewSelection)).toBeUndefined();
+ expect(find(STRINGS.cancelCheckEdit)?.disabled).toBe(false); find(STRINGS.cancelCheckEdit).click();
+ expect(handlers.onCancelCheckEdit).toHaveBeenCalledOnce(); expect(handlers.onBack).not.toHaveBeenCalled();
+ panel.render({ ...state, submitting: true }, { host: 'demo.example' });
+ expect(find(STRINGS.cancelCheckEdit).disabled).toBe(true); expect(find(STRINGS.approve).disabled).toBe(true);
+ expect(root.querySelector('textarea').readOnly).toBe(true);
+});
+
+test('unapproved preview retains its original insert-selection control without a check cancel button', () => {
+ const { panel, root, handlers } = setup(); const store = createDraftStore();
+ store.onAvatarClick({ text: 'Unapproved draft' }); store.onAvatarClick({ text: 'New selection' });
+ panel.render(store.get(), { host: 'demo.example' });
+ const find = text => [...root.querySelectorAll('button')].find(button => button.textContent === text);
+ expect(find(STRINGS.cancelCheckEdit)).toBeUndefined(); expect(find(STRINGS.checkNewSelection)).toBeUndefined();
+ find(STRINGS.insertNewSelection).click(); expect(handlers.onInsertSelection).toHaveBeenCalledOnce();
+ expect(handlers.onCheckNewSelection).not.toHaveBeenCalled();
 });

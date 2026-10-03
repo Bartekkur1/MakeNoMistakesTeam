@@ -33,6 +33,12 @@ export function createPanel({ root, strings, handlers }) {
   const button = (text, className, handler) => {
     const b = node('button', text, className); b.type = 'button'; b.addEventListener('click', handler); return b;
   };
+  const appendReplacement = state => {
+    if (!normalizeText(state.pendingSelection?.text)) return;
+    const replace = button(strings.checkNewSelection, 'btn-secondary', () => handlers.onCheckNewSelection());
+    replace.disabled = Boolean(state.submitting);
+    body.append(replace);
+  };
   return {
     el,
     render(state, ctx) {
@@ -73,7 +79,9 @@ export function createPanel({ root, strings, handlers }) {
         return;
       }
       if (state.view === 'safety') {
-        body.append(node('p', strings.safetyNotice, 'notice'), button(strings.next, 'btn-primary', () => handlers.onSafetyNext()));
+        body.append(node('p', strings.safetyNotice, 'notice'), button(strings.next, 'btn-primary', () => handlers.onSafetyNext()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
         body.querySelector('button').focus();
         return;
       }
@@ -102,7 +110,8 @@ export function createPanel({ root, strings, handlers }) {
         next.disabled = !selected.length;
         const row = node('div', undefined, 'row');
         row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
-        body.append(group, row);
+        body.append(group, row, button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
         if (state.check.discrepancy) {
           const mismatch = state.check.discrepancy;
           const prompt = node('div', undefined, 'notice');
@@ -135,11 +144,13 @@ export function createPanel({ root, strings, handlers }) {
         title.id = 'check-result-step';
         step.setAttribute('aria-labelledby', title.id);
         step.append(title, node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
-        body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()));
+        body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
         body.querySelector('button').focus();
         return;
       }
-      if (state.pendingSelection) {
+      if (state.pendingSelection && !state.candidateKind) {
         const insert = button(strings.insertNewSelection, 'btn-secondary', () => handlers.onInsertSelection());
         insert.disabled = Boolean(state.submitting);
         body.append(node('p', strings.newSelectionHint, 'hint'), insert);
@@ -170,6 +181,11 @@ export function createPanel({ root, strings, handlers }) {
       if (state.error === 'submit') body.append(node('p', strings.submitError, 'error'));
       if (state.draft.truncated) body.append(node('p', strings.truncatedNotice, 'hint'));
       body.append(approve);
+      if (state.candidateKind) {
+        const cancel = button(strings.cancelCheckEdit, 'btn-secondary', () => handlers.onCancelCheckEdit());
+        cancel.disabled = Boolean(state.submitting);
+        body.append(cancel);
+      }
       textarea.focus();
     },
     place(avatarRect, viewport) {

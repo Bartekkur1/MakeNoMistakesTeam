@@ -28,6 +28,198 @@ async function untouchedQuestion(dialog, title) {
   await expect(dialog.getByRole('button', { name: 'Dalej', exact: true })).toBeDisabled();
 }
 
+const shark = page => page.getByRole('button', { name: 'Scamerinio', exact: true });
+const clearSelection = page => page.evaluate(() => getSelection().removeAllRanges());
+async function reachStep(dialog, step) {
+  if (step === 'safety') return;
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
+  await next.click();
+  for (const [id, label] of [['sender', 'Osoba, którą znam'], ['request', 'Podania kodu do konta'], ['verify', 'Przez znaną mi aplikację, stronę lub kontakt']]) {
+    await dialog.getByLabel(label, { exact: true }).check();
+    if (step === id) return;
+    await next.click();
+  }
+}
+
+for (const step of ['safety', 'sender', 'request', 'verify', 'result']) test(`close and toolbar hide restore the same ${step} check in the real extension`, async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker); await reachStep(dialog, step);
+  const before = await dialog.textContent();
+  const selected = await dialog.locator('input:checked').evaluateAll(nodes => nodes.map(node => node.value));
+  await dialog.getByRole('button', { name: 'Zamknij okno', exact: true }).click();
+  await clearSelection(page); await shark(page).click();
+  expect(await dialog.textContent()).toBe(before);
+  expect(await dialog.locator('input:checked').evaluateAll(nodes => nodes.map(node => node.value))).toEqual(selected);
+  await page.getByRole('button', { name: 'Schowaj pomocnika', exact: true }).click();
+  await expect(shark(page)).toBeHidden();
+  // Tab URLs are withheld without the tabs permission; use the established ID-based toolbar harness.
+  const restored = await serviceWorker.evaluate(async () => {
+    const results = [];
+    for (const tab of await chrome.tabs.query({})) results.push(await self.__aura.onActionClicked(tab));
+    return results;
+  });
+  expect(restored.filter(result => result.ok && result.via === 'message')).toHaveLength(1);
+  await expect(shark(page)).toBeVisible(); await expect(dialog).toBeHidden(); await shark(page).click();
+  expect(await dialog.textContent()).toBe(before);
+  expect(await dialog.locator('input:checked').evaluateAll(nodes => nodes.map(node => node.value))).toEqual(selected);
+  await expect(dialog.getByRole('button', { name: 'Sprawdź nowe zaznaczenie', exact: true })).toHaveCount(0);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await assertOnlyLocal(netlog);
+});
+
+test('tab switch and same-document navigation preserve Q2 choices without transferring the panel', async ({ page, context, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker); await reachStep(dialog, 'request');
+  await dialog.getByLabel('Zapłaty lub przelewu', { exact: true }).check();
+  const other = await context.newPage(); await other.goto('http://127.0.0.1:4173/other.html');
+  await other.bringToFront(); await expect(shark(other)).toBeVisible(); await expect(other.getByRole('dialog')).toBeHidden();
+  await page.bringToFront();
+  await expect(dialog.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+  await expect(dialog.getByLabel('Zapłaty lub przelewu', { exact: true })).toBeChecked();
+  await page.evaluate(() => history.pushState({}, '', '/chat-like.html?kanal=2'));
+  await dialog.getByRole('button', { name: 'Zamknij okno', exact: true }).click();
+  await clearSelection(page); await shark(page).click();
+  await expect(dialog.getByRole('group', { name: 'Czego chce nadawca i czy pogania?', exact: true })).toBeVisible();
+  await expect(dialog.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+  await expect(dialog.getByLabel('Zapłaty lub przelewu', { exact: true })).toBeChecked();
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await assertOnlyLocal(netlog);
+});
+
+test('captured replacement resumes Q2 then cancels without loss and commits only on approval', async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker); await reachStep(dialog, 'request');
+  const replacement = (await page.locator('#msg').textContent()).trim();
+  await dialog.getByRole('button', { name: 'Zamknij okno', exact: true }).click();
+  await page.locator('#msg').selectText(); await shark(page).click();
+  await expect(dialog.getByRole('group', { name: 'Czego chce nadawca i czy pogania?', exact: true })).toBeVisible();
+  await expect(dialog.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+  const replace = dialog.getByRole('button', { name: 'Sprawdź nowe zaznaczenie', exact: true });
+  await expect(replace).toBeVisible(); await replace.click();
+  await expect(dialog.getByRole('textbox', { name: 'Wiadomość', exact: true })).toHaveValue(replacement);
+  await expect(dialog.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true })).toHaveValue('https://discord-nitro-free.example/gift');
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await dialog.getByRole('button', { name: 'Wróć do sprawdzania', exact: true }).click();
+  await expect(dialog.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+  await expect(replace).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Edytuj wiadomość', exact: true }).click();
+  await expect(dialog.getByRole('textbox', { name: 'Wiadomość', exact: true })).toHaveValue(honest);
+  await dialog.getByRole('button', { name: 'Wróć do sprawdzania', exact: true }).click();
+  await page.locator('#msg').selectText(); await shark(page).click(); await replace.click();
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await dialog.getByRole('button', { name: 'Zatwierdzam', exact: true }).click();
+  await expect(dialog).toContainText(safety);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(2);
+  expect(await serviceWorker.evaluate(() => self.__aura.cases)).toMatchObject([
+    { content: honest, origin: 'paste' }, { content: replacement, link: 'https://discord-nitro-free.example/gift', origin: 'selection' },
+  ]);
+  await dialog.getByRole('button', { name: 'Dalej', exact: true }).click();
+  for (const title of ['Kto wysłał wiadomość?', 'Czego chce nadawca i czy pogania?', 'Jak możesz sprawdzić poza tą wiadomością?']) {
+    await untouchedQuestion(dialog, title);
+    await dialog.getByLabel('Nie wiem', { exact: true }).check(); await dialog.getByRole('button', { name: 'Dalej', exact: true }).click();
+  }
+  await expect(dialog).not.toContainText('Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.');
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(2);
+  await assertOnlyLocal(netlog);
+});
+
+test('reload and document navigation clear approved answers and an unfinished edit', async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker); await reachStep(dialog, 'request');
+  await page.reload(); await clearSelection(page); await shark(page).click();
+  await expect(page.locator('.menu')).toBeVisible(); await expect(dialog.getByRole('group')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Sprawdź wiadomość', exact: true }).click();
+  await dialog.getByRole('textbox', { name: 'Wiadomość', exact: true }).fill(honest);
+  await dialog.getByRole('button', { name: 'Dalej', exact: true }).click();
+  await dialog.getByRole('button', { name: 'Zatwierdzam', exact: true }).click();
+  await expect(dialog).toContainText(safety); await reachStep(dialog, 'result');
+  await dialog.getByRole('button', { name: 'Edytuj wiadomość', exact: true }).click();
+  await dialog.getByRole('textbox', { name: 'Wiadomość', exact: true }).fill('Unfinished private candidate');
+  await page.goto('http://127.0.0.1:4173/other.html'); await clearSelection(page); await shark(page).click();
+  await expect(page.locator('.menu')).toBeVisible(); await expect(page.getByRole('textbox')).toHaveCount(0);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(2);
+  await assertOnlyLocal(netlog);
+});
+
+for (const change of ['text', 'link-only']) {
+  test(`result correction and ${change} reapproval preserve cancellation and reset the approved session`, async ({ page, serviceWorker, netlog }) => {
+    const dialog = await approve(page, serviceWorker);
+    const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
+    await next.click();
+    await dialog.getByLabel('Osoba, którą znam', { exact: true }).check();
+    await next.click();
+    await dialog.getByLabel('Zwykła wiadomość, bez takich próśb', { exact: true }).check();
+    await next.click();
+    await dialog.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true }).check();
+    await next.click();
+    await expect(dialog.getByRole('heading', { level: 2 })).toHaveText(summary);
+
+    // Correction changes the output but keeps the other deliberate choices.
+    await dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true }).click();
+    await expect(dialog.getByLabel('Osoba, którą znam', { exact: true })).toBeChecked();
+    await next.click();
+    await expect(dialog.getByLabel('Zwykła wiadomość, bez takich próśb', { exact: true })).toBeChecked();
+    await dialog.getByLabel('Podania kodu do konta', { exact: true }).check();
+    await expect(dialog.getByLabel('Zwykła wiadomość, bez takich próśb', { exact: true })).not.toBeChecked();
+    await next.click();
+    await expect(dialog.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true })).toBeChecked();
+    await dialog.getByRole('button', { name: 'Wróć', exact: true }).click();
+    await expect(dialog.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+    await next.click();
+    await next.click();
+    await expect(dialog).not.toContainText(summary);
+    await expect(dialog).toContainText('Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.');
+    await expect(dialog.locator('.result-step p').first()).toHaveText('Zatrzymaj się i nie podawaj hasła ani kodu');
+    const oldResult = await dialog.locator('h2, .result-section').allTextContents();
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+
+    const edit = dialog.getByRole('button', { name: 'Edytuj wiadomość', exact: true });
+    await expect(edit).toBeVisible();
+    await edit.click();
+    const message = dialog.getByRole('textbox', { name: 'Wiadomość', exact: true });
+    const link = dialog.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true });
+    await expect(message).toHaveValue(honest);
+    await expect(link).toHaveValue('');
+    await message.fill('Anulowany tekst: podaj hasło do konta');
+    await link.fill('https://anulowany.example/');
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+    await dialog.getByRole('button', { name: 'Wróć do sprawdzania', exact: true }).click();
+    expect(await dialog.locator('h2, .result-section').allTextContents()).toEqual(oldResult);
+    expect(await serviceWorker.evaluate(() => self.__aura.cases)).toMatchObject([{ content: honest, link: '' }]);
+
+    await edit.click();
+    await expect(message).toHaveValue(honest);
+    await expect(link).toHaveValue('');
+    const newText = change === 'text' ? 'Zobacz to' : honest;
+    const newLink = change === 'link-only' ? 'https://nowy.example/wiadomosc' : '';
+    if (change === 'text') await message.fill(newText);
+    else await link.fill(newLink);
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+    await dialog.getByRole('button', { name: 'Zatwierdzam', exact: true }).click();
+    await expect(dialog).toContainText(safety);
+    await expect(dialog.locator('.result-section')).toHaveCount(0);
+    await expect(edit).toBeVisible();
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(2);
+    expect(await serviceWorker.evaluate(() => self.__aura.cases)).toMatchObject([
+      { content: honest, link: '' }, { content: newText, link: newLink, origin: 'paste' },
+    ]);
+    await next.click();
+    for (const title of ['Kto wysłał wiadomość?', 'Czego chce nadawca i czy pogania?', 'Jak możesz sprawdzić poza tą wiadomością?']) {
+      await untouchedQuestion(dialog, title);
+      await expect(edit).toBeVisible();
+      if (title === 'Czego chce nadawca i czy pogania?') await expect(dialog.locator('.hint-badge')).toHaveCount(0);
+      if (title === 'Jak możesz sprawdzić poza tą wiadomością?') {
+        await expect(dialog.locator('.hint-badge')).toHaveCount(change === 'link-only' ? 1 : 0);
+      }
+      await dialog.getByLabel('Nie wiem', { exact: true }).check();
+      await next.click();
+    }
+    await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Brakuje nam informacji. Możesz spokojnie sprawdzić wiadomość przez znany Ci kontakt.');
+    await expect(dialog).not.toContainText('Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.');
+    await expect(dialog).toContainText('Nie wiemy jeszcze, kto naprawdę wysłał wiadomość.');
+    await expect(dialog).toContainText('Nie wiemy jeszcze, czego nadawca oczekuje.');
+    await expect(dialog.locator('.result-step p').first()).toHaveText('Sprawdź przez znany Ci kanał');
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(2);
+    await assertOnlyLocal(netlog);
+  });
+}
+
 test('honest approval reaches three deliberate questions and a limited-confidence result', async ({ page, serviceWorker, netlog }) => {
   const dialog = await approve(page, serviceWorker);
   const next = dialog.getByRole('button', { name: 'Dalej', exact: true });

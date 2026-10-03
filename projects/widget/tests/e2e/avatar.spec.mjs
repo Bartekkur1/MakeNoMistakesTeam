@@ -59,12 +59,26 @@ async function openView(page, view) {
   await page.goto(url);
   await avatar(page).click();
   if (view === 'howto') await formButton(page, 'Jak to działa').click();
-  if (['paste', 'preview', 'safety'].includes(view)) {
+  if (['paste', 'preview', 'safety', 'question', 'result'].includes(view)) {
     await formButton(page, 'Sprawdź wiadomość').click();
     await formText(page).fill('Fikcyjny szkic do przeciągania');
     await page.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true }).fill('https://example.test/wiadomosc');
     if (view !== 'paste') await formButton(page, 'Dalej').click();
-    if (view === 'safety') await formButton(page, 'Zatwierdzam').click();
+    if (['safety', 'question', 'result'].includes(view)) {
+      await formButton(page, STRINGS.approve).click();
+      await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
+    }
+    if (['question', 'result'].includes(view)) {
+      await formButton(page, STRINGS.next).click();
+      await page.getByLabel('Osoba, którą znam', { exact: true }).check();
+      await formButton(page, STRINGS.next).click();
+      await page.getByLabel('Podania kodu do konta', { exact: true }).check();
+      if (view === 'result') {
+        await formButton(page, STRINGS.next).click();
+        await page.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true }).check();
+        await formButton(page, STRINGS.next).click();
+      }
+    }
   }
 }
 async function expectBounded(page) {
@@ -80,7 +94,7 @@ async function expectBounded(page) {
   expect(await avatar(page).evaluate((el, point) => el.getRootNode().elementFromPoint(point.x, point.y) === el,
     { x: r.x + r.width / 2, y: r.y + r.height / 2 })).toBe(true);
 }
-for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
+for (const view of ['menu', 'howto', 'paste', 'preview', 'safety', 'question', 'result']) {
   test(`open ${view} follows avatar throughout drag without rebuilding or submitting`, async ({page, serviceWorker, netlog}) => {
     await page.setViewportSize({ width: 1400, height: 1000 });
     await openView(page, view);
@@ -88,16 +102,29 @@ for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
       await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
       expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
     }
+    const checking = ['question', 'result'].includes(view);
+    if (view === 'question') {
+      await expect(page.getByRole('group', { name: STRINGS.checkQuestions[1].title, exact: true })).toBeVisible();
+      await expect(page.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+    }
+    if (view === 'result') {
+      await expect(page.locator('.result-section')).toHaveCount(3);
+      await expect(page.getByText(STRINGS.checkSignals.credential_code, { exact: true })).toBeVisible();
+    }
     const editing = ['paste', 'preview'].includes(view);
     if (editing) {
       await formText(page).focus();
       await formText(page).evaluate(el => el.setSelectionRange(4, 10));
     }
+    if (checking) {
+      await page.locator('#msg2').selectText();
+      await (view === 'question' ? page.getByLabel('Podania kodu do konta', { exact: true }) : formButton(page, STRINGS.fixAnswers)).focus();
+    }
     const snapshot = await page.locator('bezpieczna-aura-widget').evaluate(host => {
       const root = host.shadowRoot;
       host.__dragNodes = [...root.querySelectorAll('.panel input, .panel textarea, .panel button')];
       host.__dragFocus = root.activeElement;
-      return host.__dragNodes.map(el => ({ value: el.value, start: el.selectionStart, end: el.selectionEnd }));
+      return host.__dragNodes.map(el => ({ value: el.value, checked: el.checked, start: el.selectionStart, end: el.selectionEnd }));
     });
     const messages = await serviceWorker.evaluate(() => self.__aura.messages.length);
     const panelBefore = await page.getByRole('dialog').boundingBox(), sharkBefore = await avatar(page).boundingBox();
@@ -107,6 +134,13 @@ for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
       const shark = await avatar(page).boundingBox(), panel = await page.getByRole('dialog').boundingBox();
       expect(shark.x - sharkBefore.x).toBeCloseTo(dx); expect(shark.y - sharkBefore.y).toBeCloseTo(dy);
       expect(panel.x - panelBefore.x).toBeCloseTo(dx); expect(panel.y - panelBefore.y).toBeCloseTo(dy);
+      if (checking) {
+        expect(await page.locator('bezpieczna-aura-widget').evaluate(host => {
+          const nodes = [...host.shadowRoot.querySelectorAll('.panel input, .panel textarea, .panel button')];
+          return nodes.every((node, i) => node === host.__dragNodes[i]) && host.shadowRoot.activeElement === host.__dragFocus;
+        })).toBe(true);
+        await expect(formButton(page, STRINGS.checkNewSelection)).toHaveCount(0);
+      }
     }
     await page.mouse.up();
     expect(await page.locator('bezpieczna-aura-widget').evaluate(host => {
@@ -114,12 +148,36 @@ for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
       return nodes.length === host.__dragNodes.length && nodes.every((el, i) => el === host.__dragNodes[i]);
     })).toBe(true);
     expect(await page.locator('bezpieczna-aura-widget').evaluate(host =>
-      host.__dragNodes.map(el => ({ value: el.value, start: el.selectionStart, end: el.selectionEnd })))).toEqual(snapshot);
-    if (editing) expect(await page.locator('bezpieczna-aura-widget').evaluate(host => host.shadowRoot.activeElement === host.__dragFocus)).toBe(true);
+      host.__dragNodes.map(el => ({ value: el.value, checked: el.checked, start: el.selectionStart, end: el.selectionEnd })))).toEqual(snapshot);
+    if (editing || checking) expect(await page.locator('bezpieczna-aura-widget').evaluate(host => host.shadowRoot.activeElement === host.__dragFocus)).toBe(true);
     expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(messages);
     await expectBounded(page); await assertOnlyLocal(netlog);
   });
 }
+
+for (const view of ['question', 'result']) test(`open ${view} stays reachable at edges and after resize without recapturing or submitting`, async ({ page, serviceWorker, netlog }) => {
+  await page.setViewportSize({ width: 1400, height: 1000 });
+  await openView(page, view);
+  if (view === 'question') await expect(page.getByRole('group', { name: STRINGS.checkQuestions[1].title, exact: true })).toBeVisible();
+  else await expect(page.locator('.result-section')).toHaveCount(3);
+  const oldText = await page.getByRole('dialog').textContent();
+  await page.locator('#msg2').selectText();
+  for (const [dx, dy] of [[-2000, -2000], [2000, -2000], [0, 2000], [-2000, 0]]) {
+    await gesture(page, dx, dy); await expectBounded(page);
+    expect(await page.getByRole('dialog').textContent()).toBe(oldText);
+    await expect(formButton(page, STRINGS.checkNewSelection)).toHaveCount(0);
+    if (view === 'question') await expect(page.getByLabel('Podania kodu do konta', { exact: true })).toBeChecked();
+  }
+  await page.setViewportSize({ width: 280, height: 640 });
+  await expect.poll(async () => { const r = await avatar(page).boundingBox(); return r.x + r.width; }).toBeLessThanOrEqual(272);
+  await expectBounded(page);
+  expect(await page.getByRole('dialog').textContent()).toBe(oldText);
+  expect(await page.getByRole('dialog').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  const control = formButton(page, view === 'question' ? STRINGS.next : STRINGS.editCheckContent);
+  await control.scrollIntoViewIfNeeded(); await expect(control).toBeInViewport(); await expect(control).toBeEnabled();
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await assertOnlyLocal(netlog);
+});
 test('open preview stays reachable at edges and after resize without recapturing page selection', async ({page, serviceWorker, netlog}) => {
   await openView(page, 'preview');
   await page.locator('#msg2').selectText();

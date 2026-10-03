@@ -31,6 +31,9 @@ function boot() {
     onQuestionNext(keep = false) { store.nextQuestion(keep); render(); },
     onQuestionBack() { store.previousQuestion(); render(); },
     onFixAnswers() { store.fixAnswers(); render(); },
+    onEditCheckContent() { store.editCheckContent(); render(); },
+    onCancelCheckEdit() { store.cancelCheckEdit(); render(); },
+    onCheckNewSelection() { store.checkNewSelection(); render(); },
     async onApprove() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
