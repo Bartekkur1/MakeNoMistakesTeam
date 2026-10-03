@@ -27,6 +27,10 @@ humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
 humanoid.NameDisplayDistance = 100
 humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.DisplayWhenDamaged
 humanoid.WalkSpeed = 8
+humanoid.MaxHealth = 100
+humanoid.Health = 100
+humanoid.RequiresNeck = false
+humanoid.BreakJointsOnDeath = false
 local stopWalkAnimation = NPCWalkAnimation.start(npc)
 npc.Destroying:Connect(stopWalkAnimation)
 
@@ -143,10 +147,18 @@ RunService.Heartbeat:Connect(function(dt: number)
 			local localPos = upperTorso.CFrame:PointToObjectSpace(targetHead.Position)
 			local yaw = math.clamp(-math.atan2(localPos.X, localPos.Z) - math.pi, -math.rad(60), math.rad(60))
 			local pitch = math.clamp(math.atan2(localPos.Y, -localPos.Z), -math.rad(25), math.rad(25))
-			neck.C0 = baseNeckC0 * CFrame.Angles(pitch, yaw, 0)
+			if waist then
+				neck.C0 = baseNeckC0 * CFrame.Angles(pitch, yaw, 0)
+			else
+				neck.C0 = baseNeckC0 * CFrame.Angles(-pitch * 0.7, 0, 0) * CFrame.Angles(0, 0, -yaw * 0.7)
+			end
 		end
 	elseif neck and baseNeckC0 then
-		neck.C0 = baseNeckC0 * CFrame.Angles(breath * 0.5, 0, 0)
+		if waist then
+			neck.C0 = baseNeckC0 * CFrame.Angles(breath * 0.5, 0, 0)
+		else
+			neck.C0 = baseNeckC0 * CFrame.Angles(-breath * 0.5, 0, 0)
+		end
 	end
 end)
 

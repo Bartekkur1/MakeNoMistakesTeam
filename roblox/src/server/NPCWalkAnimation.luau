@@ -24,6 +24,10 @@ function NPCWalkAnimation.start(model: Model): () -> ()
 		RightShoulder = true,
 		LeftElbow = true,
 		RightElbow = true,
+		["Left Hip"] = true,
+		["Right Hip"] = true,
+		["Left Shoulder"] = true,
+		["Right Shoulder"] = true,
 	}
 	for _, instance in model:GetDescendants() do
 		if instance:IsA("Motor6D") and animated[instance.Name] then
@@ -79,6 +83,11 @@ function NPCWalkAnimation.start(model: Model): () -> ()
 		rotate("RightShoulder", swing * 0.30 * blend)
 		rotate("LeftElbow", -0.12 * blend)
 		rotate("RightElbow", -0.12 * blend)
+		-- R6 limbs
+		rotate("Left Hip", swing * 0.40 * blend)
+		rotate("Right Hip", -swing * 0.40 * blend)
+		rotate("Left Shoulder", -swing * 0.25 * blend)
+		rotate("Right Shoulder", swing * 0.25 * blend)
 	end)
 	return stop
 end
