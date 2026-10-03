@@ -62,6 +62,53 @@ const reports = [
   'Oszust napisał: "podaj kod do konta"',
   "Oszust napisał: 'podaj hasło do konta'",
 ];
+for (const [text, id] of [
+  ['Podaj login i hasło do konta', 'password'],
+  ['Podaj mi hasło', 'password'],
+  ['Wpisz kod z SMS', 'code'],
+  ['Podaj mi swoje hasło', 'password'],
+  ['Podaj swój login i hasło', 'password'],
+  ['Wpisz login i hasło', 'password'],
+  ['Napisz nam hasło', 'password'],
+  ['Prześlij mi kod do logowania', 'code'],
+  ['Wpisz swój kod SMS', 'code'],
+  ['Napisz mi kod z SMS', 'code'],
+]) test(`common narrow credential demand retains a warning despite an ordinary answer: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual([id]);
+  const out = evaluate(honest, hints);
+  expect(out.summaryKey).toBe('conflicting_answers');
+  expect(out.signals).toEqual(['credential_' + id]);
+  expect(out.mismatches).toEqual([{ questionId: 'request', answerId: id, messageKey: 'credential_' + id }]);
+  expect(out.step.id).toBe('protect_credentials');
+});
+
+for (const text of [
+  'Podaj mi kod pocztowy', 'Wpisz kod źródłowy', 'Napisz mi nazwę gry',
+  'Podaj login, ale nie hasło', 'Podaj wskazówkę do hasła',
+  'Podaj login i nazwę gry, hasła nie wysyłaj', 'Nie podaj mi hasła', 'Nie wpisz kodu z SMS',
+  'Zgłaszam wiadomość: podaj hasło, to oszustwo',
+  'Zgłaszam wiadomość: „podaj login i hasło, inaczej zablokujemy konto”',
+]) test(`expanded credential rules do not warn on honest wording: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual([]);
+  expect(evaluate(honest, hints)).toEqual(result('no_signals', [], [], 'independent_check'));
+});
+
+for (const [text, requests] of [
+  ['Zgłaszam wiadomość: podaj hasło, inaczej zablokujemy konto', ['password', 'urgency']],
+  ['Zgłaszam wiadomość: podaj hasło, wyślij mi kod z SMS', ['code']],
+  ['Oszust napisał: podaj kod do konta, wpisz login i hasło', ['password']],
+  ['Zgłaszam wiadomość: „podaj hasło”. Wpisz kod z SMS', ['code']],
+]) test(`a report prefix cannot hide a later direct demand or attached threat: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual(requests);
+  const out = evaluate(honest, hints);
+  expect(out.summaryKey).toBe('conflicting_answers');
+  expect(out.signals).toContain('credential_' + requests[0]);
+  expect(out.step.id).toBe('protect_credentials');
+});
+
 for (const text of reports) {
   test(`reported request does not accuse its honest reporter: ${text}`, () => {
     const hints = detectHints({ text });
