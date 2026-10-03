@@ -11,7 +11,9 @@
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:build": "node scripts/build-seed.mjs",
+    "seed:check": "node scripts/build-seed.mjs --check"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
