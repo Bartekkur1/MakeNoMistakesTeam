@@ -55,8 +55,8 @@ mainFrame.Visible = false
 mainFrame.Parent = screenGui
 
 local sizeConstraint = Instance.new("UISizeConstraint")
-sizeConstraint.MaxSize = Vector2.new(840, 240)
-sizeConstraint.MinSize = Vector2.new(340, 180)
+sizeConstraint.MaxSize = Vector2.new(880, 260)
+sizeConstraint.MinSize = Vector2.new(360, 200)
 sizeConstraint.Parent = mainFrame
 
 local corner = Instance.new("UICorner")
@@ -105,10 +105,11 @@ closeBtn.Name = "CloseBtn"
 closeBtn.Size = UDim2.fromOffset(28, 28)
 closeBtn.Position = UDim2.new(1, -34, 0.5, -14)
 closeBtn.BackgroundColor3 = Color3.fromRGB(200, 45, 55)
-closeBtn.Text = "✕"
+closeBtn.BorderSizePixel = 0
+closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.FredokaOne
-closeBtn.TextSize = 16
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
 closeBtn.AutoButtonColor = true
 closeBtn.Parent = header
 
@@ -157,14 +158,14 @@ bCorner.Parent = badgeLabel
 -- Prawy panel (Tekst wypowiedzi i przyciski)
 local rightArea = Instance.new("Frame")
 rightArea.Name = "RightArea"
-rightArea.Size = UDim2.new(1, -145, 1, -44)
-rightArea.Position = UDim2.fromOffset(136, 38)
+rightArea.Size = UDim2.new(1, -136, 1, -44)
+rightArea.Position = UDim2.fromOffset(126, 38)
 rightArea.BackgroundTransparency = 1
 rightArea.Parent = mainFrame
 
 local dialogBox = Instance.new("TextLabel")
 dialogBox.Name = "DialogBox"
-dialogBox.Size = UDim2.new(1, 0, 1, -54)
+dialogBox.Size = UDim2.new(1, 0, 1, -86)
 dialogBox.Position = UDim2.new(0, 0, 0, 0)
 dialogBox.BackgroundColor3 = Color3.fromRGB(15, 30, 65)
 dialogBox.BackgroundTransparency = 0.3
@@ -189,23 +190,28 @@ dPadding.Parent = dialogBox
 
 local buttonContainer = Instance.new("Frame")
 buttonContainer.Name = "ButtonContainer"
-buttonContainer.Size = UDim2.new(1, 0, 0, 46)
-buttonContainer.Position = UDim2.new(0, 0, 1, -48)
+buttonContainer.Size = UDim2.new(1, 0, 0, 80)
+buttonContainer.Position = UDim2.new(0, 0, 1, -80)
 buttonContainer.BackgroundTransparency = 1
 buttonContainer.Parent = rightArea
 
-local listLayout = Instance.new("UIListLayout")
-listLayout.FillDirection = Enum.FillDirection.Horizontal
-listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-listLayout.Padding = UDim.new(0, 8)
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.Parent = buttonContainer
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+gridLayout.CellPadding = UDim2.fromOffset(6, 6)
+gridLayout.CellSize = UDim2.new(0.322, -4, 0, 36)
+gridLayout.Parent = buttonContainer
 
--- Helper do tworzenia przycisków wyboru (min 44px touch target)
+local function configureButtonGrid(buttonCount: number)
+	if buttonCount <= 2 then
+		gridLayout.CellSize = UDim2.new(0.485, -4, 0, 36)
+	else
+		gridLayout.CellSize = UDim2.new(0.322, -4, 0, 36)
+	end
+end
+
+-- Helper do tworzenia przycisków wyboru
 local function createChoiceBtn(order: number, text: string, callback: () -> (), color: Color3?): TextButton
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.fromOffset(155, 44) -- ergonomiczny cel dotykowy
 	btn.BackgroundColor3 = color or Color3.fromRGB(22, 58, 128)
 	btn.Font = Enum.Font.FredokaOne
 	btn.Text = text
@@ -225,6 +231,13 @@ local function createChoiceBtn(order: number, text: string, callback: () -> (), 
 	btnStroke.Thickness = 1
 	btnStroke.Transparency = 0.7
 	btnStroke.Parent = btn
+
+	local btnPad = Instance.new("UIPadding")
+	btnPad.PaddingLeft = UDim.new(0, 4)
+	btnPad.PaddingRight = UDim.new(0, 4)
+	btnPad.PaddingTop = UDim.new(0, 2)
+	btnPad.PaddingBottom = UDim.new(0, 2)
+	btnPad.Parent = btn
 
 	btn.MouseButton1Click:Connect(callback)
 	return btn
@@ -322,21 +335,22 @@ local showMainMenu: () -> ()
 local showPhishingInfo: () -> ()
 local showScamSigns: () -> ()
 local showRules: () -> ()
-local showReportAdvice: () -> ()
+local showReportingInfo: () -> ()
 
 showMainMenu = function()
 	clearButtons()
+	configureButtonGrid(5)
 	badgeLabel.Text = "STATUS: CZUWA\n🛡️ BEZPIECZNY"
 	badgeLabel.BackgroundColor3 = Color3.fromRGB(255, 180, 20)
 
 	dialogBox.Text =
-		"Cześć! Jestem Scamerino Alertinio – Twój Cyber-Pomocnik! 🦈🛡️\nPilnuję, aby nikt w Roblox nie wyłudził Twojego hasła, konta ani Robuxów.\nO czym chcesz dowiedzieć się więcej?"
+		"Cześć! Jestem Scamerino Alertinio – Twój Cyber-Pomocnik! 🦈🛡️\nPilnuję cyberbezpieczeństwa na platformie. Pamiętaj: oszuści stosują sprytne sztuczki socjotechniczne, by wyłudzić hasła lub cenne przedmioty.\nO czym chcesz dowiedzieć się więcej?"
 
 	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
 		showPhishingInfo()
 	end, Color3.fromRGB(30, 100, 200))
 
-	createChoiceBtn(2, "⚠️ Czerwone flagi oszusta", function()
+	createChoiceBtn(2, "⚠️ Czerwone flagi", function()
 		showScamSigns()
 	end, Color3.fromRGB(180, 110, 20))
 
@@ -344,8 +358,8 @@ showMainMenu = function()
 		showRules()
 	end)
 
-	createChoiceBtn(4, "🚨 Podejrzany gracz w lobby!", function()
-		showReportAdvice()
+	createChoiceBtn(4, "🚨 Jak reagować i zgłaszać?", function()
+		showReportingInfo()
 	end, Color3.fromRGB(200, 60, 60))
 
 	createChoiceBtn(5, "👋 Do widzenia", function()
@@ -355,10 +369,11 @@ end
 
 showPhishingInfo = function()
 	clearButtons()
+	configureButtonGrid(3)
 	dialogBox.Text =
-		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (np. darmowe Robuxy, rzadki pet, fałszywy link). Gdy ktoś obiecuje Robuxy w zamian za hasło lub kod SMS, chce przejąć konto! Nigdy nie wpisuj hasła w odpowiedzi na taką ofertę."
+		"🎣 CZYM JEST PHISHING?\nTo technika oszustwa polegająca na podszywaniu się pod zaufane osoby lub system gry. Oszust zarzuca 'haczyk' – obietnicę łatwych zysków (darmowa waluta, rzadkie przedmioty), aby uśpić Twoją czujność i zdobyć Twoje dane logowania."
 
-	createChoiceBtn(1, "⚠️ Jak rozpoznać oszusta?", function()
+	createChoiceBtn(1, "⚠️ Czerwone flagi", function()
 		showScamSigns()
 	end, Color3.fromRGB(180, 110, 20))
 
@@ -373,11 +388,12 @@ end
 
 showScamSigns = function()
 	clearButtons()
+	configureButtonGrid(3)
 	dialogBox.Text =
-		"⚠️ 3 CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe ('Darmowe 10 000 Robuxów!')\n2. ⏱️ Presja czasu ('Tylko 60 sekund!')\n3. 🔑 Prośba o hasło lub kod SMS. Prawdziwy pracownik Roblox NIGDY o to nie pyta!"
+		"⚠️ 3 GŁÓWNE CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe – nikt nie rozdaje waluty za darmo bez ukrytego podstępu.\n2. ⏱️ Sztuczna presja czasu ('Tylko teraz! Szybko, oferta zaraz wygaśnie!').\n3. 🔑 Pytania o poufne dane: hasła, maile, kody 2FA/SMS lub zewnętrzne linki."
 
-	createChoiceBtn(1, "🚨 Ktoś na placu rozdaje Robuxy!", function()
-		showReportAdvice()
+	createChoiceBtn(1, "🚨 Jak reagować?", function()
+		showReportingInfo()
 	end, Color3.fromRGB(200, 60, 60))
 
 	createChoiceBtn(2, "🛡️ Złote zasady", function()
@@ -391,15 +407,16 @@ end
 
 showRules = function()
 	clearButtons()
+	configureButtonGrid(3)
 	dialogBox.Text =
-		"🛡️ 3 ZŁOTE ZASADY BEZPIECZEŃSTWA:\n1. 🔑 NIGDY nie podawaj nikomu hasła ani kodów SMS.\n2. 👮 Roblox NIGDY nie prosi o hasło na czacie.\n3. ⏱️ Gdy ktoś każe działać 'szybko' – zwolnij i zapytaj rodzica lub opiekuna!"
+		"🛡️ 3 ZŁOTE ZASADY BEZPIECZEŃSTWA:\n1. 🔑 POUFNOŚĆ: Nigdy i nikomu nie zdradzaj hasła ani kodów weryfikacyjnych.\n2. 🛑 ZATRZYMAJ SIĘ: Gdy ktoś wywiera presję czasu, zwolnij i zapytaj kogoś zaufanego.\n3. 🌐 OFICJALNE FUNKCJE: Wszelkie transakcje wykonuj tylko przez oficjalne mechanizmy gry!"
 
 	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
 		showPhishingInfo()
 	end, Color3.fromRGB(30, 100, 200))
 
-	createChoiceBtn(2, "🚨 Podejrzany gracz w lobby", function()
-		showReportAdvice()
+	createChoiceBtn(2, "🚨 Jak zgłaszać?", function()
+		showReportingInfo()
 	end, Color3.fromRGB(200, 60, 60))
 
 	createChoiceBtn(3, "🔙 Wróć do menu", function()
@@ -407,14 +424,15 @@ showRules = function()
 	end)
 end
 
-showReportAdvice = function()
+showReportingInfo = function()
 	clearButtons()
+	configureButtonGrid(2)
 	dialogBox.Text =
-		"👀 ZAUWAŻYŁEŚ GRACZA 'FreeRobux_Giver'? To klasyczny podstęp! Podejdź do niego [E] i sprawdź, czy rozpoznasz jego manipulacje. Pamiętaj: pod żadnym pozorem nie podawaj kodu – odrzuć ofertę!"
+		"🚨 JAK REAGOWAĆ I ZGŁASZAĆ ZAGROŻENIA?\n1. 🛑 Nie daj się zmanipulować i natychmiast przerwij kontakt z podejrzaną osobą.\n2. 🚩 Użyj funkcji 'Report Abuse' w menu Roblox (Esc), wybierając profil gracza i powód.\n3. 🚫 Zablokuj użytkownika (Block User), aby nie mógł Cię nękać.\n4. 👨‍👩‍👧 O każdym podejrzanym incydencie porozmawiaj z rodzicem lub zaufanym opiekunem."
 
-	createChoiceBtn(1, "🚶 Idę sprawdzić oszusta!", function()
-		closeUI()
-	end, Color3.fromRGB(40, 160, 60))
+	createChoiceBtn(1, "🛡️ Złote zasady", function()
+		showRules()
+	end)
 
 	createChoiceBtn(2, "🔙 Wróć do menu", function()
 		showMainMenu()
