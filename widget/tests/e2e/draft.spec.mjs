@@ -7,7 +7,7 @@ const clear=p=>p.evaluate(()=>getSelection().removeAllRanges());
 async function draft(page,edit=true){await page.goto(url);await page.locator('#msg').selectText();await avatar(page).click();if(edit)await text(page).fill('Darmowe Nitro! Kliknij link');}
 test('draft survives close and hide on same tab',async({page,serviceWorker,netlog})=>{
  await draft(page);await button(page,'Zamknij okno').click();await clear(page);await avatar(page).click();await expect(text(page)).toHaveValue('Darmowe Nitro! Kliknij link');
- await button(page,'Schowaj pomocnika').click();const restored=await serviceWorker.evaluate(async()=>{const out=[];for(const t of await chrome.tabs.query({}))out.push(await self.__aura.onActionClicked(t));return out;});expect(restored.filter(r=>r.ok&&r.via==='message')).toHaveLength(1);
+ await button(page,'Zamknij okno').click();await button(page,'Schowaj pomocnika').click();const restored=await serviceWorker.evaluate(async()=>{const out=[];for(const t of await chrome.tabs.query({}))out.push(await self.__aura.onActionClicked(t));return out;});expect(restored.filter(r=>r.ok&&r.via==='message')).toHaveLength(1);
  await avatar(page).click();await expect(text(page)).toHaveValue('Darmowe Nitro! Kliknij link');expect(await serviceWorker.evaluate(()=>self.__aura.messages.length)).toBe(0);await assertOnlyLocal(netlog);
 });
 test('new selection needs explicit replacement',async({page,netlog})=>{

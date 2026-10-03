@@ -2,6 +2,8 @@
 
 Scamerinio pomaga dziecku przekazać wybraną wiadomość do sprawdzenia. Zaznacz tekst i kliknij rekina albo wybierz „Sprawdź wiadomość” i wklej tekst oraz opcjonalny link. Podgląd pozwala usunąć dane, zmienić tekst i świadomie zatwierdzić. „Jak to działa” wyjaśnia trzy kroki i prywatność.
 
+Podczas wklejania i podglądu wiadomości rekin oraz jego przycisk schowania znikają, a formularz pozostaje widoczny. Po zamknięciu formularza przez × lub Escape rekin wraca na swoje miejsce; ponowne kliknięcie otwiera zachowany szkic. W menu, „Jak to działa” i „Gotowe!” rekin pozostaje widoczny.
+
 Faza 1 kończy się utworzeniem sprawy w pamięci service workera. Nie ma jeszcze analizy, pytań, API ani wysyłki do opiekuna. „Gotowe!” oznacza przygotowanie sprawy do sprawdzenia. Implementacja obejmuje decyzje D-01–D-18 dotyczące rozszerzenia, dostępu do treści, obecności awatara i szkicu.
 
 ## Budowanie
@@ -60,6 +62,16 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 7. Wyłącz rozszerzenie, otwórz nową kartę ze zwykłą stroną, włącz rozszerzenie i kliknij jego ikonę na tej karcie. Rekin pojawia się i działa.
 8. Przeładuj rozszerzenie na `chrome://extensions` bez odświeżania karty z rekinem. Kliknij ikonę na tej karcie. Pozostaje jeden rekin, a zaznacz → rekin → zatwierdź kończy się „Gotowe!”.
 9. Przeczytaj wszystkie teksty: po polsku, przyjazne dla dzieci 9–13 lat, bez straszenia i zawstydzania; trzy kroki i zdanie o prywatności.
+
+## Ręczny retest G-01-2
+
+Po załadowaniu nowego buildu w Google Chrome przeładuj rozszerzenie i odśwież kartę Discorda z fikcyjnymi danymi.
+
+1. Przeciągnij rekina, kliknij go bez zaznaczenia i wybierz „Sprawdź wiadomość”. Rekin i jego × znikają; wpisz fikcyjną wiadomość i przejdź przez „Dalej”. Formularz pozostaje widoczny i edytowalny, także po zmianie rozmiaru okna. Tab nie powinien trafiać do ukrytych przycisków rekina.
+2. Zamknij formularz przez „Zamknij okno” (×). Rekin wraca w zachowanym miejscu; kliknij go ponownie i sprawdź zachowany tekst. Zamknij także przez Escape i sprawdź ten sam powrót.
+3. Zaznacz fikcyjny tekst na stronie i otwórz podgląd. Rekin znika; po zatwierdzeniu i „Gotowe!” wraca. Menu i „Jak to działa” nadal pokazują rekina. Po zamknięciu okna sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
+
+Wynik retestu zgłoś przez `$gsd-verify-work 1 --ws widget`; testy automatyczne nie zastępują tej oceny wizualnej.
 
 ## Jeśli Discord przechwytuje pisanie
 

@@ -1,6 +1,53 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const avatar = p => p.getByRole('button', {name:'Scamerinio',exact:true});
+const formText = p => p.getByRole('textbox', {name:'Wiadomość',exact:true});
+const formButton = (p, name) => p.getByRole('button', {name,exact:true});
+async function checkForm(page) {
+  await expect(page.locator('.avatar')).toBeHidden();
+  await expect(page.locator('.hide')).toBeHidden();
+  await expect(page.locator('bezpieczna-aura-widget')).toBeVisible();
+  await expect(formText(page)).toBeVisible(); await expect(formText(page)).toBeEditable();
+  await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert', true);
+  const r = await page.getByRole('dialog').boundingBox(), v = page.viewportSize();
+  expect(r.x).toBeGreaterThanOrEqual(8); expect(r.y).toBeGreaterThanOrEqual(8);
+  expect(r.x+r.width).toBeLessThanOrEqual(v.width-8); expect(r.y+r.height).toBeLessThanOrEqual(v.height-8);
+}
+for (const close of ['button', 'Escape']) test(`form preserves anchor and draft after ${close} and resize`, async ({page,netlog}) => {
+  await page.goto(url); await gesture(page,-120,-100);
+  const before = await avatar(page).boundingBox();
+  await avatar(page).click(); await expect(avatar(page)).toBeVisible();
+  await formButton(page,'Sprawdź wiadomość').click(); await checkForm(page);
+  const anchor = await page.locator('.avatar').evaluate(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};});
+  expect(anchor).toEqual(before);
+  await formText(page).fill('Fikcyjny szkic do retestu');
+  await formButton(page,'Dalej').click(); await checkForm(page);
+  const panel = await page.getByRole('dialog').boundingBox();
+  expect(panel.x+panel.width).toBeCloseTo(before.x+before.width);
+  // Traverse the document's tab order: neither hidden avatar button may receive focus.
+  await formText(page).focus();
+  for (let i=0;i<12;i++) {
+    await page.keyboard.press('Tab');
+    expect(await page.locator('bezpieczna-aura-widget').evaluate(host => host.shadowRoot.activeElement?.closest('.avatar-wrap') !== null && Boolean(host.shadowRoot.activeElement))).toBe(false);
+  }
+  await page.setViewportSize({width:640,height:480}); await checkForm(page);
+  await formText(page).fill('Szkic po zmianie rozmiaru');
+  const resized = await page.locator('.avatar').evaluate(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};});
+  if (close === 'button') await formButton(page,'Zamknij okno').click();
+  else { await formText(page).focus(); await page.keyboard.press('Escape'); }
+  await expect(avatar(page)).toBeVisible(); await expect(page.getByRole('dialog')).toBeHidden();
+  expect(await avatar(page).boundingBox()).toEqual(resized);
+  await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert',false);
+  await avatar(page).click(); await checkForm(page); await expect(formText(page)).toHaveValue('Szkic po zmianie rozmiaru');
+  await formButton(page,'Zamknij okno').click(); await formButton(page,'Schowaj pomocnika').click();
+  await expect(page.locator('bezpieczna-aura-widget')).toBeHidden(); await assertOnlyLocal(netlog);
+});
+test('selected preview hides avatar until confirmation', async ({page,netlog}) => {
+  await page.goto(url); await page.locator('#msg').selectText(); await avatar(page).click(); await checkForm(page);
+  await formButton(page,'Zatwierdzam').click(); await expect(page.getByRole('heading',{name:'Gotowe!',exact:true})).toBeVisible();
+  await expect(avatar(page)).toBeVisible(); await expect(page.locator('.hide')).toBeVisible();
+  await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert',false); await assertOnlyLocal(netlog);
+});
 async function gesture(page, dx, dy) {
   const r = await avatar(page).boundingBox(); const x = r.x + 32, y = r.y + 32;
   await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x+dx,y+dy,{steps:10}); await page.mouse.up();

@@ -3,6 +3,45 @@ import * as avatarModule from '../../src/content/avatar.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 const chromeStub = () => ({ runtime: { id: 'test-ext', onMessage: { addListener: vi.fn() } }, tabs: { sendMessage: vi.fn() }, scripting: { executeScript: vi.fn() }, action: { onClicked: { addListener: vi.fn() } } });
 const cleanup = [];
+async function bootForm() {
+  const c = chromeStub(); c.runtime.sendMessage = vi.fn(); vi.stubGlobal('chrome', c);
+  vi.spyOn(document, 'getSelection').mockReturnValue({ toString: () => '' });
+  vi.resetModules(); await import('../../src/content/main.js');
+  const host = document.querySelector('bezpieczna-aura-widget'), root = host.shadowRoot;
+  const click = name => [...root.querySelectorAll('button')].find(b => b.textContent === name).click();
+  const check = (open, panelVisible = true) => {
+    expect(host.style.display).toBe('block');
+    expect(root.querySelector('.avatar-wrap').style.visibility).toBe(open ? 'hidden' : 'visible');
+    expect(root.querySelector('.avatar-wrap').inert).toBe(open);
+    expect(root.querySelector('.panel').hidden).toBe(!panelVisible);
+  };
+  return { c, host, root, click, check };
+}
+test('form hides only avatar, restores it on close and Escape, and retains draft', async () => {
+  const { c, host, root, click, check } = await bootForm();
+  root.querySelector('.avatar').click(); check(false);
+  click(STRINGS.menuHowTo); check(false); click(STRINGS.back); check(false);
+  click(STRINGS.menuCheck); check(true);
+  const text = root.querySelector('textarea'); text.value = 'Fikcyjny szkic'; text.dispatchEvent(new Event('input'));
+  click(STRINGS.next); check(true);
+  root.querySelector('[aria-label="Zamknij okno"]').click(); check(false, false);
+  root.querySelector('.avatar').click(); check(true); expect(root.querySelector('textarea').value).toBe('Fikcyjny szkic');
+  root.querySelector('textarea').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); check(false, false);
+  root.querySelector('.hide').click(); expect(host.style.display).toBe('none');
+  c.runtime.onMessage.addListener.mock.calls[0][0]({type:'aura/show'}, {id:'test-ext'}, vi.fn()); check(false, false);
+  root.querySelector('.avatar').click(); check(true); expect(root.querySelector('textarea').value).toBe('Fikcyjny szkic');
+});
+test('selection preview stays hidden during pending and failed submit, restores on confirmation', async () => {
+  const { c, root, click, check } = await bootForm();
+  document.getSelection.mockReturnValue({ toString: () => 'Fikcyjne zaznaczenie' });
+  root.querySelector('.avatar').click(); check(true);
+  expect(root.querySelector('textarea').value).toBe('Fikcyjne zaznaczenie');
+  let resolve; c.runtime.sendMessage.mockImplementation(() => new Promise(r => { resolve = r; }));
+  click(STRINGS.approve); check(true); expect(root.querySelector('textarea').readOnly).toBe(true);
+  resolve({ ok: false }); await vi.waitFor(() => expect(root.querySelector('.error')).not.toBeNull()); check(true);
+  click(STRINGS.approve); check(true); resolve({ ok: true });
+  await vi.waitFor(() => expect(root.textContent).toContain(STRINGS.confirmationHeading)); check(false);
+});
 afterEach(() => { for (const fn of cleanup.splice(0)) fn(); vi.restoreAllMocks(); vi.unstubAllGlobals(); document.querySelectorAll('bezpieczna-aura-widget').forEach(el => el.remove()); });
 test('drag threshold and viewport clamp', () => {
   for (const [x,y,result] of [[5,0,false],[3,4,false],[6,0,true],[4,4,true]]) expect(avatarModule.isDrag(x,y)).toBe(result);
