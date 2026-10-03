@@ -1,8 +1,9 @@
 {
-  "description": "Sprawdzenie, czy backend i baza odpowiadają; widget może tego użyć, by pokazać „brak połączenia”.",
+  "description": "Sprawdzenie, czy backend i baza odpowiadają; nie wymaga logowania. Widget może tego użyć, by pokazać „brak połączenia”.",
   "method": "GET",
   "route": "/api/health",
   "path": "/api/health",
+  "auth": null,
   "request": null,
   "response": {
     "status": 200,
