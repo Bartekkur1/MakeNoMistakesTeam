@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
 source: [01-VERIFICATION.md]
 started: "2026-10-03T17:22:05.578826+00:00"
-updated: "2026-10-03T18:13:10.468757+00:00"
+updated: "2026-10-03T18:16:39.047639+00:00"
 ---
 
 ## Current Test
 
-number: 2
-name: G-01-2-drag: otwarte okno podąża za widocznym rekinem
-expected: |
-  Załaduj nowy ZIP albo widget/dist, przeładuj rozszerzenie i odśwież kartę Discorda. Rekin pozostaje widoczny. Przeciągaj go z otwartym menu, Jak to działa, formularzem, podglądem i Gotowe: okno podąża za nim, a tekst, link i aktywne pole zostają. Sprawdź krawędzie ekranu, resize oraz zamknięcie przez × i Escape z zachowaniem szkicu.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -22,7 +18,8 @@ result: pass
 
 ### 2. G-01-2-drag: otwarte okno podąża za widocznym rekinem
 expected: Załaduj nowy ZIP albo widget/dist, przeładuj rozszerzenie i odśwież kartę Discorda. Rekin pozostaje widoczny. Przeciągaj go z otwartym menu, Jak to działa, formularzem, podglądem i Gotowe: okno podąża za nim, a tekst, link i aktywne pole zostają. Sprawdź krawędzie ekranu, resize oraz zamknięcie przez × i Escape z zachowaniem szkicu.
-result: [pending]
+result: pass
+reported: "pass"
 
 ### 3. Discord: zmiana kanału i przeładowanie
 expected: Szkic zostaje po zmianie kanału, a znika po przeładowaniu dokumentu; menu wraca przy pustym zaznaczeniu.
@@ -39,9 +36,9 @@ result: pass
 ## Summary
 
 total: 5
-passed: 4
+passed: 5
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -69,7 +66,8 @@ blocked: 0
 
 - gap_id: G-01-2-drag
   truth: "Przeciąganie widocznego rekina przesuwa również otwarty panel, bez utraty szkicu."
-  status: implemented_awaiting_retest
+  status: resolved
+  resolved_at: "2026-10-03T18:16:39.047639+00:00"
   resolved_by: 01-06-PLAN.md
   reason: "User reported: przesuniecie rekina powinno przesunac tez otwarte okna, rekin jednak nie musi znikac o ile okno bedzie sie przesuwalo razem z nim"
   severity: minor
@@ -109,3 +107,7 @@ przesuniecie rekina powinno przesunac tez otwarte okna, rekin jednak nie musi zn
 ## Gap closure execution 01-06
 
 Implemented revised visible-avatar drag behavior. 38 Vitest pass; Playwright 45 passed including one existing expected failure. Four human passes preserved; revised test 2 awaits user acceptance. Retest ZIP: `/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-06.zip`.
+
+## Human acceptance
+
+User confirmed `pass` for G-01-2-drag. All five human checkpoints pass.
