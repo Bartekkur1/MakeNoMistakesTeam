@@ -177,6 +177,39 @@ test('labelled hints leave controls untouched and mismatch buttons use explicit 
   click(STRINGS.next); expect(handlers.onQuestionNext).toHaveBeenLastCalledWith(false);
 });
 
+for (const text of ['Plan zajęć', 'Odbierz darmową nagrodę']) {
+  test(`a supplied link never suggests the message-only verification answer: ${text}`, () => {
+    const { panel, root } = setup();
+    const store = createDraftStore();
+    store.submitPaste({ text, link: 'https://szkola.example/plan' });
+    store.approved(store.beginSubmit(), buildCase(store.get().draft));
+    const check = store.get().check;
+    // Link evidence remains available to evaluate a prize, without guessing the child's channels.
+    expect(check.hints.verify).toEqual(['message_link']);
+    panel.render({ view: 'question', check: { ...check, step: 'verify' } }, {});
+    expect(root.querySelectorAll('.hint-badge')).toHaveLength(0);
+    expect(root.querySelectorAll('input:checked')).toHaveLength(0);
+    expect(root.querySelector('input[value="message_link"]')).not.toBeNull();
+    expect([...root.querySelectorAll('button')].find(b => b.textContent === STRINGS.next).disabled).toBe(true);
+    if (text === 'Odbierz darmową nagrodę') {
+      expect(evaluate({ sender: ['known_person'], request: ['prize'], verify: ['independent_channel'] }, check.hints).signals)
+        .toEqual(['prize_link']);
+      panel.render({ view: 'question', check: { ...check, step: 'request' } }, {});
+      expect(root.querySelector('.hint-badge')?.textContent).toBe(STRINGS.hintBadge);
+    }
+  });
+}
+
+test('sender claim hints remain unselected suggestions', () => {
+  const { panel, root } = setup();
+  const store = createDraftStore();
+  store.submitPaste({ text: 'Jestem z firmy Przykład', link: '' });
+  store.approved(store.beginSubmit(), buildCase(store.get().draft));
+  store.startQuestions(); panel.render(store.get(), {});
+  expect(root.querySelector('.hint-badge')?.textContent).toBe(STRINGS.hintBadge);
+  expect(root.querySelectorAll('input:checked')).toHaveLength(0);
+});
+
 for (const step of ['safety', 'sender', 'request', 'verify', 'result']) test(`replacement control at ${step} requires a captured selection and invokes only its callback`, () => {
  const { panel, root, handlers } = setup(); const store = checkStore();
  if (step !== 'safety') {
