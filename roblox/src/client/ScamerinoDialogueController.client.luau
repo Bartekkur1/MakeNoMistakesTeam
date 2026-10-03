@@ -12,10 +12,19 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
-local dialogueEvent = ReplicatedStorage:WaitForChild("ScamerinoDialogueEvent") :: RemoteEvent
+local dialogueEvent = ReplicatedStorage:FindFirstChild("ScamerinoDialogueEvent") :: RemoteEvent?
+if not dialogueEvent then
+	dialogueEvent = Instance.new("RemoteEvent")
+	dialogueEvent.Name = "ScamerinoDialogueEvent"
+	dialogueEvent.Parent = ReplicatedStorage
+end
+local remoteEvent: RemoteEvent = dialogueEvent :: RemoteEvent
 
 -- Utwórz lub pobierz ScreenGui
 local screenGui = playerGui:FindFirstChild("ScamerinoDialogueGui") :: ScreenGui?
@@ -229,8 +238,53 @@ local function clearButtons()
 	end
 end
 
+local INTERACTION_DISTANCE = 14
+local BREAK_DISTANCE = 18
+local isDialogueOpen = false
+
+local function getScamerinoRoot(): BasePart?
+	local scamerino = workspace:FindFirstChild("ScamerinoAlertinio")
+	if not scamerino then
+		return nil
+	end
+	local hrp = scamerino:FindFirstChild("HumanoidRootPart")
+	if hrp and hrp:IsA("BasePart") then
+		return hrp
+	end
+	local torso = scamerino:FindFirstChild("Torso")
+	if torso and torso:IsA("BasePart") then
+		return torso
+	end
+	return nil
+end
+
+local function getPlayerRoot(): BasePart?
+	local char = player.Character
+	if not char then
+		return nil
+	end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if hrp and hrp:IsA("BasePart") then
+		return hrp
+	end
+	return nil
+end
+
+local function getDistanceToScamerino(): number?
+	local playerRoot = getPlayerRoot()
+	local scamerinoRoot = getScamerinoRoot()
+	if playerRoot and scamerinoRoot then
+		return (playerRoot.Position - scamerinoRoot.Position).Magnitude
+	end
+	return nil
+end
+
 -- Animacja Otwórz/Zamknij
 local function openUI()
+	if isDialogueOpen then
+		return
+	end
+	isDialogueOpen = true
 	mainFrame.Visible = true
 	mainFrame.Position = UDim2.fromScale(0.5, 1.4)
 	local tw = TweenService:Create(
@@ -242,6 +296,10 @@ local function openUI()
 end
 
 local function closeUI()
+	if not isDialogueOpen then
+		return
+	end
+	isDialogueOpen = false
 	local tw = TweenService:Create(
 		mainFrame,
 		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
@@ -249,7 +307,9 @@ local function closeUI()
 	)
 	tw:Play()
 	tw.Completed:Connect(function()
-		mainFrame.Visible = false
+		if not isDialogueOpen then
+			mainFrame.Visible = false
+		end
 	end)
 end
 
@@ -359,10 +419,84 @@ showReportAdvice = function()
 	end)
 end
 
--- Nasłuchuj zdarzenia otwarcia od serwera
-dialogueEvent.OnClientEvent:Connect(function(action: string)
+-- Nasłuchuj zdarzenia otwarcia/zamknięcia od serwera
+remoteEvent.OnClientEvent:Connect(function(action: string)
 	if action == "open" then
 		showMainMenu()
 		openUI()
+	elseif action == "close" then
+		closeUI()
+	end
+end)
+
+-- Bezpośrednie uruchamianie dialogu klawiszem [E] w promieniu Scamerino (bez domyślnego infoboxa)
+UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
+	if gameProcessed then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.E then
+		local dist = getDistanceToScamerino()
+		if dist and dist <= INTERACTION_DISTANCE then
+			if not isDialogueOpen then
+				showMainMenu()
+				openUI()
+			end
+		end
+	end
+end)
+
+-- Obsługa wyzwolenia ProximityPrompt
+local function hookPrompt(prompt: Instance)
+	if prompt:IsA("ProximityPrompt") and prompt.Name == "ChatPrompt" then
+		prompt.Triggered:Connect(function(triggerPlayer)
+			if triggerPlayer == player and not isDialogueOpen then
+				showMainMenu()
+				openUI()
+			end
+		end)
+	end
+end
+
+ProximityPromptService.PromptTriggered:Connect(function(prompt, triggerPlayer)
+	if
+		triggerPlayer == player
+		and (
+			prompt.Name == "ChatPrompt"
+			or (prompt.Parent and prompt.Parent.Parent and prompt.Parent.Parent.Name == "ScamerinoAlertinio")
+		)
+	then
+		if not isDialogueOpen then
+			showMainMenu()
+			openUI()
+		end
+	end
+end)
+
+local scamerino = workspace:FindFirstChild("ScamerinoAlertinio")
+local torso = scamerino and scamerino:FindFirstChild("Torso")
+local existingPrompt = torso and torso:FindFirstChild("ChatPrompt")
+if existingPrompt then
+	hookPrompt(existingPrompt)
+end
+
+workspace.DescendantAdded:Connect(function(desc)
+	if desc.Name == "ChatPrompt" and desc:IsA("ProximityPrompt") then
+		hookPrompt(desc)
+	end
+end)
+
+-- Automatyczne zamykanie dialogu po odejściu na odległość > BREAK_DISTANCE
+RunService.Heartbeat:Connect(function()
+	if isDialogueOpen then
+		local dist = getDistanceToScamerino()
+		if not dist or dist > BREAK_DISTANCE then
+			closeUI()
+		end
+	end
+end)
+
+player.CharacterRemoving:Connect(function()
+	if isDialogueOpen then
+		closeUI()
 	end
 end)
