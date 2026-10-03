@@ -25,6 +25,7 @@ Zatwierdzenie treści jest końcem fazy 1. Faza 1 NIE obejmuje: ścieżki pytań
 
 ### Platforma i obecność awatara
 - **D-05:** MVP: **rozszerzenie Chrome (Manifest V3)** na zwykłych stronach i **Discordzie w przeglądarce**. Bez desktopowej i mobilnej aplikacji Discord.
+- **D-18:** Demo odbywa się w **Google Chrome**. Testy E2E mogą działać na lokalnym Chromium (`/usr/bin/chromium`), ale przed demo jest ręczne sprawdzenie w Google Chrome. (Ustalone 2026-10-03 po researchu.)
 - **D-06:** Awatar jest **automatycznie widoczny na wszystkich stronach**, na których Chrome pozwala działać rozszerzeniom (bez listy witryn i bez ręcznego włączania).
 - **D-07:** Awatar można **przeciągać i schować na bieżącej stronie**. Po schowaniu wraca po przeładowaniu strony albo po kliknięciu ikony rozszerzenia.
 
@@ -34,6 +35,7 @@ Zatwierdzenie treści jest końcem fazy 1. Faza 1 NIE obejmuje: ścieżki pytań
 - **D-10:** Bez zaznaczenia okno pokazuje **menu z dwoma przyciskami**: „Sprawdź wiadomość” (pole do wklejenia tekstu/linku, potem ten sam podgląd) oraz „Jak to działa”.
 - **D-11:** „Jak to działa” to **3 kroki** (1. zaznacz wiadomość, 2. kliknij mnie, 3. sprawdź i zatwierdź) i jedno zdanie o prywatności w duchu: „Widzę tylko to, co mi pokażesz; zatwierdzoną sprawę zobaczy Twój opiekun”.
 - **D-12:** **Szkic** (niezatwierdzona, edytowana treść) **przetrwa zamknięcie okna w obrębie tej samej karty**. Po ponownym kliknięciu awatara szkic wraca. Zamknięcie karty, przeładowanie albo przejście na inną stronę w karcie kasuje szkic. **Nic nie zapisujemy na dysku** (bez `chrome.storage` dla treści).
+- **D-17:** Gdy na karcie jest szkic, a dziecko zaznaczy nowy tekst i kliknie awatara, **wraca szkic** (D-12), a obok jest przycisk **„Wstaw nowe zaznaczenie”**, który podmienia treść szkicu. Nic nie znika bez decyzji dziecka. (Ustalone 2026-10-03 po researchu.)
 - **D-13:** Przy zmianie karty okno **zostaje na swojej karcie**. Na innych kartach go nie ma, a po powrocie stan jest taki jak przed wyjściem. Okno nie „chodzi” za dzieckiem między kartami.
 
 ### Wygląd
