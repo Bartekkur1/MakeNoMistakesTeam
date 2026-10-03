@@ -5,6 +5,17 @@
 // Semantics follow PostgREST: every awaited query resolves { data, error } and never throws
 // unless throwNext() was armed; single() on anything but exactly one row gives PGRST116;
 // maybeSingle() on zero rows gives data null; an unknown rpc gives PGRST202.
+//
+// report_history and report_comments carry a `seq` counter like the SQL identity column
+// (canonical order, never exposed by the API). The fake RPCs at the bottom mirror the
+// Postgres functions in web-app/supabase/migrations.
+
+import {
+  ATTACK_TYPES,
+  LIMITS,
+  REPORT_SOURCES,
+  TAKEN_ACTIONS,
+} from "@/lib/contract/types";
 
 export type TableName = "reports" | "report_history" | "report_comments";
 export type Row = Record<string, unknown>;
@@ -36,6 +47,14 @@ export interface FakeCall {
 export type RpcHandler = (args: Record<string, unknown>, fake: FakeSupabase) => FakeResult;
 
 const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments"];
+
+// Tables with a `seq bigint generated always as identity` column.
+type SeqTable = "report_history" | "report_comments";
+const SEQ_TABLES: readonly SeqTable[] = ["report_history", "report_comments"];
+
+function isSeqTable(table: TableName): table is SeqTable {
+  return (SEQ_TABLES as readonly string[]).includes(table);
+}
 
 // Columns the database fills when an insert leaves them out.
 const TIMESTAMP_DEFAULTS: Record<TableName, readonly string[]> = {
@@ -270,6 +289,7 @@ export class FakeSupabase {
   readonly rpcHandlers: Record<string, RpcHandler> = {};
 
   private clockMs = Date.parse(DEFAULT_CLOCK);
+  private seqCounters: Record<SeqTable, number> = { report_history: 0, report_comments: 0 };
   private idQueue: string[] = [];
   private pendingFailure: FakeError | null = null;
   private pendingThrow: { error: unknown } | null = null;
@@ -279,11 +299,14 @@ export class FakeSupabase {
     rpc: (name: string, args: Record<string, unknown> = {}): FakeRpcCall => new FakeRpcCall(this, name, args),
   };
 
+  // Rows given here keep their `seq`; rows without one get the next value in array order,
+  // and later inserts continue after the highest seq.
   reset(initial: Partial<Record<TableName, Row[]>> = {}): void {
+    this.seqCounters = { report_history: 0, report_comments: 0 };
     this.tables = {
       reports: (initial.reports ?? []).map(storeRow),
-      report_history: (initial.report_history ?? []).map(storeRow),
-      report_comments: (initial.report_comments ?? []).map(storeRow),
+      report_history: this.withSeq("report_history", (initial.report_history ?? []).map(storeRow)),
+      report_comments: this.withSeq("report_comments", (initial.report_comments ?? []).map(storeRow)),
     };
     this.callCount = 0;
     this.calls = [];
@@ -291,6 +314,23 @@ export class FakeSupabase {
     this.idQueue = [];
     this.pendingFailure = null;
     this.pendingThrow = null;
+  }
+
+  private withSeq(table: SeqTable, rows: Row[]): Row[] {
+    for (const row of rows) {
+      if (typeof row.seq === "number") {
+        this.seqCounters[table] = Math.max(this.seqCounters[table], row.seq);
+      }
+    }
+    for (const row of rows) {
+      if (typeof row.seq !== "number") row.seq = this.nextSeq(table);
+    }
+    return rows;
+  }
+
+  nextSeq(table: SeqTable): number {
+    this.seqCounters[table] += 1;
+    return this.seqCounters[table];
   }
 
   failNext(error: FakeError): void {
@@ -329,6 +369,10 @@ export class FakeSupabase {
   prepareInsert(table: TableName, row: Row): Row {
     const stored = storeRow(row);
     if (stored.id === undefined) stored.id = this.nextId();
+    if (isSeqTable(table)) {
+      // Like `generated always as identity`: the database assigns seq, never the caller.
+      stored.seq = this.nextSeq(table);
+    }
     const missing = TIMESTAMP_DEFAULTS[table].filter((column) => stored[column] === undefined);
     if (missing.length > 0) {
       const stamp = this.now();
@@ -357,3 +401,69 @@ export class FakeSupabase {
 }
 
 export const fakeSupabase = new FakeSupabase();
+
+// ---------------------------------------------------------------------------
+// Fake Postgres functions (mirror web-app/supabase/migrations/20261003170000_reports.sql)
+// ---------------------------------------------------------------------------
+
+function checkViolation(constraint: string): FakeResult {
+  return {
+    data: null,
+    error: {
+      code: "23514",
+      message: `new row for relation "reports" violates check constraint "${constraint}"`,
+    },
+  };
+}
+
+function inList(list: readonly string[], value: unknown): boolean {
+  return typeof value === "string" && list.includes(value);
+}
+
+// public.create_report: inserts the report (state pending_parent) and its "submit" history
+// entry with one timestamp, in one transaction, and returns to_jsonb(report row).
+fakeSupabase.rpcHandlers.create_report = (args, fake) => {
+  const attackType = args.p_attack_type;
+  const takenActions = args.p_taken_actions;
+  const source = args.p_source;
+  const content = args.p_content;
+  if (!inList(ATTACK_TYPES, attackType)) return checkViolation("reports_attack_type_check");
+  if (!Array.isArray(takenActions) || !takenActions.every((a) => inList(TAKEN_ACTIONS, a))) {
+    return checkViolation("reports_taken_actions_check");
+  }
+  if (!inList(REPORT_SOURCES, source)) return checkViolation("reports_source_check");
+  if (typeof content !== "string") return checkViolation("reports_content_check");
+  const length = [...content.trim()].length;
+  if (length < 1 || length > LIMITS.contentMaxChars) return checkViolation("reports_content_check");
+  if (typeof args.p_parent_id !== "string" || typeof args.p_child_id !== "string") {
+    return { data: null, error: { code: "23502", message: "null value violates not-null constraint" } };
+  }
+
+  const now = fake.now();
+  const report: Row = {
+    id: fake.nextId(),
+    parent_id: args.p_parent_id,
+    child_id: args.p_child_id,
+    attack_type: attackType,
+    taken_actions: [...takenActions],
+    source,
+    content,
+    state: "pending_parent",
+    created_at: now,
+    updated_at: now,
+  };
+  fake.tables.reports.push(report);
+  fake.tables.report_history.push({
+    id: crypto.randomUUID(),
+    seq: fake.nextSeq("report_history"),
+    report_id: report.id,
+    action: "submit",
+    from_state: null,
+    to_state: "pending_parent",
+    actor_id: args.p_child_id,
+    actor_role: "child",
+    comment: null,
+    created_at: now,
+  });
+  return { data: clone(report), error: null };
+};
