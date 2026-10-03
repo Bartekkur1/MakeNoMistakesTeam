@@ -280,7 +280,22 @@ export interface TransitionReportInput {
   comment: string | null;
 }
 
-// RED skeleton (plan 01-05 Task 1): not implemented yet.
-export async function transitionReport(_input: TransitionReportInput): Promise<TransitionResponse | null> {
-  throw new Error("not implemented");
+// public.transition_report updates the report only while it is still in fromState and writes the
+// history entry in the same transaction. null means the state changed concurrently (409); a tuple
+// outside the matrix fails the CHECK in the database and becomes StorageUnavailableError.
+export async function transitionReport(input: TransitionReportInput): Promise<TransitionResponse | null> {
+  const data = await run("transition_report", () =>
+    getSupabase().rpc("transition_report", {
+      p_report_id: input.reportId,
+      p_action: input.action,
+      p_from_state: input.fromState,
+      p_to_state: input.toState,
+      p_actor_id: input.actorId,
+      p_actor_role: input.actorRole,
+      p_comment: input.comment,
+    }),
+  );
+  if (data === null || data === undefined) return null;
+  const row = asRow(data);
+  return { report: mapReport(row.report), entry: mapHistoryEntry(row.entry) };
 }

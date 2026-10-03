@@ -10,6 +10,8 @@ import {
   REPORT_SOURCES,
   REPORT_STATES,
   TAKEN_ACTIONS,
+  TRANSITION_ACTIONS,
+  TRANSITION_COMMENT_REQUIRED,
   type AttackType,
   type FieldError,
   type LoginScope,
@@ -17,6 +19,7 @@ import {
   type ReportSource,
   type ReportState,
   type TakenAction,
+  type TransitionAction,
 } from "@/lib/contract/types";
 import { decodeCursor, type CursorPosition } from "./pagination";
 
@@ -208,4 +211,53 @@ export function parseListQuery(params: URLSearchParams): ValidationResult<ListQu
 
   if (errors.length > 0) return { ok: false, errors };
   return { ok: true, value: { limit, cursor, state } };
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/reports/{id}/transitions (contract "Obieg zgłoszenia", D-08)
+// ---------------------------------------------------------------------------
+
+export interface TransitionInput {
+  action: TransitionAction;
+  comment: string | null;
+}
+
+function isTransitionAction(value: unknown): value is TransitionAction {
+  return typeof value === "string" && (TRANSITION_ACTIONS as readonly string[]).includes(value);
+}
+
+// Only action and comment are read; every other key (actor_id, actor_role, states...) is dropped,
+// so the history actor always comes from the session. A blank comment counts as no comment.
+export function parseTransition(body: Record<string, unknown>): ValidationResult<TransitionInput> {
+  const errors: FieldError[] = [];
+
+  const action = isTransitionAction(body.action) ? body.action : null;
+  if (action === null) {
+    errors.push({ field: "action", message: "Nieznana akcja." });
+  }
+
+  let comment: string | null = null;
+  let commentError = false;
+  const rawComment = body.comment;
+  if (rawComment !== undefined && rawComment !== null) {
+    if (typeof rawComment !== "string") {
+      errors.push({ field: "comment", message: "Komentarz musi być tekstem." });
+      commentError = true;
+    } else {
+      const trimmed = rawComment.trim();
+      if (charLength(trimmed) > LIMITS.transitionCommentMaxChars) {
+        errors.push({ field: "comment", message: "Komentarz jest za długi (maks. 1000 znaków)." });
+        commentError = true;
+      } else if (trimmed !== "") {
+        comment = trimmed;
+      }
+    }
+  }
+
+  if (action !== null && !commentError && comment === null && TRANSITION_COMMENT_REQUIRED[action]) {
+    errors.push({ field: "comment", message: "Przy eskalacji wpisz, do kogo zgłoszono incydent." });
+  }
+
+  if (errors.length > 0 || action === null) return { ok: false, errors };
+  return { ok: true, value: { action, comment } };
 }
