@@ -25,9 +25,9 @@
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 01 of 4 · 0% · executing"
+    "command": "$gsd-verify-work 1 --ws widget",
+    "label": "Retest G-01-2",
+    "reason": "Phase 01: 5/5 plans executed; visual acceptance pending"
   },
-  "updated_at": "2026-10-03T17:07:05.417Z"
+  "updated_at": "2026-10-03T17:51:57.542687+00:00"
 }
