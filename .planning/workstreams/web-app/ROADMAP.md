@@ -24,7 +24,7 @@ Od kontraktu i backendu, przez panel opiekuna na danych przykładowych, po test 
   3. Rodzic i nauczyciel logują się demo (e-mail + kod `0000`) i widzą tylko zgłoszenia, do których mają dostęp
   4. Kontrakt jest zatwierdzony przez osobę 2, a przykładowe JSON-y są w `shared/`
 
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 
 Plans:
 **Wave 1**
@@ -40,7 +40,7 @@ Plans:
 - [x] 01-04-PLAN.md — Zgłoszenia: tworzenie, szczegóły z historią, lista z widocznością i paginacją kursorem; migracja reports + test lustra schematu (API-01) (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 01-05-PLAN.md — Obieg: przejścia z historią (approve/reject/escalate/close/reopen), komentarze rodzic–nauczyciel, seed.sql z datasetu, zgodność z przykładami (API-02) (wave 5)
+- [x] 01-05-PLAN.md — Obieg: przejścia z historią (approve/reject/escalate/close/reopen), komentarze rodzic–nauczyciel, seed.sql z datasetu, zgodność z przykładami (API-02) (wave 5)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [ ] 01-06-PLAN.md — Start na $PORT + smoke test; [BLOCKING] schema push, seed, weryfikacja na żywo i wdrożenie Heroku (człowiek); URL w CONTRACT.md (wave 6)
