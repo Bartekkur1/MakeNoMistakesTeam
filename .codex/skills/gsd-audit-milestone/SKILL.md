@@ -139,7 +139,7 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/audit-milestone.md
+@/workspace/.codex/gsd-core/workflows/audit-milestone.md
 </execution_context>
 
 <context>

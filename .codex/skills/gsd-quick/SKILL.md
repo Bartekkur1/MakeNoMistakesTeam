@@ -159,7 +159,7 @@ Granular flags are composable: `--discuss --research --validate` gives the same 
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/quick.md
+@/workspace/.codex/gsd-core/workflows/quick.md
 </execution_context>
 
 <context>

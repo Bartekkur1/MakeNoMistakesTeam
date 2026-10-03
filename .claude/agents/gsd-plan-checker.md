@@ -49,7 +49,7 @@ of one route there, never a prescription.
 </adversarial_stance>
 
 <required_reading>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gates.md
+@/workspace/.claude/gsd-core/references/gates.md
 </required_reading>
 
 This agent implements the **Revision Gate** pattern (bounded quality loop with escalation on cap exhaustion).
@@ -61,7 +61,7 @@ Before verifying, discover project context:
 
 **Project skills:** Check `.claude/skills/` or `.agents/skills/` directory if either exists:
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.claude/gsd-core/references/agent-skills-bootstrap.md
 1. List available skills (subdirectories)
 2. Read `SKILL.md` for each skill (lightweight index ~130 lines)
 3. Load specific `rules/*.md` files as needed during verification
@@ -120,10 +120,10 @@ Same methodology (goal-backward), different timing, different subject matter.
 <verification_dimensions>
 
 At decision points during plan verification, apply structured reasoning:
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/thinking-models-planning.md
+@/workspace/.claude/gsd-core/references/thinking-models-planning.md
 
 For calibration on scoring and issue identification, reference these examples:
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/few-shot-examples/plan-checker.md
+@/workspace/.claude/gsd-core/references/few-shot-examples/plan-checker.md
 
 ## Dimension 1: Requirement Coverage
 
@@ -523,13 +523,13 @@ issue:
 **Question:** Is every task's completion decided by an automated check that can fail?
 
 Checks 8a-8e (presence, latency, sampling continuity, Wave 0 completeness, VALIDATION.md gate),
-skip condition and Dimension 8 output table: @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/nyquist-compliance.md
+skip condition and Dimension 8 output table: @/workspace/.claude/gsd-core/references/nyquist-compliance.md
 
 ### Check 8f - Stated Failing Direction (#3172)
 
 Each runnable `<automated>` command needs a `<fails_when>` sibling naming what output constitutes
 failure. Consume the `{FAILING_DIRECTIONS}` probe, never re-derive it:
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/failing-direction.md
+@/workspace/.claude/gsd-core/references/failing-direction.md
 
 ## Dimension 9: Cross-Plan Data Contracts
 
@@ -701,7 +701,7 @@ issue:
 ## Dimension: Verify Command Path Resolvability (#2401)
 
 **Question:** Does each `<automated>` command's target resolve? Consume the
-`{VERIFY_PATHS}` probe, never re-run/hand-reason it: @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/verify-command-path-resolvability.md
+`{VERIFY_PATHS}` probe, never re-run/hand-reason it: @/workspace/.claude/gsd-core/references/verify-command-path-resolvability.md
 
 ## Dimension: Numeric/Factual Claim Authority (#1480)
 
@@ -727,7 +727,7 @@ issue:
 ## Step 1: Load Context
 
 Load phase operation context:
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gsd-run-resolver.md
+@/workspace/.claude/gsd-core/references/gsd-run-resolver.md
 
 ```bash
 INIT=$(gsd_run query init.phase-op "${PHASE_ARG}")
@@ -900,7 +900,7 @@ Severities: `blocker` (must fix), `warning` (should fix), `info` (suggestions).
 
 <examples>
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/plan-checker-examples.md
+@/workspace/.claude/gsd-core/references/plan-checker-examples.md
 
 </examples>
 

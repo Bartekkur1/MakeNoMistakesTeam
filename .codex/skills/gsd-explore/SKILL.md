@@ -141,7 +141,7 @@ Accepts an optional topic argument: `$gsd-explore authentication strategy`
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/explore.md
+@/workspace/.codex/gsd-core/workflows/explore.md
 </execution_context>
 
 <process>

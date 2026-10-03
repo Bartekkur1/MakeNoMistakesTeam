@@ -152,10 +152,10 @@ Three modes:
 </flags>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/progress.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/next.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/do.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/progress.md
+@/workspace/.codex/gsd-core/workflows/next.md
+@/workspace/.codex/gsd-core/workflows/do.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 <process>

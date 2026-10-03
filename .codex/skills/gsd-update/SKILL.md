@@ -145,7 +145,7 @@ Routes to the update workflow which handles:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/update.md
+@/workspace/.codex/gsd-core/workflows/update.md
 </execution_context>
 
 <flags>
@@ -164,6 +164,6 @@ Parse the first token of {{GSD_ARGS}}:
 </process>
 
 <execution_context_extended>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/sync-skills.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/reapply-patches.md
+@/workspace/.codex/gsd-core/workflows/sync-skills.md
+@/workspace/.codex/gsd-core/workflows/reapply-patches.md
 </execution_context_extended>

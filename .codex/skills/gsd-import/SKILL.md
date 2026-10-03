@@ -140,10 +140,10 @@ Import external plan files into the GSD planning system with conflict detection 
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/import.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/gate-prompts.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/doc-conflict-engine.md
+@/workspace/.codex/gsd-core/workflows/import.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/references/gate-prompts.md
+@/workspace/.codex/gsd-core/references/doc-conflict-engine.md
 </execution_context>
 
 <context>

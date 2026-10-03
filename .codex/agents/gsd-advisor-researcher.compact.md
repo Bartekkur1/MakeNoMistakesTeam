@@ -18,12 +18,12 @@ viable options (via the agent's knowledge + Context7 + web search) plus a ration
 grounded in project context.
 </role>
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/untrusted-input-boundary.md
+@/workspace/.codex/gsd-core/references/untrusted-input-boundary.md
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.codex/gsd-core/references/agent-skills-bootstrap.md
 
 <documentation_lookup>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/research-documentation-lookup.md
+@/workspace/.codex/gsd-core/references/research-documentation-lookup.md
 </documentation_lookup>
 
 <input>

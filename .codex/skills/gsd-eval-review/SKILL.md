@@ -139,8 +139,8 @@ Produces EVAL-REVIEW.md with score, verdict, gaps, and remediation plan.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/eval-review.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ai-evals.md
+@/workspace/.codex/gsd-core/workflows/eval-review.md
+@/workspace/.codex/gsd-core/references/ai-evals.md
 </execution_context>
 
 <context>

@@ -26,7 +26,7 @@ Then resolve the install context via the deterministic projection (#498). **Do N
 GSD_TOOLS=""
 for cand in \
   "$PREFERRED_CONFIG_DIR/gsd-core/bin/gsd-tools.cjs" \
-  "/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/bin/gsd-tools.cjs"; do
+  "/workspace/.codex/gsd-core/bin/gsd-tools.cjs"; do
   if [ -n "$cand" ] && [ -f "$cand" ]; then GSD_TOOLS="$cand"; break; fi
 done
 # Last resort: the gsd-tools shim on PATH — resolved to its absolute path and
@@ -132,7 +132,7 @@ Extract `section_manifest` from `INIT_UPDATE` — gates the `channel-banner` sec
 <step name="check_latest_version">
 Check npm for latest version via the deterministic script. **Do NOT run `npm view` or `npm search` directly** — the package name must come from the script, not from a free choice at execution time. (#2992: LLM-driven prescriptions of npm package names produced wrong-package queries; moving the package name into a script constant closes that gap.)
 
-The `GSD_DIR` value emitted by `get_installed_version` (line 4) resolves to the runtime-specific config dir (`/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/`, `~/.gemini/antigravity/`, `~/.codex/`, etc.), so the script invocation works for every runtime — not just the agent. An unresolved target exits in `get_installed_version` before this step.
+The `GSD_DIR` value emitted by `get_installed_version` (line 4) resolves to the runtime-specific config dir (`/workspace/.codex/`, `~/.gemini/antigravity/`, `~/.codex/`, etc.), so the script invocation works for every runtime — not just the agent. An unresolved target exits in `get_installed_version` before this step.
 
 `LATEST_RESULT` is a JSON document with the documented shape `{ ok: bool, version: string, reason: string, detail?: string }`. Parse it with the Node-only `uc_field` helper. When the script cannot run or returns nothing, preserve its failure as a meaningful diagnostic (#2993 CR feedback):
 
@@ -271,7 +271,7 @@ rm -f "$CHANGELOG_TMP"
 - `agents/gsd-*` files will be replaced
 
 (Paths are relative to detected runtime install location:
-global: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/`, `~/.config/opencode/`, `~/.opencode/`, `~/.gemini/antigravity/`, `~/.config/kilo/`, or `~/.codex/`
+global: `/workspace/.codex/`, `~/.config/opencode/`, `~/.opencode/`, `~/.gemini/antigravity/`, `~/.config/kilo/`, or `~/.codex/`
 local: `./.codex/`, `./.config/opencode/`, `./.opencode/`, `./.agents/`, `./.kilo/`, or `./.codex/`)
 
 Your custom files in other locations are preserved:

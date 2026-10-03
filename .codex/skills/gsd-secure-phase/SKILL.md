@@ -142,7 +142,7 @@ Output: updated SECURITY.md.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/secure-phase.md
+@/workspace/.codex/gsd-core/workflows/secure-phase.md
 </execution_context>
 
 <context>

@@ -139,9 +139,9 @@ Flow: Select Framework → Research Docs → Research Domain → Design Eval Str
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/ai-integration-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ai-frameworks.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ai-evals.md
+@/workspace/.codex/gsd-core/workflows/ai-integration-phase.md
+@/workspace/.codex/gsd-core/references/ai-frameworks.md
+@/workspace/.codex/gsd-core/references/ai-evals.md
 </execution_context>
 
 <context>

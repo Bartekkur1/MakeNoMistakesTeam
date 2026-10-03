@@ -153,7 +153,7 @@ Output: {padded_phase}-REVIEW.md in phase directory + inline summary of findings
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/code-review.md
+@/workspace/.codex/gsd-core/workflows/code-review.md
 </execution_context>
 
 <context>
