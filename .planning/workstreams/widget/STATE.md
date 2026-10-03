@@ -55,6 +55,6 @@ See: .planning/PROJECT.md (updated 2026-10-03).
 - Szkic istnieje tylko w pamięci bieżącej karty.
 - Brak otwartych problemów UAT; istniejący test oczekiwanego błędu capture-phase pozostaje udokumentowaną granicą.
 
-## Historical Artifact Notices
+## Historical Artifacts
 
-phase.complete reported two absent historical ZIP references (01-01 and 01-05). Source, build instructions and completed test evidence remain available. These archive notices do not block canonical verification or phase completion.
+Użytkownik potwierdził, że ręcznie usunął starsze ZIP-y (01-01 i 01-05). To celowe porządki, nie brak wymaganych plików ani otwarty problem. Źródła, instrukcje budowania i dowody testów pozostają dostępne.
