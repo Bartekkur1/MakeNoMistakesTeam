@@ -1,0 +1,28 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Studio, publikacja i szkielet levelu",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Wybory, konsekwencje i pomocnik",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Wynik, nagroda i przekazanie",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
+  },
+  "updated_at": "2026-10-03T14:30:59.764Z"
+}
