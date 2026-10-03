@@ -22,7 +22,7 @@ backgroundSize: contain
 # Scamerino Alertinio
 
 <p class="text-xl leading-snug" style="color: var(--ink)">
-Cyberpomocnik, który uczy dzieci 9-13 lat rozpoznawać oszustwa w grach i pomaga, gdy podejrzana wiadomość pojawi się naprawdę.
+Cyberpomocnik, który uczy dzieci 9-13 lat rozpoznawać oszustwa w grach i pomaga, gdy podejrzana wiadomość pojawi się na&shy;prawdę.
 </p>
 
 <div class="mt-8 flex gap-2 flex-wrap">
@@ -48,17 +48,17 @@ Jedno zdanie: kim jesteśmy i co robimy. Pokazujemy Scamerino. Nie czytamy slajd
 <div class="grid grid-cols-3 gap-5 mt-4">
   <div class="card flex flex-col">
     <div class="stat">4,72 mln</div>
-    <div class="stat-label">użytkowników Robloxa w Polsce. To lider gier w PL.</div>
+    <div class="stat-label">użytkowników Robloxa w Pol&shy;sce. To lider gier w PL.</div>
     <div class="src">Mediapanel, VIII 2025</div>
   </div>
   <div class="card flex flex-col">
     <div class="stat red">28%</div>
-    <div class="stat-label">polskich nastolatków padło ofiarą cyberataku: <b>12%</b> włamanie na konto, <b>8%</b> kradzież przedmiotów w grach.</div>
+    <div class="stat-label">polskich nastolatków padło ofia&shy;rą cyber&shy;ataku: <b>12%</b> wła&shy;manie na konto, <b>8%</b> kra&shy;dzież przed&shy;miotów w grach.</div>
     <div class="src">NASK „Nastolatki” 2024, N = 3665</div>
   </div>
   <div class="card flex flex-col">
     <div class="stat amber">#2</div>
-    <div class="stat-label">Roblox to druga najczęściej podszywana marka w phishingu (12,3% prób), zaraz po Microsofcie.</div>
+    <div class="stat-label">Roblox to druga najczęściej pod&shy;szy&shy;wana marka w phi&shy;shingu (12,3% prób), zaraz po Micro&shy;sofcie.</div>
     <div class="src">NordVPN, Consumer Cybersecurity Report 2026</div>
   </div>
 </div>
@@ -85,7 +85,7 @@ Liczby tylko z pierwotnych źródeł. 51% dzieci 8-14 w UK gra w Roblox (Ofcom 2
   <div class="card flex flex-col">
     <div class="pill amber self-start">Rodzice nie widzą</div>
     <div class="stat mt-3">57% → 21%</div>
-    <div class="stat-label">57% rodziców mówi, że monitoruje dziecko w sieci. Potwierdza to 21% nastolatków.</div>
+    <div class="stat-label">57% rodziców mówi, że moni&shy;toruje dziecko w sieci. Potwier&shy;dza to 21% nasto&shy;latków.</div>
     <div class="src">NASK „Nastolatki” 2024</div>
   </div>
   <div class="card flex flex-col">
@@ -97,7 +97,7 @@ Liczby tylko z pierwotnych źródeł. 51% dzieci 8-14 w UK gra w Roblox (Ofcom 2
   <div class="card flex flex-col">
     <div class="pill amber self-start">Szkolenie zanika</div>
     <div class="stat mt-3">4 tygodnie</div>
-    <div class="stat-label">Po treningu dzieci były o 14% lepsze. Po miesiącu efekt zniknął.</div>
+    <div class="stat-label">Po treningu dzieci były o 14% lep&shy;sze. Po mie&shy;siącu efekt znik&shy;nął.</div>
     <div class="src">Lastdrager i in., SOUPS 2017 (NL)</div>
   </div>
 </div>
@@ -120,7 +120,7 @@ Tylko 5 z 57 badań gier o cyberbezpieczeństwie dla dzieci miało grupę kontro
   <div class="flex flex-col gap-3">
     <div class="card compact">
       <b>🎮 Trening w Roblox</b>
-      <div class="stat-label">Misja ze Scamerino: „darmowe Robuxy”, fałszywy admin, wymiana „ty pierwszy”.</div>
+      <div class="stat-label">Misja ze Scamerino: „darmowe Robuxy”, fałszywy admin, wymiana „ty pierw&shy;szy”.</div>
     </div>
     <div class="card compact">
       <b>🦈 Pomoc w realnej sytuacji</b>
@@ -128,7 +128,7 @@ Tylko 5 z 57 badań gier o cyberbezpieczeństwie dla dzieci miało grupę kontro
     </div>
     <div class="card compact">
       <b>🛡️ Opiekun w pętli</b>
-      <div class="stat-label">Dziecko przekazuje sprawę rodzicowi i widzi, co udostępnia. Rodzic odpowiada w panelu.</div>
+      <div class="stat-label">Dziecko przekazuje sprawę rodzicowi i widzi, co udo&shy;stępnia. Rodzic odpo&shy;wiada w panelu.</div>
     </div>
   </div>
   <img src="/scamerino.png" loading="eager" class="w-[300px] h-[345px] object-cover object-top rounded-3xl" style="box-shadow: var(--shadow)" />
@@ -165,7 +165,7 @@ Wyróżnik: ta sama postać w treningu i w codziennej sytuacji. Samo „gra na R
 
 <div class="card mt-5 flex items-center gap-4" style="border-color: var(--gold)">
   <div class="text-2xl">💡</div>
-  <div class="body-text"><b>„Darmowe + link = pytam dorosłego”</b>. Scamerino nie mówi „to jest bezpieczne”. Uczy sprawdzać i prosić o pomoc. Na początku mówi też wprost, że jest AI.</div>
+  <div class="body-text"><b>„Darmowe + link = pytam dorosłego”</b>. Scamerino nie mówi „to jest bezpieczne”. Uczy spraw&shy;dzać i pro&shy;sić o pomoc. Na początku mówi też wprost, że jest AI.</div>
 </div>
 
 <!--
@@ -214,23 +214,22 @@ TODO: podmienić placeholdery na filmy (element video wewnątrz .video-ph, w-ful
 
 <div class="kicker">Pomiar</div>
 
-# Mierzymy, czy dziecko radzi sobie samo
+# Mało kto sprawdza, czy to działa
 
 <div class="grid grid-cols-2 gap-6 mt-2">
-  <div class="card">
-    <b>Większość gier edukacyjnych nie jest rzetelnie sprawdzana</b>
-    <div class="flex items-baseline gap-3 mt-3">
-      <div class="stat red">5 z 57</div>
-      <div class="stat-label">badań gier o cyberbezpieczeństwie dla dzieci miało grupę kontrolną.</div>
-    </div>
+  <div class="card flex flex-col">
+    <div class="stat red" style="font-size: 4.2rem">5 z 57</div>
+    <div class="stat-label text-lg">badań gier o cyberbezpieczeństwie dla dzieci miało grupę kontrolną.</div>
+    <p class="text-sm mt-3">Z porównywanych programów tylko Interlandia (Google) ma badanie z grupą kontrolną, w USA. Polskie programy nie publikują takich wyników.</p>
     <div class="src">Damenu i in., przegląd systematyczny, 2025</div>
   </div>
-  <div class="card">
+  <div class="card" style="border-color: var(--gold)">
     <b>Nasz protokół</b>
+    <div class="text-sm" style="color: var(--muted)">mierzymy, czy dziecko radzi sobie samo</div>
     <ul class="text-base mt-3 leading-relaxed">
+      <li><span class="hl">grupa kontrolna</span> w pilotażu: porównujemy ze zwy&shy;kłą lekcją</li>
       <li>test <b>przed i po</b> treningu, na nowych przykładach i <b>bez pomocnika</b></li>
-      <li>liczymy trafne reakcje <b>i</b> niepotrzebne alarmy (uczciwe oferty też są w teście)</li>
-      <li>w pilotażu: <b>grupa kontrolna</b> ze zwykłą lekcją</li>
+      <li>liczymy trafne reakcje <b>i</b> niepotrzebne alarmy (ucz&shy;ciwe oferty też są w teście)</li>
       <li><b>powtórny test po 2-4 tygodniach</b></li>
     </ul>
   </div>
@@ -242,26 +241,45 @@ Demo pokazuje mechanizm pomiaru. Trwałą skuteczność potwierdzi dopiero pilot
 
 ---
 
-<div class="kicker">Konkurencja</div>
+<div class="kicker">Pozycjonowanie</div>
 
-# Inni uczą. Nikt nie pomaga w prawdziwej sytuacji
+# Uzupełniamy to, co już istnieje
 
-<div class="card mt-1 p-2">
-
-| Rozwiązanie | Wiek | Roblox | Pomoc w realnej sytuacji | Panel opiekuna | Pomiar z kontrolą |
-|---|---|---|---|---|---|
-| Sieciaki.pl (FDDS) | 7+ | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> |
-| Asy Internetu / Interlandia (Google) | kl. 4-8 | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> | RCT w USA |
-| Europol Cyber Defenders | 9-12 | <span class="yes">✓</span> | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> |
-| Cyberlekcje 3.0 (MC + NASK) | kl. I-VIII | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> | <span class="no">-</span> |
-| Telefon 116 111 (FDDS) | dzieci | n/d | <span class="yes">✓</span> człowiek | <span class="no">-</span> | n/d |
-| Roblox: kontrola rodzicielska | rodzice | <span class="yes">✓</span> | tylko „Zgłoś” | <span class="yes">✓</span> | n/d |
-| <b>Scamerino Alertinio</b> | <b>9-13</b> | <span class="yes">✓</span> | <span class="yes">✓</span> | <span class="yes">✓</span> | <span class="yes">✓</span> |
-
+<div class="grid grid-cols-3 gap-4 mt-2">
+  <div class="card flex flex-col">
+    <div class="pill self-start">Przed: uczą</div>
+    <ul class="labels text-sm mt-3">
+      <li>Sieciaki.pl (FDDS), 7+</li>
+      <li>Interlandia / Asy Internetu (Google), kl. 4-8</li>
+      <li>Europol Cyber Defenders, 9-12, w Roblox</li>
+      <li>Cyberlekcje 3.0 (MC + NASK), <span class="whitespace-nowrap">kl. I-VIII</span></li>
+    </ul>
+    <div class="text-xs mt-auto pt-3" style="color: var(--muted)">Lekcja, a potem dziecko zostaje samo z wiadomością.</div>
+  </div>
+  <div class="card flex flex-col" style="border: 2px solid var(--shark); background: rgba(15, 98, 219, 0.05)">
+    <div class="pill blue self-start">W chwili wiadomości</div>
+    <div class="font-bold mt-2" style="color: var(--shark-dark)">Scamerino Alertinio, 9-13 lat</div>
+    <div class="text-xs" style="color: var(--muted)">Tylko my łączymy:</div>
+    <ul class="labels checks text-sm mt-2">
+      <li><span class="yes">✓</span> trening w Roblox</li>
+      <li><span class="yes">✓</span> pomoc przy prawdziwej wiadomości</li>
+      <li><span class="yes">✓</span> opiekun w pętli</li>
+      <li><span class="yes">✓</span> pomiar z grupą kontrolną</li>
+    </ul>
+  </div>
+  <div class="card flex flex-col">
+    <div class="pill self-start">Po fakcie: zgłoszenie</div>
+    <ul class="labels text-sm mt-3">
+      <li>Telefon 116 111 (FDDS): rozmowa z człowiekiem</li>
+      <li>CERT: SMS 8080</li>
+      <li>przycisk „Zgłoś” w Roblox</li>
+    </ul>
+    <div class="text-xs mt-auto pt-3" style="color: var(--muted)">Działa, gdy dziecko samo rozpozna problem i się zgłosi.</div>
+  </div>
 </div>
 
-<p class="mt-3 text-sm">
-FDDS, NASK i Safer Internet traktujemy jako <b>partnerów</b>: kierujemy dzieci do 116 111, a rodziców do 800 100 100 i CERT (SMS 8080).
+<p class="mt-4 text-sm">
+Nie zastępujemy ich - kierujemy do nich: dzieci do 116 111, rodziców do 800 100 100 i CERT (SMS 8080). <b>Partnerstwo z FDDS / NASK to cel pilotażu.</b>
 </p>
 
 ---
@@ -287,7 +305,7 @@ FDDS, NASK i Safer Internet traktujemy jako <b>partnerów</b>: kierujemy dzieci 
       <div><div class="stat" style="font-size: 1.9rem">~2 mln</div><div class="stat-label">uczniów kl. 3-7 (szacunek)</div></div>
     </div>
     <ul class="text-base mt-3 leading-relaxed">
-      <li>Szkoły muszą mieć <b>standardy ochrony małoletnich</b> (ustawa „Kamilka”). Trening z pomiarem pomaga je realizować.</li>
+      <li>Szkoły muszą mieć <b>standardy ochrony mało&shy;letnich</b> (ustawa „Kamilka”). Trening z po&shy;miarem pomaga je realizować.</li>
       <li>Darmowe dla dziecka i rodzica. Płaci szkoła, samorząd albo sponsor CSR.</li>
     </ul>
   </div>
@@ -307,13 +325,13 @@ backgroundSize: contain
 
 <ol class="text-base leading-relaxed mt-2">
   <li>Ankieta w 1-2 klasach: kto gra w Roblox i na jakich kontach.</li>
-  <li>Trening z grupą kontrolną i testem po 2-4 tygodniach.</li>
-  <li>Partner: FDDS, NASK albo program CSR telekomu lub banku.</li>
+  <li>Trening z grupą kontrolną i testem po 2-4 tygo&shy;dniach.</li>
+  <li>Partner (cel): FDDS, NASK albo program CSR tele&shy;komu lub banku.</li>
 </ol>
 
 <div class="card mt-6" style="border-color: var(--gold)">
   <div class="text-xl font-bold" style="color: var(--shark-dark)">„Darmowe + link = pytam dorosłego”</div>
-  <div class="stat-label">Scamerino przypomina o tym w grze i w prawdziwym życiu.</div>
+  <div class="stat-label">Scamerino przypomina o tym w grze i w praw&shy;dziwym życiu.</div>
 </div>
 
 <div class="absolute bottom-8 left-12 text-sm" style="color: var(--muted)">

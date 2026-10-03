@@ -111,12 +111,7 @@
   place-items: center;
 }
 
-table { font-size: 0.85rem; }
-th { color: var(--shark-dark); }
-td, th { padding: 0.45rem 0.6rem !important; }
 .yes { color: #15803D; font-weight: 800; }
-.no { color: var(--muted); }
-tr.us td { background: rgba(15, 98, 219, 0.07); font-weight: 700; }
 
 /* Wyjustowany tekst ciągły (wymaga lang="pl" dla dzielenia wyrazów) */
 .slidev-layout p,
@@ -174,3 +169,22 @@ tr.us td { background: rgba(15, 98, 219, 0.07); font-weight: 700; }
   padding-left: 0.15rem;
 }
 .demo-title { font-weight: 800; line-height: 1.3; margin-top: 0.6rem; }
+
+/* Wyróżnienie kluczowej frazy (np. grupa kontrolna) */
+.hl {
+  display: inline-block;
+  background: rgba(255, 184, 0, 0.28);
+  color: var(--ink);
+  font-weight: 800;
+  padding: 0 0.3rem;
+  border-radius: 0.35rem;
+}
+
+/* Listy krótkich etykiet (slajd pozycjonowania): bez justowania, ciaśniej */
+.slidev-layout .labels li {
+  text-align: left;
+  line-height: 1.45;
+  margin-bottom: 0.35rem;
+}
+.slidev-layout ul.checks { list-style: none; }
+.slidev-layout ul.checks li { margin-left: 0; padding-left: 0; }
