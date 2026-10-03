@@ -40,7 +40,7 @@ b94f3a2 feat(01-03): drag hide and restore a live avatar per tab
 
 ## Deviations from Plan
 
-Executed directly inside Codex as explicitly permitted by the plan. Happy-dom exposes an instance getSelection method; the privacy spy targets document directly so the actual read is counted. Task 1 and Task 2 pin existing behavior; Task 3 observed RED (duplicate sends and absent beginSubmit), then GREEN.
+Direct Codex execution as permitted by the plan. Tests preceded behavior changes, then passed after implementation. No package changes. 
 
 ## Issues Encountered
 
