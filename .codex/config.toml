@@ -7,3 +7,22 @@ hooks = true
 [agents]
 max_depth = 1
 
+[mcp_servers.roblox_studio]
+command = "node"
+args = ["scripts/mcp_roblox_studio.js"]
+
+
+
+[mcp_servers.blender]
+command = "uvx"
+args = ["mcp-for-blender"]
+env = { DISABLE_TELEMETRY = "true", BLENDER_PORT = "9878", BLENDER_MCP_SAFE_MODE = "1" }
+
+[mcp_servers.qgis]
+command = "uvx"
+args = ["--from", "https://github.com/nkarasiak/qgis-mcp/archive/refs/heads/main.zip", "qgis-mcp-server"]
+
+[mcp_servers.unreal]
+url = "http://127.0.0.1:8000/mcp"
+
+

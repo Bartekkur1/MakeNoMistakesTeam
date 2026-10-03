@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "roblox-studio": {
+      "command": "node",
+      "args": ["${workspaceFolder}/scripts/mcp_roblox_studio.js"]
+    },
+    "blender": {
+      "command": "uvx",
+      "args": ["mcp-for-blender"],
+      "env": {
+        "DISABLE_TELEMETRY": "true",
+        "BLENDER_PORT": "9878",
+        "BLENDER_MCP_SAFE_MODE": "1"
+      }
+    },
+    "qgis": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "https://github.com/nkarasiak/qgis-mcp/archive/refs/heads/main.zip",
+        "qgis-mcp-server"
+      ]
+    },
+    "unreal-mcp": {
+      "url": "http://127.0.0.1:8000/mcp"
+    }
+  }
+}
