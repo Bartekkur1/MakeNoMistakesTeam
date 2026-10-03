@@ -9,7 +9,8 @@ const QUESTIONS = Object.freeze({
 });
 const ORDER = Object.keys(QUESTIONS);
 const freezeAnswers = answers => Object.freeze(Object.fromEntries(Object.entries(answers).map(([id, values]) => [id, Object.freeze(values)])));
-const initial = () => ({ view: 'closed', draft: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, gen: 0, paste: { text: '', link: '' } });
+const checkView = step => step === 'safety' || step === 'result' ? step : 'question';
+const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, gen: 0, paste: { text: '', link: '' } });
 
 export function createDraftStore() {
   let state = initial();
@@ -47,6 +48,23 @@ export function createDraftStore() {
       for (const key of ['text', 'link']) if (Object.hasOwn(patch, key)) edits[key] = patch[key];
       state = { ...state, draft: state.draft ? { ...state.draft, ...edits } : null };
     },
+    editCheckContent() {
+      if (!state.check || state.draft || state.submitting || !['safety', 'question', 'result'].includes(state.view)) return;
+      const c = state.check.case;
+      state = { ...state, view: 'preview', candidateKind: 'edit', error: null,
+        draft: { text: c.content, link: c.link, origin: c.origin, truncated: c.truncated } };
+    },
+    cancelCheckEdit() {
+      if (!state.check || !state.candidateKind || state.submitting) return;
+      state = { ...state, view: state.view === 'closed' ? 'closed' : checkView(state.check.resumeStep),
+        draft: null, candidateKind: null, pendingSelection: null, error: null };
+    },
+    checkNewSelection() {
+      if (!state.check || state.draft || !state.pendingSelection || state.submitting) return;
+      const p = state.pendingSelection;
+      state = { ...state, view: 'preview', candidateKind: 'replacement', error: null,
+        draft: { ...p, link: extractFirstLink(p.text), origin: 'selection' }, pendingSelection: null };
+    },
     close() { state = { ...state, view: 'closed', pendingSelection: null }; },
     beginSubmit() {
       if (state.submitting || !state.draft) return null;
@@ -55,15 +73,18 @@ export function createDraftStore() {
     },
     approved(token, approvedCase) {
       if (!state.submitting || token !== state.gen || !isValidCase(approvedCase)) return false;
-      const check = Object.freeze({ case: Object.freeze(approvedCase), step: 'safety',
+      const unchanged = state.check && normalizeText(state.check.case.content) === normalizeText(approvedCase.content)
+        && normalizeLink(state.check.case.link) === normalizeLink(approvedCase.link);
+      const check = unchanged ? state.check : Object.freeze({ case: Object.freeze(approvedCase), step: 'safety', resumeStep: 'safety',
         answers: freezeAnswers({ sender: [], request: [], verify: [] }), hints: detectHints(approvedCase), result: null,
         keptAnswers: Object.freeze({}), discrepancy: null });
-      state = { ...state, view: state.view === 'closed' ? 'closed' : 'safety', check, draft: null, pendingSelection: null, error: null, submitting: false };
+      state = { ...state, view: state.view === 'closed' ? 'closed' : checkView(check.resumeStep), check,
+        draft: null, candidateKind: null, pendingSelection: null, error: null, submitting: false };
       return true;
     },
     startQuestions() {
       if (!state.check || state.view !== 'safety') return;
-      state = { ...state, view: 'question', check: Object.freeze({ ...state.check, step: 'sender' }) };
+      state = { ...state, view: 'question', check: Object.freeze({ ...state.check, step: 'sender', resumeStep: 'sender' }) };
     },
     answer(questionId, answerId) {
       if (!state.check || state.view !== 'question' || state.check.step !== questionId || !QUESTIONS[questionId]?.includes(answerId)) return;
@@ -88,18 +109,18 @@ export function createDraftStore() {
       }
       const index = ORDER.indexOf(state.check.step);
       const step = ORDER[index + 1] ?? 'result';
-      state = { ...state, view: step === 'result' ? 'result' : 'question', check: Object.freeze({ ...state.check, step,
+      state = { ...state, view: checkView(step), check: Object.freeze({ ...state.check, step, resumeStep: step,
         discrepancy: null, keptAnswers: keep === true ? Object.freeze({ ...check.keptAnswers, [check.step]: choice }) : check.keptAnswers,
         result: step === 'result' ? evaluate(state.check.answers, state.check.hints) : null }) };
     },
     previousQuestion() {
       if (!state.check || state.view !== 'question') return;
       const step = ORDER[ORDER.indexOf(state.check.step) - 1] ?? 'safety';
-      state = { ...state, view: step === 'safety' ? 'safety' : 'question', check: Object.freeze({ ...state.check, step, discrepancy: null }) };
+      state = { ...state, view: checkView(step), check: Object.freeze({ ...state.check, step, resumeStep: step, discrepancy: null }) };
     },
     fixAnswers() {
       if (!state.check || state.view !== 'result') return;
-      state = { ...state, view: 'question', check: Object.freeze({ ...state.check, step: 'sender' }) };
+      state = { ...state, view: 'question', check: Object.freeze({ ...state.check, step: 'sender', resumeStep: 'sender' }) };
     },
     submitFailed(token) {
       if (!state.submitting || token !== state.gen) return false;

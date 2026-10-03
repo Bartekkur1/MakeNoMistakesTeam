@@ -20,6 +20,9 @@ export const STRINGS = Object.freeze({
   safetyNotice: 'Zanim sprawdzimy: nie podawaj hasła ani kodu i nie klikaj nieznanego linku.',
   hintBadge: 'Podpowiedź z wiadomości',
   fixAnswers: 'Popraw odpowiedzi',
+  editCheckContent: 'Edytuj wiadomość',
+  cancelCheckEdit: 'Wróć do sprawdzania',
+  checkNewSelection: 'Sprawdź nowe zaznaczenie',
   correctAnswer: 'Popraw odpowiedź',
   keepAnswer: 'Zostaw moją odpowiedź',
   checkMismatches: Object.freeze({
