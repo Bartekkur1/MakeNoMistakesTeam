@@ -11,9 +11,15 @@ const validLists = lists => Object.fromEntries(Object.entries(OPTIONS).map(([id,
 const matchingText = raw => normalizeText(typeof raw === 'string' ? raw : '').normalize('NFD').toLowerCase()
   .replace(/\p{M}/gu, '').replace(/\u0142/g, 'l').replace(/\s+/g, ' ');
 
-// Exclude the reported span, while preserving separate direct demands after it.
+// Exclude quoted reports or one unquoted clause, preserving later direct demands.
 function withoutReports(text) {
-  return text.replace(/\b(?:oszust napisal|zglaszam wiadomosc)\s*:\s*(?:\u201e[^\u201d]*\u201d|\u201c[^\u201d]*\u201d|"[^"]*"|'[^']*'|[^.!?;]*)/g, ' ');
+  return text.replace(/\b(?:oszust napisal|zglaszam wiadomosc)\s*:\s*(?:\u201e[^\u201d]*\u201d|\u201c[^\u201d]*\u201d|"[^"]*"|'[^']*'|([^.!?;,]*))/g,
+    (span, unquoted, offset) => {
+      // A loss threat attached to an unquoted demand cannot be hidden by a report prefix.
+      const after = text.slice(offset + span.length);
+      if (unquoted !== undefined && /^\s*,\s*(?:inaczej|bo)\s+(?:stracisz|utracisz|zablokujemy)\b/.test(after)) return span;
+      return ' ';
+    });
 }
 function affirmative(text, pattern) {
   return [...text.matchAll(pattern)].some(match => !/\bnie\s+$/.test(text.slice(0, match.index)));
@@ -24,8 +30,9 @@ export function detectHints(caseOrDraft) {
   const raw = caseOrDraft?.content ?? caseOrDraft?.text;
   const text = withoutReports(matchingText(raw));
   const request = [];
-  if (affirmative(text, /\b(?:podaj|wyslij|przeslij)\s+(?:(?:swoje|twoje)\s+)?hasl(?:o|a)\b/g)) request.push('password');
-  if (affirmative(text, /\b(?:podaj|wyslij|przeslij)\s+(?:(?:swoj|twoj)\s+)?kod(?:u)?\s+(?:do\s+(?:konta|logowania)|(?:z\s+)?sms|logowania)\b/g)) request.push('code');
+  // Only explicit pronouns and a login conjunction may bridge the verb and credential.
+  if (affirmative(text, /\b(?:podaj|wyslij|przeslij|wpisz|napisz)\s+(?:(?:mi|nam)\s+)?(?:(?:(?:swoj|twoj)\s+)?login\s+i\s+)?(?:(?:swoje|twoje)\s+)?hasl(?:o|a)\b/g)) request.push('password');
+  if (affirmative(text, /\b(?:podaj|wyslij|przeslij|wpisz|napisz)\s+(?:(?:mi|nam)\s+)?(?:(?:swoj|twoj)\s+)?kod(?:u)?\s+(?:do\s+(?:konta|logowania)|(?:z\s+)?sms|logowania)\b/g)) request.push('code');
   const link = Boolean(extractFirstLink(text) || normalizeText(typeof caseOrDraft?.link === 'string' ? caseOrDraft.link : ''));
   const prize = affirmative(text, /\b(?:odbierz\s+(?:darmowa\s+)?nagrode|(?:kliknij|wejdz)[^.!?;]{0,80}\baby\s+odebrac\s+(?:darmowa\s+)?nagrode)\b/g);
   if (prize && link) request.push('prize');
