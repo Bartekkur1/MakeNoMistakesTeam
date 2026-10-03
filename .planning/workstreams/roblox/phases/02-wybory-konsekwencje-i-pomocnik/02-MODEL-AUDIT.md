@@ -105,3 +105,9 @@ Robert potwierdził poprawne położenie modelu, ale zgłosił brak chodzenia po
 Actual desktop Play: root przeszedł od okolic (11.29,3.125,24.44) do (11.12,3.125,17.22), następnie (13.69,3.125,34.77); odczyt prędkości około 5 studów/s, FloorMaterial=Cobblestone, Health=100. Biodro w ruchu około 0.393 rad. Położenie i proporcje użytkownika zachowane. Studio pozostawione w Play do oceny. Gest, alarm i integracja pomocy nadal niezaliczone.
 
 Dokumentacja nawigacji: https://create.roblox.com/docs/characters/pathfinding
+
+## Korekta chwytu i pivota lupy
+
+Na prośbę Roberta dopasowano lupę do bieżącej lewej dłoni, bez zmian sylwetki. OBSERVED: uchwyt miał lokalne przesunięcie około (-0.164,-0.650,-1.150) względem Left Arm; WorldPivot modelu MagnifyingGlass był daleko od uchwytu. Nowy chwyt jest w (0,-0.725,-0.2), z wychyleniem -20° X / +20° Z, aby obręcz wychodziła przed i na zewnątrz ręki. MagnifyingGlass.PrimaryPart=Handle, Handle.PivotOffset=identity. Motor6D Left Arm.MagnifierGrip łączy rękę z uchwytem; C1=identity, a C0 odpowiada chwytowi. Attachment MagnifierGripAttachment oznacza ten sam punkt. Wewnętrzne połączenia zachowano i przeliczono po przesunięciu całej lupy. Stary zewnętrzny WeldConstraint zachowano wyłączony pod nazwą LegacyArmWeld; atrybuty PivotBeforeGripFix i HandleBeforeGripFix przechowują poprzednie ustawienie.
+
+Actual desktop Play: błąd pozycji połączenia 0 studów, odległość pivota od uchwytu 0, lokalne przesunięcie uchwytu zachowane przez fizykę, Health=100. Studio wróciło do Edit. Eksport modelu w repo wciąż wymaga odświeżenia po zakończeniu odbioru modelu.
