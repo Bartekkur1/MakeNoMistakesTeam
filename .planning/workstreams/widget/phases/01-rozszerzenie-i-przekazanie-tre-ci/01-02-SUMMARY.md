@@ -25,6 +25,9 @@ coverage:
       - kind: command
         ref: "npm --prefix widget run test:e2e"
         status: pass
+  - deliverable: "Real Discord composer selection"
+    human_judgment: true
+    rationale: "Requires real browser and authenticated fictional Discord; pending final UAT"
 ---
 
 # Phase 1 Plan 02: Deliberate capture and safe approval

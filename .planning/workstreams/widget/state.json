@@ -6,7 +6,7 @@
     {
       "number": "1",
       "name": "Rozszerzenie i przekazanie treści",
-      "status": "in_progress"
+      "status": "pending"
     },
     {
       "number": "2",
@@ -27,7 +27,7 @@
   "next": {
     "command": "/gsd:progress --next",
     "label": "Advance to the next step",
-    "reason": "Phase 1 of 4 · 0% · executing"
+    "reason": "Phase 01 of 4 · 0% · executing"
   },
-  "updated_at": "2026-10-03T15:45:32.152Z"
+  "updated_at": "2026-10-03T17:07:05.417Z"
 }
