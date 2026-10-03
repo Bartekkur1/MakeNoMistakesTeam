@@ -1,7 +1,7 @@
 ---
 phase: 01-kontrakt-i-backend-spraw
 verified: 2026-10-03T19:45:00Z
-status: human_needed
+status: passed
 score: 45/47 must-haves verified (4/4 roadmap success criteria)
 covered_files:
   - ".planning/shared/CONTRACT.md"
@@ -71,7 +71,7 @@ human_verification:
 
 **Phase Goal:** Działające API zgłoszeń z obiegiem rodzic -> nauczyciel, historią, komentarzami i logowaniem demo, z trwałym zapisem oraz przykładowymi danymi zgodnymi z `shared/CONTRACT.md`.
 **Verified:** 2026-10-03T19:45:00Z
-**Status:** human_needed
+**Status:** passed (human items resolved by the user on 2026-10-03, see 01-UAT.md)
 **Re-verification:** No - initial verification
 
 Live evidence (Supabase, local and Heroku smoke, Heroku restart) is the user's report under D-06 and is taken as given. Everything else was checked offline against the tree at 1696a64.

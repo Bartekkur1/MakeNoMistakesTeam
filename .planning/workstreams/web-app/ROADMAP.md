@@ -6,7 +6,7 @@ Od kontraktu i backendu, przez panel opiekuna na danych przykładowych, po test 
 
 ## Phases
 
-- [ ] **Phase 1: Kontrakt i backend spraw** - API spraw i odpowiedzi z trwałym zapisem, dane przykładowe
+- [x] **Phase 1: Kontrakt i backend spraw** - API spraw i odpowiedzi z trwałym zapisem, dane przykładowe (completed 2026-10-03)
 - [ ] **Phase 2: Panel opiekuna** - lista, szczegóły, odpowiedź i status na danych przykładowych
 - [ ] **Phase 3: Test przed–po i wyniki** - ekran testu, wyliczanie wyniku po stronie backendu, panel klasy
 - [ ] **Phase 4: Integracja na prawdziwych zapisach** - panel i testy na backendzie, błędy i pełna pętla
@@ -24,7 +24,7 @@ Od kontraktu i backendu, przez panel opiekuna na danych przykładowych, po test 
   3. Rodzic i nauczyciel logują się demo (e-mail + kod `0000`) i widzą tylko zgłoszenia, do których mają dostęp
   4. Kontrakt jest zatwierdzony przez osobę 2, a przykładowe JSON-y są w `shared/`
 
-**Plans**: 6/6 plans executed
+**Plans**: 6/6 plans complete
 
 Plans:
 **Wave 1**
