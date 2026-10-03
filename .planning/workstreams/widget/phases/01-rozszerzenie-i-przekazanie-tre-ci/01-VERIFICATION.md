@@ -1,10 +1,10 @@
 ---
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
-verified: "2026-10-03T17:51:26.347470+00:00"
+verified: "2026-10-03T18:14:22.158811+00:00"
 status: human_needed
-score: "51/53 must-haves verified automatically; prior UAT 4 pass; G-01-2 visual retest pending"
+score: "4/4 current gap-plan truths verified; prior phase proof retained; 4/5 UAT passed"
 behavior_unverified: 0
-covered_digest: "v2:sha256:df0526f7a79346bcddb306e0d63527515c17224cd9726744dfb382c9ad7ce102"
+covered_digest: "v2:sha256:c7b73a274bc24156ce2ae18bdde0698fe7b12658a9e344ab82070ac672375538"
 covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-SUMMARY.md
@@ -16,6 +16,8 @@ covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-04-SUMMARY.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-05-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-05-SUMMARY.md
+  - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-06-PLAN.md
+  - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-06-SUMMARY.md
   - widget/README.md
   - widget/build.mjs
   - widget/manifest.json
@@ -56,10 +58,16 @@ covered_files:
   - widget/tests/unit/presence.test.js
   - widget/tests/unit/source-scan.test.js
   - widget/vitest.config.mjs
+overrides_applied: 1
+overrides:
+  - must_have: "Rekin i jego przycisk schowania znikają w formularzach paste i preview, także podczas zatwierdzania i błędu wysyłki. Formularz pozostaje widoczny i obsługiwalny."
+    reason: "User explicitly superseded the hiding criterion: visible shark is acceptable when the open window moves together with it. Implemented by 01-06."
+    accepted_by: user
+    accepted_at: "2026-10-03"
 human_verification:
-  - test: "G-01-2: rekin znika w formularzu widgetu i wraca po zamknięciu"
-    expected: "W Google Chrome na Discordzie przejdź ręczny retest G-01-2 z README: paste i preview chowają rekina oraz jego ×, panel jest edytowalny, po resize mieści się na ekranie, × i Escape przywracają rekina oraz zachowują szkic. Menu, Jak to działa, Gotowe i przywrócenie ikoną działają."
-    why_human: "User-requested visual retest of the fixed original UAT issue on the updated build."
+  - test: "G-01-2-drag: otwarte okno podąża za widocznym rekinem"
+    expected: "W Google Chrome na Discordzie przeciągnij rekina z otwartym menu, Jak to działa, paste, preview i Gotowe. Okno podąża już podczas ruchu; tekst, link, aktywne pole i szkic zostają. Sprawdź krawędzie, resize, × i Escape według README."
+    why_human: "User visual acceptance of revised interaction in their Chrome/Discord environment."
 
 ---
 
@@ -67,7 +75,7 @@ human_verification:
 
 Goal: Rozszerzenie z awatarem przyjmuje treść do sprawdzenia. All four plans have summaries and matching task commits. The prior tracer Discord keyboard approval is preserved; it does not substitute for newly added toolbar/composer/demo checks.
 
-## Automated Evidence
+## Historical Automated Evidence (before 01-06)
 
 Vitest: 8 files, 36 tests PASS. Full Chromium Playwright: 35 PASS (tracer 3, edges 8, avatar 5, menu 8, draft 8, content 3), including one declared expected capture-phase failure. Real bfcache observed pageshow.persisted true. Source scan, planted-listener negative proof, duplicate-send RED, pending-selection RED and truncation RED substantiate the privacy and consent guards. Review warnings fixed, SECURITY has 0 blocking open threats. Build and diff checks pass. Assets, shared files and dependency manifests unchanged.
 
@@ -140,7 +148,7 @@ Avatar click → captureSelection → draft preview; approve → buildCase → b
 | WID-01 | Implemented, final Chrome UAT pending | avatar/presence/menu/tracer |
 | WID-02 | Implemented, final Discord UAT pending | capture/draft/paste/approval/source guards |
 
-## Human Verification
+## Original Human Verification (four prior passes retained)
 
 1. **Google Chrome: wygląd i obecność rekina** — Załaduj widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają.
 
@@ -154,7 +162,7 @@ Avatar click → captureSelection → draft preview; approve → buildCase → b
 
 Phase remains pending until 01-UAT.md passes. No phase.complete or next-phase advancement executed.
 
-## Re-verification after 01-05
+## Historical re-verification after 01-05 (form hiding superseded)
 
 All five plans and summaries were cross-checked against actual source and the full current test run. Original phase proof and accepted limitations remain valid; previous Chrome/Discord UAT has four user-confirmed passes. Only G-01-2 needs another user visual check. The two older HUMAN NEEDED rows above are supported by the prior UAT and retained as historical automatic-proof limits.
 
@@ -180,3 +188,43 @@ New presence integration tests exercise main.js and deferred submission. New ava
 `/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-05.zip`: 7 files; manifest.json at archive root; CRC validation passes. SHA256: 12025ea974c05cf4d336821981a67fc18c20e8235f6a2d2c138f56ca21e73bf8.
 
 Status remains human_needed solely for the updated G-01-2 visual retest; Phase 1 is not marked complete.
+
+## Current re-verification after 01-06
+
+Goal remains accepting selected or pasted content through deliberate interaction. WID-01 and WID-02 are accounted for by all six PLAN/SUMMARY frontmatters and current source/tests; requirements remain pending final human acceptance. Prior four UAT passes are preserved. User's latest instruction replaces form hiding with a visible draggable shark and a panel that follows it. Older visibility-specific rows above are historical; they do not describe the current build. Verification performed inline under Codex skill adapter, not by an independent subagent.
+
+| Current 01-06 truth | Status | Evidence |
+|---|---|---|
+| Drag moves open window in every view | VERIFIED | Five browser tests assert matching avatar/panel movement at three points before pointerup; menu/howto/paste/preview/confirmation |
+| Shark stays visible and interactive in paste/preview | VERIFIED | Updated presence integration covers pending/error/confirmation; browser visibility and Tab reachability |
+| Movement retains inputs, text/link, caret and focus; no selection capture or send | VERIFIED | Browser node identity, values, selectionStart/End and activeElement assertions; unit movement/capture counters; edge test with new page selection and worker message count |
+| Window and handle remain reachable at edges and resize | VERIFIED | Four-edge browser bounds and shadow-root hit test, resized viewport checks and pointercancel recovery |
+
+### Artifact and wiring verification
+
+All three 01-06 declared artifacts exist and are substantive. avatar.moveTo updates host styles, then calls onMove with live rect. main.placePanel checks open/non-hidden state and calls panel.place without panel.render or draft mutation. The removed setFormOpen API has no remaining source references. Callback cannot fire during avatar construction. Previous capture/consent/privacy paths remain intact and full regression suite passes.
+
+### Test Quality Audit
+
+- Full Vitest: 38 pass in 8 files. Full Playwright: 45 passed (44 ordinary passes plus one existing declared expected capture-phase focus-stealing failure). Build passes.
+- New tests assert actual extension geometry, node identity and editing state; expectations use specified movement deltas and fixed viewport bounds, not generated snapshots. No skipped/todo requirement tests found.
+- First browser run read old coordinates before resize delivery; test now waits for re-clamping. Isolated retest and final full suite pass.
+- Manual visual acceptance in Google Chrome/Discord remains pending; automated tests do not count as that acceptance.
+
+### Decision Coverage
+
+18/18 trackable CONTEXT decisions honored; no missing decisions reported. D-07/D-08/D-12 preserved. The latest user instruction is the explicit override for historical 01-05 hiding.
+
+### Code review and security
+
+Standard inline review found no new critical/warning/info issues. Prior WR-01/WR-02 remain fixed and their disposition ledger is preserved. Existing SECURITY.md has threats_open: 0; no capture, permission, storage, dependency, network or sender-validation change.
+
+### Advisory (New Scope, Unevidenced)
+
+None.
+
+### Packaging
+
+`/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-06.zip`: seven files, root manifest, CRC valid and all manifest-referenced scripts/icons present. SHA256: `26d16a44a66b9824a5be4b6d5806a1419655b3f59c02aff27fd394ed1b3bce65`.
+
+Status remains human_needed solely for G-01-2-drag visual retest. Phase completion and advancement have not run.

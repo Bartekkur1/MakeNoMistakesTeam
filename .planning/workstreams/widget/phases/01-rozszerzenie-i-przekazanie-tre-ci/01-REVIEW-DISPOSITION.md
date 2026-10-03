@@ -22,3 +22,5 @@ total: 2
 | WR-02 | warning | fixed | menu.spec.mjs narrow viewport, commit 4a6c66d |
 
 01-05 review: no new findings; prior fixed dispositions preserved.
+
+01-06 review: no new findings; both prior fixed dispositions remain verified.

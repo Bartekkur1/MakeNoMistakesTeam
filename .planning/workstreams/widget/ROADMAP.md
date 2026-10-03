@@ -23,7 +23,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
 
-**Plans**: 5/6 plans executed; G-01-2-drag diagnosed, 01-06 ready
+**Plans**: 6/6 plans executed; G-01-2-drag implemented, visual retest pending
 
 Plans:
 **Wave 1**
@@ -42,7 +42,7 @@ Plans:
 - [x] 01-05-PLAN.md — G-01-2: chowanie rekina w formularzu widgetu i powrót po zamknięciu
 
 **Wave 6 — revised UAT gap closure**
-- [ ] 01-06-PLAN.md — G-01-2-drag: otwarty panel podąża za widocznym rekinem
+- [x] 01-06-PLAN.md — G-01-2-drag: otwarty panel podąża za widocznym rekinem
 
 **UI hint**: yes
 
