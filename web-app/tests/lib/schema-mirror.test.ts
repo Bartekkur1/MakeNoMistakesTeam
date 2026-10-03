@@ -127,6 +127,20 @@ describe("migrations keep history and comments append-only and closed to API key
     expect(SQL).toContain("before update on public.report_comments");
   });
 
+  it("blocks direct deletes and truncation of history and comments (WR-03)", () => {
+    for (const table of ["report_history", "report_comments"]) {
+      expect(SQL).toContain(`before delete on public.${table}\n  for each row execute function public.forbid_delete();`);
+      expect(SQL).toContain(`before truncate on public.${table}\n  for each statement execute function public.forbid_delete();`);
+    }
+  });
+
+  it("still lets a report delete cascade to its history and comments (seed.sql demo reset)", () => {
+    expect(count("references public.reports(id) on delete cascade")).toBe(2);
+    // forbid_delete lets a row go only inside the cascade: nested trigger and parent already gone.
+    expect(SQL).toContain("if tg_op = 'DELETE' and pg_trigger_depth() > 1 then");
+    expect(SQL).toContain("if not exists (select 1 from public.reports where id = old.report_id) then");
+  });
+
   it("enables row level security on the three tables without any policy", () => {
     expect(count("enable row level security")).toBe(3);
     for (const table of ["reports", "report_history", "report_comments"]) {
@@ -137,7 +151,7 @@ describe("migrations keep history and comments append-only and closed to API key
 
   it("revokes execute from public, anon and authenticated on every function and grants it to service_role", () => {
     const names = [...SQL.matchAll(/create (?:or replace )?function public\.([a-z_]+)\s*\(/g)].map((m) => m[1]);
-    expect(names).toEqual(expect.arrayContaining(["create_report", "list_reports"]));
+    expect(names).toEqual(expect.arrayContaining(["create_report", "list_reports", "forbid_update", "forbid_delete"]));
     const lines = SQL.split("\n");
     for (const name of names) {
       const revoke = lines.find((line) => line.startsWith(`revoke execute on function public.${name}(`));

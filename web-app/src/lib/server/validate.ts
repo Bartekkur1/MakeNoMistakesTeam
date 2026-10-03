@@ -94,6 +94,17 @@ function charLength(value: string): number {
   return [...value].length;
 }
 
+// Postgres text cannot hold U+0000, and PostgREST rejects unpaired UTF-16 surrogates as invalid
+// JSON Unicode. Both are valid in a JSON string, so without this check they reach the database
+// and come back as a false 503 storage_unavailable. Rejecting them here gives a 400 instead.
+const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/;
+
+function hasUnstorableChars(value: string): boolean {
+  return value.includes("\u0000") || LONE_SURROGATE.test(value);
+}
+
+const UNSTORABLE_CHARS_MESSAGE = "Tekst zawiera niedozwolone znaki.";
+
 function canonicalActionOrder(a: TakenAction, b: TakenAction): number {
   return TAKEN_ACTIONS.indexOf(a) - TAKEN_ACTIONS.indexOf(b);
 }
@@ -146,6 +157,8 @@ export function parseNewReport(body: Record<string, unknown>): ValidationResult<
     errors.push({ field: "content", message: "Treść nie może być pusta." });
   } else if (charLength(content) > LIMITS.contentMaxChars) {
     errors.push({ field: "content", message: "Treść jest za długa (maks. 5000 znaków)." });
+  } else if (hasUnstorableChars(content)) {
+    errors.push({ field: "content", message: UNSTORABLE_CHARS_MESSAGE });
   }
 
   if (errors.length > 0 || attackType === null || source === null) return { ok: false, errors };
@@ -248,6 +261,9 @@ export function parseTransition(body: Record<string, unknown>): ValidationResult
       if (charLength(trimmed) > LIMITS.transitionCommentMaxChars) {
         errors.push({ field: "comment", message: "Komentarz jest za długi (maks. 1000 znaków)." });
         commentError = true;
+      } else if (hasUnstorableChars(trimmed)) {
+        errors.push({ field: "comment", message: UNSTORABLE_CHARS_MESSAGE });
+        commentError = true;
       } else if (trimmed !== "") {
         comment = trimmed;
       }
@@ -278,6 +294,9 @@ export function parseComment(body: Record<string, unknown>): ValidationResult<Co
   }
   if (charLength(text) > LIMITS.commentMaxChars) {
     return { ok: false, errors: [{ field: "body", message: "Komentarz jest za długi (maks. 2000 znaków)." }] };
+  }
+  if (hasUnstorableChars(text)) {
+    return { ok: false, errors: [{ field: "body", message: UNSTORABLE_CHARS_MESSAGE }] };
   }
   return { ok: true, value: { body: text } };
 }

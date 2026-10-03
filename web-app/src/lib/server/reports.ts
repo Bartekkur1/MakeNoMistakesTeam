@@ -308,7 +308,8 @@ export interface AddCommentInput {
 }
 
 // Appends one comment to the parent+teacher thread (D-11). Comments are append-only (D-10):
-// no update or delete function exists anywhere, and the database blocks updates by trigger.
+// no update or delete function exists anywhere, and the database blocks UPDATE, DELETE and
+// TRUNCATE by trigger. A comment goes away only together with its report (on delete cascade).
 // Only the row Supabase returned is confirmed; an error, a throw or no row is a 503.
 export async function addComment(input: AddCommentInput): Promise<ReportComment> {
   const data = await run("add_comment", () =>
