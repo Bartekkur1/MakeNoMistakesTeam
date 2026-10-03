@@ -112,6 +112,26 @@ test('honest result explicitly states absent signals and additional unknowns wit
   expect(root.textContent).not.toMatch(/wiadomość jest bezpieczna|nadawca jest wiarygodny/i);
 });
 
+for (const request of ['payment', 'prize']) test(`caution for a standalone ${request} answer renders its reason without the no-signals fallback`, () => {
+  const { panel, root } = setup();
+  const out = evaluate({ sender: ['known_person'], request: [request], verify: ['independent_channel'] }, null);
+  panel.render({ view: 'result', check: { result: out } }, {});
+  expect(root.textContent).not.toContain(STRINGS.checkSignals.none);
+  expect(root.querySelector('h2').textContent).toBe(STRINGS.checkSummaries.caution);
+  expect(root.querySelector('.result-section').textContent).toContain(STRINGS.checkSignals[request]);
+  expect(root.querySelector('.result-step').textContent).toContain(STRINGS.checkSteps['verify_' + request]);
+});
+
+for (const [text, absentUnknown] of [['Kliknij, tylko dziś', 'urgency'], ['Podaj kod do konta', 'request']]) {
+  test(`unknown answer renders no conflicting missing-fact statement: ${text}`, () => {
+    const { panel, root } = setup();
+    const out = evaluate({ sender: ['known_person'], request: ['unknown'], verify: ['independent_channel'] }, detectHints({ text }));
+    panel.render({ view: 'result', check: { result: out } }, {});
+    expect(root.textContent).not.toContain(STRINGS.checkUnknowns[absentUnknown]);
+    expect(root.querySelector('.result-section').textContent).not.toContain(STRINGS.checkSignals.none);
+  });
+}
+
 for (const [name, text, answers] of [
   ['password', 'Prześlij hasło do konta', { sender: ['known_person'], request: ['password'], verify: ['independent_channel'] }],
   ['code conflict', 'Podaj kod do konta', { sender: ['known_person'], request: ['ordinary'], verify: ['independent_channel'] }],

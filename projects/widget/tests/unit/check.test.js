@@ -92,7 +92,19 @@ for (const text of ['Zapłać teraz', 'Zrób przelew, to ostatnia szansa', 'Zap�
   });
 }
 test('a standalone payment answer calls for verification without an accusation', () => {
-  expect(evaluate({ ...honest, request: ['payment'] }, null)).toEqual(result('caution', [], [], 'verify_payment'));
+  expect(evaluate({ ...honest, request: ['payment'] }, null)).toEqual(result('caution', ['payment'], [], 'verify_payment'));
+});
+for (const verify of ['independent_channel', 'no_channel']) test(`a child-reported prize without a link remains visible: ${verify}`, () => {
+  expect(evaluate({ ...honest, request: ['prize'], verify: [verify] }, detectHints({ text: 'Zobacz to' })))
+    .toEqual(result('caution', ['prize'], verify === 'no_channel' ? ['official_channel'] : [], 'verify_prize'));
+});
+for (const [text, signals, unknowns, step] of [
+  ['Kliknij, tylko dziś', ['urgency'], ['request'], 'pause_and_verify'],
+  ['Podaj kod do konta', ['credential_code'], ['urgency'], 'protect_credentials'],
+  ['Prześlij hasło do konta natychmiast', ['credential_password', 'urgency'], [], 'protect_credentials'],
+]) test(`unknown request does not contradict recognized evidence: ${text}`, () => {
+  expect(evaluate({ ...honest, request: ['unknown'] }, detectHints({ text })))
+    .toEqual(result('caution', signals, unknowns, step));
 });
 test('urgency phrases select a pause rather than a bare-date alarm', () => {
   for (const text of ['Kliknij, tylko dziś', 'Zadziałaj natychmiast', 'Ostatnia szansa, odpowiedz']) {
