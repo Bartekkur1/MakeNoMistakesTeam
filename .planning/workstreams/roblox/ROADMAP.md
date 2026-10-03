@@ -19,7 +19,13 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 **Success Criteria** (what must be TRUE):
   1. Ograniczenia publikacji zgłoszone zespołowi do 2 h; gotowy wariant pokazu w Studio
   2. Gracz przechodzi start → NPC → podejrzana oferta → decyzja → zakończenie
-**Plans**: TBD
+**Plans**: 2 plans in 2 waves
+
+**Wave 1**
+- [ ] 01-01-PLAN.md — publikacja, zachowanie Place1 i bezpieczne granice Rojo
+
+**Wave 2 *(blocked on Wave 1 completion)***
+- [ ] 01-02-PLAN.md — pełna ścieżka misji, GUI mobilne i weryfikacja Play
 
 ### Phase 2: Wybory, konsekwencje i pomocnik
 **Goal**: Poprawna i błędna decyzja prowadzą do różnych skutków z wyjaśnieniem
