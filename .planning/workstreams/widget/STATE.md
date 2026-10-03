@@ -38,3 +38,7 @@ created: 2026-10-03
 
 **Stopped At:** Dyskusja widget faza 1: przekazanie innemu deweloperowi; zachowanie okna pozostaje otwarte
 **Resume File:** .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/.continue-here.md
+
+## Notes from web-app
+
+- 2026-10-03 — Kontrakt API wersja 2 (zatwierdzony przez osobę 2): .planning/shared/CONTRACT.md i .planning/shared/examples/ (13 plików, w tym demo-dataset.json). Zastępuje v1: zgłoszenie = rodzaj ataku + podjęte działania; wtyczka loguje się mailem rodzica (scope extension) i nie widzi historii ani komentarzy; nie ma odpowiedzi do dziecka (HND-03 do przeglądu). Bazowy URL demo dopisze plan 01-06.

@@ -21,3 +21,7 @@ created: 2026-10-03
 
 **Stopped At:** N/A
 **Resume File:** None
+
+## Notes from web-app
+
+- 2026-10-03 — Kontrakt API wersja 2: obieg demo dziecko zgłasza → rodzic zatwierdza → nauczyciel prowadzi, może eskalować (NASK) i zamyka; konta demo w .planning/shared/CONTRACT.md (Logowanie demo), dane w .planning/shared/examples/demo-dataset.json.
