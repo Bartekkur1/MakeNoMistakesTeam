@@ -1,5 +1,13 @@
 import { normalizeText } from '../core/case.js';
 
+export function computePanelPosition(avatarRect, panelSize, viewport, { gap = 12, margin = 8 } = {}) {
+  const { width, height } = panelSize;
+  const above = avatarRect.top - gap - height;
+  const top = above < margin ? avatarRect.bottom + gap : above;
+  const clamp = (value, extent, size) => Math.max(margin, Math.min(value, Math.max(margin, extent - size - margin)));
+  return { left: clamp(avatarRect.right - width, viewport.width, width), top: clamp(top, viewport.height, height) };
+}
+
 export function createPanel({ root, strings, handlers }) {
   const doc = root.ownerDocument;
   const node = (tag, text, className) => {
@@ -21,12 +29,41 @@ export function createPanel({ root, strings, handlers }) {
   const body = node('div');
   el.append(header, body);
   root.append(el);
+  el.addEventListener('keydown', event => { if (event.key === 'Escape') handlers.onClose(); });
+  const button = (text, className, handler) => {
+    const b = node('button', text, className); b.type = 'button'; b.addEventListener('click', handler); return b;
+  };
   return {
     el,
     render(state, ctx) {
       body.replaceChildren();
-      el.hidden = !['preview', 'confirmation'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation'].includes(state.view);
       if (el.hidden) return;
+      if (state.view === 'menu') {
+        const menu = node('div', undefined, 'menu');
+        menu.append(button(strings.menuCheck, 'btn-primary', () => handlers.onCheck()), button(strings.menuHowTo, 'btn-secondary', () => handlers.onHowTo()));
+        body.append(node('p', strings.menuIntro, 'intro'), menu);
+        menu.querySelector('button').focus();
+        return;
+      }
+      if (state.view === 'howto') {
+        const steps = node('ol', undefined, 'steps'); for (const text of strings.howToSteps) steps.append(node('li', text));
+        body.append(node('h2', strings.howToHeading), steps, node('p', strings.howToPrivacy, 'privacy'), button(strings.back, 'btn-secondary', () => handlers.onBack()));
+        body.querySelector('button').focus();
+        return;
+      }
+      if (state.view === 'paste') {
+        const text = node('textarea'); text.setAttribute('aria-label', strings.messageLabel); text.placeholder = strings.pastePlaceholder; text.value = state.paste.text;
+        const link = node('input'); link.type = 'text'; link.setAttribute('aria-label', strings.linkLabel); link.placeholder = strings.linkPlaceholder; link.autocomplete = 'off'; link.value = state.paste.link;
+        const next = button(strings.next, 'btn-primary', () => handlers.onPasteNext({ text: text.value, link: link.value }));
+        next.disabled = !normalizeText(text.value);
+        text.addEventListener('input', () => { handlers.onPasteEdit({ text: text.value }); next.disabled = !normalizeText(text.value); });
+        link.addEventListener('input', () => handlers.onPasteEdit({ link: link.value }));
+        const row = node('div', undefined, 'row'); row.append(button(strings.back, 'btn-secondary', () => handlers.onBack()), next);
+        body.append(node('h2', strings.pasteHeading), text, link);
+        if (state.error === 'empty') body.append(node('p', strings.emptyHint, 'hint'));
+        body.append(row); text.focus(); return;
+      }
       if (state.view === 'confirmation') {
         const done = node('button', strings.confirmationClose, 'btn-secondary');
         done.type = 'button';
@@ -63,11 +100,8 @@ export function createPanel({ root, strings, handlers }) {
     },
     place(avatarRect, viewport) {
       const { width, height } = el.getBoundingClientRect();
-      const preferredTop = avatarRect.top - height - 12;
-      const top = preferredTop >= 8 ? preferredTop : avatarRect.bottom + 12;
-      const clamp = (value, max) => Math.max(8, Math.min(value, max));
-      el.style.left = clamp(avatarRect.right - width, viewport.width - width - 8) + 'px';
-      el.style.top = clamp(top, viewport.height - height - 8) + 'px';
+      const pos = computePanelPosition(avatarRect, { width, height }, viewport);
+      el.style.left = pos.left + 'px'; el.style.top = pos.top + 'px';
     },
   };
 }

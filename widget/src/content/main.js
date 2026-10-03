@@ -18,6 +18,11 @@ function boot() {
   const { host, root } = createHost();
   const store = createDraftStore();
   const panel = createPanel({ root, strings: STRINGS, handlers: {
+    onCheck() { store.showPaste(); render(); },
+    onHowTo() { store.showHowTo(); render(); },
+    onBack() { store.back(); render(); },
+    onPasteNext(values) { store.submitPaste(values); render(); },
+    onPasteEdit(patch) { store.editPaste(patch); },
     onEdit(patch) { store.edit(patch); },
     onClose() { store.close(); render(); },
     async onApprove() {

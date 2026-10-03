@@ -1,4 +1,5 @@
-const initial = () => ({ view: 'closed', draft: null, pendingSelection: null, hidden: false, error: null, submitting: false, gen: 0 });
+import { normalizeText, capCodePoints, normalizeLink } from './case.js';
+const initial = () => ({ view: 'closed', draft: null, pendingSelection: null, hidden: false, error: null, submitting: false, gen: 0, paste: { text: '', link: '' } });
 
 export function createDraftStore() {
   let state = initial();
@@ -7,7 +8,21 @@ export function createDraftStore() {
     onAvatarClick({ text, truncated }) {
       if (state.draft) state = { ...state, view: 'preview' };
       else if (text) state = { ...state, view: 'preview', draft: { text, link: '', origin: 'selection', truncated: Boolean(truncated) } };
-      else state = { ...state, view: 'menu' };
+      else state = { ...state, view: normalizeText(state.paste.text) || normalizeText(state.paste.link) ? 'paste' : 'menu' };
+    },
+    editPaste(patch) {
+      const edits = {};
+      for (const key of ['text', 'link']) if (Object.hasOwn(patch, key)) edits[key] = patch[key];
+      state = { ...state, paste: { ...state.paste, ...edits } };
+    },
+    showPaste() { state = { ...state, view: 'paste', error: null }; },
+    showHowTo() { state = { ...state, view: 'howto' }; },
+    back() { state = { ...state, view: 'menu', error: null }; },
+    submitPaste({ text, link }) {
+      const norm = normalizeText(text);
+      if (!norm) { state = { ...state, view: 'paste', error: 'empty' }; return; }
+      const capped = capCodePoints(norm);
+      state = { ...state, view: 'preview', error: null, draft: { ...capped, link: normalizeLink(link), origin: 'paste' }, paste: { text: '', link: '' } };
     },
     edit(patch) {
       if (state.submitting) return;
