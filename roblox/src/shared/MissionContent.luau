@@ -14,6 +14,7 @@ export type ChatMessage = {
 
 export type MissionSnapshot = {
 	revision: number,
+	sequence: number,
 	activeConversation: string, -- "mati" | "scamerino" | "none"
 	histories: {
 		mati: { ChatMessage },
@@ -30,27 +31,27 @@ local MissionContent = {}
 MissionContent.initialMatiMessages = {
 	{
 		sender = "MatiBuilds",
-		text = "Siemka! Masz super skin, widać że znasz się na grze :)",
+		text = "Hej, fajny skin :)",
 	},
 	{
 		sender = "MatiBuilds",
-		text = "Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!",
+		text = "Robimy w grupie giveaway. Mam dla ciebie 1500 Robuxów.",
 	},
 	{
 		sender = "MatiBuilds",
-		text = "Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.",
+		text = "Do wypłaty muszę wejść na twoje konto. Podasz login i hasło?",
 	},
 	{
 		sender = "MatiBuilds",
-		text = "Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+		text = "Potem zmienisz hasło. Tylko szybko, zostało jedno miejsce.",
 	},
 } :: { ChatMessage }
 
 MissionContent.texts = {
-	offer_intro = "MatiBuilds: Siemka! Masz super skin, widać że znasz się na grze :)\n"
-		.. "MatiBuilds: Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!\n"
-		.. "MatiBuilds: Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.\n"
-		.. "MatiBuilds: Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+	offer_intro = "MatiBuilds: Hej, fajny skin :)\n"
+		.. "MatiBuilds: Robimy w grupie giveaway. Mam dla ciebie 1500 Robuxów.\n"
+		.. "MatiBuilds: Do wypłaty muszę wejść na twoje konto. Podasz login i hasło?\n"
+		.. "MatiBuilds: Potem zmienisz hasło. Tylko szybko, zostało jedno miejsce.",
 	decision = "Co odpowiadasz?",
 	pressure_shout = "Zostało ostatnie miejsce w giveawayu Robuxów, zaraz przepada!",
 	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
@@ -64,13 +65,13 @@ MissionContent.texts = {
 MissionContent.choices = {
 	{
 		id = "share_fake_password",
-		label = "Jasne, podam hasło – doładuj mi Robuxy!",
+		label = "OK, podam hasło.",
 		nextStage = "ending_bad",
 		enabled = true,
 	},
 	{
 		id = "refuse",
-		label = "Nie ma opcji, nikomu nie podaję hasła do konta.",
+		label = "Nie, nie podam hasła.",
 		nextStage = "ending_good",
 		enabled = true,
 	},

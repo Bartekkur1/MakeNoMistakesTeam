@@ -30,3 +30,7 @@ PARTIAL — podstawowe podejście i czat działają; planu 02-02 nie można uzna
 Dwie odmowy, sprawdzenie oferty i osobny czat pomocnika należą do planu 02-03; ich brak nie jest tutaj traktowany jako błąd planu 02-02. Gest i czerwony alarm modelu nie zostały tym przeglądem zaliczone. Model został zaakceptowany wizualnie przez Roberta, ale jego zaktualizowany eksport nadal wymaga odświeżenia.
 
 Zalecana kolejność: poprawność nawigacji i ownera → anulowanie/presja/ponowne zaczepienie → animacja chodu → sekwencyjne wiadomości → ponowny desktop Play oraz dwa klienty. Nie wykonano napraw w ramach tego przeglądu.
+
+## Późniejsza naprawa na zlecenie Roberta
+
+Chód, panel, sekwencyjne wiadomości, zamykanie, presja oraz część walidacji zostały później poprawione. Aktualne dowody i pozostałe granice opisuje [02-CHAT-MOTION-FIX.md](02-CHAT-MOTION-FIX.md). Pierwotne ustalenia powyżej dokumentują stan sprzed tej naprawy.

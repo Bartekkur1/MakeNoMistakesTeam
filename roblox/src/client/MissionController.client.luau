@@ -1,279 +1,284 @@
 --!strict
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
-
+local TextChatService = game:GetService("TextChatService")
 local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
-local remotesFolder = ReplicatedStorage:WaitForChild("MissionRemotes")
-local requestActionRemote = remotesFolder:WaitForChild("RequestAction") :: RemoteEvent
-local missionUpdateRemote = remotesFolder:WaitForChild("MissionUpdate") :: RemoteEvent
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local remotes = ReplicatedStorage:WaitForChild("MissionRemotes")
+local request = remotes:WaitForChild("RequestAction") :: RemoteEvent
+local update = remotes:WaitForChild("MissionUpdate") :: RemoteEvent
+local publicBubble = remotes:WaitForChild("PublicNpcBubble") :: RemoteEvent
 
--- Create custom ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MissionGui"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.Parent = playerGui
+local oldGui = playerGui:FindFirstChild("MissionGui")
+if oldGui then
+	oldGui:Destroy()
+end
+local gui = Instance.new("ScreenGui")
+gui.Name = "MissionGui"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 10
+gui.Parent = playerGui
 
--- Simulated Private Chat Panel per D-14, D-18
-local chatFrame = Instance.new("Frame")
-chatFrame.Name = "SimulatedChatFrame"
-chatFrame.Size = UDim2.fromScale(0.32, 0.48)
-chatFrame.Position = UDim2.fromScale(0.04, 0.95)
-chatFrame.AnchorPoint = Vector2.new(0, 1)
-chatFrame.BackgroundColor3 = Color3.fromRGB(15, 22, 34)
-chatFrame.BackgroundTransparency = 0.05
-chatFrame.BorderSizePixel = 0
-chatFrame.Visible = false
-chatFrame.Parent = screenGui
+local panel = Instance.new("Frame")
+panel.Name = "SimulatedChatFrame"
+panel.Size = UDim2.fromScale(0.29, 0.48)
+panel.AnchorPoint = Vector2.new(0, 1)
+panel.Position = UDim2.new(0, 16, 1, -24)
+panel.BackgroundColor3 = Color3.fromRGB(28, 29, 32)
+panel.BackgroundTransparency = 0.1
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Parent = gui
+local constraint = Instance.new("UISizeConstraint")
+constraint.MinSize = Vector2.new(280, 300)
+constraint.MaxSize = Vector2.new(390, 400)
+constraint.Parent = panel
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = panel
 
-local sizeConstraint = Instance.new("UISizeConstraint")
-sizeConstraint.MaxSize = Vector2.new(440, 420)
-sizeConstraint.MinSize = Vector2.new(280, 260)
-sizeConstraint.Parent = chatFrame
+local function label(name: string, parent: Instance, size: number): TextLabel
+	local text = Instance.new("TextLabel")
+	text.Name = name
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.Gotham
+	text.TextSize = size
+	text.TextColor3 = Color3.fromRGB(235, 235, 238)
+	text.TextXAlignment = Enum.TextXAlignment.Left
+	text.TextYAlignment = Enum.TextYAlignment.Top
+	text.Parent = parent
+	return text
+end
+local title = label("TitleLabel", panel, 15)
+title.Font = Enum.Font.GothamMedium
+title.Position = UDim2.fromOffset(12, 10)
+title.Size = UDim2.new(1, -54, 0, 20)
+local subtitle = label("SubTitleLabel", panel, 11)
+subtitle.Text = "Rozmowa prywatna"
+subtitle.TextColor3 = Color3.fromRGB(174, 176, 182)
+subtitle.Position = UDim2.fromOffset(12, 32)
+subtitle.Size = UDim2.new(1, -24, 0, 16)
 
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 12)
-frameCorner.Parent = chatFrame
+local close = Instance.new("TextButton")
+close.Name = "CloseButton"
+close.Size = UDim2.fromOffset(30, 30)
+close.Position = UDim2.new(1, -36, 0, 5)
+close.BackgroundTransparency = 1
+close.Font = Enum.Font.Gotham
+close.Text = "×"
+close.TextSize = 24
+close.TextColor3 = Color3.fromRGB(225, 225, 228)
+close.Parent = panel
 
-local frameStroke = Instance.new("UIStroke")
-frameStroke.Color = Color3.fromRGB(0, 160, 240)
-frameStroke.Thickness = 2
-frameStroke.Parent = chatFrame
-
--- Header Bar (38px)
-local headerBar = Instance.new("Frame")
-headerBar.Name = "HeaderBar"
-headerBar.Size = UDim2.new(1, 0, 0, 38)
-headerBar.Position = UDim2.fromOffset(0, 0)
-headerBar.BackgroundColor3 = Color3.fromRGB(22, 32, 48)
-headerBar.BorderSizePixel = 0
-headerBar.Parent = chatFrame
-
-local headerCorner = Instance.new("UICorner")
-headerCorner.CornerRadius = UDim.new(0, 12)
-headerCorner.Parent = headerBar
-
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1, -70, 0, 20)
-titleLabel.Position = UDim2.fromOffset(12, 4)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.FredokaOne
-titleLabel.TextSize = 14
-titleLabel.TextColor3 = Color3.fromRGB(255, 220, 50)
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.Text = "MatiBuilds"
-titleLabel.Parent = headerBar
-
-local subTitleLabel = Instance.new("TextLabel")
-subTitleLabel.Name = "SubTitleLabel"
-subTitleLabel.Size = UDim2.new(1, -70, 0, 14)
-subTitleLabel.Position = UDim2.fromOffset(12, 22)
-subTitleLabel.BackgroundTransparency = 1
-subTitleLabel.Font = Enum.Font.Gotham
-subTitleLabel.TextSize = 10
-subTitleLabel.TextColor3 = Color3.fromRGB(130, 200, 255)
-subTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-subTitleLabel.Text = "Wiadomość prywatna (symulacja)"
-subTitleLabel.Parent = headerBar
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Name = "CloseButton"
-closeBtn.Size = UDim2.fromOffset(28, 28)
-closeBtn.Position = UDim2.new(1, -34, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
-closeBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-closeBtn.Text = "✕"
-closeBtn.Parent = headerBar
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 6)
-closeCorner.Parent = closeBtn
-
-closeBtn.Activated:Connect(function()
-	requestActionRemote:FireServer("close")
-end)
-
--- Messages History (ScrollingFrame)
-local messageScroll = Instance.new("ScrollingFrame")
-messageScroll.Name = "MessageScroll"
-messageScroll.Size = UDim2.new(1, -16, 1, -145)
-messageScroll.Position = UDim2.fromOffset(8, 44)
-messageScroll.BackgroundTransparency = 1
-messageScroll.BorderSizePixel = 0
-messageScroll.ScrollBarThickness = 4
-messageScroll.ScrollBarImageColor3 = Color3.fromRGB(60, 100, 150)
-messageScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-messageScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-messageScroll.Parent = chatFrame
-
+local tabs = Instance.new("Frame")
+tabs.Name = "ConversationTabs"
+tabs.Position = UDim2.fromOffset(12, 52)
+tabs.Size = UDim2.new(1, -24, 0, 28)
+tabs.BackgroundTransparency = 1
+tabs.Visible = false
+tabs.Parent = panel
+local scroll = Instance.new("ScrollingFrame")
+scroll.Name = "MessageScroll"
+scroll.Position = UDim2.fromOffset(12, 54)
+scroll.Size = UDim2.new(1, -24, 1, -164)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 3
+scroll.ScrollBarImageColor3 = Color3.fromRGB(130, 132, 138)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.CanvasSize = UDim2.new()
+scroll.ClipsDescendants = true
+scroll.Parent = panel
 local messageLayout = Instance.new("UIListLayout")
-messageLayout.FillDirection = Enum.FillDirection.Vertical
-messageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-messageLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-messageLayout.Padding = UDim.new(0, 8)
-messageLayout.Parent = messageScroll
-
--- Choices Container at bottom
-local choicesContainer = Instance.new("Frame")
-choicesContainer.Name = "ChoicesContainer"
-choicesContainer.Size = UDim2.new(1, -16, 0, 92)
-choicesContainer.Position = UDim2.new(0, 8, 1, -96)
-choicesContainer.BackgroundTransparency = 1
-choicesContainer.Parent = chatFrame
-
+messageLayout.Padding = UDim.new(0, 9)
+messageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+messageLayout.Parent = scroll
+local status = label("TypingStatus", panel, 11)
+status.TextColor3 = Color3.fromRGB(174, 176, 182)
+local choices = Instance.new("Frame")
+choices.Name = "ChoicesContainer"
+choices.BackgroundTransparency = 1
+choices.Parent = panel
 local choicesLayout = Instance.new("UIListLayout")
-choicesLayout.FillDirection = Enum.FillDirection.Vertical
-choicesLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-choicesLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 choicesLayout.Padding = UDim.new(0, 6)
-choicesLayout.Parent = choicesContainer
+choicesLayout.SortOrder = Enum.SortOrder.LayoutOrder
+choicesLayout.Parent = choices
 
-local function clearContainer(container: Instance)
-	for _, child in ipairs(container:GetChildren()) do
-		if not child:IsA("UIListLayout") and not child:IsA("UIPadding") and not child:IsA("UICorner") then
+local latest: MissionContent.MissionSnapshot? = nil
+local selectedConversation = "mati"
+local latestSequence = -1
+local latestRevision = -1
+local pendingAction = false
+local function clear(parent: Instance)
+	for _, child in parent:GetChildren() do
+		if child:IsA("GuiObject") then
 			child:Destroy()
 		end
 	end
 end
-
-local function renderMessageBubble(msg: MissionContent.ChatMessage)
-	local isPlayer = (msg.sender == "Ty")
-	local isSystem = (msg.sender == "System")
-
-	local bubbleContainer = Instance.new("Frame")
-	bubbleContainer.Size = UDim2.fromScale(1, 0)
-	bubbleContainer.AutomaticSize = Enum.AutomaticSize.Y
-	bubbleContainer.BackgroundTransparency = 1
-
-	local bubble = Instance.new("Frame")
-	bubble.AutomaticSize = Enum.AutomaticSize.XY
-	bubble.BorderSizePixel = 0
-
-	local bubbleCorner = Instance.new("UICorner")
-	bubbleCorner.CornerRadius = UDim.new(0, 8)
-	bubbleCorner.Parent = bubble
-
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Font = Enum.Font.GothamMedium
-	textLabel.TextSize = 12
-	textLabel.TextWrapped = true
-	textLabel.AutomaticSize = Enum.AutomaticSize.XY
-	textLabel.BackgroundTransparency = 1
-
-	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft = UDim.new(0, 8)
-	pad.PaddingRight = UDim.new(0, 8)
-	pad.PaddingTop = UDim.new(0, 6)
-	pad.PaddingBottom = UDim.new(0, 6)
-	pad.Parent = textLabel
-
-	if isSystem then
-		bubble.BackgroundColor3 = Color3.fromRGB(35, 45, 65)
-		bubble.AnchorPoint = Vector2.new(0.5, 0)
-		bubble.Position = UDim2.fromScale(0.5, 0)
-		textLabel.TextColor3 = Color3.fromRGB(240, 220, 100)
-		textLabel.Text = msg.text
-	elseif isPlayer then
-		bubble.BackgroundColor3 = Color3.fromRGB(36, 110, 185) -- Player blue
-		bubble.AnchorPoint = Vector2.new(1, 0)
-		bubble.Position = UDim2.fromScale(1, 0)
-		textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		textLabel.Text = msg.text
-	else
-		bubble.BackgroundColor3 = Color3.fromRGB(28, 38, 56) -- NPC dark slate
-		bubble.AnchorPoint = Vector2.new(0, 0)
-		bubble.Position = UDim2.fromOffset(0, 0)
-		textLabel.TextColor3 = Color3.fromRGB(230, 235, 245)
-		textLabel.Text = msg.text
-	end
-
-	textLabel.Parent = bubble
-	bubble.Parent = bubbleContainer
-	bubbleContainer.Parent = messageScroll
+local function escape(text: string): string
+	local escaped = text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+	return escaped
 end
-
-local function createChoiceButton(label: string, color: Color3, callback: () -> ()): TextButton
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1, 0, 0, 40)
-	btn.BackgroundColor3 = color
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.Font = Enum.Font.FredokaOne
-	btn.TextSize = 13
-	btn.TextWrapped = true
-	btn.Text = label
-	btn.AutoButtonColor = true
-
-	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = UDim.new(0, 8)
-	btnCorner.Parent = btn
-
-	local btnStroke = Instance.new("UIStroke")
-	btnStroke.Color = Color3.fromRGB(255, 255, 255)
-	btnStroke.Thickness = 1
-	btnStroke.Transparency = 0.7
-	btnStroke.Parent = btn
-
-	btn.Activated:Connect(callback)
-	btn.Parent = choicesContainer
-	return btn
+local function messageRow(message: MissionContent.ChatMessage, index: number)
+	local row = label("Message", scroll, 14)
+	row.Size = UDim2.new(1, -6, 0, 0)
+	row.AutomaticSize = Enum.AutomaticSize.Y
+	row.TextWrapped = true
+	row.RichText = true
+	row.LayoutOrder = index
+	local color = if message.sender == "Ty"
+		then "#B3CFFF"
+		elseif message.sender == "System" then "#D1D1D6"
+		else "#F1C58C"
+	local name = if message.sender == "Ty" then player.DisplayName else message.sender
+	row.Text = '<font color="' .. color .. '"><b>' .. escape(name) .. ":</b></font> " .. escape(message.text)
 end
-
-local function renderSnapshot(snapshot: MissionContent.MissionSnapshot)
+local function actionButton(text: string, order: number, callback: () -> ())
+	local button = Instance.new("TextButton")
+	button.Name = "Choice"
+	button.Size = UDim2.new(1, 0, 0, 34)
+	button.BackgroundColor3 = Color3.fromRGB(55, 57, 63)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.Gotham
+	button.TextSize = 13
+	button.TextColor3 = Color3.fromRGB(240, 240, 243)
+	button.TextWrapped = true
+	button.Text = text
+	button.LayoutOrder = order
+	button.Active = not pendingAction
+	button.AutoButtonColor = not pendingAction
+	local rounding = Instance.new("UICorner")
+	rounding.CornerRadius = UDim.new(0, 4)
+	rounding.Parent = button
+	button.Activated:Connect(callback)
+	button.Parent = choices
+end
+local render: (MissionContent.MissionSnapshot) -> ()
+render = function(snapshot)
 	if snapshot.status == "start" or snapshot.status == "closed" or snapshot.activeConversation == "none" then
-		chatFrame.Visible = false
+		panel.Visible = false
 		return
 	end
-
-	chatFrame.Visible = true
-	titleLabel.Text = snapshot.title or "MatiBuilds"
-
-	-- Clear and rebuild message history
-	clearContainer(messageScroll)
-	local messages = if snapshot.activeConversation == "scamerino"
-		then (snapshot.histories and snapshot.histories.scamerino or {})
-		else (snapshot.histories and snapshot.histories.mati or {})
-
-	for _, msg in ipairs(messages) do
-		renderMessageBubble(msg)
+	panel.Visible = true
+	panel:SetAttribute("Revision", snapshot.revision)
+	panel:SetAttribute("Status", snapshot.status)
+	title.Text = if selectedConversation == "scamerino" then "Scamerino" else "MatiBuilds"
+	local hasHelper = #snapshot.histories.scamerino > 0
+	tabs.Visible = hasHelper
+	local top = if hasHelper then 88 else 54
+	local nearBottom = scroll.CanvasPosition.Y + scroll.AbsoluteSize.Y >= scroll.AbsoluteCanvasSize.Y - 20
+	local oldPosition = scroll.CanvasPosition
+	clear(scroll)
+	local history = if selectedConversation == "scamerino"
+		then snapshot.histories.scamerino
+		else snapshot.histories.mati
+	for index, message in history do
+		messageRow(message, index)
 	end
-
-	-- Auto scroll to bottom
-	task.defer(function()
-		messageScroll.CanvasPosition = Vector2.new(0, 99999)
-	end)
-
-	-- Render choices
-	clearContainer(choicesContainer)
-
-	if snapshot.status == "decision" then
-		for _, choice in ipairs(snapshot.choices) do
+	clear(choices)
+	local count = 0
+	local function submit(action: string)
+		if pendingAction or not latest or latest.revision ~= snapshot.revision then
+			return
+		end
+		pendingAction = true
+		request:FireServer(action, snapshot.revision)
+	end
+	if snapshot.status == "decision" and selectedConversation == snapshot.activeConversation then
+		for _, choice in snapshot.choices do
 			if choice.enabled then
-				-- Neutral slate-blue for both choices per D-14
-				createChoiceButton(choice.label, Color3.fromRGB(36, 82, 138), function()
-					requestActionRemote:FireServer(choice.id)
+				count += 1
+				actionButton(choice.label, count, function()
+					submit(choice.id)
 				end)
 			end
 		end
 	elseif snapshot.status == "ending_good" or snapshot.status == "ending_bad" then
-		createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
-			requestActionRemote:FireServer("replay")
+		count = 1
+		actionButton("Spróbuj ponownie", 1, function()
+			submit("replay")
 		end)
 	end
-end
-
-missionUpdateRemote.OnClientEvent:Connect(function(data: any)
-	if typeof(data) == "table" and data.revision ~= nil then
-		renderSnapshot(data :: MissionContent.MissionSnapshot)
-	elseif typeof(data) == "string" then
-		-- Fallback compatibility for simple stage strings
-		if data == "closed" or data == "start" then
-			chatFrame.Visible = false
+	local choicesHeight = if count > 0 then count * 34 + (count - 1) * 6 else 0
+	choices.Position = UDim2.new(0, 12, 1, -12 - choicesHeight)
+	choices.Size = UDim2.new(1, -24, 0, choicesHeight)
+	status.Position = UDim2.new(0, 12, 1, -choicesHeight - 34)
+	status.Size = UDim2.new(1, -24, 0, 16)
+	status.Text = if snapshot.status == "presenting" or snapshot.status == "responding"
+		then title.Text .. " pisze…"
+		elseif snapshot.status == "decision" then "Wybierz odpowiedź:"
+		else ""
+	scroll.Position = UDim2.fromOffset(12, top)
+	scroll.Size = UDim2.new(1, -24, 1, -top - choicesHeight - 42)
+	local sequence = snapshot.sequence
+	task.defer(function()
+		if latestSequence ~= sequence then
+			return
 		end
+		if nearBottom then
+			scroll.CanvasPosition = Vector2.new(0, math.max(0, scroll.AbsoluteCanvasSize.Y - scroll.AbsoluteSize.Y))
+		else
+			scroll.CanvasPosition = oldPosition
+		end
+	end)
+end
+for index, conversation in { "mati", "scamerino" } do
+	local button = Instance.new("TextButton")
+	button.Name = conversation
+	button.Size = UDim2.new(0.5, -3, 1, 0)
+	button.Position = UDim2.new((index - 1) * 0.5, if index == 1 then 0 else 3, 0, 0)
+	button.BackgroundColor3 = Color3.fromRGB(55, 57, 63)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.Gotham
+	button.TextSize = 12
+	button.TextColor3 = Color3.fromRGB(235, 235, 238)
+	button.Text = if conversation == "mati" then "MatiBuilds" else "Scamerino"
+	button.Parent = tabs
+	button.Activated:Connect(function()
+		selectedConversation = conversation
+		if latest then
+			render(latest)
+		end
+	end)
+end
+close.Activated:Connect(function()
+	if not latest then
+		return
 	end
+	panel.Visible = false
+	request:FireServer("close", latest.revision)
 end)
+update.OnClientEvent:Connect(function(snapshot: any)
+	if
+		typeof(snapshot) ~= "table"
+		or typeof(snapshot.revision) ~= "number"
+		or typeof(snapshot.sequence) ~= "number"
+	then
+		return
+	end
+	if snapshot.revision < latestRevision or snapshot.sequence <= latestSequence then
+		return
+	end
+	if
+		not latest
+		or snapshot.activeConversation ~= latest.activeConversation
+		or snapshot.revision ~= latestRevision
+	then
+		selectedConversation = if snapshot.activeConversation == "scamerino" then "scamerino" else "mati"
+	end
+	latestSequence = snapshot.sequence
+	latestRevision = snapshot.revision
+	latest = snapshot :: MissionContent.MissionSnapshot
+	pendingAction = false
+	render(snapshot)
+end)
+publicBubble.OnClientEvent:Connect(function(adornee: any, text: any)
+	if typeof(adornee) ~= "Instance" or not adornee:IsDescendantOf(workspace) or typeof(text) ~= "string" then
+		return
+	end
+	TextChatService:DisplayBubble(adornee, text)
+end)
+-- Subscribe before requesting a snapshot; an early approach must not lose the opening.
+request:FireServer("ready")

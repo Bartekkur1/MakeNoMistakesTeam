@@ -37,6 +37,8 @@ export type Arbiter = {
 	getToken: (player: Player) -> NavigationToken?,
 	createToken: (player: Player, revision: number) -> NavigationToken,
 	getQueueLength: () -> number,
+	getQueue: () -> { Player },
+	isInQueue: (player: Player) -> boolean,
 }
 
 function NPCNavigation.createToken(revision: number?): NavigationToken
@@ -58,12 +60,22 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 
 	local arbiter: Arbiter = {} :: Arbiter
 
+	local function isSamePlayer(a: Player?, b: Player?): boolean
+		if a == b then
+			return a ~= nil
+		end
+		if a and b and a.UserId and b.UserId and a.UserId ~= 0 and a.UserId == b.UserId then
+			return true
+		end
+		return false
+	end
+
 	function arbiter.getOwner(): Player?
 		return currentOwner
 	end
 
 	function arbiter.isOwner(player: Player): boolean
-		return currentOwner == player
+		return isSamePlayer(currentOwner, player)
 	end
 
 	function arbiter.getToken(player: Player): NavigationToken?
@@ -86,11 +98,11 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 	end
 
 	function arbiter.enqueue(player: Player)
-		if currentOwner == player then
+		if isSamePlayer(currentOwner, player) then
 			return
 		end
 		for _, p in ipairs(queue) do
-			if p == player then
+			if isSamePlayer(p, player) then
 				return
 			end
 		end
@@ -114,38 +126,67 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 			arbiter.createToken(player, revision or 1)
 			return true
 		end
-		return currentOwner == player
+		return isSamePlayer(currentOwner, player)
+	end
+
+	function arbiter.isInQueue(player: Player): boolean
+		for _, p in ipairs(queue) do
+			if isSamePlayer(p, player) then
+				return true
+			end
+		end
+		return false
+	end
+
+	function arbiter.getQueue(): { Player }
+		return table.clone(queue)
 	end
 
 	function arbiter.advanceQueue(): Player?
+		if currentOwner ~= nil then
+			return currentOwner
+		end
 		while #queue > 0 do
 			local nextPlayer = table.remove(queue, 1)
 			queueTimes[nextPlayer] = nil
 			if nextPlayer and nextPlayer.Parent and nextPlayer.Character then
-				currentOwner = nextPlayer
-				arbiter.createToken(nextPlayer, 1)
-				return nextPlayer
+				local hum = nextPlayer.Character:FindFirstChildOfClass("Humanoid")
+				local root = nextPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if hum and hum.Health > 0 and root then
+					currentOwner = nextPlayer
+					arbiter.createToken(nextPlayer, 1)
+					return nextPlayer
+				end
 			end
 		end
 		return nil
 	end
 
 	function arbiter.releaseOwner(player: Player): Player?
-		if currentOwner == player then
-			local token = ownerTokens[player]
+		if isSamePlayer(currentOwner, player) then
+			local ownerRef = currentOwner
+			local token = if ownerRef then ownerTokens[ownerRef] else nil
+			if not token then
+				token = ownerTokens[player]
+			end
 			if token then
 				token.cancel()
+				if ownerRef then
+					ownerTokens[ownerRef] = nil
+				end
 				ownerTokens[player] = nil
 			end
 			currentOwner = nil
+			return arbiter.advanceQueue()
 		end
-		return arbiter.advanceQueue()
+		return nil
 	end
 
 	function arbiter.cancelPlayer(player: Player)
 		for i, p in ipairs(queue) do
-			if p == player then
+			if isSamePlayer(p, player) then
 				table.remove(queue, i)
+				queueTimes[p] = nil
 				queueTimes[player] = nil
 				break
 			end
@@ -155,7 +196,7 @@ function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
 			token.cancel()
 			ownerTokens[player] = nil
 		end
-		if currentOwner == player then
+		if isSamePlayer(currentOwner, player) then
 			currentOwner = nil
 		end
 	end
@@ -316,7 +357,7 @@ function NPCNavigation.walkToPlayer(
 		return "arrived"
 	end
 
-	return "arrived"
+	return "no_path"
 end
 
 return NPCNavigation

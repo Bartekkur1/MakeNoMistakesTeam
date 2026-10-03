@@ -1,242 +1,214 @@
 --!strict
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-
 local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
 local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+local arbiter = NPCNavigation.getDefaultArbiter()
 
--- Ensure MissionRemotes folder and RemoteEvents exist
-local remotesFolder = ReplicatedStorage:FindFirstChild("MissionRemotes")
-if not remotesFolder then
-	remotesFolder = Instance.new("Folder")
-	remotesFolder.Name = "MissionRemotes"
-	remotesFolder.Parent = ReplicatedStorage
+local folder = ReplicatedStorage:FindFirstChild("MissionRemotes")
+if not folder then
+	folder = Instance.new("Folder")
+	folder.Name = "MissionRemotes"
+	folder.Parent = ReplicatedStorage
 end
-
-local requestActionRemote = remotesFolder:FindFirstChild("RequestAction")
-if not requestActionRemote then
-	requestActionRemote = Instance.new("RemoteEvent")
-	requestActionRemote.Name = "RequestAction"
-	requestActionRemote.Parent = remotesFolder
+local function ensure(name: string, className: string): Instance
+	local instance = folder:FindFirstChild(name)
+	if not instance then
+		instance = Instance.new(className)
+		instance.Name = name
+		instance.Parent = folder
+	end
+	return instance
 end
+local request = ensure("RequestAction", "RemoteEvent") :: RemoteEvent
+local update = ensure("MissionUpdate", "RemoteEvent") :: RemoteEvent
+local beginEvent = ensure("BeginEncounterEvent", "BindableEvent") :: BindableEvent
+local cancelEvent = ensure("CancelEncounterEvent", "BindableEvent") :: BindableEvent
+local stateEvent = ensure("EncounterStateChanged", "BindableEvent") :: BindableEvent
+local query = ensure("QueryEncounterState", "BindableFunction") :: BindableFunction
+ensure("PublicNpcBubble", "RemoteEvent")
 
-local missionUpdateRemote = remotesFolder:FindFirstChild("MissionUpdate")
-if not missionUpdateRemote then
-	missionUpdateRemote = Instance.new("RemoteEvent")
-	missionUpdateRemote.Name = "MissionUpdate"
-	missionUpdateRemote.Parent = remotesFolder
-end
-
-type PlayerState = {
+type State = {
 	stage: string,
 	revision: number,
-	ownerStatus: string,
-	histories: {
-		mati: { MissionContent.ChatMessage },
-		scamerino: { MissionContent.ChatMessage },
-	},
-	lastActionTime: number,
+	sequence: number,
 	activeConversation: string,
+	histories: { mati: { MissionContent.ChatMessage }, scamerino: { MissionContent.ChatMessage } },
+	lastActionTime: number,
 }
-
-local playerStates: { [Player]: PlayerState } = {}
-
-local function getOrCreateState(player: Player): PlayerState
-	local state = playerStates[player]
-	if not state then
-		state = {
-			stage = "start",
-			revision = 1,
-			ownerStatus = "none",
-			histories = {
-				mati = {},
-				scamerino = {},
-			},
-			lastActionTime = 0,
-			activeConversation = "none",
-		}
-		playerStates[player] = state
+local states: { [Player]: State } = {}
+local function stateFor(player: Player): State
+	local existing = states[player]
+	if existing then
+		return existing
 	end
+	local state: State = {
+		stage = "start",
+		revision = 0,
+		sequence = 0,
+		activeConversation = "none",
+		histories = { mati = {}, scamerino = {} },
+		lastActionTime = 0,
+	}
+	states[player] = state
 	return state
 end
-
-local function sendSnapshot(player: Player, state: PlayerState)
+local function send(player: Player, state: State)
+	if not player.Parent then
+		return
+	end
+	state.sequence += 1
 	local snapshot: MissionContent.MissionSnapshot = {
 		revision = state.revision,
+		sequence = state.sequence,
 		activeConversation = state.activeConversation,
 		histories = state.histories,
-		choices = MissionContent.choices,
+		choices = if state.stage == "decision" then MissionContent.choices else {},
 		status = state.stage,
-		title = if state.activeConversation == "mati"
-			then "MatiBuilds"
-			elseif state.activeConversation == "scamerino" then "Scamerino Alertinio"
-			else nil,
-		interlocutorName = if state.activeConversation == "mati"
-			then "MatiBuilds"
-			elseif state.activeConversation == "scamerino" then "Scamerino"
-			else nil,
+		title = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
+		interlocutorName = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
 	}
-	(missionUpdateRemote :: RemoteEvent):FireClient(player, snapshot)
+	update:FireClient(player, snapshot)
 end
-
--- Teleport character to MissionStart SpawnLocation
-local function teleportToStart(player: Player)
-	local character = player.Character
-	if not character then
+local function setStage(player: Player, state: State, stage: string)
+	state.stage = stage
+	stateEvent:Fire(player, state.revision, stage)
+end
+local function current(player: Player, state: State, revision: number): boolean
+	return player.Parent == Players and states[player] == state and state.revision == revision
+end
+local function append(state: State, sender: string, text: string)
+	table.insert(state.histories.mati, { sender = sender, text = text, time = os.clock() })
+end
+local function cancel(player: Player)
+	local state = states[player]
+	if state then
+		state.revision += 1
+		state.activeConversation = "none"
+		setStage(player, state, "closed")
+		send(player, state)
+	end
+	arbiter.releaseOwner(player)
+end
+query.OnInvoke = function(player: Player)
+	local state = stateFor(player)
+	return { stage = state.stage, revision = state.revision }
+end
+beginEvent.Event:Connect(function(player: Player)
+	if not arbiter.isOwner(player) then
 		return
 	end
-	local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	local missionStart = Workspace:FindFirstChild("MissionStart") :: BasePart?
-	if rootPart and missionStart then
-		rootPart.CFrame = missionStart.CFrame + Vector3.new(0, 3, 0)
-	end
-end
-
-local function beginEncounter(player: Player, revision: number?)
-	local state = getOrCreateState(player)
-	if revision and revision > state.revision then
-		state.revision = revision
-	end
-
-	state.ownerStatus = "active"
-	state.activeConversation = "mati"
-	state.stage = "decision"
-
-	-- Populate initial short messages from MatiBuilds per D-14, D-17
-	state.histories.mati = {}
-	for _, msg in ipairs(MissionContent.initialMatiMessages) do
-		table.insert(state.histories.mati, {
-			sender = msg.sender,
-			text = msg.text,
-			time = os.clock(),
-		})
-	end
-
-	sendSnapshot(player, state)
-end
-
-local function cancelEncounter(player: Player)
-	local state = playerStates[player]
-	if not state then
+	local state = stateFor(player)
+	if state.stage ~= "start" and state.stage ~= "closed" then
 		return
 	end
-
 	state.revision += 1
-	state.stage = "closed"
-	state.activeConversation = "none"
-	state.ownerStatus = "none"
-	sendSnapshot(player, state)
-end
-
--- Register BindableEvents for cross-script server communication
-local beginEncounterEvent = remotesFolder:FindFirstChild("BeginEncounterEvent")
-if not beginEncounterEvent then
-	beginEncounterEvent = Instance.new("BindableEvent")
-	beginEncounterEvent.Name = "BeginEncounterEvent"
-	beginEncounterEvent.Parent = remotesFolder
-end
-(beginEncounterEvent :: BindableEvent).Event:Connect(function(player: Player, revision: number?)
-	beginEncounter(player, revision)
+	local revision = state.revision
+	local token = arbiter.getToken(player)
+	if token then
+		token.revision = revision
+	end
+	state.activeConversation = "mati"
+	state.histories = { mati = {}, scamerino = {} }
+	setStage(player, state, "presenting")
+	send(player, state)
+	task.spawn(function()
+		for index, message in MissionContent.initialMatiMessages do
+			task.wait(if index == 1 then 0.55 else 1.25)
+			if not current(player, state, revision) or not arbiter.isOwner(player) or state.stage ~= "presenting" then
+				return
+			end
+			append(state, message.sender, message.text)
+			send(player, state)
+		end
+		if not current(player, state, revision) or not arbiter.isOwner(player) then
+			return
+		end
+		setStage(player, state, "decision")
+		send(player, state)
+	end)
 end)
+cancelEvent.Event:Connect(cancel)
 
-local cancelEncounterEvent = remotesFolder:FindFirstChild("CancelEncounterEvent")
-if not cancelEncounterEvent then
-	cancelEncounterEvent = Instance.new("BindableEvent")
-	cancelEncounterEvent.Name = "CancelEncounterEvent"
-	cancelEncounterEvent.Parent = remotesFolder
-end
-(cancelEncounterEvent :: BindableEvent).Event:Connect(function(player: Player)
-	cancelEncounter(player)
-end)
-
--- Handle player actions from client
-local actionRemote = requestActionRemote :: RemoteEvent
-actionRemote.OnServerEvent:Connect(function(player: Player, actionId: any)
-	if typeof(actionId) ~= "string" then
+request.OnServerEvent:Connect(function(player: Player, action: any, revision: any)
+	if typeof(action) ~= "string" then
 		return
 	end
-
+	local state = stateFor(player)
+	if action == "ready" then
+		send(player, state)
+		return
+	end
+	if typeof(revision) ~= "number" or revision ~= state.revision then
+		return
+	end
 	local now = os.clock()
-	local state = getOrCreateState(player)
-
-	-- Rate limiting: ignore rapid requests within 0.25s
 	if now - state.lastActionTime < 0.25 then
 		return
 	end
 	state.lastActionTime = now
-
-	if actionId == "replay" then
+	if action == "close" then
+		cancel(player)
+		return
+	end
+	if action == "replay" then
+		if state.stage ~= "ending_good" and state.stage ~= "ending_bad" then
+			return
+		end
 		state.revision += 1
-		state.stage = "start"
+		state.histories = { mati = {}, scamerino = {} }
 		state.activeConversation = "none"
-		state.ownerStatus = "none"
-		state.histories.mati = {}
-		state.histories.scamerino = {}
-		NPCNavigation.releaseOwner(player)
-		teleportToStart(player)
-		sendSnapshot(player, state)
+		arbiter.cancelPlayer(player)
+		setStage(player, state, "start")
+		local spawn = workspace:FindFirstChild("MissionStart")
+		if spawn and spawn:IsA("BasePart") and player.Character then
+			player.Character:PivotTo(spawn.CFrame + Vector3.new(0, 3, 0))
+		end
+		send(player, state)
 		return
 	end
-
-	if actionId == "close" then
-		state.revision += 1
-		state.stage = "closed"
-		state.activeConversation = "none"
-		state.ownerStatus = "none"
-		NPCNavigation.releaseOwner(player)
-		sendSnapshot(player, state)
+	if state.stage ~= "decision" or not arbiter.isOwner(player) then
 		return
 	end
-
-	-- Only allow choices when player is in 'decision' stage
-	if state.stage ~= "decision" then
-		return
-	end
-
-	local choice = MissionContent.getChoice(actionId)
+	local choice = MissionContent.getChoice(action)
 	if not choice or not choice.enabled then
 		return
 	end
-
-	-- Per D-14: append player's selected choice to history as their message
-	table.insert(state.histories.mati, {
-		sender = "Ty",
-		text = choice.label,
-		time = now,
-	})
-
-	-- Set next stage
-	state.stage = choice.nextStage
-
-	if choice.nextStage == "ending_bad" then
-		table.insert(state.histories.mati, {
-			sender = "MatiBuilds",
-			text = "Dzięki za hasło! Zaraz się loguję i doładuję Robuxy...",
-			time = now + 0.1,
-		})
-		table.insert(state.histories.mati, {
-			sender = "System",
-			text = MissionContent.texts.ending_bad,
-			time = now + 0.2,
-		})
-	elseif choice.nextStage == "ending_good" then
-		table.insert(state.histories.mati, {
-			sender = "MatiBuilds",
-			text = "Ehh, to jak nie chcesz darmowych Robuxów, to twoja sprawa...",
-			time = now + 0.1,
-		})
-		table.insert(state.histories.mati, {
-			sender = "System",
-			text = MissionContent.texts.ending_good,
-			time = now + 0.2,
-		})
-	end
-
-	sendSnapshot(player, state)
+	append(state, "Ty", choice.label)
+	setStage(player, state, "responding")
+	send(player, state)
+	local capturedRevision = state.revision
+	task.spawn(function()
+		task.wait(0.85)
+		if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+			return
+		end
+		append(
+			state,
+			"MatiBuilds",
+			if choice.nextStage == "ending_bad" then "Dobra, już wchodzę na konto." else "No dobra, twoja sprawa."
+		)
+		send(player, state)
+		task.wait(0.85)
+		if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+			return
+		end
+		append(state, "System", MissionContent.texts[choice.nextStage])
+		setStage(player, state, choice.nextStage)
+		arbiter.releaseOwner(player)
+		send(player, state)
+	end)
 end)
-
-Players.PlayerRemoving:Connect(function(player: Player)
-	NPCNavigation.releaseOwner(player)
-	playerStates[player] = nil
+local function hookPlayer(player: Player)
+	player.CharacterRemoving:Connect(function()
+		cancel(player)
+	end)
+end
+Players.PlayerAdded:Connect(hookPlayer)
+for _, player in Players:GetPlayers() do
+	hookPlayer(player)
+end
+Players.PlayerRemoving:Connect(function(player)
+	arbiter.cancelPlayer(player)
+	states[player] = nil
 end)
