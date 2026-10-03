@@ -14,6 +14,11 @@ const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check
 
 export function createDraftStore() {
   let state = initial();
+  const submitFailed = token => {
+    if (!state.submitting || token !== state.gen) return false;
+    state = { ...state, view: state.view === 'closed' ? 'closed' : 'preview', error: 'submit', submitting: false };
+    return true;
+  };
   return {
     get: () => state,
     onAvatarClick({ text, truncated }) {
@@ -75,7 +80,8 @@ export function createDraftStore() {
       return state.gen;
     },
     approved(token, approvedCase) {
-      if (!state.submitting || token !== state.gen || !isValidCase(approvedCase)) return false;
+      if (!state.submitting || token !== state.gen) return false;
+      if (!isValidCase(approvedCase)) { submitFailed(token); return false; }
       const unchanged = state.check && normalizeText(state.check.case.content) === normalizeText(approvedCase.content)
         && normalizeLink(state.check.case.link) === normalizeLink(approvedCase.link);
       const check = unchanged ? state.check : Object.freeze({ case: Object.freeze(approvedCase), step: 'safety', resumeStep: 'safety',
@@ -125,11 +131,7 @@ export function createDraftStore() {
       if (!state.check || state.view !== 'result') return;
       state = { ...state, view: 'question', check: Object.freeze({ ...state.check, step: 'sender', resumeStep: 'sender' }) };
     },
-    submitFailed(token) {
-      if (!state.submitting || token !== state.gen) return false;
-      state = { ...state, view: state.view === 'closed' ? 'closed' : 'preview', error: 'submit', submitting: false };
-      return true;
-    },
+    submitFailed,
     hide() { state = { ...state, hidden: true, view: 'closed', pendingSelection: null }; },
     show() { state = { ...state, hidden: false }; },
     resetForNewDocument() { state = { ...initial(), gen: state.gen + 1 }; },

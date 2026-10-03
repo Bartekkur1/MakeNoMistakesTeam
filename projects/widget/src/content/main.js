@@ -3,7 +3,7 @@ import { createAvatar } from './avatar.js';
 import { createPanel } from '../ui/panel.js';
 import { STRINGS } from '../ui/strings.pl.js';
 import { createDraftStore } from '../core/draft.js';
-import { buildCase } from '../core/case.js';
+import { buildCase, normalizeText, normalizeLink } from '../core/case.js';
 import { MSG_SHOW } from '../core/messages.js';
 import { submitCase } from '../core/integration.js';
 
@@ -38,10 +38,15 @@ function boot() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
       catch { return; }
+      const state = store.get();
+      if (state.candidateKind && state.check && normalizeText(state.check.case.content) === c.content
+          && normalizeLink(state.check.case.link) === c.link) {
+        store.cancelCheckEdit(); render(); return;
+      }
       const token = store.beginSubmit();
       if (token === null) return;
       render();
-      try { await submitCase(c); store.approved(token, c); }
+      try { await submitCase(c); if (!store.approved(token, c)) store.submitFailed(token); }
       catch { store.submitFailed(token); }
       render();
     },
