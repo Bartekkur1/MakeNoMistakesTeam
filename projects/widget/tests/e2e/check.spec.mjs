@@ -51,11 +51,13 @@ for (const step of ['safety', 'sender', 'request', 'verify', 'result']) test(`cl
   expect(await dialog.locator('input:checked').evaluateAll(nodes => nodes.map(node => node.value))).toEqual(selected);
   await page.getByRole('button', { name: 'Schowaj pomocnika', exact: true }).click();
   await expect(shark(page)).toBeHidden();
-  const restored = await serviceWorker.evaluate(async targetUrl => {
-    const tab = (await chrome.tabs.query({})).find(tab => tab.url === targetUrl);
-    return self.__aura.onActionClicked(tab);
-  }, url);
-  expect(restored).toMatchObject({ ok: true, via: 'message' });
+  // Tab URLs are withheld without the tabs permission; use the established ID-based toolbar harness.
+  const restored = await serviceWorker.evaluate(async () => {
+    const results = [];
+    for (const tab of await chrome.tabs.query({})) results.push(await self.__aura.onActionClicked(tab));
+    return results;
+  });
+  expect(restored.filter(result => result.ok && result.via === 'message')).toHaveLength(1);
   await expect(shark(page)).toBeVisible(); await expect(dialog).toBeHidden(); await shark(page).click();
   expect(await dialog.textContent()).toBe(before);
   expect(await dialog.locator('input:checked').evaluateAll(nodes => nodes.map(node => node.value))).toEqual(selected);

@@ -59,12 +59,26 @@ async function openView(page, view) {
   await page.goto(url);
   await avatar(page).click();
   if (view === 'howto') await formButton(page, 'Jak to działa').click();
-  if (['paste', 'preview', 'safety'].includes(view)) {
+  if (['paste', 'preview', 'safety', 'question', 'result'].includes(view)) {
     await formButton(page, 'Sprawdź wiadomość').click();
     await formText(page).fill('Fikcyjny szkic do przeciągania');
     await page.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true }).fill('https://example.test/wiadomosc');
     if (view !== 'paste') await formButton(page, 'Dalej').click();
-    if (view === 'safety') await formButton(page, 'Zatwierdzam').click();
+    if (['safety', 'question', 'result'].includes(view)) {
+      await formButton(page, STRINGS.approve).click();
+      await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
+    }
+    if (['question', 'result'].includes(view)) {
+      await formButton(page, STRINGS.next).click();
+      await page.getByLabel('Osoba, którą znam', { exact: true }).check();
+      await formButton(page, STRINGS.next).click();
+      await page.getByLabel('Podania kodu do konta', { exact: true }).check();
+      if (view === 'result') {
+        await formButton(page, STRINGS.next).click();
+        await page.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true }).check();
+        await formButton(page, STRINGS.next).click();
+      }
+    }
   }
 }
 async function expectBounded(page) {

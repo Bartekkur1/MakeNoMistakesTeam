@@ -78,7 +78,9 @@ Odczyt następuje tylko po kliknięciu awatara i dotyczy aktualnego zaznaczenia.
 
 Hasła i inne nietekstowe pola, ramki oraz pola wewnątrz shadow DOM innych komponentów nie są odczytywane. Można wkleić wybrany tekst ręcznie. Link pozostaje tekstem: rozszerzenie nie otwiera go i nie pobiera.
 
-Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina i zmiana kanału SPA zachowują szkic. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz” kasują stan. Nowe zaznaczenie zastępuje szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. W fazie 2 nie ma wysyłki sieciowej.
+Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina, zmiana karty i zmiana kanału SPA zachowują szkic oraz trwające sprawdzanie. Po kliknięciu rekina wraca ten sam ekran: wskazówka bezpieczeństwa, jedno z trzech pytań albo wynik. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz”, również z bfcache, kasują stan. Nowe zaznaczenie zastępuje niezatwierdzony szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. W trakcie sprawdzania przycisk „Sprawdź nowe zaznaczenie” otwiera osobny podgląd; stara sprawa i odpowiedzi zostają aż do udanego zatwierdzenia nowej treści.
+
+„Edytuj wiadomość” otwiera kopię zatwierdzonego tekstu i linku. „Wróć do sprawdzania” anuluje edycję lub podgląd nowego zaznaczenia i wraca do poprzedniego pytania albo wyniku. Sama edycja, podgląd i anulowanie nie tworzą sprawy. Udane ponowne zatwierdzenie zmienionego tekstu **lub samego linku** rozpoczyna wskazówkę bezpieczeństwa i trzy puste pytania. Niezmieniona treść po normalizacji zachowuje postęp. Błąd zatwierdzenia zachowuje edytowaną kopię i starą sesję; przeładowanie zalecane przez komunikat usuwa je obie. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. W fazie 2 nie ma wysyłki sieciowej.
 
 Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Nie ma uprawnienia storage. Otwarty shadow root może być czytany przez stronę; zatrzymywanie zdarzeń chroni jedynie przed listenerami klawiatury w fazie bubble. To zaakceptowane ograniczenia MVP z fikcyjnymi danymi, z wariantem panelu iframe w razie problemu na Discordzie.
 
@@ -94,6 +96,20 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 8. Przeładuj rozszerzenie na `chrome://extensions` bez odświeżania karty z rekinem. Kliknij ikonę na tej karcie. Pozostaje jeden rekin, a zaznacz → rekin → zatwierdź pokazuje wskazówkę bezpieczeństwa.
 9. Przejdź wszystkie pięć scenariuszy i oba warianty rozbieżności. Sprawdź niezaznaczone podpowiedzi, „Nie wiem”, „Wróć”, „Popraw odpowiedzi”, trzy nazwane sekcje i dokładnie jeden krok z instrukcją. Nie powinno być surowych kluczy ani zapewnienia, że wiadomość jest bezpieczna.
 10. Osoba 4 przegląda polskie teksty dla dzieci 10–13 lat: czytelne ograniczenia, konkretne działania, brak straszenia i zawstydzania. Testy automatyczne nie zastępują tej oceny w Google Chrome.
+
+## Retest ścieżki sprawdzania w Google Chrome
+
+Używaj pięciu fikcyjnych scenariuszy z tabeli powyżej. Zatwierdzenie nadal oznacza wyłącznie lokalne przyjęcie, bez wiadomości lub potwierdzenia od rzeczywistego opiekuna.
+
+1. Na wskazówce bezpieczeństwa, Q1, Q2, Q3 i wyniku zamknij okno przez ×, a następnie przez Escape i otwórz rekinem. Powinien wrócić ten sam ekran i wybrane odpowiedzi. Powtórz ze schowaniem rekina i przywróceniem ikoną rozszerzenia.
+2. Na Q2 wybierz dwie odpowiedzi i zmień kartę przeglądarki. Okno zostaje na pierwszej karcie; po powrocie oba wybory zostają. Zmiana kanału Discorda bez przeładowania również zachowuje postęp.
+3. Na wyniku kliknij „Popraw odpowiedzi”. Q1 zachowuje wybór. Zmień Q2, przejdź przez zachowaną Q3 i sprawdź przeliczone sygnały, brakujące informacje i krok. „Wróć” zachowuje pozostałe odpowiedzi. W scenariuszu z kodem sprawdź ponownie oba warianty rozbieżności.
+4. Kliknij „Edytuj wiadomość”, zmień tekst i link, a potem „Wróć do sprawdzania”: stary wynik wraca bez zmian. Otwórz edycję ponownie: pola zawierają poprzednią zatwierdzoną treść. Zatwierdź zmieniony tekst: wskazówka i trzy pytania bez dawnych wyborów. Powtórz osobno, zmieniając **tylko link**; stare odpowiedzi i wynik też znikają. Zatwierdzenie niezmienionej kopii zachowuje postęp.
+5. Podczas Q2 lub na wyniku zaznacz inną fikcyjną wiadomość na stronie i kliknij rekina. Najpierw wraca sprawdzanie z przyciskiem dokładnie „Sprawdź nowe zaznaczenie”. Otwórz podgląd i anuluj: poprzednie wybory lub wynik zostają. Zaznacz ponownie, otwórz podgląd i zatwierdź: dopiero teraz rozpoczynają się puste pytania dla nowej treści. Bez nowego zaznaczenia przycisku nie ma.
+6. Z Q2, z wyniku i z niedokończonej edycji przeładuj kartę lub przejdź na inny dokument i wróć „Wstecz”. Usuń zaznaczenie i kliknij rekina: powinno być menu, bez poprzednich odpowiedzi, wyniku i kopii edycji. Zmiana karty z kroku 2 nadal je zachowuje.
+7. Na Q2 ustaw fokus na wybranej odpowiedzi; na wyniku na „Popraw odpowiedzi”. Przeciągnij rekina: okno porusza się już przed puszczeniem, rekin i × zostają widoczne, fokus i wybory nie zmieniają się. Nowe zaznaczenie na stronie nie staje się podglądem podczas przeciągania. Sprawdź krawędzie i wąskie okno: odpowiedzi oraz przyciski pozostają osiągalne przez przewijanie panelu.
+
+Testy przeglądarkowe wymagają prawdziwego `pageshow.persisted === true` przy bfcache i sprawdzają tożsamość kontrolek oraz fokus podczas przeciągania. Zmiana rozmiaru okna może odtworzyć kontrolki; gwarancja zachowania ich tożsamości dotyczy samego przeciągania. Ręcznie oceń czytelność długich tekstów, małych podpowiedzi, obrysów fokusu i przycisku schowania. Ton, wygląd i zrozumiałość informacji o przyszłym opiekunie pozostają częścią UAT, nie wynikiem samych testów.
 
 ## Ręczny retest G-01-2-drag
 
