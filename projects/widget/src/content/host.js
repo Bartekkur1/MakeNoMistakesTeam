@@ -1,4 +1,4 @@
-import paletteCss from '../../../assets/scamerino_palette.css?raw';
+import paletteCss from '../../../../assets/scamerino_palette.css?raw';
 import widgetCss from '../ui/widget.css?raw';
 
 export const HOST_TAG = 'bezpieczna-aura-widget';

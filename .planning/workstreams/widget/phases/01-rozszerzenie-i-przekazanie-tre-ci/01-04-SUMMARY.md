@@ -10,7 +10,7 @@ tech-stack:
   added: []
   patterns: [in-memory-state, shadow-dom]
 key-files:
-  modified: [widget/src/core/draft.js, widget/src/content/main.js, widget/src/ui/panel.js]
+  modified: [projects/widget/src/core/draft.js, projects/widget/src/content/main.js, projects/widget/src/ui/panel.js]
 key-decisions: ["No package changes; direct Codex execution; no push"]
 requirements-completed: [WID-02, WID-01]
 duration: "session"
@@ -20,10 +20,10 @@ coverage:
     human_judgment: false
     verification:
       - kind: command
-        ref: "npm --prefix widget test"
+        ref: "npm --prefix projects/widget test"
         status: pass
       - kind: command
-        ref: "npm --prefix widget run test:e2e"
+        ref: "npm --prefix projects/widget run test:e2e"
         status: pass
   - deliverable: "Google Chrome and Discord end-of-phase walkthrough"
     human_judgment: true

@@ -1,5 +1,5 @@
 import { captureSelection } from './capture.js';
-import avatarUrl from '../../../assets/widget-avatar/avatar-128.png?inline';
+import avatarUrl from '../../../../assets/widget-avatar/avatar-128.png?inline';
 
 export const DRAG_PX = 5;
 export const AVATAR_SIZE = 64;

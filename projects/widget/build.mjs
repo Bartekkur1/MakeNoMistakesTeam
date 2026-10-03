@@ -8,7 +8,7 @@ fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(path.join(dist, 'icons'), { recursive: true });
 fs.copyFileSync(path.join(base, 'manifest.json'), path.join(dist, 'manifest.json'));
 for (const size of [16, 32, 48, 128]) {
-  fs.copyFileSync(path.resolve(base, `../assets/widget-avatar/icon-${size}.png`), path.join(dist, `icons/icon-${size}.png`));
+  fs.copyFileSync(path.resolve(base, `../../assets/widget-avatar/icon-${size}.png`), path.join(dist, `icons/icon-${size}.png`));
 }
 const queryPlugin = {
   name: 'aura-query',

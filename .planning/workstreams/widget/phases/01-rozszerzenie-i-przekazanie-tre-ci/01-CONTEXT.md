@@ -49,7 +49,7 @@ Zatwierdzenie treści jest końcem fazy 1. Faza 1 NIE obejmuje: ścieżki pytań
 - To **zmienia starszy model** z HND-02 / `ideas/defence/koncepcja.md` (opcjonalny przycisk „Pokaż opiekunowi”). Przed fazą 3 trzeba zaktualizować REQUIREMENTS i uzgodnić kontrakt z `api-ui`.
 
 ### Claude's Discretion
-- Struktura katalogu `widget/` (content script / service worker / popup), bundler lub jego brak, framework UI (np. vanilla + Shadow DOM, Preact).
+- Struktura katalogu `projects/widget/` (content script / service worker / popup), bundler lub jego brak, framework UI (np. vanilla + Shadow DOM, Preact).
 - Izolacja stylów okna od strony (Shadow DOM zalecany, żeby strony nie psuły wyglądu i odwrotnie).
 - Pozycja startowa awatara (np. prawy dolny róg z odstępem od pól pisania Discorda) i czy pozycja po przeciągnięciu jest pamiętana (sama pozycja to nie treść, więc może trafić do `chrome.storage`).
 - Nawigacja SPA (np. zmiana kanału w Discordzie bez przeładowania): domyślnie **nie** kasuje szkicu. Kasuje go tylko przeładowanie lub zmiana dokumentu.
@@ -70,7 +70,7 @@ Zatwierdzenie treści jest końcem fazy 1. Faza 1 NIE obejmuje: ścieżki pytań
 - `ideas/defence/koncepcja.md`, `ideas/defence/taski.md`: koncepcja produktu i zadania osoby 3 (W2–W7). Starszy opis wysyłki nie odzwierciedla decyzji z fazy 3.
 
 ### Zasady wspólne między workstreamami
-- `.planning/shared/README.md`: kod tylko w `widget/`, `shared/` tylko do odczytu
+- `.planning/shared/README.md`: kod tylko w `projects/widget/`, `shared/` tylko do odczytu
 - `.planning/shared/CONTRACT.md`: minimalny kontrakt z backendem (`api-ui`), ważny od fazy 3; nie trzymać sekretów w rozszerzeniu
 - `.planning/shared/content/`: **jeszcze nie istnieje**; treści pytań i wyjaśnień (faza 2) przygotuje osoba 4
 - `.planning/PROJECT.md`: ograniczenia hackathonu (~24 h, tylko fikcyjne dane)
@@ -86,11 +86,11 @@ Zatwierdzenie treści jest końcem fazy 1. Faza 1 NIE obejmuje: ścieżki pytań
 ## Existing Code Insights
 
 ### Reusable Assets
-- Brak kodu. Katalog `widget/` jeszcze nie istnieje, to nowy projekt.
+- Brak kodu. Katalog `projects/widget/` jeszcze nie istnieje, to nowy projekt.
 - Paleta CSS gotowa do zaimportowania: `assets/scamerino_palette.css`.
 
 ### Established Patterns
-- Repo dzieli pracę na workstreamy z osobnymi katalogami kodu (`api-ui/`, `widget/`, `roblox/`, `presentation/`).
+- Repo dzieli pracę na workstreamy z osobnymi katalogami kodu (`projects/api-ui/`, `projects/widget/`, `projects/roblox/`, `projects/presentation/`).
 - Commity dokumentacji: `docs(...)`.
 
 ### Integration Points

@@ -8,19 +8,19 @@ Faza 1 kończy się utworzeniem sprawy w pamięci service workera. Nie ma jeszcz
 
 ## Budowanie
 
-W katalogu `widget/`:
+W katalogu `projects/widget/`:
 
 ```sh
 npm ci
 npm run build
 ```
 
-Wynik: `widget/dist/`. Zależności są przypięte w lockfile; wykonanie tej fazy nie dodaje ani nie aktualizuje pakietów.
+Wynik: `projects/widget/dist/`. Zależności są przypięte w lockfile; wykonanie tej fazy nie dodaje ani nie aktualizuje pakietów.
 
 ## Uruchomienie w Google Chrome
 
 1. Otwórz `chrome://extensions` i włącz **Tryb dewelopera**.
-2. Kliknij **Załaduj rozpakowane** i wskaż `widget/dist`.
+2. Kliknij **Załaduj rozpakowane** i wskaż `projects/widget/dist`.
 3. Otwórz zwykłą stronę HTTP(S). Rekin pojawi się w prawym dolnym rogu. Możesz go przeciągnąć lub schować przyciskiem ×; ikona rozszerzenia przywraca go na tej karcie.
 4. Po każdym przebudowaniu kliknij przeładowanie na karcie rozszerzenia i odśwież kartę demo. Jeśli karta nie została odświeżona, kliknięcie ikony na pasku zastępuje osieroconego rekina działającą instancją.
 
@@ -53,7 +53,7 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 
 ## Lista kontrolna przed demo (Google Chrome, Discord w przeglądarce, fikcyjne konto i dane)
 
-1. Zbuduj rozszerzenie i załaduj `widget/dist` w Google Chrome.
+1. Zbuduj rozszerzenie i załaduj `projects/widget/dist` w Google Chrome.
 2. Na zwykłej stronie (np. pl.wikipedia.org) sprawdź ostrość rekina, nieuciętą płetwę i kolory palety.
 3. Na Discordzie sprawdź, że rekin nie zasłania kompozytora. Przeciągnij, schowaj, przywróć ikoną; po przeładowaniu wraca.
 4. Zaznacz fikcyjną wiadomość „darmowe Nitro, kliknij link”. Kliknij rekina: tylko zaznaczony tekst, „Ze strony: discord.com” i informacja dla opiekuna. Usuń imię i dopisz kilka znaków. Kompozytor Discorda pozostaje pusty i skróty Discorda nie działają. Zatwierdź: „Gotowe!”, bez twierdzenia o wysłaniu do opiekuna.

@@ -13,11 +13,11 @@ updated: "2026-10-03T18:16:39.047639+00:00"
 ## Tests
 
 ### 1. Google Chrome: wygląd i obecność rekina
-expected: Załaduj widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają.
+expected: Załaduj projects/widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają.
 result: pass
 
 ### 2. G-01-2-drag: otwarte okno podąża za widocznym rekinem
-expected: Załaduj nowy ZIP albo widget/dist, przeładuj rozszerzenie i odśwież kartę Discorda. Rekin pozostaje widoczny. Przeciągaj go z otwartym menu, Jak to działa, formularzem, podglądem i Gotowe: okno podąża za nim, a tekst, link i aktywne pole zostają. Sprawdź krawędzie ekranu, resize oraz zamknięcie przez × i Escape z zachowaniem szkicu.
+expected: Załaduj nowy ZIP albo projects/widget/dist, przeładuj rozszerzenie i odśwież kartę Discorda. Rekin pozostaje widoczny. Przeciągaj go z otwartym menu, Jak to działa, formularzem, podglądem i Gotowe: okno podąża za nim, a tekst, link i aktywne pole zostają. Sprawdź krawędzie ekranu, resize oraz zamknięcie przez × i Escape z zachowaniem szkicu.
 result: pass
 reported: "pass"
 
@@ -51,9 +51,9 @@ blocked: 0
   severity: minor
   test: 2
   artifacts:
-    - path: widget/src/content/main.js
+    - path: projects/widget/src/content/main.js
       issue: "render() przekazuje setHidden tylko state.hidden, bez uwzględnienia otwartego formularza."
-    - path: widget/src/content/avatar.js
+    - path: projects/widget/src/content/avatar.js
       issue: "setHidden chowa cały host zawierający też panel; potrzebna osobna widoczność awatara."
   root_cause: "Widoczność całego widgetu jest sterowana flagą ręcznego schowania. Brakuje niezależnego chowania awatara w widokach paste i preview."
   missing:
@@ -74,11 +74,11 @@ blocked: 0
   test: 2
   root_cause: "moveTo zmienia wyłącznie style hosta. Panel ma position: fixed i własne left/top; panel.place jest wywoływane przez render/resize, bez powiadomienia o przeciąganiu. setFormOpen dodatkowo ukrywa i blokuje rekina w paste/preview."
   artifacts:
-    - path: widget/src/content/avatar.js
+    - path: projects/widget/src/content/avatar.js
       issue: "Brak powiadomienia o zmianie pozycji; setFormOpen ukrywa uchwyt przeciągania."
-    - path: widget/src/content/main.js
+    - path: projects/widget/src/content/main.js
       issue: "Brak aktualizacji pozycji panelu na pointermove; render przebudowuje formularz."
-    - path: widget/src/ui/panel.js
+    - path: projects/widget/src/ui/panel.js
       issue: "Panel jest fixed i potrzebuje jawnego place po zmianie pozycji awatara."
   missing:
     - "Powiadomienie o ruchu rekina i aktualizacja samej pozycji otwartego panelu."

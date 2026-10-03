@@ -24,11 +24,11 @@ tech-stack:
 key-files:
   created: []
   modified:
-    - widget/src/content/avatar.js
-    - widget/src/content/main.js
-    - widget/tests/unit/presence.test.js
-    - widget/tests/e2e/avatar.spec.mjs
-    - widget/README.md
+    - projects/widget/src/content/avatar.js
+    - projects/widget/src/content/main.js
+    - projects/widget/tests/unit/presence.test.js
+    - projects/widget/tests/e2e/avatar.spec.mjs
+    - projects/widget/README.md
 key-decisions:
   - "Latest user instruction supersedes 01-05 form hiding: avatar stays visible and open panel follows it."
   - "Drag updates only panel geometry; it never calls panel.render or changes draft state."
@@ -39,23 +39,23 @@ coverage:
     description: "Open menu, howto, paste, preview and confirmation follow live avatar drag; edits, node identity, selection and focus survive."
     verification:
       - kind: e2e
-        ref: "widget/tests/e2e/avatar.spec.mjs#open preview follows avatar throughout drag without rebuilding or submitting"
+        ref: "projects/widget/tests/e2e/avatar.spec.mjs#open preview follows avatar throughout drag without rebuilding or submitting"
         status: pass
       - kind: e2e
-        ref: "widget/tests/e2e/avatar.spec.mjs#open paste follows avatar throughout drag without rebuilding or submitting"
+        ref: "projects/widget/tests/e2e/avatar.spec.mjs#open paste follows avatar throughout drag without rebuilding or submitting"
         status: pass
     human_judgment: false
   - id: G-01-2-drag-edges
     description: "Drag preserves draft and suppresses new page capture, while panel and avatar remain reachable at edges and resize; pointer cancellation recovers."
     verification:
       - kind: e2e
-        ref: "widget/tests/e2e/avatar.spec.mjs#open preview stays reachable at edges and after resize without recapturing page selection"
+        ref: "projects/widget/tests/e2e/avatar.spec.mjs#open preview stays reachable at edges and after resize without recapturing page selection"
         status: pass
       - kind: e2e
-        ref: "widget/tests/e2e/avatar.spec.mjs#pointer cancellation ends drag and allows another gesture with open paste"
+        ref: "projects/widget/tests/e2e/avatar.spec.mjs#pointer cancellation ends drag and allows another gesture with open paste"
         status: pass
       - kind: integration
-        ref: "widget/tests/unit/presence.test.js#gesture 130,100"
+        ref: "projects/widget/tests/unit/presence.test.js#gesture 130,100"
         status: pass
     human_judgment: false
   - id: G-01-2-drag-package

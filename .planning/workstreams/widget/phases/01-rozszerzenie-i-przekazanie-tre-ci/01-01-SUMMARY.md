@@ -16,7 +16,7 @@ tech-stack:
   added: [esbuild 0.28.2, vitest 5.0.1, happy-dom 20.14.5, '@playwright/test 1.63.0']
   patterns: [Shadow DOM, per-document in-memory draft, single selection read site, single runtime send site]
 key-files:
-  created: [widget/manifest.json, widget/build.mjs, widget/src/content/main.js, widget/src/content/capture.js, widget/src/ui/panel.js, widget/src/core/case.js, widget/src/background/sw.js, widget/tests/e2e/tracer.spec.mjs]
+  created: [projects/widget/manifest.json, projects/widget/build.mjs, projects/widget/src/content/main.js, projects/widget/src/content/capture.js, projects/widget/src/ui/panel.js, projects/widget/src/core/case.js, projects/widget/src/background/sw.js, projects/widget/tests/e2e/tracer.spec.mjs]
   modified: []
 key-decisions:
   - Zachowano panel Shadow DOM po potwierdzeniu testu na Discordzie przez użytkownika.
@@ -31,21 +31,21 @@ coverage:
     requirement: WID-02
     verification:
       - kind: e2e
-        ref: widget/tests/e2e/tracer.spec.mjs#zaznaczenie → podgląd → zatwierdzenie; nic nie wysłane wcześniej
+        ref: projects/widget/tests/e2e/tracer.spec.mjs#zaznaczenie → podgląd → zatwierdzenie; nic nie wysłane wcześniej
         status: pass
     human_judgment: false
   - id: D2
     description: Zamknięcie i ponowne otwarcie podglądu zachowuje szkic
     verification:
       - kind: e2e
-        ref: widget/tests/e2e/tracer.spec.mjs#zamknięcie okna zachowuje szkic
+        ref: projects/widget/tests/e2e/tracer.spec.mjs#zamknięcie okna zachowuje szkic
         status: pass
     human_judgment: false
   - id: D3
     description: Klawiatura pozostaje w podglądzie na stronie testowej i Discordzie
     verification:
       - kind: e2e
-        ref: widget/tests/e2e/tracer.spec.mjs#pisanie w podglądzie nie trafia do strony
+        ref: projects/widget/tests/e2e/tracer.spec.mjs#pisanie w podglądzie nie trafia do strony
         status: pass
       - kind: manual_procedural
         ref: 'Potwierdzenie użytkownika 2026-10-03: wszystkie przypadki testowe dzialaja'
@@ -82,7 +82,7 @@ status: complete
 ## Verification
 
 - Build: PASS.
-- `AURA_CHROMIUM=bundled npm --prefix widget run test:e2e -- tests/e2e/tracer.spec.mjs --reporter=list,json`: **3 passed (7.4s)**.
+- `AURA_CHROMIUM=bundled npm --prefix projects/widget run test:e2e -- tests/e2e/tracer.spec.mjs --reporter=list,json`: **3 passed (7.4s)**.
 - Każdy test miał aktywny kolektor sieci: jeden request fixture, brak requestów poza dozwolonymi originami w obserwowanych oknach 1973, 1372 i 1287 ms. To dowód wyłącznie dla tych okien.
 - Gałęzie resolveBrowser, manifest MV3, grafika inline, paleta i ikony: PASS.
 - `git diff --quiet -- assets/ .planning/shared/`: PASS.
@@ -102,7 +102,7 @@ Historyczna zgoda na instalację pakietów nie jest dostępna w odzyskanych arte
 
 ## User Setup Required
 
-Rozszerzenie ładowane ręcznie jako rozpakowane `widget/dist` w Chrome; paczka do testów w `artifacts/bezpieczna-aura-chrome.zip`.
+Rozszerzenie ładowane ręcznie jako rozpakowane `projects/widget/dist` w Chrome; paczka do testów w `artifacts/bezpieczna-aura-chrome.zip`.
 
 ## Next Phase Readiness
 

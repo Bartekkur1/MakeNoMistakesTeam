@@ -69,6 +69,7 @@ Szczegółowe wymagania są w workstreamach (`.planning/workstreams/<nazwa>/REQU
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
+| Projekty w `projects/<nazwa>/` | Osobne katalogi kodu i zależności; wspólne `assets/` i `.planning/shared/` w repozytorium | ✓ widget przeniesiony do `projects/widget/` |
 | Workstreamy: api-ui, widget, roblox, presentation | Osobne ROADMAP/STATE/fazy, żeby tory pracy się nie mieszały | — Pending |
 | `.planning/shared/` na kontrakt, treści i pomiar | Jedno źródło prawdy dla wszystkich torów; właściciel edytuje, reszta czyta | — Pending |
 | Widoczny rekin i otwarty panel przesuwają się razem | Zachowanie tekstu i fokusu podczas przeciągania; doprecyzowanie użytkownika | ✓ widget Phase 1, UAT pass |

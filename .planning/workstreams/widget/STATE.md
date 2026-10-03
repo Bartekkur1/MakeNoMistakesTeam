@@ -58,3 +58,7 @@ See: .planning/PROJECT.md (updated 2026-10-03).
 ## Historical Artifacts
 
 Użytkownik potwierdził, że ręcznie usunął starsze ZIP-y (01-01 i 01-05). To celowe porządki, nie brak wymaganych plików ani otwarty problem. Źródła, instrukcje budowania i dowody testów pozostają dostępne.
+
+## Code Location
+
+Kod rozszerzenia: `projects/widget/`. Build z repo: `npm --prefix projects/widget run build`. W Chrome załaduj `projects/widget/dist/`. Planowanie nadal w `.planning/workstreams/widget/`.

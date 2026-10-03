@@ -1,10 +1,10 @@
 ---
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
-verified: "2026-10-03T18:14:22.158811+00:00"
+verified: "2026-10-03T18:25:05.413651+00:00"
 status: passed
 score: "4/4 current gap-plan truths verified; prior phase proof retained; 4/5 UAT passed"
 behavior_unverified: 0
-covered_digest: "v2:sha256:c7b73a274bc24156ce2ae18bdde0698fe7b12658a9e344ab82070ac672375538"
+covered_digest: "v2:sha256:de355d1af3d997751237bd9739358ccd171bfc98208c7af0ad4d313807354c66"
 covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-SUMMARY.md
@@ -18,46 +18,46 @@ covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-05-SUMMARY.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-06-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-06-SUMMARY.md
-  - widget/README.md
-  - widget/build.mjs
-  - widget/manifest.json
-  - widget/package-lock.json
-  - widget/package.json
-  - widget/playwright.config.mjs
-  - widget/src/background/sw.js
-  - widget/src/content/avatar.js
-  - widget/src/content/capture.js
-  - widget/src/content/host.js
-  - widget/src/content/main.js
-  - widget/src/core/case.js
-  - widget/src/core/draft.js
-  - widget/src/core/integration.js
-  - widget/src/core/messages.js
-  - widget/src/ui/panel.js
-  - widget/src/ui/strings.pl.js
-  - widget/src/ui/widget.css
-  - widget/tests/e2e/avatar.spec.mjs
-  - widget/tests/e2e/browser.mjs
-  - widget/tests/e2e/content.spec.mjs
-  - widget/tests/e2e/draft.spec.mjs
-  - widget/tests/e2e/edges.spec.mjs
-  - widget/tests/e2e/extension.fixture.mjs
-  - widget/tests/e2e/fixtures/capture-autofocus.html
-  - widget/tests/e2e/fixtures/chat-like.html
-  - widget/tests/e2e/fixtures/fields.html
-  - widget/tests/e2e/fixtures/other.html
-  - widget/tests/e2e/menu.spec.mjs
-  - widget/tests/e2e/server.mjs
-  - widget/tests/e2e/tracer.spec.mjs
-  - widget/tests/unit/approve.test.js
-  - widget/tests/unit/content.test.js
-  - widget/tests/unit/draft.test.js
-  - widget/tests/unit/host.test.js
-  - widget/tests/unit/no-background-reading.test.js
-  - widget/tests/unit/panel.test.js
-  - widget/tests/unit/presence.test.js
-  - widget/tests/unit/source-scan.test.js
-  - widget/vitest.config.mjs
+  - projects/widget/README.md
+  - projects/widget/build.mjs
+  - projects/widget/manifest.json
+  - projects/widget/package-lock.json
+  - projects/widget/package.json
+  - projects/widget/playwright.config.mjs
+  - projects/widget/src/background/sw.js
+  - projects/widget/src/content/avatar.js
+  - projects/widget/src/content/capture.js
+  - projects/widget/src/content/host.js
+  - projects/widget/src/content/main.js
+  - projects/widget/src/core/case.js
+  - projects/widget/src/core/draft.js
+  - projects/widget/src/core/integration.js
+  - projects/widget/src/core/messages.js
+  - projects/widget/src/ui/panel.js
+  - projects/widget/src/ui/strings.pl.js
+  - projects/widget/src/ui/widget.css
+  - projects/widget/tests/e2e/avatar.spec.mjs
+  - projects/widget/tests/e2e/browser.mjs
+  - projects/widget/tests/e2e/content.spec.mjs
+  - projects/widget/tests/e2e/draft.spec.mjs
+  - projects/widget/tests/e2e/edges.spec.mjs
+  - projects/widget/tests/e2e/extension.fixture.mjs
+  - projects/widget/tests/e2e/fixtures/capture-autofocus.html
+  - projects/widget/tests/e2e/fixtures/chat-like.html
+  - projects/widget/tests/e2e/fixtures/fields.html
+  - projects/widget/tests/e2e/fixtures/other.html
+  - projects/widget/tests/e2e/menu.spec.mjs
+  - projects/widget/tests/e2e/server.mjs
+  - projects/widget/tests/e2e/tracer.spec.mjs
+  - projects/widget/tests/unit/approve.test.js
+  - projects/widget/tests/unit/content.test.js
+  - projects/widget/tests/unit/draft.test.js
+  - projects/widget/tests/unit/host.test.js
+  - projects/widget/tests/unit/no-background-reading.test.js
+  - projects/widget/tests/unit/panel.test.js
+  - projects/widget/tests/unit/presence.test.js
+  - projects/widget/tests/unit/source-scan.test.js
+  - projects/widget/vitest.config.mjs
 
 overrides_applied: 1
 overrides:
@@ -85,7 +85,7 @@ Vitest: 8 files, 36 tests PASS. Full Chromium Playwright: 35 PASS (tracer 3, edg
 | Plan | Truth | Status | Evidence |
 |------|-------|--------|----------|
 | 01-01 | D-01/D-04: until the child clicks the avatar the extension reads nothing from the page and sends nothing; selecting text and waiting leaves the service-worker message log (self.__aura.messages) empty | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
-| 01-01 | D-05/D-06/D-14: after `npm --prefix widget run build` and loading `widget/dist` unpacked in Chromium (MV3), the Scamerinio avatar (assets/widget-avatar/avatar-128.png drawn at 64x64 CSS px) is visible bottom-right on an ordinary http page with no user action; extension icons come from assets/widget-avatar/icon-16/32/48/128.png | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
+| 01-01 | D-05/D-06/D-14: after `npm --prefix projects/widget run build` and loading `projects/widget/dist` unpacked in Chromium (MV3), the Scamerinio avatar (assets/widget-avatar/avatar-128.png drawn at 64x64 CSS px) is visible bottom-right on an ordinary http page with no user action; extension icons come from assets/widget-avatar/icon-16/32/48/128.png | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-08/D-09: with text selected on the page, clicking the avatar opens a small window (320 px wide) next to the avatar that shows exactly the selected text in an editable field | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-02/D-03: the preview shows the editable text, an optional link field, the line „Ze strony: <hostname>” (hostname only, never the full URL) and the notice „Gdy zatwierdzisz, tę wiadomość i wynik sprawdzania zobaczy Twój opiekun.”; showing the avatar, opening the window and previewing create no case | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-03: pressing „Zatwierdzam” sends exactly one 'aura/case-approved' runtime message whose case object has exactly the keys content, link, origin, source, created_at, truncated; content equals the edited text and source equals the page hostname | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
@@ -93,7 +93,7 @@ Vitest: 8 files, 36 tests PASS. Full Chromium Playwright: 35 PASS (tracer 3, edg
 | 01-01 | D-03 (Pitfall 7): the confirmation („Gotowe!” + „Sprawa jest przygotowana do sprawdzenia.”) appears only after the service worker answers {ok:true}; on a failed send the draft stays and „Coś poszło nie tak. Odśwież stronę i spróbuj jeszcze raz.” is shown | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-12 (first slice): closing the window keeps the draft, and the next avatar click shows it again | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-15/D-16: the shadow root carries the scamerino palette tokens rebased from :root onto :host with --radius-widget 20px, proven in real Chromium (the „Zatwierdzam” button background computes to rgb(15, 98, 219) and the window's border-radius to 20px), and every UI string lives in src/ui/strings.pl.js, in Polish | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
-| 01-01 | Build: `?raw` and `?inline` imports keep their mode through esbuild resolution (separate plugin namespaces, paths resolved against the importer's resolveDir), so widget/dist/content.js contains the palette text with 0F62DB and the avatar as a data:image/png;base64 URL | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
+| 01-01 | Build: `?raw` and `?inline` imports keep their mode through esbuild resolution (separate plugin namespaces, paths resolved against the importer's resolveDir), so projects/widget/dist/content.js contains the palette text with 0F62DB and the avatar as a data:image/png;base64 URL | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-02/D-04 capture scope: the click reads a focused textarea or text/search/url input through its own selection range, returns empty for any other focused input type (password included) and for a focused page element hosting its own shadow root, and otherwise reads the document selection; it never traverses the DOM | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | D-18: the Playwright suite launches the local Chromium at /usr/bin/chromium by default; AURA_CHROMIUM=bundled selects Playwright's bundled Chromium even when /usr/bin/chromium exists, and any other AURA_CHROMIUM value is used as the executable path | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
 | 01-01 | Pitfall 3 (automated proxy): keystrokes typed into the preview field never reach a bubbling keydown listener on the page (fixture #keylog stays empty) | VERIFIED | tracer E2E, manifest/build; prior 01-01 summary and approvals |
@@ -131,7 +131,7 @@ Vitest: 8 files, 36 tests PASS. Full Chromium Playwright: 35 PASS (tracer 3, edg
 | 01-04 | D-03/Pitfall 5: a failed send (e.g. „Extension context invalidated.”) keeps the draft and shows „Coś poszło nie tak. Odśwież stronę i spróbuj jeszcze raz.”, never the confirmation | VERIFIED | draft/content + draft/content E2E and README |
 | 01-04 | Edge WID-02 empty: an empty, whitespace-only or NBSP-only selection opens the menu instead of a preview; a single visible character opens the preview with that character; buildCase throws Error('empty') for empty or whitespace-only content; „Zatwierdzam” and „Dalej” stay disabled while the text is empty or whitespace-only, so no 'aura/case-approved' message ever carries empty content | VERIFIED | draft/content + draft/content E2E and README |
 | 01-04 | Edge WID-02 encoding: length is counted in Unicode code points; content longer than 2000 code points is cut to exactly 2000 code points without leaving a lone surrogate, sets truncated: true and shows the „Wiadomość była bardzo długa…” notice; U+00A0 becomes a normal space; Polish diacritics and emoji (fixture #msg2 „Cześć! Jutro o 17:00 gramy w Minecrafta, będziesz? 🙂”) reach case.content unchanged; no NFC/NFD normalization is applied | VERIFIED | draft/content + draft/content E2E and README |
-| 01-04 | D-05/D-18: widget/README.md explains how to load widget/dist unpacked in Google Chrome and holds the pre-demo checklist for Discord in the browser (including composer selection, the real toolbar click on an uninjected tab and recovery after an extension reload); the end-of-phase manual walkthrough runs in Google Chrome | HUMAN NEEDED | draft/content + draft/content E2E and README |
+| 01-04 | D-05/D-18: projects/widget/README.md explains how to load projects/widget/dist unpacked in Google Chrome and holds the pre-demo checklist for Discord in the browser (including composer selection, the real toolbar click on an uninjected tab and recovery after an extension reload); the end-of-phase manual walkthrough runs in Google Chrome | HUMAN NEEDED | draft/content + draft/content E2E and README |
 | 01-04 | D-04: at phase end the full Vitest suite (including no-background-reading and source-scan) and the full Playwright suite pass | VERIFIED | draft/content + draft/content E2E and README |
 
 ## Required Artifacts
@@ -151,7 +151,7 @@ Avatar click → captureSelection → draft preview; approve → buildCase → b
 
 ## Original Human Verification (four prior passes retained)
 
-1. **Google Chrome: wygląd i obecność rekina** — Załaduj widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają.
+1. **Google Chrome: wygląd i obecność rekina** — Załaduj projects/widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają.
 
 2. **Discord: podgląd, klawiatura i zaznaczenie kompozytora** — Na fikcyjnym koncie przejdź kroki 4–5 README: tylko zaznaczony fragment i hostname discord.com, informacja dla opiekuna, edycja nie trafia do kompozytora i nie uruchamia skrótów; fragment wpisanego zdania przechodzi dokładnie bez wysłania wiadomości; zatwierdzenie daje neutralne Gotowe!.
 
@@ -229,3 +229,9 @@ None.
 `/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-06.zip`: seven files, root manifest, CRC valid and all manifest-referenced scripts/icons present. SHA256: `26d16a44a66b9824a5be4b6d5806a1419655b3f59c02aff27fd394ed1b3bce65`.
 
 Status remains human_needed solely for G-01-2-drag visual retest. Phase completion and advancement have not run.
+
+## Repository relocation verification
+
+Code relocated from `widget/` to `projects/widget/`. Shared assets remain at repo-root `assets/`; build and source imports resolve one additional parent level. Vitest fs allowlist includes the repo root. Source/manifest behavior and dependencies are unchanged. All plan/summary/source references now use the relocated paths; the covered-input fingerprint was recomputed with the canonical helper.
+
+Validation from the new directory: 38 Vitest pass; 45 Playwright passed (44 ordinary passes and one existing expected capture-phase failure). Root command `npm --prefix projects/widget run build` passes. Asset references resolve and the manifest is byte-for-byte unchanged. All five previously accepted human UAT checks remain accepted; phase 1 remains passed.

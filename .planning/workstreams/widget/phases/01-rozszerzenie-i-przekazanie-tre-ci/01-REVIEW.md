@@ -11,7 +11,7 @@ reviewer: Codex-inline
 
 # Phase 01 Code Review
 
-Scope: all widget/src JS and CSS, manifest, build, browser fixture and new tests. Checked event/read/send paths, consent, async completion, lifecycle cleanup, origin validation, UI placement and package changes. Direct review under the Codex skill fallback; no independent reviewer was spawned.
+Scope: all projects/widget/src JS and CSS, manifest, build, browser fixture and new tests. Checked event/read/send paths, consent, async completion, lifecycle cleanup, origin validation, UI placement and package changes. Direct review under the Codex skill fallback; no independent reviewer was spawned.
 
 ## Warnings
 
