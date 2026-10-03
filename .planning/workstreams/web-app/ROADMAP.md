@@ -24,7 +24,7 @@ Od kontraktu i backendu, przez panel opiekuna na danych przykładowych, po test 
   3. Rodzic i nauczyciel logują się demo (e-mail + kod `0000`) i widzą tylko zgłoszenia, do których mają dostęp
   4. Kontrakt jest zatwierdzony przez osobę 2, a przykładowe JSON-y są w `shared/`
 
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 
 Plans:
 **Wave 1**
@@ -34,7 +34,7 @@ Plans:
 - [x] 01-02-PLAN.md — Bramki ludzkie: zatwierdzenie kontraktu przez osobę 2, legitymacja pakietów npm; zapis zatwierdzenia, notatki w STATE, COVERAGE.md v2 (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-03-PLAN.md — Fundament backendu: tracer /api/health (supabase-js, vitest, helpery HTTP/CORS) + logowanie demo e-mail + 0000, tokeny Bearer (API-06) (wave 3)
+- [x] 01-03-PLAN.md — Fundament backendu: tracer /api/health (supabase-js, vitest, helpery HTTP/CORS) + logowanie demo e-mail + 0000, tokeny Bearer (API-06) (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 01-04-PLAN.md — Zgłoszenia: tworzenie, szczegóły z historią, lista z widocznością i paginacją kursorem; migracja reports + test lustra schematu (API-01) (wave 4)
