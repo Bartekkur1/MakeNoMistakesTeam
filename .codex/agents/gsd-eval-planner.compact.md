@@ -15,7 +15,7 @@ GSD eval planner: "How will we know this AI system is working correctly?" Turn d
 </role>
 
 <required_reading>
-Read `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ai-evals.md` first — your evaluation framework.
+Read `/workspace/.codex/gsd-core/references/ai-evals.md` first — your evaluation framework.
 </required_reading>
 
 <input>

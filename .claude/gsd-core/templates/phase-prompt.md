@@ -45,10 +45,10 @@ Output: [What artifacts will be created]
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/execute-plan.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/templates/summary.md
+@/workspace/.claude/gsd-core/workflows/execute-plan.md
+@/workspace/.claude/gsd-core/templates/summary.md
 [If plan contains checkpoint tasks (type="checkpoint:*"), add:]
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/checkpoints.md
+@/workspace/.claude/gsd-core/references/checkpoints.md
 </execution_context>
 
 <context>
@@ -92,7 +92,7 @@ Output: [What artifacts will be created]
   <done>[Acceptance criteria]</done>
 </task>
 
-<!-- For checkpoint task examples and patterns, see @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/checkpoints.md -->
+<!-- For checkpoint task examples and patterns, see @/workspace/.claude/gsd-core/references/checkpoints.md -->
 
 <task type="checkpoint:decision" gate="blocking">
   <decision>[What needs deciding]</decision>
@@ -285,7 +285,7 @@ TDD features get dedicated plans with `type: tdd`.
 → Yes: Create a TDD plan
 → No: Standard task in standard plan
 
-See `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/tdd.md` for TDD plan structure.
+See `/workspace/.claude/gsd-core/references/tdd.md` for TDD plan structure.
 
 ---
 
@@ -389,9 +389,9 @@ Output: Working dashboard component.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/execute-plan.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/templates/summary.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/checkpoints.md
+@/workspace/.claude/gsd-core/workflows/execute-plan.md
+@/workspace/.claude/gsd-core/templates/summary.md
+@/workspace/.claude/gsd-core/references/checkpoints.md
 </execution_context>
 
 <context>
@@ -547,7 +547,7 @@ user_setup:
 
 **Result:** Execute-plan generates `{phase}-USER-SETUP.md` with checklist for the user.
 
-See `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/templates/user-setup.md` for full schema and examples
+See `/workspace/.claude/gsd-core/templates/user-setup.md` for full schema and examples
 
 ---
 

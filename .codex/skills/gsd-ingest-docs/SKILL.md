@@ -146,10 +146,10 @@ Auto-synthesizes most conflicts using the precedence rule `ADR > SPEC > PRD > DO
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/ingest-docs.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/gate-prompts.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/doc-conflict-engine.md
+@/workspace/.codex/gsd-core/workflows/ingest-docs.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/references/gate-prompts.md
+@/workspace/.codex/gsd-core/references/doc-conflict-engine.md
 </execution_context>
 
 <context>

@@ -143,8 +143,8 @@ Requirements: Claude Code v2.1.91+, claude.ai account, GitHub repository.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/ultraplan-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/ultraplan-phase.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

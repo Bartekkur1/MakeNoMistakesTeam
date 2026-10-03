@@ -26,7 +26,7 @@ If the prompt contains a `<required_reading>` block, you MUST use the `Read` too
 
 **Project skills:** Check `.codex/skills/` or `.agents/skills/` directory if either exists:
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.codex/gsd-core/references/agent-skills-bootstrap.md
 1. List available skills (subdirectories)
 2. Read `SKILL.md` for each skill (lightweight index ~130 lines)
 3. Load specific `rules/*.md` files as needed during implementation
@@ -341,7 +341,7 @@ The H1 carries the PROJECT name only — never a version and never a milestone n
 Milestone identity (version + name) lives in milestone headings (`## vX.Y — [Name]`) or
 `## Milestones` bullets (`🚧 **vX.Y [Name]**`), never in the H1. A trailing version in the
 H1 (`# Roadmap: [Project] — [Name] (vX.Y)`) corrupts milestone-name extraction (#4134).
-`/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/roadmap.md` is the canonical shape.
+`/workspace/.codex/gsd-core/templates/roadmap.md` is the canonical shape.
 
 ### 1. Summary Checklist (under `## Phases`)
 
@@ -445,11 +445,11 @@ This annotation is consumed by downstream workflows (`new-project`, `progress`) 
 | 2. Name | 0/2 | Not started | - |
 ```
 
-Reference full template: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/roadmap.md`
+Reference full template: `/workspace/.codex/gsd-core/templates/roadmap.md`
 
 ## STATE.md Structure
 
-Use template from `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/state.md`.
+Use template from `/workspace/.codex/gsd-core/templates/state.md`.
 
 Key sections:
 - Project Reference (core value, current focus)

@@ -145,7 +145,7 @@ Validate `.planning/` directory integrity and report actionable issues. Checks f
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/health.md
+@/workspace/.codex/gsd-core/workflows/health.md
 </execution_context>
 
 <process>

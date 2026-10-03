@@ -1,0 +1,26 @@
+:host { all: initial; --radius-widget: 20px; font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--color-text-primary); }
+[hidden] { display: none !important; }
+.avatar { width: 64px; height: 64px; padding: 0; border: 0; background: none; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+.avatar img { width: 64px; height: 64px; -webkit-user-drag: none; pointer-events: none; }
+.avatar:focus-visible { outline: 3px solid var(--color-siren-amber); }
+.panel { position: fixed; width: 320px; max-width: calc(100vw - 16px); max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 16px; border-radius: var(--radius-widget); background: var(--color-surface-card); border: 1px solid var(--color-shield-silver-border); box-shadow: var(--shadow-shield-card); }
+.panel header { display: flex; justify-content: flex-end; }
+button { font: inherit; cursor: pointer; padding: 8px 12px; border: 0; border-radius: 12px; }
+.btn-primary { background: var(--color-shark-blue); color: white; border-radius: 12px; }
+.btn-secondary { background: var(--color-shield-silver); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+textarea, input[type=text] { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1px solid var(--color-shield-silver-border); font: inherit; padding: 8px; }
+textarea { min-height: 96px; resize: vertical; }
+.notice { background: rgba(var(--color-shark-blue-rgb), 0.08); border-radius: 12px; padding: 8px 12px; }
+.error { color: var(--color-hook-crimson); }
+.source, .hint { color: var(--color-text-muted); font-size: 13px; }
+h2 { font-size: 18px; margin: 8px 0; }
+.avatar-wrap { position: relative; width: 64px; height: 64px; }
+.avatar.dragging { cursor: grabbing; }
+.hide { position: absolute; top: -4px; right: -4px; width: 24px; height: 24px; padding: 0; background: var(--color-shield-silver); color: var(--color-text-primary); border-radius: 12px; }
+.menu { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.steps { margin: 8px 0; padding-left: 20px; }
+.steps li { margin: 4px 0; }
+.privacy { background: rgba(var(--color-shark-blue-rgb), 0.08); border-radius: 12px; padding: 8px 12px; }
+.intro { font-weight: 600; margin: 0 0 12px; }

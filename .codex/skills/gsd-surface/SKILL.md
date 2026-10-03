@@ -133,9 +133,9 @@ Result parsing:
 </codex_skill_adapter>
 
 <objective>
-Manage the runtime skill surface without reinstall. Reads/writes `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/.gsd-surface.json`
-(sibling to `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/.gsd-profile`) and re-stages the active skills directory in place.
-Skill dirs live at `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/skills/gsd-*/`.
+Manage the runtime skill surface without reinstall. Reads/writes `/workspace/.codex/.gsd-surface.json`
+(sibling to `/workspace/.codex/.gsd-profile`) and re-stages the active skills directory in place.
+Skill dirs live at `/workspace/.codex/skills/gsd-*/`.
 
 Sub-commands: list · status · profile · disable · enable · reset
 </objective>
@@ -256,11 +256,11 @@ Valid cluster names: `core_loop`, `audit_review`, `milestone`, `research_ideate`
 ## runtimeConfigDir resolution
 
 The `runtimeConfigDir` for `applySurface` is the **base the agent config directory**
-(`~/.codex`), NOT the skills sub-directory (`/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/skills`).
+(`~/.codex`), NOT the skills sub-directory (`/workspace/.codex/skills`).
 
 This matches `installRuntimeArtifacts` and `uninstallRuntimeArtifacts`, which also
 receive `~/.codex` as `configDir`. The skill dirs themselves live at
-`/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/skills/gsd-*/` because the `claude global` layout has `destSubpath =
+`/workspace/.codex/skills/gsd-*/` because the `claude global` layout has `destSubpath =
 'skills'` — they are derived from `configDir`, not the root for it.
 
 ```bash
@@ -274,7 +274,7 @@ SCOPE="global"
 ```
 
 Surface state is stored at `${RUNTIME_CONFIG_DIR}/.gsd-surface.json`
-(i.e. `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/.gsd-surface.json`).
+(i.e. `/workspace/.codex/.gsd-surface.json`).
 
 All paths can be overridden by reading the `CLAUDE_CONFIG_DIR` env var if set.
 
@@ -287,9 +287,9 @@ All paths can be overridden by reading the `CLAUDE_CONFIG_DIR` env var if set.
 - Missing `surface.cjs` → prompt: "Run `npm i -g @opengsd/gsd-core` to reinstall GSD."
 
 <execution_context>
-Surface state file: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/.gsd-surface.json`
-Install profile marker: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/.gsd-profile`
-Skill dirs: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/skills/gsd-*/`
-Engine module: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/bin/lib/surface.cjs`
-Cluster definitions: `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/bin/lib/clusters.cjs`
+Surface state file: `/workspace/.codex/.gsd-surface.json`
+Install profile marker: `/workspace/.codex/.gsd-profile`
+Skill dirs: `/workspace/.codex/skills/gsd-*/`
+Engine module: `/workspace/.codex/gsd-core/bin/lib/surface.cjs`
+Cluster definitions: `/workspace/.codex/gsd-core/bin/lib/clusters.cjs`
 </execution_context>

@@ -137,7 +137,7 @@ Scan all phases for pending, skipped, blocked, and human_needed UAT items. Cross
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/audit-uat.md
+@/workspace/.codex/gsd-core/workflows/audit-uat.md
 </execution_context>
 
 <context>

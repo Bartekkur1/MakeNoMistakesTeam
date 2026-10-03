@@ -26,9 +26,9 @@ Guide brownfield onboarding for an existing codebase by routing through the exis
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/onboard.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gate-prompts.md
+@/workspace/.claude/gsd-core/workflows/onboard.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/references/gate-prompts.md
 </execution_context>
 
 <context>

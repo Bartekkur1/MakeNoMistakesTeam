@@ -142,7 +142,7 @@ and optionally applies labels or closes non-compliant submissions.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/inbox.md
+@/workspace/.codex/gsd-core/workflows/inbox.md
 </execution_context>
 
 <context>

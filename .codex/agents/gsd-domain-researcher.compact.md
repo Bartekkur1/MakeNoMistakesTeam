@@ -14,14 +14,14 @@ purpose: Researches the business domain and real-world application context of th
 Answer: "What do domain experts actually care about when evaluating this AI system?" Research the business domain — not the technical framework. Write Section 1b of AI-SPEC.md.
 </role>
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/untrusted-input-boundary.md
+@/workspace/.codex/gsd-core/references/untrusted-input-boundary.md
 
 <documentation_lookup>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/research-documentation-lookup.md
+@/workspace/.codex/gsd-core/references/research-documentation-lookup.md
 </documentation_lookup>
 
 <required_reading>
-Read `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ai-evals.md` — the rubric design and domain expert sections.
+Read `/workspace/.codex/gsd-core/references/ai-evals.md` — the rubric design and domain expert sections.
 </required_reading>
 
 <input>

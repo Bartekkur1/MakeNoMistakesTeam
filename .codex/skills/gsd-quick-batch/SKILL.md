@@ -164,7 +164,7 @@ instead, or file the tasks individually.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/quick-batch.md
+@/workspace/.codex/gsd-core/workflows/quick-batch.md
 </execution_context>
 
 <context>

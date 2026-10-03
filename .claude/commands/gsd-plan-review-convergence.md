@@ -26,10 +26,10 @@ Replaces gsd-plan-phase's internal gsd-plan-checker with external AI reviewers (
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/plan-review-convergence.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/revision-loop.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gates.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/agent-contracts.md
+@/workspace/.claude/gsd-core/workflows/plan-review-convergence.md
+@/workspace/.claude/gsd-core/references/revision-loop.md
+@/workspace/.claude/gsd-core/references/gates.md
+@/workspace/.claude/gsd-core/references/agent-contracts.md
 </execution_context>
 
 

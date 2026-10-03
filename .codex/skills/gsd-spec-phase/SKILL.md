@@ -149,8 +149,8 @@ Clarify phase requirements through structured Socratic questioning with quantita
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/spec-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/spec.md
+@/workspace/.codex/gsd-core/workflows/spec-phase.md
+@/workspace/.codex/gsd-core/templates/spec.md
 </execution_context>
 
 

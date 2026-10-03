@@ -146,9 +146,9 @@ Does not require prior new-project setup — auto-creates `.planning/spikes/` if
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/spike.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/spike-wrap-up.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/spike.md
+@/workspace/.codex/gsd-core/workflows/spike-wrap-up.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 

@@ -146,8 +146,8 @@ Uses ROADMAP.md phase discovery and Skill() flat invocations for each phase comm
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/autonomous.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/autonomous.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

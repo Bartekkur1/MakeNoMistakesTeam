@@ -1,4 +1,4 @@
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/response-language-directive.md
+@/workspace/.codex/gsd-core/references/response-language-directive.md
 
 <purpose>
 Surface the agent's assumptions about a phase before planning, enabling users to correct misconceptions early.

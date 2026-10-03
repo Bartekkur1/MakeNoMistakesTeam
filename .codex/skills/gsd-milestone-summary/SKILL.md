@@ -140,7 +140,7 @@ Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, opt
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/milestone-summary.md
+@/workspace/.codex/gsd-core/workflows/milestone-summary.md
 </execution_context>
 
 <context>

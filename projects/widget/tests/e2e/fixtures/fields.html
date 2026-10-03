@@ -1,0 +1,10 @@
+<!doctype html><html lang="pl"><meta charset="utf-8"><title>Pola (fikcyjne)</title>
+<textarea id="notes" aria-label="Notatki">Moje imię to Ola. Darmowe Nitro: https://nitro-gift.example/x</textarea>
+<input id="field" type="text" aria-label="Pole tekstowe" value="Kod ABC-123 wpisz na stronie">
+<div id="editable" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Pole edytowalne"><p><span data-slate-string="true">Hej, wejdź na nitro-free.example i zaloguj się</span></p></div>
+<input id="secret" type="password" aria-label="Hasło" value="fikcyjne-haslo-123">
+<iframe id="ramka" title="Ramka" srcdoc="<!doctype html><html lang='pl'><p id='msg-in-frame'>Wiadomość w ramce: darmowe Nitro</p></html>"></iframe>
+<div id="obcy"></div><script>
+const root = document.querySelector('#obcy').attachShadow({mode:'open'});
+const input = document.createElement('input'); input.id = 'obcy-input'; input.type = 'text'; input.value = 'Zaloguj się na nitro-free.example'; root.append(input);
+</script></html>

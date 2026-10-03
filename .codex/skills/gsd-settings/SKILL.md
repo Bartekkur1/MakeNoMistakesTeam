@@ -144,7 +144,7 @@ Routes to the settings workflow which handles:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/settings.md
+@/workspace/.codex/gsd-core/workflows/settings.md
 </execution_context>
 
 <process>

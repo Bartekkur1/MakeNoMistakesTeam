@@ -6,7 +6,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
 
 ## Phases
 
-- [ ] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości
+- [x] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości (completed 2026-10-03)
 - [ ] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok
 - [ ] **Phase 3: Przekazanie opiekunowi i błędy** - podgląd, wysyłka, odpowiedź, obsługa awarii
 - [ ] **Phase 4: Wersja mobilna** - ta sama ścieżka jako strona w przeglądarce telefonu
@@ -23,20 +23,26 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
 
-**Plans**: 4 plans
+**Plans**: 6/6 plans complete; G-01-2-drag visually accepted; UAT 5/5 passed
 
 Plans:
 **Wave 1**
-- [ ] 01-01-PLAN.md — Bramka pakietów npm, tracer zaznacz → kliknij rekina → podgląd → zatwierdź → sprawa w service workerze, blokujący test klawiatury na Discordzie
+- [x] 01-01-PLAN.md — Bramka pakietów npm, tracer zaznacz → kliknij rekina → podgląd → zatwierdź → sprawa w service workerze, blokujący test klawiatury na Discordzie
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02-PLAN.md — Strażnik D-04 (test szpiegujący + skan źródeł, Vitest z CSS), zaznaczenie w polach i kompozytorze w prawdziwym Chromium, limit przechwytywania klawiatury, jedno zatwierdzenie = jedna sprawa
+- [x] 01-02-PLAN.md — Strażnik D-04 (test szpiegujący + skan źródeł, Vitest z CSS), zaznaczenie w polach i kompozytorze w prawdziwym Chromium, limit przechwytywania klawiatury, jedno zatwierdzenie = jedna sprawa
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-03-PLAN.md — Awatar zawsze pod ręką: przeciąganie, chowanie, przywracanie ikoną (z odzyskiem po przeładowaniu rozszerzenia), menu bez zaznaczenia, wklejanie z buforem, „Jak to działa”, okno na ekranie
+- [x] 01-03-PLAN.md — Awatar zawsze pod ręką: przeciąganie, chowanie, przywracanie ikoną (z odzyskiem po przeładowaniu rozszerzenia), menu bez zaznaczenia, wklejanie z buforem, „Jak to działa”, okno na ekranie
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 01-04-PLAN.md — Szkic na karcie (D-12, D-17, prawdziwy bfcache), link z zaznaczenia, przypadki brzegowe treści, uczciwa awaria i spóźnione odpowiedzi, README z listą kontrolną demo w Google Chrome
+- [x] 01-04-PLAN.md — Szkic na karcie (D-12, D-17, prawdziwy bfcache), link z zaznaczenia, przypadki brzegowe treści, uczciwa awaria i spóźnione odpowiedzi, README z listą kontrolną demo w Google Chrome
+
+**Wave 5 — UAT gap closure**
+- [x] 01-05-PLAN.md — G-01-2: chowanie rekina w formularzu widgetu i powrót po zamknięciu
+
+**Wave 6 — revised UAT gap closure**
+- [x] 01-06-PLAN.md — G-01-2-drag: otwarty panel podąża za widocznym rekinem
 
 **UI hint**: yes
 

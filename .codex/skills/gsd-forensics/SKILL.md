@@ -140,7 +140,7 @@ Output: Forensic report saved to `.planning/forensics/`, presented inline, with 
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/forensics.md
+@/workspace/.codex/gsd-core/workflows/forensics.md
 </execution_context>
 
 <context>

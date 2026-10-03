@@ -148,11 +148,11 @@ Brownfield equivalent of new-project. Project exists, PROJECT.md has history. Ga
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/new-milestone.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/questioning.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/project.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/requirements.md
+@/workspace/.codex/gsd-core/workflows/new-milestone.md
+@/workspace/.codex/gsd-core/references/questioning.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/templates/project.md
+@/workspace/.codex/gsd-core/templates/requirements.md
 </execution_context>
 
 <context>
