@@ -1,18 +1,18 @@
 ---
 gsd_state_version: "1.0"
 current_phase: 01
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-10-03T17:08:19.734Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-10-03T17:21:05.756Z"
 last_activity: 2026-10-03
-last_activity_desc: Plan 01-03 complete (health tracer, demo login and bearer sessions, API-06)
-state_head: d77ab084903a4878aa52aec4ee70b59a44eee78d
+last_activity_desc: Plan 01-04 complete (report submit, detail and paginated list on Postgres functions, API-01 part)
+state_head: c20cb0828c5f57a4aac243a68f118a57d8730aec
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 workstream: web-app
 created: 2026-10-03
@@ -23,26 +23,26 @@ current_phase_name: Kontrakt i backend spraw
 
 ## Current Position
 
-Current Plan: 4
+Current Plan: 5
 Total Plans in Phase: 6
 
 **Status:** Ready to execute
 **Current Phase:** 01
-**Last Activity:** 2026-10-03 — Plan 01-03 complete
-**Last Activity Description:** Plan 01-03 complete (health tracer, demo login and bearer sessions, API-06)
+**Last Activity:** 2026-10-03 — Plan 01-04 complete
+**Last Activity Description:** Plan 01-04 complete (report submit, detail and paginated list on Postgres functions, API-01 part)
 
 ## Progress
 
 Progress: [░░░░░░░░░░] 0%
 
 **Phases Complete:** 0
-**Current Plan:** 4
+**Current Plan:** 5
 
 ## Session Continuity
 
-**Last session:** 2026-10-03T17:08:19.723Z
+**Last session:** 2026-10-03T17:20:59.054Z
 
-**Stopped At:** Completed 01-03-PLAN.md
+**Stopped At:** Completed 01-04-PLAN.md
 **Resume File:** None
 
 ## Performance Metrics
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P01 | 12min | 3 tasks | 22 files |
 | Phase 01 P02 | 1min | 3 tasks | 4 files |
 | Phase 01 P03 | 13min | 2 tasks | 16 files |
+| Phase 01 P04 | 9min | 3 tasks | 13 files |
 
 ## Decisions
 
@@ -63,3 +64,6 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 01]: 01-03: vite pinned via package.json overrides {vite: ^7.0.0} (user-approved approve-override) after npm 10.9.8 crashed resolving vitest 4.1.11 against vite 8 devtools peers; installed vitest 4.1.11, vite 7.3.6
 - [Phase 01]: 01-03: verifyToken compares the base64url signature text with timingSafeEqual (not decoded bytes) so altered padding bits in the last character are rejected
 - [Phase 01]: 01-03: fakeSupabase.reset() keeps rpcHandlers (persistent registry for 01-04/01-05 fake RPCs)
+- [Phase 01]: 01-04: omitted taken_actions means [] (approved contract wins over the plan bullet); a present non-list value is 400; duplicates are 400 (plan + checker), and the CONTRACT.md prose saying the server deduplicates needs the owner to align it
+- [Phase 01]: 01-04: writes go through Postgres functions (create_report, list_reports); every function gets revoke-from-public/anon/authenticated + grant-to-service_role, enforced by schema-mirror.test.ts
+- [Phase 01]: 01-04: decodeCursor accepts only the canonical base64url {c, i} encoding; list_reports raises on an empty scope, a bad limit or a half cursor
