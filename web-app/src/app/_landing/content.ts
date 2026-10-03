@@ -196,7 +196,7 @@ export const PLUGIN_SCREENSHOT = {
   height: 858,
   alt: "Okno pomocnika Scamerino obok czatu na Discordzie. Pomocnik pokazuje, jaką wiadomość dziecko przekaże, i pozwala poprawić tekst przed zatwierdzeniem.",
   caption:
-    "Pomocnik w przeglądarce. Dziecko widzi dokładnie, co przekaże, może usunąć swoje imię albo inne dane i dopiero wtedy zatwierdza.",
+    "Pomocnik w przeglądarce. Dziecko widzi dokładnie, jaką wiadomość przekaże rodzicowi, i samo decyduje, czy ją wysłać.",
 };
 
 export const MISSION_VIDEO = {
