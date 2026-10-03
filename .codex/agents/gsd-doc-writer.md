@@ -34,7 +34,7 @@ If the prompt contains a `<required_reading>` block, you MUST use the `Read` too
 
 **Project skills:** Check `.codex/skills/` or `.agents/skills/` directory if either exists:
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.codex/gsd-core/references/agent-skills-bootstrap.md
 1. List available skills (subdirectories)
 2. Read `SKILL.md` for each skill (lightweight index ~130 lines)
 3. Load specific `rules/*.md` files as needed during implementation

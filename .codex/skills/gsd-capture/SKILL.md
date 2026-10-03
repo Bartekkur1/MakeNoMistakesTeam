@@ -158,13 +158,13 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/add-todo.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/note.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/add-backlog.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/plant-seed.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/check-todos.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/list-seeds.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/add-todo.md
+@/workspace/.codex/gsd-core/workflows/note.md
+@/workspace/.codex/gsd-core/workflows/add-backlog.md
+@/workspace/.codex/gsd-core/workflows/plant-seed.md
+@/workspace/.codex/gsd-core/workflows/check-todos.md
+@/workspace/.codex/gsd-core/workflows/list-seeds.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

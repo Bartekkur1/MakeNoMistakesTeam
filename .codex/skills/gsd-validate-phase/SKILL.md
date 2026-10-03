@@ -142,7 +142,7 @@ Output: updated VALIDATION.md + generated test files.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/validate-phase.md
+@/workspace/.codex/gsd-core/workflows/validate-phase.md
 </execution_context>
 
 <context>

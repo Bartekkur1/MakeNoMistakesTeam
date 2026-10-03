@@ -12,7 +12,7 @@ Run a ≤6-question interview, score frameworks, return a ranked recommendation 
 </role>
 
 <required_reading>
-Read `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ai-frameworks.md` before asking questions. This is your decision matrix.
+Read `/workspace/.claude/gsd-core/references/ai-frameworks.md` before asking questions. This is your decision matrix.
 </required_reading>
 
 <project_context>

@@ -139,7 +139,7 @@ doesn't belong to any specific phase.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/thread.md
+@/workspace/.codex/gsd-core/workflows/thread.md
 </execution_context>
 
 <process>

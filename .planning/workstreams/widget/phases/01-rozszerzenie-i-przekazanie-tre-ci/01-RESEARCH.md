@@ -39,7 +39,7 @@
 - To **zmienia starszy model** z HND-02 / `ideas/defence/koncepcja.md` (opcjonalny przycisk „Pokaż opiekunowi”). Przed fazą 3 trzeba zaktualizować REQUIREMENTS i uzgodnić kontrakt z `api-ui`.
 
 ### Claude's Discretion
-- Struktura katalogu `widget/` (content script / service worker / popup), bundler lub jego brak, framework UI (np. vanilla + Shadow DOM, Preact).
+- Struktura katalogu `projects/widget/` (content script / service worker / popup), bundler lub jego brak, framework UI (np. vanilla + Shadow DOM, Preact).
 - Izolacja stylów okna od strony (Shadow DOM zalecany, żeby strony nie psuły wyglądu i odwrotnie).
 - Pozycja startowa awatara (np. prawy dolny róg z odstępem od pól pisania Discorda) i czy pozycja po przeciągnięciu jest pamiętana (sama pozycja to nie treść, więc może trafić do `chrome.storage`).
 - Nawigacja SPA (np. zmiana kanału w Discordzie bez przeładowania): domyślnie **nie** kasuje szkicu. Kasuje go tylko przeładowanie lub zmiana dokumentu.
@@ -65,11 +65,11 @@
 ## Project Constraints (from CLAUDE.md)
 
 There is no `./CLAUDE.md` or `./.claude/CLAUDE.md` in the repo, and no project skills (`.claude/skills/`, `.agents/skills/` absent). `[VERIFIED: ls in this session]` These directives apply instead:
-- Code goes **only** in `widget/`. `.planning/shared/` is read-only (source: `.planning/shared/README.md:13`, verbatim: "Każdy workstream pracuje wyłącznie w `.planning/workstreams/<nazwa>/` i w swoim katalogu kodu (`api-ui/`, `widget/`, `roblox/`, `presentation/`)."). Reading `assets/` at build time is fine. Do not modify `assets/Scamerino_Alertinio.png`.
+- Code goes **only** in `projects/widget/`. `.planning/shared/` is read-only (source: `.planning/shared/README.md:13`, verbatim: "Każdy workstream pracuje wyłącznie w `.planning/workstreams/<nazwa>/` i w swoim katalogu kodu (`projects/api-ui/`, `projects/widget/`, `projects/roblox/`, `projects/presentation/`)."). Reading `assets/` at build time is fine. Do not modify `assets/Scamerino_Alertinio.png`.
 - No secrets in the extension (source: `.planning/shared/CONTRACT.md:41`, verbatim: "Sekrety nigdy w kliencie (Roblox, rozszerzenie).").
 - Docs commits use `docs(...)`. The user's standing rule is that **every git commit needs explicit user confirmation** (user memory). The planner and executor must not auto-commit without that confirmation.
 - Demo uses fictional data only (`.planning/PROJECT.md` Constraints: "tylko fikcyjne dane").
-- There is no root `.gitignore`. `widget/` needs its own `.gitignore` (`node_modules/`, `dist/`, `test-results/`, `playwright-report/`).
+- There is no root `.gitignore`. `projects/widget/` needs its own `.gitignore` (`node_modules/`, `dist/`, `test-results/`, `playwright-report/`).
 
 ## Summary
 
@@ -120,9 +120,9 @@ Strict page CSP is a non-issue for content-script DOM. Under `default-src 'self'
 | Shadow DOM panel | Extension-page iframe (`chrome-extension://…/panel.html` as a web-accessible resource) | Full keystroke, style and content isolation from the page (it loaded even under `frame-src 'none'` in the probe). The cost is two contexts plus messaging. Keep it as the **fallback** if Discord steals keystrokes (Pitfall 3). |
 | Plain JS | TypeScript 7.0.2 (published today) | Type safety, but adds a compile step or `@types/chrome` setup. Skip for the hackathon. |
 
-**Installation (inside `widget/`):**
+**Installation (inside `projects/widget/`):**
 ```bash
-cd widget
+cd projects/widget
 npm init -y
 npm install --save-dev --save-exact esbuild@0.28.2 vitest@5.0.1 happy-dom@20.14.5 @playwright/test@1.63.0
 npx playwright install chromium   # bundled Chromium; or use system /usr/bin/chromium via executablePath (verified to load extensions)
@@ -178,7 +178,7 @@ Command run: `gsd-tools query package-legitimacy check --ecosystem npm esbuild v
 
 ### Recommended Project Structure
 ```
-widget/
+projects/widget/
 ├── package.json            # scripts: build, watch, test, test:e2e
 ├── build.mjs               # esbuild → dist/; copies manifest + icons from ../assets/widget-avatar/
 ├── manifest.json           # source manifest (copied to dist/)
@@ -194,7 +194,7 @@ widget/
 │   ├── ui/
 │   │   ├── panel.js        # views: menu, paste, preview, howto, confirmation (pure DOM, no chrome.*)
 │   │   ├── strings.pl.js   # every Polish string in one place (D-16)
-│   │   └── widget.css      # imported as text; palette imported from ../../../assets/
+│   │   └── widget.css      # imported as text; palette imported from ../../../../assets/
 │   ├── core/
 │   │   ├── draft.js        # per-tab draft state machine (memory only)
 │   │   ├── case.js         # buildCase({text, link, origin}) → normalized, length-capped object
@@ -237,7 +237,7 @@ Notes: `run_at` defaults to `document_idle` and `all_frames` defaults to `false`
 ```js
 // src/content/host.js
 import widgetCss from '../ui/widget.css';                  // esbuild loader: text
-import paletteCss from '../../../assets/scamerino_palette.css';
+import paletteCss from '../../../../assets/scamerino_palette.css';
 
 export function createHost(doc = document) {
   const host = doc.createElement('bezpieczna-aura-widget'); // DON'T call customElements.define: it is null in content scripts
@@ -605,7 +605,7 @@ ASVS level 1 (`security_asvs_level: 1`), `security_block_on: high`.
    - Resolution: `attachShadow({ mode: 'open' })` in plan 01-01 Task 2, accepted as threat T-01-06. The iframe panel is the fallback if the blocking Discord keyboard check at the end of the plan 01-01 tracer fails (Pitfall 3).
 3. **Remember the dragged position?** RESOLVED: no stored position in phase 1 (plan default). The position lives in memory only and resets on reload, so the manifest keeps no `storage` permission and "the extension has no storage permission" stays a clean privacy claim. Implemented in plan 01-03 Task 1.
 4. **Auto-fill the link field from a URL inside the selected text?** RESOLVED: yes, from the selected text only (plan default). `extractFirstLink` runs a regex on the selected text and never on DOM `href`s; pasted links come only from the link field, and the child can edit or clear the pre-filled link. Implemented in plan 01-04 Task 1.
-5. **Demo browser:** RESOLVED by the user as **D-18** (2026-10-03): the demo runs in Google Chrome (load unpacked through the UI); E2E tests run on the local Chromium at `/usr/bin/chromium`. The Google Chrome load steps and the pre-demo checklist are in `widget/README.md` (plan 01-04 Task 2).
+5. **Demo browser:** RESOLVED by the user as **D-18** (2026-10-03): the demo runs in Google Chrome (load unpacked through the UI); E2E tests run on the local Chromium at `/usr/bin/chromium`. The Google Chrome load steps and the pre-demo checklist are in `projects/widget/README.md` (plan 01-04 Task 2).
 
 ## Sources
 

@@ -26,7 +26,7 @@ Flag handling rule:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/docs-update.md
+@/workspace/.claude/gsd-core/workflows/docs-update.md
 </execution_context>
 
 <context>

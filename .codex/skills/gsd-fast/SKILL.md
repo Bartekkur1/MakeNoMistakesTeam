@@ -143,7 +143,7 @@ you could describe in one sentence and execute in under 2 minutes.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/fast.md
+@/workspace/.codex/gsd-core/workflows/fast.md
 </execution_context>
 
 <process>

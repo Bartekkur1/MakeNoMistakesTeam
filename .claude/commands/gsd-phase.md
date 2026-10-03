@@ -32,10 +32,10 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/add-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/insert-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/remove-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/edit-phase.md
+@/workspace/.claude/gsd-core/workflows/add-phase.md
+@/workspace/.claude/gsd-core/workflows/insert-phase.md
+@/workspace/.claude/gsd-core/workflows/remove-phase.md
+@/workspace/.claude/gsd-core/workflows/edit-phase.md
 </execution_context>
 
 <context>

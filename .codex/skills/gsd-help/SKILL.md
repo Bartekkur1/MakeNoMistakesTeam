@@ -143,7 +143,7 @@ Output ONLY the reference content of the chosen tier. Do NOT add:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/help.md
+@/workspace/.codex/gsd-core/workflows/help.md
 </execution_context>
 
 <context>
@@ -151,5 +151,5 @@ Arguments: {{GSD_ARGS}}
 </context>
 
 <process>
-Follow /home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/help.md with {{GSD_ARGS}}.
+Follow /workspace/.codex/gsd-core/workflows/help.md with {{GSD_ARGS}}.
 </process>

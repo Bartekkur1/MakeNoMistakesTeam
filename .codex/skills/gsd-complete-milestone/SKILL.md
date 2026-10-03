@@ -142,8 +142,8 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
 <execution_context>
 **Load these files NOW (before proceeding):**
 
-- @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/complete-milestone.md (main workflow)
-- @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/milestone-archive.md (archive template)
+- @/workspace/.codex/gsd-core/workflows/complete-milestone.md (main workflow)
+- @/workspace/.codex/gsd-core/templates/milestone-archive.md (archive template)
   </execution_context>
 
 <context>

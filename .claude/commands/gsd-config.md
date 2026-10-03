@@ -33,9 +33,9 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/settings.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/settings-advanced.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/settings-integrations.md
+@/workspace/.claude/gsd-core/workflows/settings.md
+@/workspace/.claude/gsd-core/workflows/settings-advanced.md
+@/workspace/.claude/gsd-core/workflows/settings-integrations.md
 </execution_context>
 
 <context>

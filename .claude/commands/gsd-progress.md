@@ -32,10 +32,10 @@ Three modes:
 </flags>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/progress.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/next.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/do.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/workflows/progress.md
+@/workspace/.claude/gsd-core/workflows/next.md
+@/workspace/.claude/gsd-core/workflows/do.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
 </execution_context>
 
 <process>

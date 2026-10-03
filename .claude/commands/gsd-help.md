@@ -16,7 +16,7 @@ Output ONLY the reference content of the chosen tier. Do NOT add:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/help.md
+@/workspace/.claude/gsd-core/workflows/help.md
 </execution_context>
 
 <context>
@@ -24,5 +24,5 @@ Arguments: $ARGUMENTS
 </context>
 
 <process>
-Follow /home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/help.md with $ARGUMENTS.
+Follow /workspace/.claude/gsd-core/workflows/help.md with $ARGUMENTS.
 </process>

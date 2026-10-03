@@ -144,9 +144,9 @@ Phase 1 of the vertical-mvp-slice PRD shipped the planner-side machinery; this c
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/mvp-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/spidr-splitting.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/user-story-template.md
+@/workspace/.codex/gsd-core/workflows/mvp-phase.md
+@/workspace/.codex/gsd-core/references/spidr-splitting.md
+@/workspace/.codex/gsd-core/references/user-story-template.md
 </execution_context>
 
 
@@ -158,6 +158,6 @@ The phase must already exist in ROADMAP.md (created via `/gsd new-project`, `/gs
 </context>
 
 <process>
-Execute the mvp-phase workflow from @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/mvp-phase.md end-to-end.
+Execute the mvp-phase workflow from @/workspace/.codex/gsd-core/workflows/mvp-phase.md end-to-end.
 Preserve all gates: phase existence, status guard (refuse in_progress/completed), user-story format validation, SPIDR splitting check, ROADMAP write confirmation, plan-phase delegation.
 </process>

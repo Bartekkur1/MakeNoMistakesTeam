@@ -8,8 +8,8 @@
 
 ### Rozszerzenie
 
-- [ ] **WID-01**: Użytkownik uruchamia awatara w rozszerzeniu na komputerze
-- [ ] **WID-02**: Użytkownik przekazuje zaznaczoną treść albo wkleja wiadomość/link ręcznie; dostęp do strony tylko na działanie użytkownika
+- [x] **WID-01**: Użytkownik uruchamia awatara w rozszerzeniu na komputerze
+- [x] **WID-02**: Użytkownik przekazuje zaznaczoną treść albo wkleja wiadomość/link ręcznie; dostęp do strony tylko na działanie użytkownika
 
 ### Ścieżka sprawdzania
 
@@ -46,8 +46,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WID-01 | Phase 1 | Pending |
-| WID-02 | Phase 1 | Pending |
+| WID-01 | Phase 1 | Complete |
+| WID-02 | Phase 1 | Complete |
 | CHK-01 | Phase 2 | Pending |
 | CHK-02 | Phase 2 | Pending |
 | CHK-03 | Phase 2 | Pending |

@@ -137,7 +137,7 @@ Extract structured learnings from completed phase artifacts (PLAN.md, SUMMARY.md
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/extract-learnings.md
+@/workspace/.codex/gsd-core/workflows/extract-learnings.md
 </execution_context>
 
-Execute the extract-learnings workflow from @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/extract-learnings.md end-to-end.
+Execute the extract-learnings workflow from @/workspace/.codex/gsd-core/workflows/extract-learnings.md end-to-end.

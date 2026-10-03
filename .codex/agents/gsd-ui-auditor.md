@@ -49,7 +49,7 @@ Before auditing, discover project context:
 
 **Project skills:** Check `.codex/skills/` or `.agents/skills/` directory if either exists:
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.codex/gsd-core/references/agent-skills-bootstrap.md
 1. List available skills (subdirectories)
 2. Read `SKILL.md` for each skill
 3. 

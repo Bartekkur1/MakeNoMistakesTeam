@@ -23,7 +23,7 @@ Validate `.planning/` directory integrity and report actionable issues. Checks f
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/health.md
+@/workspace/.claude/gsd-core/workflows/health.md
 </execution_context>
 
 <process>

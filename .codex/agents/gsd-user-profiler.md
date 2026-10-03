@@ -46,7 +46,7 @@ Key characteristics of the input:
 </input>
 
 <reference>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/user-profiling.md
+@/workspace/.codex/gsd-core/references/user-profiling.md
 
 This is the detection heuristics rubric. Read it in full before analyzing any messages. It defines:
 - The 8 dimensions and their rating spectrums
@@ -60,7 +60,7 @@ This is the detection heuristics rubric. Read it in full before analyzing any me
 <process>
 
 <step name="load_rubric">
-Read the user-profiling reference document at `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/user-profiling.md` to load:
+Read the user-profiling reference document at `/workspace/.codex/gsd-core/references/user-profiling.md` to load:
 - All 8 dimension definitions with rating spectrums
 - Signal patterns and detection heuristics per dimension
 - Confidence scoring thresholds (HIGH: 10+ signals across 2+ projects, MEDIUM: 5-9, LOW: <5, UNSCORED: 0)
