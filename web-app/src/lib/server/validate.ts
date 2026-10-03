@@ -8,14 +8,17 @@ import {
   LIMITS,
   LOGIN_SCOPES,
   REPORT_SOURCES,
+  REPORT_STATES,
   TAKEN_ACTIONS,
   type AttackType,
   type FieldError,
   type LoginScope,
   type NewReportInput,
   type ReportSource,
+  type ReportState,
   type TakenAction,
 } from "@/lib/contract/types";
+import { decodeCursor, type CursorPosition } from "./pagination";
 
 export type ValidationResult<T> = { ok: true; value: T } | { ok: false; errors: FieldError[] };
 
@@ -152,4 +155,57 @@ export function parseNewReport(body: Record<string, unknown>): ValidationResult<
       content,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/reports query (contract "Paginacja", D-16)
+// ---------------------------------------------------------------------------
+
+export interface ListQuery {
+  limit: number;
+  cursor: CursorPosition | null;
+  state: ReportState | null;
+}
+
+function isReportState(value: unknown): value is ReportState {
+  return typeof value === "string" && (REPORT_STATES as readonly string[]).includes(value);
+}
+
+// limit 1..100 (default 20), cursor taken verbatim from next_cursor, optional state filter.
+// Other parameters are ignored.
+export function parseListQuery(params: URLSearchParams): ValidationResult<ListQuery> {
+  const errors: FieldError[] = [];
+
+  let limit: number = LIMITS.pageDefault;
+  const rawLimit = params.get("limit");
+  if (rawLimit !== null) {
+    const parsed = /^\d+$/.test(rawLimit) ? Number(rawLimit) : NaN;
+    if (Number.isInteger(parsed) && parsed >= 1 && parsed <= LIMITS.pageMax) {
+      limit = parsed;
+    } else {
+      errors.push({ field: "limit", message: "Parametr limit musi być liczbą od 1 do 100." });
+    }
+  }
+
+  let cursor: CursorPosition | null = null;
+  const rawCursor = params.get("cursor");
+  if (rawCursor !== null) {
+    cursor = decodeCursor(rawCursor);
+    if (cursor === null) {
+      errors.push({ field: "cursor", message: "Nieprawidłowy kursor — użyj wartości next_cursor." });
+    }
+  }
+
+  let state: ReportState | null = null;
+  const rawState = params.get("state");
+  if (rawState !== null) {
+    if (isReportState(rawState)) {
+      state = rawState;
+    } else {
+      errors.push({ field: "state", message: "Nieznany stan zgłoszenia." });
+    }
+  }
+
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, value: { limit, cursor, state } };
 }

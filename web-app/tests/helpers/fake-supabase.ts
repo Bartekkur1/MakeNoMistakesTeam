@@ -506,18 +506,16 @@ fakeSupabase.rpcHandlers.list_reports = (args, fake) => {
   if (typeof limit !== "number" || !Number.isInteger(limit) || limit < 1 || limit > 101) {
     return raise("list_reports: limit must be between 1 and 101");
   }
+  if ((cursorCreated === null) !== (cursorId === null)) {
+    return raise("list_reports: cursor needs both created_at and id");
+  }
 
   const rows = fake.tables.reports
     .filter((r) => parentId === null || r.parent_id === parentId)
     .filter((r) => childIds === null || childIds.includes(String(r.child_id)))
     .filter((r) => states === null || states.includes(String(r.state)))
     .filter((r) => state === null || r.state === state)
-    .filter(
-      (r) =>
-        cursorCreated === null ||
-        cursorId === null ||
-        compareCreatedId(r.created_at, r.id, cursorCreated, cursorId) < 0,
-    )
+    .filter((r) => cursorCreated === null || compareCreatedId(r.created_at, r.id, cursorCreated, cursorId) < 0)
     .sort((a, b) => compareCreatedId(b.created_at, b.id, a.created_at, a.id))
     .slice(0, limit);
   return { data: rows.map((r) => clone(r)), error: null };

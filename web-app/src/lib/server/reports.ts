@@ -28,7 +28,9 @@ import {
   type ReportState,
   type TakenAction,
 } from "@/lib/contract/types";
+import type { ListScope } from "./access";
 import { StorageUnavailableError } from "./errors";
+import type { CursorPosition } from "./pagination";
 import { getSupabase } from "./supabase";
 
 export const REPORT_COLUMNS = REPORT_FIELDS.join(",");
@@ -234,4 +236,34 @@ export async function getReportTimeline(id: string): Promise<ReportTimeline> {
     history: mapList(historyData, mapHistoryEntry),
     comments: mapList(commentData, mapComment),
   };
+}
+
+export interface ListReportsInput {
+  scope: ListScope;
+  state: ReportState | null;
+  cursor: CursorPosition | null;
+  // The page size + 1, so paginate() can tell whether another page exists.
+  fetchLimit: number;
+}
+
+// One page of visible reports, newest first (created_at desc, id desc), via public.list_reports.
+export async function listReports({ scope, state, cursor, fetchLimit }: ListReportsInput): Promise<Report[]> {
+  if (scope.parentId === null && scope.childIds === null) {
+    // A programming error, never "all reports" (T-01-26).
+    throw new Error("list scope required");
+  }
+  if (scope.childIds !== null && scope.childIds.length === 0) return [];
+
+  const data = await run("list_reports", () =>
+    getSupabase().rpc("list_reports", {
+      p_parent_id: scope.parentId,
+      p_child_ids: scope.childIds,
+      p_states: scope.states === null ? null : [...scope.states],
+      p_state: state,
+      p_cursor_created_at: cursor === null ? null : cursor.createdAt,
+      p_cursor_id: cursor === null ? null : cursor.id,
+      p_limit: fetchLimit,
+    }),
+  );
+  return mapList(data, mapReport);
 }

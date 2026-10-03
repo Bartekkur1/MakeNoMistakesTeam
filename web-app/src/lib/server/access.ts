@@ -2,8 +2,14 @@
 // the reports of children in their own classes, and only once a parent approved them
 // (TEACHER_VISIBLE_STATES). Anything an account may not see answers 404 like a missing report.
 
-import { TEACHER_VISIBLE_STATES, type AccountInfo, type ChildInfo, type Report } from "@/lib/contract/types";
-import { demoChildOfParent, teacherTeachesChild } from "@/lib/contract/demo-accounts";
+import {
+  TEACHER_VISIBLE_STATES,
+  type AccountInfo,
+  type ChildInfo,
+  type Report,
+  type ReportState,
+} from "@/lib/contract/types";
+import { demoChildOfParent, demoChildrenForAccount, teacherTeachesChild } from "@/lib/contract/demo-accounts";
 
 type ReportAccess = Pick<Report, "parent_id" | "child_id" | "state">;
 
@@ -28,4 +34,24 @@ export function childForNewReport(account: AccountInfo): ChildInfo {
     throw new Error("no demo child for this account");
   }
   return child;
+}
+
+// What GET /api/reports may return for an account (D-15). The same rule as canView, expressed as
+// filters for public.list_reports. A scope always names a parent or a list of children; an empty
+// scope is never "all reports" (listReports rejects it).
+export interface ListScope {
+  parentId: string | null;
+  childIds: string[] | null;
+  states: readonly ReportState[] | null;
+}
+
+export function listScopeFor(account: AccountInfo): ListScope {
+  if (account.role === "parent") {
+    return { parentId: account.id, childIds: null, states: null };
+  }
+  return {
+    parentId: null,
+    childIds: demoChildrenForAccount(account).map((child) => child.id),
+    states: TEACHER_VISIBLE_STATES,
+  };
 }

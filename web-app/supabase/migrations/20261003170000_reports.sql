@@ -171,3 +171,51 @@ $$;
 
 revoke execute on function public.create_report(uuid, uuid, text, text[], text, text) from public, anon, authenticated;
 grant execute on function public.create_report(uuid, uuid, text, text[], text, text) to service_role;
+
+-- ---------------------------------------------------------------------------
+-- list_reports: one page of visible reports, newest first (D-15, D-16)
+-- ---------------------------------------------------------------------------
+-- The server computes the scope: a parent passes p_parent_id; a teacher passes p_child_ids
+-- (own-class children) and p_states (with_teacher, escalated, closed). An empty scope raises,
+-- so a bug can never turn into "all reports". The cursor is the (created_at, id) of the last
+-- row of the previous page; p_limit is the page size + 1 (at most 101).
+
+create function public.list_reports(
+  p_parent_id uuid,
+  p_child_ids uuid[],
+  p_states text[],
+  p_state text,
+  p_cursor_created_at timestamptz,
+  p_cursor_id uuid,
+  p_limit integer
+) returns setof public.reports
+language plpgsql
+stable
+set search_path = public
+as $$
+begin
+  if p_parent_id is null and p_child_ids is null then
+    raise exception 'list_reports: parent or child scope required';
+  end if;
+  if p_limit is null or p_limit < 1 or p_limit > 101 then
+    raise exception 'list_reports: limit must be between 1 and 101';
+  end if;
+  if (p_cursor_created_at is null) <> (p_cursor_id is null) then
+    raise exception 'list_reports: cursor needs both created_at and id';
+  end if;
+
+  return query
+    select *
+    from public.reports
+    where (p_parent_id is null or parent_id = p_parent_id)
+      and (p_child_ids is null or child_id = any(p_child_ids))
+      and (p_states is null or state = any(p_states))
+      and (p_state is null or state = p_state)
+      and (p_cursor_created_at is null or (created_at, id) < (p_cursor_created_at, p_cursor_id))
+    order by created_at desc, id desc
+    limit p_limit;
+end;
+$$;
+
+revoke execute on function public.list_reports(uuid, uuid[], text[], text, timestamptz, uuid, integer) from public, anon, authenticated;
+grant execute on function public.list_reports(uuid, uuid[], text[], text, timestamptz, uuid, integer) to service_role;
