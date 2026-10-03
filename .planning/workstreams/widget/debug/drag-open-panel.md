@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: resolved
 gap_id: G-01-2-drag
 ---
 
@@ -23,3 +23,7 @@ Avatar movement does not notify panel positioning. Reusing render for drag would
 Keep avatar visible and active. Notify main on position changes; call only panel.place for open panel. Preserve clamp and click suppression. Test real browser movement with open menu, howto, paste, preview and confirmation, including viewport edges and resize.
 
 Diagnosis and planning performed inline per Codex skill adapter; no subagents dispatched. No product files changed.
+
+## Resolution
+
+01-06 executed; current automated suites pass. User confirmed `pass` for the revised drag checkpoint; all five phase UAT tests pass.

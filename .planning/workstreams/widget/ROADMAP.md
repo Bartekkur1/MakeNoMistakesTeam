@@ -6,7 +6,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
 
 ## Phases
 
-- [ ] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości
+- [x] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości (completed 2026-10-03)
 - [ ] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok
 - [ ] **Phase 3: Przekazanie opiekunowi i błędy** - podgląd, wysyłka, odpowiedź, obsługa awarii
 - [ ] **Phase 4: Wersja mobilna** - ta sama ścieżka jako strona w przeglądarce telefonu
@@ -23,7 +23,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
 
-**Plans**: 6/6 plans executed; G-01-2-drag implemented, visual retest pending
+**Plans**: 6/6 plans complete; G-01-2-drag visually accepted; UAT 5/5 passed
 
 Plans:
 **Wave 1**

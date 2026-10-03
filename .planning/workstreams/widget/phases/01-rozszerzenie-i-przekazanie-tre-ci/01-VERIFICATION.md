@@ -1,7 +1,7 @@
 ---
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
 verified: "2026-10-03T18:14:22.158811+00:00"
-status: human_needed
+status: passed
 score: "4/4 current gap-plan truths verified; prior phase proof retained; 4/5 UAT passed"
 behavior_unverified: 0
 covered_digest: "v2:sha256:c7b73a274bc24156ce2ae18bdde0698fe7b12658a9e344ab82070ac672375538"
@@ -58,6 +58,7 @@ covered_files:
   - widget/tests/unit/presence.test.js
   - widget/tests/unit/source-scan.test.js
   - widget/vitest.config.mjs
+
 overrides_applied: 1
 overrides:
   - must_have: "Rekin i jego przycisk schowania znikają w formularzach paste i preview, także podczas zatwierdzania i błędu wysyłki. Formularz pozostaje widoczny i obsługiwalny."

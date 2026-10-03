@@ -65,3 +65,7 @@ Mitigations verified against source and passing tests. Final demo behavior and t
 ## 01-05 regression assessment
 
 The gap changes only avatar visibility and inert interaction state. No new trust boundary, permission, package, storage, capture or send path. Existing mitigations remain exercised by the passing privacy/source-scan suite and full browser suite. threats_open remains 0.
+
+## Security Audit 2026-10-03 — UAT close-out
+
+L1 short-circuit: plan-authored register retained; 27 registered threats remain closed, threats_open: 0. Latest source review and privacy/consent regressions are recorded in 01-06-SUMMARY and REVIEW; drag changes geometry only. Five human UAT tests now pass. No additional accepted risk introduced.

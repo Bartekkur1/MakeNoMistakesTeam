@@ -6,12 +6,12 @@
     {
       "number": "1",
       "name": "Rozszerzenie i przekazanie treści",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "2",
       "name": "Ścieżka sprawdzania",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "number": "3",
@@ -25,9 +25,9 @@
     }
   ],
   "next": {
-    "command": "$gsd-verify-work 1 --ws widget",
-    "label": "Retest G-01-2",
-    "reason": "Phase 01: 5/5 plans executed; visual acceptance pending"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 4 — needs a plan"
   },
-  "updated_at": "2026-10-03T17:51:57.542687+00:00"
+  "updated_at": "2026-10-03T18:17:28.264Z"
 }
