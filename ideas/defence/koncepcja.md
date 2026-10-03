@@ -4,7 +4,7 @@ Koncepcja na HackYeah 2026, ścieżka Defence. Nazwa robocza.
 
 ## Pomysł
 
-Pomocnik w postaci własnego, kreskówkowego awatara uczy dzieci 10–13 lat rozpoznawać phishing, wyłudzanie danych i pułapki zakupowe. Działa w treningu szkolnym oraz pomaga przy podejrzanej wiadomości z gry, maila, SMS-a lub Discorda.
+Pomocnik w postaci własnego, kreskówkowego awatara uczy dzieci 9–13 lat rozpoznawać phishing, wyłudzanie danych i pułapki zakupowe. Działa w treningu szkolnym oraz pomaga przy podejrzanej wiadomości z gry, maila, SMS-a lub Discorda.
 
 Dziecko przekazuje wybraną treść, link lub zrzut ekranu. Pomocnik zadaje krótkie pytania, wyjaśnia sygnały zagrożenia i proponuje następny krok: sprawdzenie oficjalnym kanałem, zakończenie kontaktu, zgłoszenie na platformie albo prośbę o pomoc opiekuna. Nie gwarantuje, że wiadomość jest bezpieczna.
 
