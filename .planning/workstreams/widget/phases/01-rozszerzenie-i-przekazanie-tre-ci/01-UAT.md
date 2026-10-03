@@ -103,8 +103,8 @@ przesuniecie rekina powinno przesunac tez otwarte okna, rekin jednak nie musi zn
 > result: issue
 > reported: "2 wiekszosc pass, rekin powinien znikac kiedy pojawia sie pole do wpisywania (chyba, ze nie jest to zgodne z wymaganiami)"
 > severity: minor
-> 
-> 
+>
+>
 
 ## Gap closure execution 01-06
 
