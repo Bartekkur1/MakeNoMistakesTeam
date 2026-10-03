@@ -196,3 +196,10 @@
 }
 .slidev-layout ul.checks { list-style: none; }
 .slidev-layout ul.checks li { margin-left: 0; padding-left: 0; }
+
+/* Źródła w kartach: zawsze jedna linia, żeby linie podziału były na jednym poziomie */
+.card.flex-col > .src { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: 3px; }
+
+/* Źródła jako linki: kolor tekstu, podkreślenie Slidev, niebieskie po najechaniu */
+.src a, .footer-src a { color: inherit; }
+.src a:hover, .footer-src a:hover { color: var(--shark); }

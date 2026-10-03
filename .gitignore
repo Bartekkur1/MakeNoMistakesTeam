@@ -1,0 +1,7 @@
+# Node
+node_modules/
+
+# Slidev
+slides/dist/
+slides/.slidev/
+slides/components/.vite/

@@ -49,17 +49,17 @@ Jedno zdanie: kim jesteśmy i co robimy. Pokazujemy Scamerino. Nie czytamy slajd
   <div class="card flex flex-col">
     <div class="stat">4,72 mln</div>
     <div class="stat-label">użytkowników Robloxa w&nbsp;Polsce. To&nbsp;lider wśród gier.</div>
-    <div class="src">Mediapanel, VIII 2025</div>
+    <div class="src"><a href="https://www.gry-online.pl/newsroom/roblox-krolem-polskiego-gamingu-472-mln-polakow-odwiedzilo-te-pla/z32eec4" target="_blank">Mediapanel, VIII 2025</a></div>
   </div>
   <div class="card flex flex-col">
     <div class="stat red">28%</div>
     <div class="stat-label">polskich nastolatków padło ofiarą cyberataku. <b>12%</b> doświadczyło włamania na konto, <b>8%</b> kradzieży przedmiotów w&nbsp;grach.</div>
-    <div class="src">NASK „Nastolatki” 2024, N = 3665</div>
+    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024, N = 3665</a></div>
   </div>
   <div class="card flex flex-col">
     <div class="stat amber">#2</div>
     <div class="stat-label">Pod Robloxa oszuści podszywają się najczęściej zaraz po Microsofcie (12,3% prób phishingu).</div>
-    <div class="src">NordVPN, Consumer Cybersecurity Report 2026</div>
+    <div class="src"><a href="https://nordvpn.com/blog/nordvpn-consumer-cybersecurity-report-2026/" target="_blank">NordVPN, Cybersecurity Report 2026</a></div>
   </div>
 </div>
 
@@ -68,7 +68,7 @@ Jedno zdanie: kim jesteśmy i co robimy. Pokazujemy Scamerino. Nie czytamy slajd
     <div class="stat red" style="font-size: 1.8rem">610 tys.</div>
     <div class="stat-label" style="margin: 0">kont Roblox przejętych w&nbsp;ciągu 4 miesięcy przez malware udające narzędzia do gry.</div>
   </div>
-  <div class="src">CERT Orange Polska, 09.2026</div>
+  <div class="src"><a href="https://cert.orange.pl/aktualnosci/oszustwa-na-robloxie/" target="_blank">CERT Orange Polska, 09.2026</a></div>
 </div>
 
 <!--
@@ -86,19 +86,19 @@ Liczby tylko z pierwotnych źródeł. W UK w Roblox gra 51% dzieci w wieku 8-14 
     <div class="pill amber self-start">Rodzice nie widzą</div>
     <div class="stat mt-3">57% → 21%</div>
     <div class="stat-label">57% rodziców twierdzi, że monitoruje dziecko w&nbsp;sieci. Potwierdza to 21% nastolatków.</div>
-    <div class="src">NASK „Nastolatki” 2024</div>
+    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
   </div>
   <div class="card flex flex-col">
     <div class="pill amber self-start">Dzieci milczą</div>
     <div class="stat mt-3">13% vs 28%</div>
     <div class="stat-label">Rodzice wiedzą o&nbsp;cyberataku na dziecko w&nbsp;13% przypadków, a&nbsp;doświadczyło go 28% nastolatków.</div>
-    <div class="src">NASK „Nastolatki” 2024</div>
+    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
   </div>
   <div class="card flex flex-col">
     <div class="pill amber self-start">Efekt szybko mija</div>
     <div class="stat mt-3">4 tygodnie</div>
     <div class="stat-label">Po treningu dzieci radziły sobie o&nbsp;14% lepiej. Po miesiącu efekt zniknął.</div>
-    <div class="src">Lastdrager i in., SOUPS 2017 (NL)</div>
+    <div class="src"><a href="https://www.usenix.org/conference/soups2017/technical-sessions/presentation/lastdrager" target="_blank">Lastdrager i in., SOUPS 2017 (NL)</a></div>
   </div>
 </div>
 
@@ -221,7 +221,7 @@ TODO: podmienić placeholdery na filmy (element video wewnątrz .video-ph, w-ful
     <div class="stat red" style="font-size: 4.2rem">5 z 57</div>
     <div class="stat-label text-lg">badań nad grami o&nbsp;cyberbezpieczeństwie dla dzieci miało grupę kontrolną.</div>
     <p class="text-sm mt-3">Z&nbsp;porównywanych programów badanie z&nbsp;grupą kontrolną ma tylko Interlandia (Google), i&nbsp;to w&nbsp;USA. Polskie programy nie publikują takich wyników.</p>
-    <div class="src">Damenu i in., przegląd systematyczny, 2025</div>
+    <div class="src"><a href="https://arxiv.org/abs/2508.17414" target="_blank">Damenu i in., przegląd systematyczny, 2025</a></div>
   </div>
   <div class="card" style="border-color: var(--gold)">
     <b>Nasz protokół</b>
@@ -311,7 +311,7 @@ Nie zastępujemy tych służb, tylko do nich kierujemy: dzieci do 116&nbsp;111, 
   </div>
 </div>
 
-<div class="footer-src">GUS 2024/2025. Liczba uczniów kl. 3-7 to szacunek: 3,2 mln / 8 roczników × 5.</div>
+<div class="footer-src"><a href="https://stat.gov.pl/dla-mediow/informacje-prasowe/polska-szkola-w-liczbach-jak-wyglada-edukacja-w-roku-szkolnym-20242025,36,1.html" target="_blank">GUS 2024/2025</a>. Liczba uczniów kl. 3-7 to szacunek: 3,2 mln / 8 roczników × 5.</div>
 
 ---
 layout: image-right
