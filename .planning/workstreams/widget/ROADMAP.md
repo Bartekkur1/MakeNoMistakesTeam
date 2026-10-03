@@ -57,6 +57,10 @@ Plans:
   3. Uczciwa fikcyjna wiadomość nie dostaje fałszywego alarmu; przy braku pewności pomocnik to mówi
 
 **Plans**: TBD
+- [x] 02-01-PLAN.md
+- [ ] 02-02-PLAN.md
+- [ ] 02-03-PLAN.md
+
 **UI hint**: yes
 
 ### Phase 3: Przekazanie opiekunowi i błędy
