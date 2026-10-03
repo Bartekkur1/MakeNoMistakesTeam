@@ -3,6 +3,7 @@ import * as panelModule from '../../src/ui/panel.js';
 import { createDraftStore } from '../../src/core/draft.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 import { buildCase } from '../../src/core/case.js';
+import { detectHints, evaluate } from '../../src/core/check.js';
 const hosts = [];
 afterEach(() => { for (const host of hosts.splice(0)) host.remove(); });
 const setup = () => { const host = document.createElement('div'); document.body.append(host); hosts.push(host); const root=host.attachShadow({mode:'open'}); const handlers=Object.fromEntries(['onClose','onCheck','onHowTo','onBack','onPasteEdit','onPasteNext','onSafetyNext','onAnswer','onQuestionNext','onQuestionBack','onFixAnswers'].map(k=>[k,vi.fn()])); return {root,handlers,panel:panelModule.createPanel({root,strings:STRINGS,handlers})}; };
@@ -98,4 +99,60 @@ test('safety and result controls invoke handlers and render exactly three sectio
   expect(root.querySelectorAll('a')).toHaveLength(0);
   [...root.querySelectorAll('button')].find(b => b.textContent === STRINGS.fixAnswers).click();
   expect(handlers.onFixAnswers).toHaveBeenCalledOnce();
+});
+
+test('honest result explicitly states absent signals and additional unknowns without guaranteeing safety', () => {
+  const { panel, root } = setup();
+  const out = evaluate({ sender: ['known_person'], request: ['ordinary'], verify: ['independent_channel'] }, detectHints({ text: 'Dziś gramy o 17' }));
+  panel.render({ view: 'result', check: { result: out } }, {});
+  const sections = [...root.querySelectorAll('.result-section')];
+  expect(sections[0].textContent).toContain('Nie widzę typowych sygnałów oszustwa w wiadomości ani w Twoich odpowiedziach.');
+  expect(sections[1].textContent).toContain('Nie wskazano dodatkowych brakujących informacji. To nie potwierdza tożsamości nadawcy ani bezpieczeństwa wiadomości.');
+  expect(root.querySelector('h2').textContent).toBe(STRINGS.checkSummaries.no_signals);
+  expect(root.textContent).not.toMatch(/wiadomość jest bezpieczna|nadawca jest wiarygodny/i);
+});
+
+for (const [name, text, answers] of [
+  ['password', 'Prześlij hasło do konta', { sender: ['known_person'], request: ['password'], verify: ['independent_channel'] }],
+  ['code conflict', 'Podaj kod do konta', { sender: ['known_person'], request: ['ordinary'], verify: ['independent_channel'] }],
+  ['prize', 'Odbierz darmową nagrodę: https://nagroda.example/prezent', { sender: ['claims_organization'], request: ['prize'], verify: ['message_link'] }],
+  ['payment', 'Zapłać natychmiast, inaczej stracisz konto.', { sender: ['unknown_sender'], request: ['payment', 'urgency'], verify: ['no_channel'] }],
+  ['urgency', 'Kliknij, tylko dziś', { sender: ['known_person'], request: ['urgency'], verify: ['independent_channel'] }],
+  ['unknown', 'Zobacz to', { sender: ['unknown'], request: ['unknown'], verify: ['unknown'] }],
+  ['honest', 'Dziś gramy o 17', { sender: ['known_person'], request: ['ordinary'], verify: ['independent_channel'] }],
+]) test(`result ${name} resolves every key into three named Polish sections and one explanation`, () => {
+  const { panel, root } = setup();
+  const out = evaluate(answers, detectHints({ text }));
+  panel.render({ view: 'result', check: { result: out } }, {});
+  expect(root.querySelector('h2').textContent).toBe(STRINGS.checkSummaries[out.summaryKey]);
+  const sections = [...root.querySelectorAll('.result-section')];
+  expect(sections).toHaveLength(3);
+  for (const [index, key] of ['signals', 'unknowns'].entries()) {
+    const copy = key === 'signals' ? STRINGS.checkSignals : STRINGS.checkUnknowns;
+    expect([...sections[index].querySelectorAll('li')].map(li => li.textContent)).toEqual((out[key].length ? out[key] : ['none']).map(id => copy[id]));
+  }
+  for (const [index, key] of ['signals', 'unknowns', 'step'].entries()) {
+    const title = root.getElementById(sections[index].getAttribute('aria-labelledby'));
+    expect(title?.textContent).toBe(STRINGS.resultSections[key]);
+  }
+  expect(root.querySelectorAll('.result-step')).toHaveLength(1);
+  expect([...root.querySelectorAll('.result-step p')].map(p => p.textContent)).toEqual([STRINGS.checkSteps[out.step.id], STRINGS.checkSteps[out.step.explanationKey]]);
+  expect(root.textContent).not.toMatch(/undefined|credential_|prize_link|payment_pressure|official_channel|_how|no_signals|insufficient_information|conflicting_answers/);
+  expect(root.querySelectorAll('a')).toHaveLength(0);
+});
+
+test('labelled hints leave controls untouched and mismatch buttons use explicit correction and retention callbacks', () => {
+  const { panel, root, handlers } = setup();
+  const store = checkStore(); store.startQuestions(); store.answer('sender', 'known_person'); store.nextQuestion();
+  panel.render(store.get(), {});
+  expect(root.querySelectorAll('.hint-badge')).toHaveLength(1);
+  expect(root.querySelector('.hint-badge').textContent).toBe('Podpowiedź z wiadomości');
+  expect(root.querySelectorAll('input:checked')).toHaveLength(0);
+  store.answer('request', 'ordinary'); store.nextQuestion(); panel.render(store.get(), {});
+  expect(root.querySelector('input[value="ordinary"]').checked).toBe(true);
+  expect(root.querySelector('input[value="code"]').checked).toBe(false);
+  const click = text => [...root.querySelectorAll('button')].find(button => button.textContent === text).click();
+  click(STRINGS.correctAnswer); expect(handlers.onAnswer).toHaveBeenCalledWith('request', 'code');
+  click(STRINGS.keepAnswer); expect(handlers.onQuestionNext).toHaveBeenLastCalledWith(true);
+  click(STRINGS.next); expect(handlers.onQuestionNext).toHaveBeenLastCalledWith(false);
 });

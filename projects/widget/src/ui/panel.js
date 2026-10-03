@@ -98,11 +98,20 @@ export function createPanel({ root, strings, handlers }) {
           if (state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
           group.append(row);
         }
-        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext());
+        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext(false));
         next.disabled = !selected.length;
         const row = node('div', undefined, 'row');
         row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
         body.append(group, row);
+        if (state.check.discrepancy) {
+          const mismatch = state.check.discrepancy;
+          const prompt = node('div', undefined, 'notice');
+          prompt.setAttribute('role', 'alert');
+          prompt.append(node('p', strings.checkMismatches[mismatch.messageKey]),
+            button(strings.correctAnswer, 'btn-secondary', () => handlers.onAnswer(mismatch.questionId, mismatch.answerId)),
+            button(strings.keepAnswer, 'btn-primary', () => handlers.onQuestionNext(true)));
+          body.append(prompt);
+        }
         const focused = [...group.querySelectorAll('input')].find(input => input.id === focusedId);
         (focused ?? group.querySelector('input:checked') ?? group.querySelector('input')).focus();
         return;
@@ -115,11 +124,17 @@ export function createPanel({ root, strings, handlers }) {
           const list = node('ul');
           const copy = key === 'signals' ? strings.checkSignals : strings.checkUnknowns;
           for (const id of result[key].length ? result[key] : ['none']) list.append(node('li', copy[id]));
-          section.append(node('h3', strings.resultSections[key]), list);
+          const title = node('h3', strings.resultSections[key]);
+          title.id = 'check-result-' + key;
+          section.setAttribute('aria-labelledby', title.id);
+          section.append(title, list);
           body.append(section);
         }
         const step = node('section', undefined, 'result-section result-step');
-        step.append(node('h3', strings.resultSections.step), node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
+        const title = node('h3', strings.resultSections.step);
+        title.id = 'check-result-step';
+        step.setAttribute('aria-labelledby', title.id);
+        step.append(title, node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
         body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()));
         body.querySelector('button').focus();
         return;

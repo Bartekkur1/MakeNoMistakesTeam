@@ -28,12 +28,12 @@ test('question ordering requires explicit answers and Back and fix retain choice
   expect(s.get().check.step).toBe(id);expect(s.get().check.answers[id]).toEqual([]);
   const before=s.get();s.nextQuestion();expect(s.get()).toBe(before);s.answer(id,choice);s.nextQuestion();
  }
- expect(s.get().view).toBe('result');expect(s.get().check.result.summaryKey).toBe('no_signal');
+ expect(s.get().view).toBe('result');expect(s.get().check.result.summaryKey).toBe('no_signals');
  const answers=s.get().check.answers;s.fixAnswers();expect(s.get().check.answers).toBe(answers);expect(s.get().check.step).toBe('sender');
  s.previousQuestion();expect(s.get().view).toBe('safety');s.startQuestions();s.nextQuestion();s.previousQuestion();
  expect(s.get().check.step).toBe('sender');expect(s.get().check.answers).toBe(answers);
  s.answer('sender','unknown');s.nextQuestion();s.nextQuestion();s.nextQuestion();
- expect(s.get().check.result.summaryKey).toBe('missing_information');expect(s.get().check.result.unknowns).toContain('sender');
+ expect(s.get().check.result.summaryKey).toBe('insufficient_information');expect(s.get().check.result.unknowns).toContain('sender');
 });
 test('request unknown and ordinary are exclusive and concrete options can toggle',()=>{
  const s=approvedStore();s.startQuestions();s.answer('sender','unknown');s.nextQuestion();

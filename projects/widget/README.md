@@ -1,10 +1,40 @@
-# BezpiecznaAura – rozszerzenie Scamerinio (faza 1)
+# BezpiecznaAura – rozszerzenie Scamerinio (faza 2)
 
-Scamerinio pomaga dziecku przekazać wybraną wiadomość do sprawdzenia. Zaznacz tekst i kliknij rekina albo wybierz „Sprawdź wiadomość” i wklej tekst oraz opcjonalny link. Podgląd pozwala usunąć dane, zmienić tekst i świadomie zatwierdzić. „Jak to działa” wyjaśnia trzy kroki i prywatność.
+Scamerinio prowadzi dziecko przez sprawdzanie wybranej wiadomości. Zaznacz tekst i kliknij rekina albo wybierz „Sprawdź wiadomość” i wklej tekst oraz opcjonalny link. Podgląd pozwala usunąć dane, zmienić tekst i świadomie zatwierdzić. Następnie pojawia się wskazówka bezpieczeństwa, trzy pytania i wynik: sygnały, brakujące informacje oraz jeden wyjaśniony krok.
 
-Podczas wklejania i podglądu wiadomości rekin oraz jego przycisk schowania znikają, a formularz pozostaje widoczny. Po zamknięciu formularza przez × lub Escape rekin wraca na swoje miejsce; ponowne kliknięcie otwiera zachowany szkic. W menu, „Jak to działa” i „Gotowe!” rekin pozostaje widoczny.
+Rekin pozostaje widoczny, a otwarte okno przesuwa się razem z nim. Przeciąganie zachowuje tekst i fokus. Podpowiedzi oznaczone „Podpowiedź z wiadomości” nie zaznaczają odpowiedzi; dziecko wybiera je samodzielnie i klika „Dalej”. „Nie wiem” jest pełnoprawną odpowiedzią. „Wróć” i „Popraw odpowiedzi” zachowują wybory, a zmiany przeliczają wynik.
 
-Faza 1 kończy się utworzeniem sprawy w pamięci service workera. Nie ma jeszcze analizy, pytań, API ani wysyłki do opiekuna. „Gotowe!” oznacza przygotowanie sprawy do sprawdzenia. Implementacja obejmuje decyzje D-01–D-18 dotyczące rozszerzenia, dostępu do treści, obecności awatara i szkicu.
+**Zatwierdzenie w fazie 2 jest lokalne: nie wysłało niczego do rzeczywistego opiekuna.** Sprawa trafia do pamięci service workera, a reguły i odpowiedzi działają w pamięci karty. Nie ma API opiekuna, AI ani oceny reputacji linku. Teksty zapowiadające widoczność sprawy dla opiekuna opisują docelowy model kolejnej fazy, nie potwierdzenie doręczenia.
+
+Przeniesiona decyzja dla fazy 3: po zatwierdzeniu sprawa ma być od razu przekazywana opiekunowi, a wynik dopisywany później. Starszy `.planning/shared/CONTRACT.md` i HND-02 nie odzwierciedlają jeszcze tego modelu i wymagają uzgodnienia przez właściciela kontraktu. Faza 2 nie dodaje przycisku wysyłki ani nie zmienia wspólnych materiałów.
+
+## Roboczy pakiet treści i ograniczenia
+
+Pakiet do przeglądu przez **osobę 4** znajduje się w `src/ui/strings.pl.js` (polskie pytania, odpowiedzi, wyjaśnienia i instrukcje) oraz `src/core/check.js` (jawne reguły `detectHints` i `evaluate`). Przykłady i kontrakty sprawdzają `tests/unit/check.test.js`, `tests/unit/panel.test.js` i `tests/e2e/check.spec.mjs`. Nieistniejący jeszcze wspólny pakiet `shared/content/` nie blokuje tego demo; późniejsze dopasowanie wymaga zachowania ustalonych zachowań.
+
+- Prośby „podaj / wyślij / prześlij hasło” lub kod do konta, logowania czy SMS tworzą ostrzeżenie. Samo słowo „kod”, kod pocztowy lub źródłowy go nie tworzy. Odpowiedź dziecka wskazująca hasło lub kod także zachowuje ostrzeżenie.
+- Nagroda wymaga zaproszenia do jej odebrania oraz linku w tekście lub osobnym polu. Zwykła wzmianka o nagrodzie i neutralny link nie tworzą alarmu. Sam link nie potwierdza wiarygodności nadawcy.
+- Zapłata wymaga presji, np. „natychmiast”, „ostatnia szansa” albo groźby straty. Przypomnienie o obiedzie bez presji nie alarmuje. Samodzielna odpowiedź o zapłacie proponuje ostrożne sprawdzenie.
+- „Dziś” samo w sobie nie oznacza pośpiechu. Rozpoznajemy wąskie frazy związane z działaniem, nie każdą datę ani każdy synonim.
+- Ostrzeżenia „nie podawaj…” oraz wyraźnie zgłaszane prośby, np. `Oszust napisał: „podaj kod do konta”` i `Zgłaszam wiadomość: podaj hasło do konta`, nie są automatycznym alarmem o zgłaszającym. Osobna bezpośrednia prośba po cytacie nadal pozostaje sygnałem. Nie jest to pełna analiza znaczenia wszystkich możliwych cytatów.
+- Kopia do dopasowania usuwa różnice wielkości liter, akcentów, NFC/NFD i spacji NBSP; zatwierdzona treść pozostaje bez zmian. Limity tekstu i linku liczone są punktami kodowymi, również dla emoji.
+- Priorytet jednego kroku: ochrona hasła/kodu → zapłata z presją → nagroda z linkiem → zatrzymanie pośpiechu → niezależne sprawdzenie. Znany kanał trzeba otworzyć samodzielnie, poza linkiem z wiadomości.
+
+Wynik nie gwarantuje bezpieczeństwa ani tożsamości nadawcy. Brak informacji nie jest dowodem oszustwa. Nie ma punktów, prawdopodobieństwa ani automatycznego sprawdzania linków; reguły mogą nie rozpoznać innych sformułowań. Demo używa wyłącznie fikcyjnych treści, haseł, kodów i profili.
+
+## Pięć fikcyjnych wiadomości demo
+
+Po zatwierdzeniu każdej wiadomości przejdź przez wskazówkę bezpieczeństwa i trzy pytania. Każdy scenariusz zaczynaj po odświeżeniu karty, aby mieć puste odpowiedzi.
+
+| Wiadomość | Wybory do pokazania | Oczekiwany wynik |
+|---|---|---|
+| „Podaj kod do konta, aby odebrać nagrodę” | Nie znam nadawcy → Podania kodu do konta → Nie mam innego sposobu | Konkretny sygnał o kodzie, brak nadawcy i kanału, jeden krok: nie podawaj hasła/kodu i poproś dorosłego lub sprawdź przez znaną pomoc. Wariant hasła: „Prześlij hasło do konta”. |
+| „Odbierz darmową nagrodę: https://nagroda.example/prezent” | Ktoś podaje się za firmę lub organizację → Odebrania darmowej nagrody → Tylko przez link z tej wiadomości | Wyjaśnienie nagrody z linkiem, brak niezależnego kanału, jeden krok: sprawdź nagrodę poza wiadomością. Nie otwieraj linku demo. |
+| „Zapłać natychmiast, inaczej stracisz konto.” | Nie znam nadawcy → Zapłaty lub przelewu **i** Szybkiego działania → Nie mam innego sposobu | Sygnały zapłaty z presją i pośpiechu, brak nadawcy i kanału, jeden krok: sprawdź prośbę przez wcześniej znany kontakt przed zapłatą. |
+| „Dziś gramy o 17, spotkajmy się w naszej grupie” | Osoba, którą znam → Zwykła wiadomość, bez takich próśb → Przez znaną mi aplikację, stronę lub kontakt | „Nie widzę typowych sygnałów oszustwa. To nie daje pewności — sprawdź wiadomość oficjalnym kanałem.” Brak dodatkowych wskazanych niewiadomych nie potwierdza bezpieczeństwa. |
+| „Zobacz to” | Nie wiem → Nie wiem → Nie wiem | Brak automatycznego alarmu; brak nadawcy, oczekiwań, informacji o pośpiechu i niezależnym kanale. Jeden krok: sprawdź przez znany kanał. |
+
+W wariancie z kodem wybierz najpierw „Zwykła wiadomość, bez takich próśb” i kliknij „Dalej”. Komunikat rozbieżności oferuje „Popraw odpowiedź” lub „Zostaw moją odpowiedź”. Zachowanie wyboru pozostawia ostrzeżenie i wyjaśnia niepewność; poprawienie na kod usuwa rozbieżność. Zmiana odpowiedzi po jej zachowaniu wymaga nowego potwierdzenia. Sprawdź także uczciwe przykłady „Nie podawaj hasła ani kodu”, „Zapłać za obiad, gdy będziesz mieć czas” i „Wygrałem nagrodę na szkolnym konkursie”: przy zwykłej odpowiedzi i znanym kanale nie powinny mieć automatycznych sygnałów.
 
 ## Budowanie
 
@@ -31,6 +61,7 @@ Chrome ogranicza działanie rozszerzeń m.in. na stronach `chrome://`, Chrome We
 ```sh
 npm test
 npm run test:e2e
+npm run test:e2e -- tests/e2e/check.spec.mjs
 ```
 
 Vitest używa happy-dom z przetwarzaniem rzeczywistego CSS. Testy D-04 pilnują miejsc odczytu i wysyłki, listenerów, uprawnień i zakazu zapisu treści. Playwright uruchamia rozszerzenie w lokalnym `/usr/bin/chromium`, jeśli jest dostępne.
@@ -47,7 +78,7 @@ Odczyt następuje tylko po kliknięciu awatara i dotyczy aktualnego zaznaczenia.
 
 Hasła i inne nietekstowe pola, ramki oraz pola wewnątrz shadow DOM innych komponentów nie są odczytywane. Można wkleić wybrany tekst ręcznie. Link pozostaje tekstem: rozszerzenie nie otwiera go i nie pobiera.
 
-Szkic i bufor wklejania są tylko w pamięci karty. Zamknięcie okna, schowanie rekina i zmiana kanału SPA zachowują szkic. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz” kasują go. Nowe zaznaczenie zastępuje szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. Nic nie zapisuje się w pamięci przeglądarki ani na dysku. W fazie 1 nie ma wysyłki sieciowej.
+Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina i zmiana kanału SPA zachowują szkic. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz” kasują stan. Nowe zaznaczenie zastępuje szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. W fazie 2 nie ma wysyłki sieciowej.
 
 Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Nie ma uprawnienia storage. Otwarty shadow root może być czytany przez stronę; zatrzymywanie zdarzeń chroni jedynie przed listenerami klawiatury w fazie bubble. To zaakceptowane ograniczenia MVP z fikcyjnymi danymi, z wariantem panelu iframe w razie problemu na Discordzie.
 
@@ -56,12 +87,13 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 1. Zbuduj rozszerzenie i załaduj `projects/widget/dist` w Google Chrome.
 2. Na zwykłej stronie (np. pl.wikipedia.org) sprawdź ostrość rekina, nieuciętą płetwę i kolory palety.
 3. Na Discordzie sprawdź, że rekin nie zasłania kompozytora. Przeciągnij, schowaj, przywróć ikoną; po przeładowaniu wraca.
-4. Zaznacz fikcyjną wiadomość „darmowe Nitro, kliknij link”. Kliknij rekina: tylko zaznaczony tekst, „Ze strony: discord.com” i informacja dla opiekuna. Usuń imię i dopisz kilka znaków. Kompozytor Discorda pozostaje pusty i skróty Discorda nie działają. Zatwierdź: „Gotowe!”, bez twierdzenia o wysłaniu do opiekuna.
+4. Zaznacz jedną z pięciu fikcyjnych wiadomości powyżej. Kliknij rekina: tylko zaznaczony tekst, „Ze strony: discord.com” i informacja o docelowym modelu opiekuna. Usuń imię i dopisz kilka znaków. Kompozytor Discorda pozostaje pusty; sprawdź izolację pisania zgodnie z ograniczeniem capture poniżej. Zatwierdź: wskazówka „Zanim sprawdzimy…”, następnie trzy pytania i wynik. Lokalne zatwierdzenie nie oznacza wysłania do opiekuna.
 5. Wpisz fikcyjne zdanie w kompozytorze Discorda bez wysyłania. Zaznacz fragment i kliknij rekina. Podgląd pokazuje dokładnie fragment; kompozytor zachowuje tekst.
 6. Utwórz szkic i zmień kanał Discorda: szkic zostaje. Odśwież stronę, usuń zaznaczenie i kliknij rekina: menu, bez starego szkicu.
 7. Wyłącz rozszerzenie, otwórz nową kartę ze zwykłą stroną, włącz rozszerzenie i kliknij jego ikonę na tej karcie. Rekin pojawia się i działa.
-8. Przeładuj rozszerzenie na `chrome://extensions` bez odświeżania karty z rekinem. Kliknij ikonę na tej karcie. Pozostaje jeden rekin, a zaznacz → rekin → zatwierdź kończy się „Gotowe!”.
-9. Przeczytaj wszystkie teksty: po polsku, przyjazne dla dzieci 9–13 lat, bez straszenia i zawstydzania; trzy kroki i zdanie o prywatności.
+8. Przeładuj rozszerzenie na `chrome://extensions` bez odświeżania karty z rekinem. Kliknij ikonę na tej karcie. Pozostaje jeden rekin, a zaznacz → rekin → zatwierdź pokazuje wskazówkę bezpieczeństwa.
+9. Przejdź wszystkie pięć scenariuszy i oba warianty rozbieżności. Sprawdź niezaznaczone podpowiedzi, „Nie wiem”, „Wróć”, „Popraw odpowiedzi”, trzy nazwane sekcje i dokładnie jeden krok z instrukcją. Nie powinno być surowych kluczy ani zapewnienia, że wiadomość jest bezpieczna.
+10. Osoba 4 przegląda polskie teksty dla dzieci 10–13 lat: czytelne ograniczenia, konkretne działania, brak straszenia i zawstydzania. Testy automatyczne nie zastępują tej oceny w Google Chrome.
 
 ## Ręczny retest G-01-2-drag
 
@@ -71,7 +103,7 @@ Po załadowaniu nowego buildu w Google Chrome przeładuj rozszerzenie i odświe�
 2. Otwórz „Sprawdź wiadomość”, wpisz fikcyjny tekst i link. Przeciągnij rekina: formularz podąża za nim, tekst i link zostają, aktywne pole oraz zaznaczenie w polu nie zmieniają się. Przejdź przez „Dalej” i powtórz w podglądzie. Rekin i jego × pozostają widoczne.
 3. Przeciągnij rekina do krawędzi ekranu i zmień rozmiar okna Chrome. Panel pozostaje na ekranie, a rekin dostępny do kolejnego przeciągnięcia. Przy krawędziach panel może zmienić stronę względem rekina, aby zmieścić się w oknie.
 4. Zamknij formularz przez „Zamknij okno” (×), otwórz go ponownie i sprawdź szkic. Powtórz przez Escape. Przeciąganie nie wysyła wiadomości, nie zastępuje szkicu zaznaczeniem z Discorda ani nie uruchamia jego skrótów.
-5. Zaznacz fikcyjny tekst na stronie, otwórz podgląd i przeciągnij rekina. Dopiero świadome „Zatwierdzam” pokazuje „Gotowe!”. Także to okno podąża za rekinem. Sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
+5. Zaznacz fikcyjny tekst na stronie, otwórz podgląd i przeciągnij rekina. Dopiero świadome „Zatwierdzam” pokazuje wskazówkę bezpieczeństwa. Także to okno podąża za rekinem. Sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
 
 Wynik retestu zgłoś przez `$gsd-verify-work 1 --ws widget`; testy automatyczne nie zastępują tej oceny wizualnej.
 
