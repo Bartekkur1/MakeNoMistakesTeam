@@ -52,6 +52,7 @@ export function createAvatar({ host, root, doc = document, strings, onActivate, 
   hide.textContent = strings.closeSymbol; hide.setAttribute('aria-label', strings.hideLabel); hide.title = strings.hideTitle;
   hide.addEventListener('mousedown', e => e.preventDefault()); hide.addEventListener('click', () => onHide()); wrap.append(hide);
   return { el: button, rect: () => button.getBoundingClientRect(),
+    setFormOpen(open) { wrap.style.visibility = open ? 'hidden' : 'visible'; wrap.inert = open; },
     reclamp(v) { if (moved) { const r = host.getBoundingClientRect(); moveTo(clampToViewport({ x: r.left, y: r.top }, v)); } },
     setHidden(hidden) { host.style.setProperty('display', hidden ? 'none' : 'block', 'important'); } };
 }

@@ -44,6 +44,7 @@ function boot() {
   function render() {
     const state = store.get();
     avatar.setHidden(state.hidden);
+    avatar.setFormOpen(['paste', 'preview'].includes(state.view));
     panel.render(state, { host: location.hostname });
     if (state.view !== 'closed') panel.place(avatar.rect(), { width: innerWidth, height: innerHeight });
   }
