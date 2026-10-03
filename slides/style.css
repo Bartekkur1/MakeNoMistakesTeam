@@ -113,16 +113,24 @@
 
 .yes { color: #15803D; font-weight: 800; }
 
-/* Wyjustowany tekst ciągły (wymaga lang="pl" dla dzielenia wyrazów) */
+/* Wyjustowany tekst ciągły, bez dzielenia wyrazów */
 .slidev-layout p,
 .slidev-layout li,
 .stat-label,
 .body-text {
   text-align: justify;
-  hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphenate-limit-chars: 6 3 3;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: pretty;
 }
+
+/* Wąskie kolumny (karty w siatce 3-kolumnowej): justowanie dawałoby duże odstępy */
+.grid-cols-3 > .card > .stat-label { text-align: left; }
+
+/* Krótki lead na stronie tytułowej: wąska kolumna, wyrównanie do lewej */
+.slidev-layout p.lead { text-align: left; }
 
 /* Etykiety, źródła i liczby nigdy nie są justowane */
 .src,
