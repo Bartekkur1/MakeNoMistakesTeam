@@ -7,7 +7,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 ## Phases
 
 - [x] **Phase 1: Studio, publikacja i szkielet levelu** - ryzyko publikacji zbadane, mały level z NPC
-- [ ] **Phase 2: Wybory, konsekwencje i pomocnik** - decyzje, wyjaśnienia, ponowna próba
+- [ ] **Phase 2: Wybory, konsekwencje i pomocnik** - decyzje, wyjaśnienia, spójny Scamerino 3D, ruch NPC i ponowna próba
 - [ ] **Phase 3: Wynik, nagroda i przekazanie** - punkty, odznaka, eksport zgodny z kontraktem
 
 ## Phase Details
@@ -30,15 +30,20 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 - [x] 01-02-PLAN.md — ścieżka misji i Play na komputerze potwierdzone przez Roberta; test mobilny odłożony
 
 ### Phase 2: Wybory, konsekwencje i pomocnik
-**Goal**: Poprawna i błędna decyzja prowadzą do różnych skutków z wyjaśnieniem
+**Goal**: Decyzje prowadzą do różnych skutków z wyjaśnieniem; scammer podchodzi do gracza, a spójny Scamerino 3D przychodzi po wybraniu pomocy
 **Depends on**: Phase 1, `shared/content/` (dialogi i wyjaśnienia)
-**Requirements**: MIS-02, MIS-03, MIS-04
+**Requirements**: MIS-02, MIS-03, MIS-04, MIS-05, MIS-06, MIS-07
 **Success Criteria** (what must be TRUE):
   1. Gracz może sprawdzić ofertę, fikcyjnie przekazać kod, odmówić lub poprosić o pomoc
   2. Pomocnik wyjaśnia prośbę o kod, presję czasu i obietnicę nagrody
   3. Po błędzie można spróbować ponownie; misję można odtworzyć od początku
   4. Żadne prawdziwe hasło ani kod nie jest zbierane
+  5. Scamerino ma spójny tors, głowę i kończyny; poprawiony model nie rozpada się ani nie deformuje podczas chodzenia
+  6. Scammer chodzi po mapie i podchodzi do gracza, zatrzymując się przed nim i respektując przeszkody
+  7. Wybranie pomocy w dialogu powoduje podejście Scamerino i uruchomienie jego wskazówek; restart przywraca NPC do stanu początkowego
 **Plans**: TBD
+
+**Zarys kolejności prac:** poprawa i przygotowanie modelu Scamerino do chodzenia → ruch scammera → cztery ścieżki dialogu i wezwanie Scamerino → sprawdzenie całości w Play na komputerze. Ustalenia użytkownika i kryteria odbioru: `phases/02-wybory-konsekwencje-i-pomocnik/02-SCOPE.md`.
 
 ### Phase 3: Wynik, nagroda i przekazanie
 **Goal**: Misja kończy się wynikiem z użyciem podpowiedzi, nagrodą i zapisem zgodnym z kontraktem

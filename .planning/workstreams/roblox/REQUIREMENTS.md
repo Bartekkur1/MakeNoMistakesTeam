@@ -16,6 +16,9 @@
 - [ ] **MIS-02**: Wybory i konsekwencje: sprawdzenie oferty, fikcyjne przekazanie kodu, odmowa, prośba o pomoc; nigdy prawdziwe hasło ani kod
 - [ ] **MIS-03**: Pomocnik wyjaśnia prośbę o kod, presję czasu i obietnicę nagrody zgodnie z treściami osoby 4; błąd umożliwia ponowną próbę
 - [ ] **MIS-04**: Misję można odtworzyć od początku
+- [ ] **MIS-05**: Scamerino ma spójny model 3D; tors nie wygląda jak przypadkowy kwadrat, pasuje do głowy i kończyn, a model zachowuje wygląd podczas chodzenia
+- [ ] **MIS-06**: Scammer chodzi po mapie i podchodzi do gracza; zatrzymuje się w odległości umożliwiającej rozmowę, bez wchodzenia w gracza i przenikania przez przeszkody
+- [ ] **MIS-07**: Wybranie pomocy Scamerino w dialogu uruchamia jego podejście do gracza, po którym pomocnik udziela wskazówek; powtórka resetuje zachowanie obu NPC
 
 ### Wynik i nagroda
 
@@ -45,11 +48,14 @@
 | MIS-02 | Phase 2 | Pending |
 | MIS-03 | Phase 2 | Pending |
 | MIS-04 | Phase 2 | Pending |
+| MIS-05 | Phase 2 | Pending |
+| MIS-06 | Phase 2 | Pending |
+| MIS-07 | Phase 2 | Pending |
 | SCR-01 | Phase 3 | Pending |
 | SCR-02 | Phase 3 | Pending |
 | SCR-03 | Phase 3 | Pending |
 
-**Coverage:** v1: 8 total, mapped: 8, unmapped: 0 ✓
+**Coverage:** v1: 11 total, mapped: 11, unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-03*
