@@ -48,7 +48,7 @@ export interface FakeCall {
 }
 
 export type RpcHandler = (args: Record<string, unknown>, fake: FakeSupabase) => FakeResult;
-export type BeforeRpcCallback = (fake: FakeSupabase) => void;
+export type BeforeCallCallback = (fake: FakeSupabase) => void;
 
 const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments"];
 
@@ -208,6 +208,7 @@ export class FakeQueryBuilder implements PromiseLike<FakeResult> {
   }
 
   private async execute(): Promise<FakeResult> {
+    if (this.mode === "insert") this.fake.runBeforeInsert();
     const injected = this.fake.beginCall({ kind: "from", name: this.table, args: null, ops: this.ops });
     if (injected) return injected;
 
@@ -300,7 +301,8 @@ export class FakeSupabase {
   private idQueue: string[] = [];
   private pendingFailure: FakeError | null = null;
   private pendingThrow: { error: unknown } | null = null;
-  private beforeRpc: BeforeRpcCallback | null = null;
+  private beforeRpc: BeforeCallCallback | null = null;
+  private beforeInsert: BeforeCallCallback | null = null;
 
   readonly client = {
     from: (table: string): FakeQueryBuilder => new FakeQueryBuilder(this, table),
@@ -323,6 +325,7 @@ export class FakeSupabase {
     this.pendingFailure = null;
     this.pendingThrow = null;
     this.beforeRpc = null;
+    this.beforeInsert = null;
   }
 
   private withSeq(table: SeqTable, rows: Row[]): Row[] {
@@ -352,13 +355,24 @@ export class FakeSupabase {
 
   // Runs `callback` on the fake just before the next rpc executes (before an armed failure is
   // applied), e.g. to simulate a concurrent change between a route's read and its write.
-  beforeNextRpc(callback: BeforeRpcCallback): void {
+  beforeNextRpc(callback: BeforeCallCallback): void {
     this.beforeRpc = callback;
   }
 
   runBeforeRpc(): void {
     const callback = this.beforeRpc;
     this.beforeRpc = null;
+    if (callback) callback(this);
+  }
+
+  // The same for the next table insert, e.g. to fail the comment insert but not the report read.
+  beforeNextInsert(callback: BeforeCallCallback): void {
+    this.beforeInsert = callback;
+  }
+
+  runBeforeInsert(): void {
+    const callback = this.beforeInsert;
+    this.beforeInsert = null;
     if (callback) callback(this);
   }
 

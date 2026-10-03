@@ -299,3 +299,15 @@ export async function transitionReport(input: TransitionReportInput): Promise<Tr
   const row = asRow(data);
   return { report: mapReport(row.report), entry: mapHistoryEntry(row.entry) };
 }
+
+export interface AddCommentInput {
+  reportId: string;
+  authorId: string;
+  authorRole: AccountRole;
+  body: string;
+}
+
+// RED skeleton (plan 01-05 Task 2): not implemented yet.
+export async function addComment(_input: AddCommentInput): Promise<ReportComment> {
+  throw new Error("not implemented");
+}
