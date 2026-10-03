@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 02-cie-ka-sprawdzania
 source: [02-VERIFICATION.md]
 started: 2026-10-03T22:32:30Z
@@ -50,5 +50,24 @@ blocked: 0
   reason: "User reported: brak możliwości wysłania do opiekuna i prośby o weryfikację; mock jak w fazie 1 dalej powinien działać — 'wysłane do opiekuna' to tylko mock na prezentację, API dojdzie później"
   severity: major
   test: 2
-  artifacts: []
-  missing: []
+  root_cause: "Commit 5e9600a (02-01) przełączył draft.approved() z 'confirmation' na 'safety'; ścieżka kończy się na 'result' bez akcji przekazania opiekunowi. Widok confirmation (panel.js:74-80, IN-01) stał się martwy, a mock SW zapisuje tylko sprawę przy zatwierdzeniu (bez wyniku). Plany fazy 2 jawnie wykluczyły wysyłkę (02-CONTEXT:50, README:9, P7) — nie uchwycono wymagania, że demo-mock ma dalej działać."
+  artifacts:
+    - path: "projects/widget/src/core/draft.js"
+      issue: "approved() → 'safety'; brak przejścia result → confirmation/przekazanie opiekunowi"
+    - path: "projects/widget/src/ui/panel.js"
+      issue: "Widok result (129-153) bez przycisku przekazania; confirmation (74-80) nieosiągalny"
+    - path: "projects/widget/src/content/main.js"
+      issue: "Brak handlera prośby o weryfikację opiekuna"
+    - path: "projects/widget/src/core/integration.js / messages.js / background/sw.js"
+      issue: "Mock przyjmuje tylko MSG_CASE_APPROVED; brak lokalnej wiadomości z prośbą o weryfikację i wynikiem"
+    - path: "projects/widget/src/ui/strings.pl.js"
+      issue: "confirmation copy nie mówi o przekazaniu opiekunowi ani o trybie demo"
+    - path: "projects/widget/README.md"
+      issue: "l.7,9,102 twierdzą, że faza 2 nie ma przycisku wysyłki"
+  missing:
+    - "Jawny przycisk na ekranie wyniku (np. „Poproś opiekuna o sprawdzenie”) poza 3 .result-section, fokus pierwszego przycisku bez zmian"
+    - "Przejście w store result → confirmation (reuse widoku, zamyka IN-01) + handler w main.js"
+    - "Lokalny mock: nowa wiadomość (np. aura/guardian-request ze sprawą i kluczem wyniku) tylko przez core/integration.js, zapis w pamięci SW (self.__aura.guardianRequests), bez sieci i storage"
+    - "Copy potwierdzenia: przekazano opiekunowi — wyraźnie oznaczone jako demo/mock (API w fazie 3)"
+    - "Testy: unit store/panel/copy, e2e result → przycisk → potwierdzenie + rekord mocka + assertOnlyLocal; aktualizacja README"
+  debug_session: .planning/debug/guardian-send-mock-missing.md
