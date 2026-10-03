@@ -250,6 +250,22 @@ describe("POST /api/reports", () => {
     expectNothingStored();
   });
 
+  it.each([
+    ["a NUL character", "Wiadomość a\u0000b (demo)"],
+    ["an unpaired high surrogate", "Wiadomość \ud800 (demo)"],
+    ["an unpaired low surrogate", "Wiadomość \udc00 (demo)"],
+  ])("rejects content with %s as 400, not a false 503 (WR-01)", async (_label, content) => {
+    const res = await postReport(validBody({ content }));
+    await expectValidationError(res, "content", "Tekst zawiera niedozwolone znaki.");
+    expect(fakeSupabase.callCount).toBe(0);
+    expectNothingStored();
+  });
+
+  it("accepts content with emoji (paired surrogates)", async () => {
+    const res = await postReport(validBody({ content: "Wygrałeś 🎁 nagrodę (demo)" }));
+    expect(res.status).toBe(201);
+  });
+
   it("rejects an unknown attack type", async () => {
     const res = await postReport(validBody({ attack_type: "virus" }));
     await expectValidationError(res, "attack_type", "Wybierz rodzaj ataku.");

@@ -146,6 +146,16 @@ describe("POST /api/reports/{id}/comments", () => {
     expect((await comment(R4, { body: "a".repeat(2000) })).status).toBe(201);
   });
 
+  it("rejects NUL characters and unpaired surrogates as 400, not a false 503 (WR-01)", async () => {
+    const before = commentsOf(R4);
+    for (const text of ["a\u0000b", "a\ud800b", "a\udc00b"]) {
+      const res = await expectError(await comment(R4, { body: text }), 400, "validation_error");
+      expect(res.error.details).toEqual([{ field: "body", message: "Tekst zawiera niedozwolone znaki." }]);
+    }
+    expect(commentsOf(R4)).toBe(before);
+    expect((await comment(R4, { body: "Dziękuję 👍 (demo)" })).status).toBe(201);
+  });
+
   it("answers 400 invalid_json and 413 for unreadable bodies", async () => {
     await expectError(await comment(R4, "{"), 400, "invalid_json");
     await expectError(await comment(R4, JSON.stringify({ body: "x".repeat(40000) })), 413, "payload_too_large");

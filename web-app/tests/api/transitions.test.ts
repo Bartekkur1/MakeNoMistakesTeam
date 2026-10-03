@@ -256,6 +256,15 @@ describe("POST /api/reports/{id}/transitions", () => {
     await expectValidationField(await transition(R1, { action: "approve", comment: 42 }), "comment");
   });
 
+  it("rejects a comment with NUL characters or unpaired surrogates as 400, not a false 503 (WR-01)", async () => {
+    for (const text of ["CERT\u0000Polska", "CERT \ud800", "CERT \udc00"]) {
+      const res = await transition(R4, { action: "escalate", comment: text }, authHeaders(T1));
+      const body = await expectError(res, 400, "validation_error");
+      expect(body.error.details).toEqual([{ field: "comment", message: "Tekst zawiera niedozwolone znaki." }]);
+    }
+    expect(reportRow(R4)?.state).toBe("with_teacher");
+  });
+
   it("rejects an unknown or missing action", async () => {
     const res = await transition(R1, { action: "delete" });
     const body = await expectError(res, 400, "validation_error");
