@@ -2,7 +2,7 @@
 
 Właściciel: osoba 3. Osoba 2 potwierdza przed implementacją. Źródło: `ideas/defence/taski.md` oraz decyzje D-08…D-18 w `.planning/workstreams/web-app/phases/01-kontrakt-i-backend-spraw/01-CONTEXT.md`.
 
-**Status:** wersja 2 — zatwierdzona przez osobę 2 (2026-10-03)
+**Status:** wersja 2 — zatwierdzona przez osobę 2 (2026-10-03); backend demo wdrożony i sprawdzony testem dymnym (2026-10-03)
 **Wersja:** 2 (2026-10-03)
 
 Wersja 1 (sprawy i odpowiedzi opiekuna, bez logowania) nie została zatwierdzona i jest wycofana; zastępuje ją model zgłoszeń z decyzji CONTEXT D-08…D-18 opisany poniżej.
@@ -14,7 +14,7 @@ Typy i stałe w kodzie: `web-app/src/lib/contract/types.ts` (jedno źródło pra
 | Środowisko | Bazowy URL |
 |---|---|
 | dev (lokalnie) | `http://localhost:3000` |
-| demo (Heroku, https) | wpisuje plan 01-06 po wdrożeniu (D-04) |
+| demo (Heroku, https) | `https://bezpieczna-aura.pl` |
 
 Każdy klient (wtyczka i strona mobilna widgetu, panel rodzica i nauczyciela, serwer Roblox) używa wyłącznie tego bazowego URL-a z dopisanym `/api/...`.
 

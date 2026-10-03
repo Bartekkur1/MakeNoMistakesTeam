@@ -42,3 +42,4 @@ created: 2026-10-03
 ## Notes from web-app
 
 - 2026-10-03 — Kontrakt API wersja 2 (zatwierdzony przez osobę 2): .planning/shared/CONTRACT.md i .planning/shared/examples/ (13 plików, w tym demo-dataset.json). Zastępuje v1: zgłoszenie = rodzaj ataku + podjęte działania; wtyczka loguje się mailem rodzica (scope extension) i nie widzi historii ani komentarzy; nie ma odpowiedzi do dziecka (HND-03 do przeglądu). Bazowy URL demo dopisze plan 01-06.
+- 2026-10-03 - Backend demo działa: https://bezpieczna-aura.pl (bazowy URL z .planning/shared/CONTRACT.md); konta demo i kod 0000 w sekcji Logowanie demo; konta *.test są tylko do testu dymnego.
