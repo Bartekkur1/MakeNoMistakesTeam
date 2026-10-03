@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=block" rel="stylesheet">
+<title>Poradnik dla rodziców i nauczycieli | BezpiecznaAura</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  :root {
+    --shark: #0F62DB;
+    --shark-dark: #0A3B8C;
+    --silver: #E2E8F0;
+    --amber: #FF8A00;
+    --gold: #FFB800;
+    --crimson: #EA3323;
+    --green: #15803D;
+    --bg: #F8FAFC;
+    --ink: #0F172A;
+    --muted: #64748B;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.45;
+    color: var(--ink);
+    background: #fff;
+  }
+  h1, h2, h3, h4 { color: var(--shark-dark); line-height: 1.2; margin: 0; }
+  h2 {
+    font-size: 17pt;
+    margin: 0 0 3mm;
+    padding-bottom: 2mm;
+    border-bottom: 2.5px solid var(--shark);
+  }
+  h3 { font-size: 12pt; margin: 4mm 0 1.5mm; }
+  h4 { font-size: 10.5pt; margin: 2.5mm 0 1mm; color: var(--ink); }
+  p { margin: 0 0 2mm; }
+  ul, ol { margin: 0 0 2mm; padding-left: 5mm; }
+  li { margin-bottom: 0.8mm; }
+  a { color: var(--shark); text-decoration: none; }
+  strong { color: var(--ink); }
+  .page { page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  .muted { color: var(--muted); }
+  .small { font-size: 8.6pt; }
+  .lead { font-size: 11pt; }
+
+  /* Okładka */
+  .cover {
+    height: 255mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover-top {
+    background: linear-gradient(135deg, var(--shark-dark), var(--shark));
+    color: #fff;
+    border-radius: 6mm;
+    padding: 14mm 12mm 12mm;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-top .kicker {
+    font-size: 10pt; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 4mm;
+  }
+  .cover-top h1 { color: #fff; font-size: 27pt; margin-bottom: 4mm; max-width: 108mm; }
+  .cover-top .sub { font-size: 12pt; max-width: 104mm; color: #DCE7FB; }
+  .cover-top img {
+    position: absolute; right: 4mm; bottom: 0; width: 60mm;
+  }
+  .cover-who { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 8mm; }
+  .cover-bottom { font-size: 9pt; color: var(--muted); border-top: 1px solid var(--silver); padding-top: 3mm; }
+  .rule-big {
+    margin-top: 8mm;
+    border: 2.5px dashed var(--amber);
+    border-radius: 5mm;
+    padding: 6mm;
+    text-align: center;
+  }
+  .rule-big .r { font-size: 20pt; font-weight: 800; color: var(--shark-dark); }
+  .rule-big .r span { color: var(--amber); }
+
+  /* Bloki */
+  .box {
+    border-radius: 3.5mm;
+    padding: 3.5mm 4.5mm;
+    margin: 0 0 3mm;
+    break-inside: avoid;
+  }
+  .box.blue { background: #EAF1FD; border-left: 4px solid var(--shark); }
+  .box.amber { background: #FFF4E5; border-left: 4px solid var(--amber); }
+  .box.red { background: #FDECEB; border-left: 4px solid var(--crimson); }
+  .box.green { background: #EAF6EE; border-left: 4px solid var(--green); }
+  .box.grey { background: var(--bg); border: 1px solid var(--silver); }
+  .box h4:first-child, .box h3:first-child { margin-top: 0; }
+
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps > li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 10mm;
+    margin-bottom: 2.2mm;
+    break-inside: avoid;
+  }
+  .steps > li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 0;
+    width: 6.5mm; height: 6.5mm; border-radius: 50%;
+    background: var(--shark); color: #fff; font-weight: 800;
+    font-size: 9.5pt; text-align: center; line-height: 6.5mm;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; font-size: 9.4pt; }
+  th, td { text-align: left; vertical-align: top; padding: 1.8mm 2.2mm; border-bottom: 1px solid var(--silver); }
+  th { background: var(--shark-dark); color: #fff; font-weight: 700; }
+  tr { break-inside: avoid; }
+  td.k { font-weight: 800; color: var(--shark-dark); white-space: nowrap; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .toc { columns: 2; column-gap: 8mm; padding: 0; list-style: none; }
+  .toc li { margin-bottom: 1.4mm; display: flex; justify-content: space-between; gap: 3mm; border-bottom: 1px dotted var(--silver); break-inside: avoid; }
+  .toc .pg { color: var(--shark); font-weight: 700; }
+
+  /* Scenariusze */
+  .scen { break-before: page; }
+  .scen-head {
+    display: flex; align-items: center; gap: 4mm;
+    background: var(--bg); border: 1px solid var(--silver);
+    border-radius: 3.5mm; padding: 3mm 4mm; margin-bottom: 3mm;
+  }
+  .scen-num {
+    flex: none; width: 11mm; height: 11mm; border-radius: 3mm;
+    background: var(--shark); color: #fff; font-weight: 800; font-size: 15pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scen-head h2 { border: 0; padding: 0; margin: 0; font-size: 15pt; }
+  .scen-head .tags { margin-top: 1.2mm; }
+  .scen-lead { font-size: 10.5pt; color: #334155; margin: 0 0 3.5mm; }
+  .pill {
+    display: inline-block; padding: 0.4mm 2.2mm; border-radius: 99px;
+    font-size: 8pt; font-weight: 700; margin-right: 1mm;
+  }
+  .pill.red { background: rgba(234, 51, 35, 0.13); color: #B91C1C; }
+  .pill.amber { background: rgba(255, 138, 0, 0.17); color: #9A4F00; }
+  .pill.blue { background: rgba(15, 98, 219, 0.12); color: var(--shark-dark); }
+  .msg {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #fff; border: 1px solid var(--silver); border-radius: 3mm 3mm 3mm 0;
+    padding: 2.5mm 3.5mm; font-style: italic; margin: 1mm 0 3mm; color: #334155;
+  }
+  .lbl {
+    display: block; font-size: 8.2pt; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 1mm;
+  }
+  .lbl.blue { color: var(--shark); }
+  .lbl.amber { color: #B45F00; }
+  .lbl.red { color: var(--crimson); }
+  .lbl.green { color: var(--green); }
+
+  /* Karta szybkiej reakcji */
+  .card {
+    border: 3px solid var(--shark-dark); border-radius: 6mm; padding: 7mm;
+  }
+  .card h2 { text-align: center; border: 0; font-size: 20pt; }
+  .card .cut { text-align: center; color: var(--muted); font-size: 8.5pt; margin-bottom: 4mm; }
+  .card td { vertical-align: middle; }
+  .bignum { font-size: 15pt; font-weight: 800; color: var(--shark-dark); }
+
+  .footer-note { font-size: 8.4pt; color: var(--muted); border-top: 1px solid var(--silver); padding-top: 2mm; margin-top: 4mm; }
+
+  /* ===== przyjazny wygląd ===== */
+  h2 { border-bottom: 0; padding-bottom: 0; position: relative; padding-left: 0; font-weight: 900; }
+  h2::after { content: ""; display: block; width: 22mm; height: 1.6mm; border-radius: 99px; margin-top: 2mm;
+    background: linear-gradient(90deg, var(--amber), var(--gold)); }
+  h3 { font-weight: 800; }
+  .box { border-radius: 5mm; border-left: 0 !important; }
+  .box.blue { border: 1.5px solid #C9DBF8 !important; }
+  .box.amber { border: 1.5px solid #FFD9A8 !important; }
+  .box.red { border: 1.5px solid #F8C4C0 !important; }
+  .box.green { border: 1.5px solid #BFE3CB !important; }
+  .lbl { display: flex; align-items: center; gap: 1.6mm; font-size: 8.6pt; letter-spacing: 0.04em; margin-bottom: 1.5mm; }
+  .lbl .ico { font-size: 11pt; letter-spacing: 0; }
+  .lbl .ico:empty { display: none; }
+  .scen-head { background: linear-gradient(135deg, #EAF1FD, #F8FAFC 70%); border: 1.5px solid #C9DBF8;
+    border-radius: 6mm; padding: 3mm 4mm; position: relative; }
+  .scen-num { border-radius: 50%; background: linear-gradient(135deg, var(--shark), var(--shark-dark));
+    box-shadow: 0 0 0 1.2mm #fff, 0 0 0 1.8mm var(--gold); font-weight: 900; }
+  .scen-ava { width: 15mm; height: 15mm; margin-left: auto; flex: none; }
+  .scen-head h2::after { display: none; }
+  .scen-lead { font-weight: 600; }
+  .msg { border-radius: 5mm 5mm 5mm 1mm; background: #fff; border: 1.5px solid #C9DBF8;
+    box-shadow: 0 1mm 0 #E2E8F0; font-style: normal; }
+  .steps > li::before { background: linear-gradient(135deg, var(--shark), var(--shark-dark)); font-weight: 900; }
+  table { border-collapse: separate; border-spacing: 0; border: 1.5px solid var(--silver); border-radius: 4mm; overflow: hidden; }
+  th:first-child { border-top-left-radius: 3mm; } th:last-child { border-top-right-radius: 3mm; }
+  tr:nth-child(odd) td { background: #F8FAFC; }
+  tr:last-child td { border-bottom: 0; }
+  .card table, .card tr td { background: transparent; border: 0; }
+  .card tr td { border-bottom: 1px dashed var(--silver); }
+  .pill { font-weight: 800; }
+  .cover-top { border-radius: 8mm; }
+  .rule-big { border-radius: 7mm; background: #FFFBF3; }
+  .card { border-radius: 8mm; }
+  .chk { display: inline-block; width: 4.2mm; height: 4.2mm; border: 1.8px solid var(--shark); border-radius: 1.3mm; background: #fff; margin-top: 0.4mm; }
+  code, .dom { font-family: Consolas, "Courier New", monospace; }
+  .dom { background: #FDECEB; color: #B91C1C; padding: 0 1.2mm; border-radius: 1.2mm; font-style: normal; font-size: 0.95em; }
+  .card h2::after { margin-left: auto; margin-right: auto; }
+  .card-ava { display: block; width: 20mm; margin: 0 auto 1mm; }
+</style>
+</head>
+<body>
+
+<!-- ============ OKŁADKA ============ -->
+<section class="page cover">
+  <div>
+    <div class="cover-top">
+      <div class="kicker">BezpiecznaAura · poradnik</div>
+      <h1>Dziecko trafiło na oszustwo w sieci. Co teraz?</h1>
+      <p class="sub">Instrukcja dla rodziców, opiekunów i nauczycieli: jak zareagować w pierwszych minutach, gdzie zgłosić incydent i jak zabezpieczyć dziecko na przyszłość.</p>
+      <img src="../../../assets/Scamerino_Alertinio.png" alt="Scamerinio Alertinio">
+    </div>
+
+    <div class="cover-who">
+      <div class="box blue">
+        <h4>Dla rodzica i opiekuna</h4>
+        <p class="small">Co zrobić, gdy dziecko kliknęło link, podało hasło lub kod, straciło przedmioty w grze, wydało pieniądze albo pisze z nim obcy dorosły.</p>
+      </div>
+      <div class="box amber">
+        <h4>Dla nauczyciela i pedagoga</h4>
+        <p class="small">Jak przyjąć zgłoszenie od ucznia, kogo powiadomić w szkole, jak ostrzec klasę, nie wskazując ofiary, i czego nie robić z prywatnymi danymi dziecka.</p>
+      </div>
+    </div>
+
+    <div class="rule-big">
+      <div class="r">Darmowe + link = <span>pytam dorosłego</span></div>
+      <p class="small muted" style="margin:2mm 0 0">Zasada, której uczy Scamerinio Alertinio. Poradnik podpowiada, co dalej robi dorosły.</p>
+    </div>
+
+    <h3 style="margin-top:8mm">Spis treści</h3>
+    <ul class="toc small">
+      <li><span>Pierwsze 5 minut: zasady wspólne dla każdej sytuacji</span><span class="pg">2</span></li>
+      <li><span>Najważniejsze kontakty</span><span class="pg">3</span></li>
+      <li><span>Scenariusz 1: „Darmowe Robuxy” i fałszywa strona logowania</span><span class="pg">4</span></li>
+      <li><span>Scenariusz 2: „Admin” prosi o kod weryfikacyjny</span><span class="pg">5</span></li>
+      <li><span>Scenariusz 3: Konto zostało przejęte</span><span class="pg">6</span></li>
+      <li><span>Scenariusz 4: Oszustwo przy wymianie przedmiotów</span><span class="pg">7</span></li>
+      <li><span>Scenariusz 5: Cheaty, „executory” i złośliwe programy</span><span class="pg">8</span></li>
+      <li><span>Scenariusz 6: „Darmowy render GFX”, plik HAR i ciasteczka</span><span class="pg">9</span></li>
+      <li><span>Scenariusz 7: Podejrzany SMS lub e-mail</span><span class="pg">10</span></li>
+      <li><span>Scenariusz 8: Pieniądze: karta, BLIK, zakupy w grze</span><span class="pg">11</span></li>
+      <li><span>Scenariusz 9: Obcy dorosły: „przejdźmy na Discorda”, prezenty, sekrety</span><span class="pg">12</span></li>
+      <li><span>Scenariusz 10: Wiadomość z przejętego konta kolegi</span><span class="pg">13</span></li>
+      <li><span>Zgłoszenie do CERT Polska krok po kroku</span><span class="pg">14</span></li>
+      <li><span>Kiedy i jak zawiadomić Policję</span><span class="pg">15</span></li>
+      <li><span>Rozdział dla nauczyciela</span><span class="pg">16</span></li>
+      <li><span>Profilaktyka: lista kontrolna na jeden wieczór</span><span class="pg">17</span></li>
+      <li><span>Jak rozmawiać z dzieckiem</span><span class="pg">18</span></li>
+      <li><span>Karta szybkiej reakcji (do wydruku)</span><span class="pg">19</span></li>
+    </ul>
+  </div>
+
+  <div class="cover-bottom">
+    Stan na październik 2026. Poradnik ma charakter informacyjny i nie zastępuje porady prawnej. Nazwy usług, numery i adresy sprawdzaj na oficjalnych stronach instytucji. Wszystkie przykładowe wiadomości są zmyślone; linki zapisano z <code>[.]</code>, żeby nie były klikalne.
+  </div>
+</section>
+
+<!-- ============ PIERWSZE 5 MINUT ============ -->
+<section class="page">
+  <h2>Pierwsze 5 minut: zasady wspólne dla każdej sytuacji</h2>
+  <p class="lead">Niezależnie od tego, co się stało, kolejność działań jest prawie zawsze taka sama. Najpierw dziecko, potem dowody, potem konta, na końcu zgłoszenia.</p>
+
+  <ol class="steps">
+    <li><strong>Zachowaj spokój i podziękuj dziecku, że przyszło.</strong> Najważniejsze, żeby następnym razem też przyszło. Nie krzycz, nie odbieraj od razu urządzenia „za karę” i nie zawstydzaj. Oszuści celowo grają na emocjach i presji czasu; ofiarami padają też dorośli.</li>
+    <li><strong>Przerwij kontakt, ale niczego nie usuwaj.</strong> Dziecko nie odpisuje oszustowi, nie grozi mu i nie „demaskuje” go. Nie kasujcie rozmowy, wiadomości ani konta, dopóki nie zabezpieczycie dowodów.</li>
+    <li><strong>Zabezpiecz dowody.</strong> Zrób zrzuty ekranu: wiadomość, nick lub numer nadawcy, jego profil (z identyfikatorem), adres strony, datę i godzinę. Zapisz link jako tekst i nie otwieraj go ponownie. Zanotuj, co dziecko kliknęło, wpisało lub wysłało.</li>
+    <li><strong>Ustal, co wyciekło.</strong> Hasło? Kod z SMS-a lub e-maila? Dane karty, BLIK? Plik z komputera? Zdjęcia? Adres, szkoła, numer telefonu? Od tego zależy, które kroki z następnych stron są pilne.</li>
+    <li><strong>Zabezpiecz konta i pieniądze.</strong> Jeśli wyciekło hasło lub kod: od razu zmień hasło (z innego, czystego urządzenia), wyloguj wszystkie sesje i włącz weryfikację dwuetapową. Jeśli wyciekły dane karty lub BLIK: zadzwoń do banku od razu, nie jutro.</li>
+    <li><strong>Zgłoś.</strong> Na platformie (przycisk „Zgłoś” w grze lub komunikatorze), do CERT Polska (link, strona, SMS), do banku (pieniądze), na Policję (kradzież, wyłudzenie, kontakt dorosłego o podtekście seksualnym). Zgłoszenie do CERT pomaga zablokować stronę, zanim trafią na nią kolejne dzieci.</li>
+    <li><strong>Wróćcie do tematu za kilka dni.</strong> Krótka rozmowa: co zadziałało, co zrobimy inaczej. Jedno ustawienie z listy profilaktyki (str. 17) wdrożone od razu jest więcej warte niż cała lista „kiedyś”.</li>
+  </ol>
+
+  <div class="two">
+    <div class="box red">
+      <span class="lbl red"><span class="ico">🚨</span>Natychmiast dzwoń, gdy…</span>
+      <ul class="small" style="margin:0">
+        <li>dorosły z sieci namawia dziecko na spotkanie, prosi o zdjęcia lub „sekret”: <strong>112</strong>, a potem zawiadomienie na komisariacie;</li>
+        <li>z konta zniknęły pieniądze lub ktoś zna dane karty: <strong>infolinia banku</strong>;</li>
+        <li>dziecko jest w kryzysie, boi się albo mówi, że dzieje mu się krzywda. <strong>116 111</strong> to telefon dla samego dziecka: może tam anonimowo porozmawiać z konsultantem o tym, co przeżywa (całodobowo, także czat). <strong>800 100 100</strong> to telefon dla ciebie: doradzą, jak rozmawiać z dzieckiem i co zrobić dalej (w dni robocze). Gdy zagrożone jest życie lub zdrowie dziecka: <strong>112</strong>.</li>
+      </ul>
+    </div>
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">⛔</span>Czego nie robić</span>
+      <ul class="small" style="margin:0">
+        <li>nie płać „okupu” ani „opłaty za odblokowanie”;</li>
+        <li>nie wchodź ponownie w link „żeby sprawdzić”;</li>
+        <li>nie kopiuj i nie przesyłaj dalej intymnych zdjęć dziecka, nawet jako dowodu; zgłoś je (scenariusz 9);</li>
+        <li>nie publikuj sprawy z danymi dziecka w grupach rodziców ani w mediach społecznościowych.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box grey small">
+    <strong>Rola BezpiecznejAury.</strong> Dziecko może wkleić podejrzaną wiadomość pomocnikowi Scamerinio. Pomocnik zadaje kilka prostych pytań, wskazuje sygnały ostrzegawcze i proponuje następny krok, a dziecko może przekazać sprawę opiekunowi (zawsze widzi, co udostępnia). Pomocnik nie gwarantuje, że wiadomość jest bezpieczna, i nie zgłasza niczego sam: zgłoszenia opisane w tym poradniku składa dorosły. Nauczyciel widzi wyniki ćwiczeń klasy, a nie prywatne sprawy uczniów.
+  </div>
+</section>
+
+<!-- ============ KONTAKTY ============ -->
+<section class="page">
+  <h2>Najważniejsze kontakty</h2>
+  <table>
+    <tr><th style="width:27%">Gdzie</th><th style="width:38%">Kiedy</th><th>Jak</th></tr>
+    <tr><td class="k">Policja: 112<br>lub komisariat</td><td><strong>Pilnie, przez 112:</strong> bezpośrednie zagrożenie życia lub zdrowia dziecka; <strong>dziecko umówiło się na spotkanie z obcym dorosłym</strong> poznanym w sieci; ktoś właśnie szantażuje dziecko.<br><strong>Bez pośpiechu, na komisariacie:</strong> kradzież pieniędzy lub konta, wyłudzenie, kontakt dorosłego o podtekście seksualnym, gdy sytuacja jest już opanowana.</td><td>112 to numer alarmowy, całodobowy. Zawiadomienie o przestępstwie składasz na najbliższym komisariacie (str. 15).</td></tr>
+    <tr><td class="k">CERT Polska<br>incydent.cert.pl</td><td>Fałszywa strona logowania, link phishingowy, złośliwy plik, podejrzany e-mail, oszustwo internetowe.</td><td>Formularz na <a href="https://incydent.cert.pl">incydent.cert.pl</a> (str. 14).</td></tr>
+    <tr><td class="k">SMS 8080</td><td>Podejrzany SMS z linkiem lub prośbą o dopłatę, kod lub dane.</td><td>Przekaż SMS bez zmian na numer 8080 (bezpłatnie). Trafia do CERT Polska.</td></tr>
+    <tr><td class="k">Dyżurnet.pl (NASK)</td><td>Treści przedstawiające seksualne wykorzystanie dzieci, nielegalne treści.</td><td>Formularz na <a href="https://dyzurnet.pl">dyzurnet.pl</a>, można anonimowo. Wystarczy link, bez kopiowania materiału.</td></tr>
+    <tr><td class="k">116 111</td><td>Telefon zaufania dla dzieci i młodzieży (Fundacja Dajemy Dzieciom Siłę). Dziecko może porozmawiać anonimowo.</td><td>Bezpłatnie, całodobowo; także czat na <a href="https://116111.pl">116111.pl</a>.</td></tr>
+    <tr><td class="k">800 100 100</td><td>Telefon dla rodziców i nauczycieli w sprawie bezpieczeństwa dzieci (FDDS).</td><td>Bezpłatnie, w dni robocze; także <a href="https://800100100.pl">800100100.pl</a>.</td></tr>
+    <tr><td class="k">Bank</td><td>Wyciek danych karty, kodu BLIK, loginu do bankowości, nieautoryzowana transakcja.</td><td>Numer z tyłu karty lub z aplikacji. Zastrzeżenie karty: także <strong>828 828 828</strong>.</td></tr>
+    <tr><td class="k">mObywatel / gov.pl</td><td>Wyciekł PESEL lub zdjęcie dokumentu (dziecka albo rodzica).</td><td>Zastrzeż numer PESEL w aplikacji mObywatel lub na gov.pl; zgłoś utratę dokumentu.</td></tr>
+    <tr><td class="k">Roblox</td><td>Oszust w grze, przejęte konto, nieuprawniona transakcja.</td><td>„Zgłoś nadużycie” (Report Abuse) w grze lub przy profilu; formularz pomocy: <a href="https://www.roblox.com/support">roblox.com/support</a>.</td></tr>
+    <tr><td class="k">Discord</td><td>Oszust na serwerze lub w prywatnej wiadomości, przejęte konto.</td><td>Zgłoś wiadomość (prawy przycisk / przytrzymaj → Zgłoś); pomoc: <a href="https://support.discord.com">support.discord.com</a>.</td></tr>
+    <tr><td class="k">Rzecznik Finansowy, UOKiK</td><td>Bank odmawia zwrotu; nieuczciwe praktyki sklepu lub gry wobec dzieci.</td><td><a href="https://rf.gov.pl">rf.gov.pl</a> (spory z bankiem), <a href="https://uokik.gov.pl">uokik.gov.pl</a> i miejski lub powiatowy rzecznik konsumentów.</td></tr>
+  </table>
+</section>
+
+<!-- ============ SCENARIUSZ 1 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">1</div>
+    <div>
+      <h2>„Darmowe Robuxy” i fałszywa strona logowania</h2>
+      <div class="tags"><span class="pill red">phishing</span><span class="pill blue">Roblox, Discord, TikTok, YouTube</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Najczęstszy schemat: obietnica waluty lub przedmiotu za „zalogowanie się”.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Hej! Event 10 000 Robux za darmo tylko dziś 🎁 Zaloguj się na <code class="dom">robIox-bonus[.]xyz</code> i wpisz kod z SMS, żeby odebrać!”</div>
+  <p><strong>Sygnały:</strong> darmowe + link + pośpiech („tylko dziś”), literówka w adresie (wielkie <code>I</code> zamiast małego <code>l</code>), logowanie poza oficjalną aplikacją, prośba o kod. Prawdziwe nagrody Robloxa odbiera się w grze, bez logowania na obcej stronie i bez podawania kodów.</p>
+
+  <div class="two">
+    <div class="box blue">
+      <span class="lbl blue"><span class="ico">🙂</span>Dziecko tylko kliknęło, nic nie wpisało</span>
+      <ul class="small">
+        <li>Zamknij kartę i nie wracaj na stronę.</li>
+        <li>Jeśli coś się pobrało, nie otwieraj pliku; usuń go i uruchom skan antywirusowy.</li>
+        <li>Zgłoś adres do CERT Polska (str. 14), a nadawcę na platformie.</li>
+        <li>Pochwal dziecko, że zatrzymało się przed wpisaniem danych.</li>
+      </ul>
+    </div>
+    <div class="box red">
+      <span class="lbl red"><span class="ico">🚨</span>Dziecko wpisało login, hasło lub kod</span>
+      <ul class="small">
+        <li><strong>Teraz:</strong> zaloguj się do prawdziwego konta (wpisz adres ręcznie lub użyj oficjalnej aplikacji) i zmień hasło na nowe, niepowtarzalne.</li>
+        <li>W ustawieniach bezpieczeństwa wyloguj wszystkie inne sesje.</li>
+        <li>Włącz weryfikację dwuetapową (najlepiej aplikacja uwierzytelniająca lub e-mail rodzica).</li>
+        <li>Jeśli dziecko używało tego hasła także gdzie indziej, zmień je i tam. Zacznij od skrzynki e-mail.</li>
+        <li>Jeśli nie da się zalogować: scenariusz 3.</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+  <ul>
+    <li><strong>CERT Polska</strong> (incydent.cert.pl): adres fałszywej strony i zrzut ekranu. CERT może dopisać domenę do Listy ostrzeżeń, dzięki której operatorzy blokują stronę u innych użytkowników.</li>
+    <li><strong>Platforma:</strong> „Zgłoś nadużycie” przy wiadomości lub profilu nadawcy, kategoria „oszustwo / scam”.</li>
+    <li>Jeśli link przyszedł e-mailem lub SMS-em, patrz scenariusz 7.</li>
+  </ul>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Zasada domowa: „Do gry loguję się tylko w aplikacji, nigdy przez link z wiadomości”.</li>
+      <li>Weryfikacja dwuetapowa na koncie gry i na e-mailu, do którego konto jest przypisane; e-mail rodzica jako adres odzyskiwania.</li>
+      <li>Menedżer haseł w przeglądarce nie podpowie hasła na stronie z literówką w adresie. To wyraźny sygnał ostrzegawczy.</li>
+      <li>Ćwiczenie: pokaż dziecku trzy adresy (jeden prawdziwy, dwa z literówkami) i poproś o znalezienie różnic.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 2 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">2</div>
+    <div>
+      <h2>„Admin” prosi o kod weryfikacyjny</h2>
+      <div class="tags"><span class="pill red">podszywanie się</span><span class="pill blue">gry, Discord, SMS</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Oszust udaje moderatora, pracownika firmy, „support” lub znajomego.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Jestem z moderacji Roblox. Twoje konto zostanie zbanowane za 10 min. Podaj kod weryfikacyjny, który właśnie dostałeś, żebyśmy mogli to wyjaśnić.”</div>
+  <p><strong>Sygnały:</strong> podszywanie się pod obsługę, groźba i presja czasu, prośba o kod. W tym samym czasie oszust loguje się na konto dziecka (zna hasło albo je resetuje) i potrzebuje kodu, który dziecko właśnie dostało. <strong>Prawdziwa obsługa żadnej platformy nigdy nie prosi o hasło ani kod.</strong></p>
+
+  <div class="two">
+    <div class="box blue">
+      <span class="lbl blue"><span class="ico">🙂</span>Kod nie został podany</span>
+      <ul class="small">
+        <li>Zakończ rozmowę i nie odpisuj.</li>
+        <li>Skoro przyszedł kod, o który nikt nie prosił, ktoś zna hasło albo próbuje je zresetować. Na wszelki wypadek zmień hasło i wyloguj inne sesje.</li>
+        <li>Zgłoś profil „admina” na platformie.</li>
+      </ul>
+    </div>
+    <div class="box red">
+      <span class="lbl red"><span class="ico">🚨</span>Kod został podany</span>
+      <ul class="small">
+        <li>Liczą się minuty: zaloguj się i zmień hasło, wyloguj wszystkie sesje, sprawdź e-mail i telefon przypisane do konta (oszust mógł je podmienić).</li>
+        <li>Zmień hasło do skrzynki e-mail dziecka i sprawdź w niej reguły przekierowania.</li>
+        <li>Jeśli konto jest już przejęte, przejdź do scenariusza 3.</li>
+        <li>Jeśli kod dotyczył bankowości lub BLIK-a: scenariusz 8.</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+  <ul>
+    <li><strong>Platforma:</strong> zgłoszenie profilu za podszywanie się i oszustwo.</li>
+    <li><strong>CERT Polska:</strong> jeśli rozmowa zawierała link lub prowadziła na zewnętrzną stronę.</li>
+    <li><strong>Policja:</strong> jeśli konto przejęto i utracono przedmioty kupione za prawdziwe pieniądze lub doszło do szantażu.</li>
+  </ul>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Zasada, którą dziecko powtarza na głos: „Kod jest jak klucz do domu. Nikomu go nie daję, nawet adminowi”.</li>
+      <li>Ustalcie razem: groźba bana to sygnał, by przyjść do dorosłego, a nie działać w pośpiechu.</li>
+      <li>Weryfikacja dwuetapowa przez aplikację uwierzytelniającą (zamiast SMS-ów) utrudnia przejęcie konta po wyłudzeniu hasła.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 3 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">3</div>
+    <div>
+      <h2>Konto zostało przejęte</h2>
+      <div class="tags"><span class="pill red">przejęcie konta</span><span class="pill blue">gra, Discord, e-mail</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Dziecko nie może się zalogować, zniknęły przedmioty, z konta wychodzą dziwne wiadomości.</p>
+
+  <ol class="steps">
+    <li><strong>Zacznij od e-maila.</strong> Konto gry odzyskuje się przez skrzynkę e-mail. Jeśli skrzynka też jest przejęta, najpierw odzyskaj ją (przez formularz dostawcy poczty), dopiero potem grę.</li>
+    <li><strong>Odzyskuj konto oficjalną drogą.</strong> „Nie pamiętasz hasła?” w oficjalnej aplikacji. Jeśli oszust zmienił e-mail lub telefon, wypełnij formularz pomocy platformy (Roblox: roblox.com/support, kategoria bezpieczeństwo konta / przejęte konto). Podaj nazwę konta, datę założenia, przybliżoną datę przejęcia, historię zakupów i dowody zakupu Robuxów.</li>
+    <li><strong>Nie korzystaj z „pomocy” obcych.</strong> Osoby oferujące odzyskanie konta za opłatę w komentarzach lub na Discordzie to kolejni oszuści.</li>
+    <li><strong>Po odzyskaniu:</strong> nowe hasło, wylogowanie wszystkich sesji, weryfikacja dwuetapowa, kontrola e-maila i telefonu przypisanych do konta, przegląd listy znajomych i ustawień prywatności.</li>
+    <li><strong>Uprzedź znajomych dziecka</strong>, że z konta mogły wychodzić fałszywe wiadomości (scenariusz 10). W klasie może to zrobić nauczyciel, bez wskazywania, czyje konto przejęto.</li>
+    <li><strong>Utracone przedmioty:</strong> zgłoś w formularzu pomocy platformy; zwrot zależy od jej zasad i nie jest gwarantowany. Przedmioty kupione za prawdziwe pieniądze to podstawa do zawiadomienia Policji (scenariusz 8, str. 15).</li>
+    <li><strong>Sprawdź urządzenie.</strong> Jeśli konto przejęto bez podania hasła, przyczyną może być złośliwy program lub wykradziona sesja (scenariusze 5 i 6). Wtedy zmiana hasła na tym samym, zainfekowanym komputerze nie wystarczy.</li>
+  </ol>
+
+  <div class="box amber">
+    <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+    <p class="small" style="margin:0">Platforma (formularz pomocy i zgłoszenie konta, z którego wyszło oszustwo), CERT Polska (jeśli znasz link, plik lub stronę, przez które doszło do przejęcia), Policja (gdy utracono przedmioty lub środki o realnej wartości albo konto służy do dalszych oszustw).</p>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>E-mail rodzica jako adres odzyskiwania i powiadomień o logowaniu.</li>
+      <li>Zapiszcie kody zapasowe weryfikacji dwuetapowej w bezpiecznym miejscu (nie w telefonie dziecka).</li>
+      <li>Raz w miesiącu: wspólny przegląd „aktywnych sesji” i powiadomień o logowaniu.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 4 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">4</div>
+    <div>
+      <h2>Oszustwo przy wymianie przedmiotów</h2>
+      <div class="tags"><span class="pill amber">oszustwo na zaufaniu</span><span class="pill blue">gry z handlem</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">„Ty wysyłasz pierwszy”, „pożycz konto”, „sprzedam taniej poza grą”, fałszywy pośrednik.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Dam ci mojego legendarnego peta za twój miecz. Ale ty wysyłasz pierwszy, bo ja już raz zostałem oszukany 😢”</div>
+  <p><strong>Sygnały:</strong> prośba o zaufanie, wymiana poza oficjalnym systemem handlu w grze, presja emocjonalna, „pośrednik” wskazany przez drugą stronę, prośba o pożyczenie konta lub danych logowania „na chwilę”.</p>
+
+  <div class="two">
+    <div class="box blue">
+      <span class="lbl blue"><span class="ico">✅</span>Co teraz</span>
+      <ul class="small">
+        <li>Zrób zrzuty ekranu rozmowy i profilu drugiej strony (nick i identyfikator).</li>
+        <li>Zgłoś profil na platformie jako oszustwo.</li>
+        <li>Jeśli dziecko „pożyczyło” konto lub podało hasło, zabezpiecz konto jak w scenariuszu 3.</li>
+        <li>Potraktuj stratę poważnie: dla dziecka jest prawdziwa, nawet jeśli przedmioty były wirtualne.</li>
+      </ul>
+    </div>
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+      <ul class="small">
+        <li><strong>Platforma:</strong> zgłoszenie użytkownika; szansa na zwrot przedmiotu jest niewielka, ale zgłoszenie pomaga zablokować konto oszusta.</li>
+        <li><strong>Policja:</strong> gdy przedmioty miały realną wartość pieniężną (kupione za prawdziwe pieniądze lub sprzedane poza grą za przelew lub BLIK).</li>
+        <li><strong>CERT Polska:</strong> gdy „pośrednik” prowadził na zewnętrzną stronę.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Zasada: wymieniam tylko przez oficjalny system wymiany w grze, w którym obie strony widzą i potwierdzają przedmioty. Jeśli ktoś proponuje inny sposób, rezygnuję.</li>
+      <li>Konta i hasła się nie pożycza, nawet najlepszemu przyjacielowi.</li>
+      <li>Nie kupujemy i nie sprzedajemy przedmiotów poza grą za prawdziwe pieniądze (dotyczy to też kont rodzeństwa).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 5 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">5</div>
+    <div>
+      <h2>Cheaty, „executory” i złośliwe programy</h2>
+      <div class="tags"><span class="pill red">malware</span><span class="pill blue">komputer, telefon</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">„Darmowy skrypt”, „auto-farm”, „mod do gry”, „generator Robuxów” do pobrania.</p>
+
+  <p><strong>Sygnały:</strong> program do pobrania z Discorda, YouTube lub nieznanej strony; instrukcja „wyłącz antywirusa, bo wykrywa fałszywie”; plik w archiwum z hasłem; prośba o uruchomienie jako administrator. Takie programy często wykradają zapisane w przeglądarce hasła, ciasteczka sesji i dane kart, nie tylko konto w grze. CERT Orange Polska opisał setki tysięcy kont Roblox przejętych w ten sposób.</p>
+
+  <div class="box red">
+    <span class="lbl red"><span class="ico">🚨</span>Program został uruchomiony</span>
+    <ol class="steps small">
+      <li><strong>Odłącz komputer od internetu</strong> (Wi-Fi, kabel). Nie loguj się na nim do niczego.</li>
+      <li><strong>Z innego, czystego urządzenia</strong> zmień hasła w kolejności: e-mail, bankowość, konta płatności i sklepy, konto gry, Discord i media społecznościowe. Wyloguj wszystkie sesje na każdym z tych kont.</li>
+      <li>Jeśli w przeglądarce na zainfekowanym komputerze były zapisane karty płatnicze: zadzwoń do banku i rozważ zastrzeżenie karty.</li>
+      <li>Wykonaj pełny skan aktualnym antywirusem. Przy wątpliwościach najbezpieczniej przywrócić system do stanu fabrycznego (po skopiowaniu dokumentów; nie kopiuj programów ani plików pobranych razem z cheatem).</li>
+      <li>Dopiero czysty komputer podłącz do sieci; włącz też weryfikację dwuetapową, gdzie jej brakowało.</li>
+    </ol>
+  </div>
+
+  <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+  <ul>
+    <li><strong>CERT Polska</strong> (incydent.cert.pl): link, z którego pobrano program, nazwa pliku i, jeśli to możliwe, sam plik w archiwum z hasłem (opisz to w zgłoszeniu; nie wysyłaj go nikomu innemu).</li>
+    <li><strong>Platforma</strong>, na której program był reklamowany (film, serwer Discord, kanał).</li>
+    <li><strong>Policja i bank:</strong> gdy doszło do strat finansowych.</li>
+  </ul>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Dziecko korzysta z konta bez uprawnień administratora; instalacja programów wymaga hasła rodzica.</li>
+      <li>Nie zapisujemy kart płatniczych i haseł do bankowości w przeglądarce, z której korzysta dziecko.</li>
+      <li>Antywirus i aktualizacje systemu włączone; zasada: „Kto każe wyłączyć antywirusa, ten jest oszustem”.</li>
+      <li>Rozmowa o tym, dlaczego cheaty kuszą (presja rówieśnicza, chęć dorównania), zamiast samego zakazu.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 6 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">6</div>
+    <div>
+      <h2>„Darmowy render GFX”, plik HAR i ciasteczka</h2>
+      <div class="tags"><span class="pill red">kradzież sesji</span><span class="pill blue">komputer, przeglądarka</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Przejęcie konta bez hasła i bez kodu.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Zrobię ci darmowy render 3D twojego awatara! Wyślij mi tylko plik, który pokaże ci przeglądarka po wciśnięciu F12 → Network → Save as HAR.”</div>
+  <p><strong>Dlaczego to groźne:</strong> plik HAR, „cookies” czy „token” zawierają dane aktywnej sesji. Kto je ma, może korzystać z konta jak zalogowany użytkownik, z pominięciem hasła i weryfikacji dwuetapowej. Podobnie działają prośby o wklejenie „kodu” w konsolę przeglądarki (F12) lub przeciągnięcie „zakładki” do paska.</p>
+
+  <div class="box red">
+    <span class="lbl red"><span class="ico">🚨</span>Plik lub kod został wysłany</span>
+    <ul class="small" style="margin:0">
+      <li><strong>Wyloguj wszystkie sesje</strong> w ustawieniach bezpieczeństwa konta (to unieważnia wykradzioną sesję), następnie zmień hasło.</li>
+      <li>Jeśli w tej samej przeglądarce dziecko było zalogowane do innych serwisów (e-mail, Discord, YouTube), zrób to samo na każdym z nich.</li>
+      <li>Sprawdź, czy na koncie nie zmieniono e-maila, telefonu ani ustawień; jeśli tak, scenariusz 3.</li>
+    </ul>
+  </div>
+
+  <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+  <p>Platforma (profil „grafika”), CERT Polska (jeśli w rozmowie padł link do strony lub formularza), Policja przy stratach.</p>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Zasada: nigdy nie wysyłam plików z przeglądarki, „cookies” ani „tokenów” i nie otwieram F12 na czyjąś prośbę.</li>
+      <li>Przeglądarka z osobnym profilem dla dziecka, bez zalogowanych kont rodziców.</li>
+      <li>„Darmowe” usługi od obcych w zamian za plik techniczny traktujemy jak „darmowe + link”: pytam dorosłego.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 7 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">7</div>
+    <div>
+      <h2>Podejrzany SMS lub e-mail</h2>
+      <div class="tags"><span class="pill red">smishing, phishing</span><span class="pill blue">telefon, poczta</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">„Dopłata do paczki”, „blokada konta”, „wygrałeś”, „zaległa faktura”, „Twój kod BLIK”.</p>
+
+  <p><strong>Sygnały:</strong> link skrócony lub z dziwną domeną, prośba o drobną dopłatę (np. 1,99 zł) albo kod, presja czasu, nadawca podszywający się pod kuriera, bank, operatora, urząd lub platformę gier. Dzieci z własnym telefonem dostają te same SMS-y co dorośli.</p>
+
+  <div class="two">
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">📱</span>SMS: jak zgłosić</span>
+      <ol class="small">
+        <li>Nie klikaj linku i nie odpowiadaj.</li>
+        <li>Przekaż SMS w niezmienionej formie na numer <strong>8080</strong> (w telefonie: przytrzymaj wiadomość → Przekaż / Prześlij dalej). To bezpłatne; wiadomość trafi do CERT Polska.</li>
+        <li>Zrób zrzut ekranu z numerem nadawcy, potem możesz usunąć SMS i zablokować numer.</li>
+      </ol>
+    </div>
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">✉️</span>E-mail: jak zgłosić</span>
+      <ol class="small">
+        <li>Nie otwieraj załączników i linków.</li>
+        <li>Zgłoś przez <strong>incydent.cert.pl</strong>; dołącz treść wiadomości i nagłówki (w poczcie: „Pokaż oryginał”) albo plik .eml.</li>
+        <li>Oznacz wiadomość jako spam lub phishing w swojej skrzynce; to uczy filtr.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="box red">
+    <span class="lbl red"><span class="ico">🚨</span>Dziecko kliknęło i coś podało</span>
+    <p class="small" style="margin:0">Dane logowania: kroki ze scenariusza 1. Dane karty, BLIK, login do banku: scenariusz 8, telefon do banku natychmiast. Imię, nazwisko, PESEL, adres: zastrzeż PESEL (mObywatel), zgłoś do CERT, obserwuj korespondencję i próby kontaktu „w sprawie paczki”.</p>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>U operatora komórkowego zablokuj usługi Premium SMS i płatności przez operatora na numerze dziecka.</li>
+      <li>Zasada: „Nie płacę i nie podaję kodu z wiadomości. Jeśli coś jest ważne, sprawdzam w aplikacji albo pytam dorosłego”.</li>
+      <li>Włączone filtry antyspamowe i ochrona przed niebezpiecznymi stronami w telefonie (domyślnie w wielu przeglądarkach i u operatorów, którzy korzystają z Listy ostrzeżeń CERT).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 8 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">8</div>
+    <div>
+      <h2>Pieniądze: karta, BLIK, zakupy w grze</h2>
+      <div class="tags"><span class="pill red">straty finansowe</span><span class="pill blue">karta rodzica, sklepy z aplikacjami</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Wyłudzone dane karty lub kod BLIK, nieoczekiwane obciążenia, „subskrypcje”.</p>
+
+  <ol class="steps">
+    <li><strong>Zadzwoń do banku od razu.</strong> Numer z karty lub z aplikacji banku, nie z wiadomości. Poproś o zastrzeżenie karty, zablokowanie BLIK-a lub dostępu do bankowości i o wstrzymanie jeszcze nierozliczonych transakcji. Karty możesz też zastrzec pod numerem <strong>828 828 828</strong>.</li>
+    <li><strong>Złóż w banku reklamację</strong> nieautoryzowanej transakcji (najlepiej na piśmie lub w aplikacji, z datami i kwotami). Nieautoryzowane transakcje bank co do zasady musi zwrócić albo uzasadnić odmowę; ostateczny wynik zależy od okoliczności, m.in. od tego, czy dziecko korzystało z karty za twoją zgodą.</li>
+    <li><strong>Zakupy w aplikacji lub grze</strong> zrobione przez dziecko bez twojej wiedzy: poproś o zwrot w sklepie, przez który przeszła płatność (Apple: reportaproblem.apple.com; Google Play: historia zamówień w Sklepie Play; konsola: wsparcie producenta) oraz w pomocy platformy gry. Napisz wprost, że zakupu dokonało dziecko.</li>
+    <li><strong>Zawiadom Policję</strong> przy wyłudzeniu (fałszywa strona, BLIK dla „kolegi”, przelew dla „sprzedawcy”). Potwierdzenie zawiadomienia często przydaje się w reklamacji bankowej.</li>
+    <li><strong>Gdy bank odmówi</strong>, możesz złożyć odwołanie, a potem zwrócić się do Rzecznika Finansowego.</li>
+  </ol>
+
+  <div class="box amber">
+    <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+    <p class="small" style="margin:0">Bank (natychmiast), Policja (wyłudzenie), CERT Polska (strona lub link, przez które wyłudzono dane), sklep z aplikacjami lub platforma gry (zwrot), UOKiK lub rzecznik konsumentów (gdy gra lub serwis stosuje nieuczciwe praktyki wobec dzieci).</p>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>W sklepie z aplikacjami: wymagane hasło lub zgoda rodzica przy każdym zakupie (Rodzina / Family Link / Chmura rodzinna).</li>
+      <li>W grze: limit miesięcznych wydatków w kontroli rodzicielskiej; najlepiej doładowania kartami podarunkowymi o stałej kwocie zamiast podpiętej karty.</li>
+      <li>Dla nastolatka: konto lub karta dziecięca z limitem i powiadomieniami o każdej transakcji.</li>
+      <li>Zasada: „Kod BLIK jest jak gotówka. Nie podaję go nikomu przez wiadomość, nawet znajomemu”.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 9 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">9</div>
+    <div>
+      <h2>Obcy dorosły: „przejdźmy na Discorda”, prezenty, sekrety</h2>
+      <div class="tags"><span class="pill red">możliwy grooming</span><span class="pill blue">gry, Discord, Telegram, Snapchat</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">Najpoważniejszy scenariusz w tym poradniku.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Fajnie się gra! Tu jest za dużo moderacji, napisz do mnie na Discordzie, dam ci tam darmowe itemy. Nie mów rodzicom, to nasza tajemnica.”</div>
+  <p><strong>Sygnały:</strong> przeniesienie rozmowy poza platformę z moderacją, prezenty (przedmioty, waluta, doładowania), prośba o sekret, komplementy i „rozumienie” dziecka lepiej niż rodzice, pytania o wygląd, zdjęcia, dom, szkołę, propozycja spotkania lub rozmowy wideo, szantaż („pokażę twoje zdjęcia”).</p>
+
+  <div class="box red">
+    <span class="lbl red"><span class="ico">🚨</span>Co robić</span>
+    <ol class="steps small">
+      <li><strong>Bezpieczeństwo dziecka przede wszystkim.</strong> Przy umówionym spotkaniu, groźbach lub szantażu dzwoń na <strong>112</strong>.</li>
+      <li><strong>Nie konfrontuj się ze sprawcą</strong>, nie pisz do niego z konta dziecka, nie usuwaj rozmów i nie blokuj go przed zabezpieczeniem dowodów (blokada lub usunięcie konta może skasować historię).</li>
+      <li><strong>Zabezpiecz dowody</strong>: zrzuty ekranu rozmów, nick, identyfikator i link do profilu, daty. <strong>Wyjątek:</strong> jeśli w rozmowie są intymne zdjęcia dziecka, nie rób ich kopii i nie przesyłaj ich nikomu, nawet Policji e-mailem. Zostaw je na urządzeniu i powiedz o nich Policji.</li>
+      <li><strong>Zawiadom Policję</strong> (komisariat). Uwodzenie dziecka poniżej 15 lat przez internet, w tym składanie mu propozycji o charakterze seksualnym, jest przestępstwem (art. 200a Kodeksu karnego), nawet jeśli do spotkania nie doszło.</li>
+      <li><strong>Zgłoś profil na platformie</strong> (kategoria: bezpieczeństwo dzieci) i treści do <strong>Dyżurnet.pl</strong>.</li>
+      <li><strong>Zadbaj o dziecko.</strong> Powiedz wyraźnie, że to nie jego wina. Rozważ rozmowę ze specjalistą; wsparcia udzielają 800 100 100 (tobie) i 116 111 (dziecku). Powiadom też wychowawcę lub pedagoga szkolnego.</li>
+    </ol>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Konto dziecka z ustawieniami odpowiednimi do wieku (w Robloxie: konto dla dzieci z ograniczonym czatem; kontrola rodzicielska po powiązaniu z kontem rodzica; w Discordzie: Centrum rodzinne, filtr treści, wiadomości tylko od znajomych).</li>
+      <li>Zasada: „Dorosły, który prosi o sekret przed rodzicami, jest sygnałem alarmowym. Sekrety, od których robi się nieswojo, wolno i trzeba zdradzić”.</li>
+      <li>Interesuj się, z kim dziecko gra: pytaj z ciekawością, a nie podejrzliwością.</li>
+      <li>Nigdy nie zawstydzaj i nie karz za to, że dziecko odpowiedziało obcemu; strach przed karą to główny powód, dla którego dzieci milczą.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SCENARIUSZ 10 ============ -->
+<section class="scen">
+  <div class="scen-head">
+    <div class="scen-num">10</div>
+    <div>
+      <h2>Wiadomość z przejętego konta kolegi</h2>
+      <div class="tags"><span class="pill amber">zaufanie</span><span class="pill blue">Discord, komunikatory, gry</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <p class="scen-lead">„Darmowe Nitro”, „zagłosuj na mnie”, „przypadkiem zgłosiłem twoje konto”, „pożycz BLIK-a”.</p>
+
+  <span class="lbl blue"><span class="ico">👀</span>Jak to wygląda</span>
+  <div class="msg">„Siema, robię konkurs w szkole, zagłosujesz na mnie? Wejdź tu i zaloguj się Discordem: <code class="dom">dlscord-gift[.]com/vote</code> 🙏”</div>
+  <p><strong>Sygnały:</strong> znajomy pisze nietypowo (inny styl, pora, język), prosi o kliknięcie, zalogowanie, kod QR, przelew lub BLIK. Kod QR „do zalogowania” daje oszustowi dostęp do konta osoby, która go zeskanuje.</p>
+
+  <div class="two">
+    <div class="box blue">
+      <span class="lbl blue"><span class="ico">✅</span>Co teraz</span>
+      <ul class="small">
+        <li>Potwierdź innym kanałem: telefon, rozmowa na żywo, wiadomość do rodzica kolegi.</li>
+        <li>Nie klikaj, nie skanuj kodu, nie wysyłaj pieniędzy.</li>
+        <li>Jeśli dziecko już się zalogowało lub zeskanowało kod: kroki ze scenariuszy 1 i 3.</li>
+        <li>Daj znać koledze (i jego rodzicom), że jego konto jest przejęte; dalej postępują według scenariusza 3.</li>
+      </ul>
+    </div>
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">📣</span>Gdzie zgłosić</span>
+      <ul class="small">
+        <li>Platforma: zgłoszenie wiadomości i informacja, że konto wygląda na przejęte.</li>
+        <li>CERT Polska: link lub strona z wiadomości.</li>
+        <li>Szkoła: jeśli wiadomości krążą w klasie, nauczyciel może ostrzec wszystkich (str. 16).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box green">
+    <span class="lbl green"><span class="ico">🛡️</span>Na przyszłość</span>
+    <ul class="small" style="margin:0">
+      <li>Zasada: „Prośba o pieniądze, kod lub logowanie, nawet od przyjaciela, wymaga potwierdzenia na żywo lub telefonicznie”.</li>
+      <li>Hasło rodzinne lub „słowo-klucz” z najbliższymi znajomymi na wypadek próśb o pomoc.</li>
+      <li>Nie skanujemy kodów QR do logowania otrzymanych od innych osób.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CERT ============ -->
+<section class="page" style="break-before: page;">
+  <h2>Zgłoszenie do CERT Polska krok po kroku</h2>
+  <p class="lead">CERT Polska (zespół działający w NASK) przyjmuje zgłoszenia incydentów od każdego. Zgłoszenie zajmuje kilka minut, nie wymaga konta i chroni kolejne osoby: zgłoszone fałszywe strony mogą trafić na <strong>Listę ostrzeżeń</strong>, na podstawie której operatorzy i przeglądarki blokują je u innych użytkowników.</p>
+
+  <div class="two">
+    <div>
+      <h3>Co zgłaszać</h3>
+      <ul>
+        <li>fałszywe strony logowania (gry, banki, poczta, kurierzy);</li>
+        <li>linki z wiadomości w grach, na Discordzie, w komunikatorach;</li>
+        <li>e-maile phishingowe i złośliwe załączniki;</li>
+        <li>złośliwe programy („cheaty”, „generatory”, „mody”);</li>
+        <li>oszustwa w sklepach internetowych i ogłoszeniach;</li>
+        <li>SMS-y: przez przekazanie na <strong>8080</strong>.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Co przygotować</h3>
+      <ul>
+        <li>adres strony (skopiowany jako tekst, nie otwieraj go ponownie);</li>
+        <li>zrzuty ekranu wiadomości i strony;</li>
+        <li>skąd przyszedł link: gra, nick nadawcy, serwer Discord, numer telefonu, adres e-mail;</li>
+        <li>datę i godzinę;</li>
+        <li>co zostało podane lub pobrane i co już zrobiliście (zmiana hasła, telefon do banku);</li>
+        <li>e-mail kontaktowy (dorosłego).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Jak wysłać</h3>
+  <ol class="steps">
+    <li>Wejdź na <strong>incydent.cert.pl</strong> (wpisz adres ręcznie).</li>
+    <li>Wybierz rodzaj zgłoszenia (np. phishing / fałszywa strona, złośliwe oprogramowanie, oszustwo).</li>
+    <li>Wklej adres strony lub opis, dołącz zrzuty ekranu. W opisie napisz, że ofiarą jest dziecko i w jakiej grze lub aplikacji doszło do kontaktu: to pomaga w analizie schematów wymierzonych w dzieci.</li>
+    <li>Podaj e-mail kontaktowy dorosłego i wyślij. Zachowaj numer zgłoszenia lub potwierdzenie.</li>
+  </ol>
+
+  <div class="box amber">
+    <span class="lbl amber"><span class="ico">⚠️</span>Ważne: czego CERT nie zrobi</span>
+    <p class="small" style="margin:0">CERT Polska analizuje zagrożenia, ostrzega i blokuje niebezpieczne strony, ale nie odzyskuje pieniędzy, przedmiotów ani kont i nie prowadzi postępowania karnego. Przy stratach finansowych zgłoszenie do CERT to <strong>dodatek</strong> do telefonu do banku i zawiadomienia Policji, a nie ich zamiennik.</p>
+  </div>
+
+  <div class="box grey small">
+    <strong>Przykładowy opis zgłoszenia:</strong> „3.10.2026 ok. 17:40 mój syn (11 lat) dostał w grze Roblox prywatną wiadomość od użytkownika [nick, ID] z linkiem <code class="dom">robIox-bonus[.]xyz</code> obiecującym darmowe Robuxy. Strona podszywa się pod logowanie Roblox i prosi o kod z SMS-a. Syn wpisał login i hasło, kodu nie podał. Hasło zostało zmienione, sesje wylogowane. W załączniku zrzuty ekranu wiadomości i strony.”
+  </div>
+</section>
+
+<!-- ============ POLICJA ============ -->
+<section class="page">
+  <h2>Kiedy i jak zawiadomić Policję</h2>
+
+  <h3>Kiedy warto</h3>
+  <table>
+    <tr><th style="width:42%">Sytuacja</th><th>Przykładowa podstawa (Kodeks karny)</th></tr>
+    <tr><td>Wyłudzenie pieniędzy, BLIK-a, płatności za fikcyjny przedmiot</td><td>oszustwo (art. 286), oszustwo komputerowe (art. 287)</td></tr>
+    <tr><td>Przejęcie konta, włamanie do poczty, wykradzenie sesji</td><td>nielegalny dostęp do informacji (art. 267)</td></tr>
+    <tr><td>Podszywanie się pod dziecko lub rodzica w celu wyrządzenia szkody</td><td>kradzież tożsamości (art. 190a § 2)</td></tr>
+    <tr><td>Groźby, szantaż („opublikuję”, „zhakuję”), wymuszenie</td><td>groźba karalna (art. 190), wymuszenie (art. 191, art. 282)</td></tr>
+    <tr><td>Dorosły nawiązuje kontakt z dzieckiem poniżej 15 lat w celu seksualnym, prosi o zdjęcia, proponuje spotkanie</td><td>art. 200a, art. 200 i art. 202 (zawsze zgłaszaj)</td></tr>
+  </table>
+  <p class="small muted">Kwalifikację prawną ustalają Policja i prokuratura. Nie musisz jej znać, żeby złożyć zawiadomienie; tabela ma tylko pokazać, że sprawa nie jest „za mała”.</p>
+
+  <h3>Jak się przygotować</h3>
+  <ul>
+    <li>Zawiadomienie składa rodzic lub opiekun prawny dziecka, ustnie na komisariacie (spiszą protokół) lub pisemnie.</li>
+    <li>Zabierz: dowód osobisty, wydruki lub zrzuty ekranu na nośniku, listę dat i zdarzeń, nazwy kont i identyfikatory sprawcy, potwierdzenia transakcji, numer zgłoszenia z CERT i reklamacji bankowej.</li>
+    <li>Nie zabieraj i nie kopiuj intymnych zdjęć dziecka; powiedz, że są na urządzeniu.</li>
+    <li>Poproś o potwierdzenie złożenia zawiadomienia (przyda się w banku i w reklamacji u platformy).</li>
+    <li>Przesłuchanie dziecka w sprawach o przestępstwa seksualne odbywa się w specjalnych warunkach (przyjazny pokój, z udziałem psychologa). Nie przepytuj dziecka wielokrotnie w domu.</li>
+  </ul>
+
+  <div class="box blue small">
+    <strong>Dlaczego zgłaszać nawet małe kwoty?</strong> Oszuści działają seryjnie i na wielu dzieciach naraz. Pojedyncze zgłoszenie z identyfikatorem konta, numerem telefonu lub rachunku pozwala połączyć sprawy i namierzyć sprawców. Z badań wynika, że rodzice dowiadują się o cyberatakach na dzieci znacznie rzadziej, niż do nich dochodzi, więc każde zgłoszenie wypełnia lukę.
+  </div>
+</section>
+
+<!-- ============ NAUCZYCIEL ============ -->
+<section class="page">
+  <h2>Rozdział dla nauczyciela</h2>
+  <p class="lead">Uczniowie często mówią o oszustwie najpierw koledze, potem nauczycielowi, a dopiero na końcu rodzicom. Twoja reakcja decyduje, czy uczeń przyjdzie znowu.</p>
+
+  <h3>Gdy uczeń zgłasza ci sprawę</h3>
+  <ol class="steps">
+    <li><strong>Wysłuchaj w spokojnym miejscu</strong>, bez oceniania. Powiedz, że dobrze, że ci o tym mówi.</li>
+    <li><strong>Oceń pilność.</strong> Zagrożenie bezpieczeństwa dziecka (obcy dorosły, szantaż, spotkanie, intymne zdjęcia)? Natychmiast uruchom procedurę interwencji ze szkolnych <strong>standardów ochrony małoletnich</strong> i powiadom osobę wyznaczoną w szkole oraz dyrekcję. Przy bezpośrednim zagrożeniu: 112.</li>
+    <li><strong>Nie przeglądaj telefonu ucznia</strong> i nie rób zdjęć jego prywatnych rozmów, chyba że wymaga tego procedura i dzieje się to przy uczniu. Nie przesyłaj intymnych materiałów nikomu, nawet dyrekcji lub Policji.</li>
+    <li><strong>Powiadom rodziców</strong> (wychowawca lub pedagog). Przekaż im ten poradnik i wskaż właściwy scenariusz. To rodzic zabezpiecza konta, rozmawia z bankiem i składa zawiadomienie.</li>
+    <li><strong>Zanotuj</strong> w dokumentacji przewidzianej w standardach: data, kto zgłosił, co ustalono, kogo powiadomiono. Nie kopiuj treści prywatnych wiadomości ponad potrzebę.</li>
+    <li><strong>Pomóż zgłosić</strong> link lub stronę do CERT Polska, jeśli rodzic nie umie; zgłoszenie nie wymaga danych dziecka.</li>
+  </ol>
+
+  <div class="two">
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">📢</span>Ostrzeżenie dla klasy</span>
+      <ul class="small" style="margin:0">
+        <li>Mów o schemacie, nie o osobie: „W naszej szkole krąży wiadomość o darmowych Robuxach…”.</li>
+        <li>Pokaż przykład z zamazanymi nickami i adresem zapisanym z <code>[.]</code>.</li>
+        <li>Przypomnij zasadę: „Darmowe + link = pytam dorosłego” i gdzie szukać pomocy (116 111).</li>
+        <li>Przy przejętych kontach uczniów poproś wszystkich o zmianę haseł i włączenie weryfikacji dwuetapowej w domu z rodzicem.</li>
+      </ul>
+    </div>
+    <div class="box green">
+      <span class="lbl green"><span class="ico">🏫</span>Profilaktyka w szkole</span>
+      <ul class="small" style="margin:0">
+        <li>Krótki trening rozpoznawania oszustw powtarzany co kilka tygodni działa lepiej niż jedna duża lekcja: efekt jednorazowego szkolenia zanika po około miesiącu.</li>
+        <li>BezpiecznaAura: misja treningowa i test przed–po pokazują nauczycielowi wyniki klasy; prywatne sprawy uczniów trafiają tylko do opiekuna.</li>
+        <li>Wpisz zasady reagowania na oszustwa internetowe do szkolnych standardów ochrony małoletnich.</li>
+        <li>Na zebraniu rozdaj rodzicom kartę szybkiej reakcji (ostatnia strona).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box red small">
+    <strong>Czego nie robić w szkole:</strong> nie zawstydzaj ucznia przy klasie, nie wymagaj pokazania prywatnych rozmów „żeby sprawdzić”, nie wysyłaj zrzutów ekranu w grupach rodziców ani na szkolnym czacie, nie mów, że „sam sobie winien, bo grał”.
+  </div>
+</section>
+
+<!-- ============ PROFILAKTYKA ============ -->
+<section class="page">
+  <h2>Profilaktyka: lista kontrolna na jeden wieczór</h2>
+  <p>Zróbcie to razem z dzieckiem. Tłumacz każdy krok: dziecko, które rozumie, po co jest weryfikacja dwuetapowa, rzadziej da się namówić na podanie kodu.</p>
+
+  <table>
+    <tr><th style="width:4%"></th><th style="width:36%">Ustawienie</th><th>Po co</th></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Weryfikacja dwuetapowa</strong> na e-mailu, koncie gry, Discordzie</td><td>Samo hasło nie wystarczy do przejęcia konta. Najlepiej aplikacja uwierzytelniająca lub e-mail rodzica.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>E-mail i telefon rodzica</strong> jako dane odzyskiwania konta dziecka</td><td>Rodzic widzi powiadomienia o logowaniu i zmianach; konto da się odzyskać.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Kody zapasowe</strong> zapisane w bezpiecznym miejscu</td><td>Odzyskanie konta po utracie telefonu.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Unikalne hasła</strong> + menedżer haseł</td><td>Wyciek jednego hasła nie otwiera innych kont. Menedżer nie podpowie hasła na fałszywej stronie.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Kontrola rodzicielska w grze</strong> (Roblox: powiązanie konta rodzica, ustawienia czatu, limit wydatków)</td><td>Ograniczenie kontaktu z obcymi i kontrola wydatków.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Prywatność:</strong> wiadomości tylko od znajomych, ukryty wiek, szkoła, miasto</td><td>Mniej kontaktów od obcych, mniej danych do podszywania się.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Zakupy wymagają zgody rodzica</strong> (App Store / Google Play / konsola)</td><td>Brak przypadkowych i wyłudzonych płatności.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Brak zapisanych kart</strong> w przeglądarce i grze na urządzeniu dziecka; ewentualnie karty podarunkowe</td><td>Złośliwy program nie wykradnie danych karty.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Blokada usług Premium SMS</strong> i płatności przez operatora</td><td>Ochrona przed subskrypcjami i „dopłatami”.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Konto użytkownika bez uprawnień administratora</strong>, antywirus, aktualizacje</td><td>Dziecko nie zainstaluje „cheata” bez wiedzy rodzica.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>PESEL zastrzeżony</strong> (rodzice; dziecko, jeśli jego dane wyciekły)</td><td>Utrudnia zaciąganie zobowiązań na cudze dane.</td></tr>
+    <tr><td><span class="chk"></span></td><td><strong>Umowa rodzinna</strong> spisana i powieszona przy komputerze</td><td>Jasne zasady i obietnica „nie ukarzę za to, że przyjdziesz”.</td></tr>
+  </table>
+
+  <div class="box blue">
+    <span class="lbl blue"><span class="ico">🤝</span>Propozycja umowy rodzinnej</span>
+    <ol class="small" style="margin:0">
+      <li>Darmowe + link = pytam dorosłego.</li>
+      <li>Nikomu nie podaję hasła ani kodu, nawet adminowi i przyjacielowi.</li>
+      <li>Loguję się tylko w oficjalnej aplikacji, nigdy przez link z wiadomości.</li>
+      <li>Wymieniam przedmioty tylko w oficjalnej wymianie w grze.</li>
+      <li>Nie pobieram cheatów i programów od obcych; kto każe wyłączyć antywirusa, jest oszustem.</li>
+      <li>Sekrety z dorosłymi z internetu zawsze mówię rodzicom.</li>
+      <li>Rodzic obiecuje: jeśli przyjdziesz z problemem, najpierw pomogę, a nie ukarzę.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ ROZMOWA ============ -->
+<section class="page">
+  <h2>Jak rozmawiać z dzieckiem</h2>
+  <p class="lead">Badania pokazują, że rodzice dowiadują się tylko o części cyberataków na nastolatków, a wielu z nich błędnie zakłada, że dziecko samo przyjdzie po pomoc. Najskuteczniejszą ochroną jest dziecko, które nie boi się mówić.</p>
+
+  <div class="two">
+    <div class="box green">
+      <span class="lbl green"><span class="ico">💬</span>Mów</span>
+      <ul class="small" style="margin:0">
+        <li>„Dobrze, że mi o tym mówisz. Razem to ogarniemy.”</li>
+        <li>„Oszuści są w tym bardzo dobrzy, nabierają też dorosłych.”</li>
+        <li>„Pokaż mi, jak to wyglądało, chcę zrozumieć.”</li>
+        <li>„Co teraz poradzisz koledze, który dostanie taką wiadomość?”</li>
+        <li>„Gdyby to się powtórzyło, przyjdź od razu, nawet w nocy.”</li>
+      </ul>
+    </div>
+    <div class="box red">
+      <span class="lbl red"><span class="ico">✋</span>Unikaj</span>
+      <ul class="small" style="margin:0">
+        <li>„Jak mogłeś być tak naiwny?”</li>
+        <li>„Koniec z grami” jako pierwsza reakcja (dziecko następnym razem ukryje problem).</li>
+        <li>Przesłuchiwania i wielokrotnego wypytywania o szczegóły, zwłaszcza w scenariuszu 9.</li>
+        <li>Opowiadania o sprawie innym dorosłym przy dziecku.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Na spokojnie, bez incydentu</h3>
+  <ul>
+    <li>Grajcie razem 15 minut i poproście dziecko, żeby pokazało, jak działa czat, wymiana i znajomi w grze.</li>
+    <li>Ćwiczcie na zmyślonych wiadomościach (jak w scenariuszach): „Oszustwo czy nie? Po czym poznajesz?”. Pytajcie też o uczciwe oferty, żeby dziecko nie uznało wszystkiego za oszustwo.</li>
+    <li>Odwróćcie role: dziecko jest „pomocnikiem” i tłumaczy wam, dlaczego wiadomość jest podejrzana. Uczenie innych utrwala wiedzę.</li>
+    <li>Powtarzajcie co kilka tygodni; jednorazową rozmowę szybko się zapomina.</li>
+  </ul>
+
+  <div class="box grey small">
+    <strong>BezpiecznaAura w domu.</strong> Gdy dziecko dostanie podejrzaną wiadomość, może wkleić ją pomocnikowi Scamerinio. Pomocnik nie ocenia dziecka, zadaje proste pytania („Czy ktoś prosi o kod? Czy jest link? Czy ktoś się spieszy?”), wyjaśnia sygnały ostrzegawcze i proponuje przekazanie sprawy opiekunowi. Opiekun widzi przekazaną sprawę i może odpowiedzieć. Dzięki temu rozmowa z rodzicem zaczyna się od faktów, a nie od strachu.
+  </div>
+
+  <div class="footer-note">
+    Źródła wykorzystane w poradniku: CERT Polska (incydent.cert.pl, SMS 8080, raport roczny 2025); CERT Orange Polska, „Oszustwa na Robloxie” (2026); NASK, „Nastolatki” (2024/2025) i Dyżurnet.pl; Fundacja Dajemy Dzieciom Siłę (116 111, 800 100 100); Roblox: Safety Center, zasady społeczności, kontrola rodzicielska; Discord: Centrum pomocy, Centrum rodzinne; Ministerstwo Sprawiedliwości: standardy ochrony małoletnich; Lastdrager i in., SOUPS 2017 (zanikanie efektu szkolenia); Kodeks karny. Pełna bibliografia: <code>ideas/defence/research.md</code> w repozytorium projektu.
+  </div>
+</section>
+
+<!-- ============ KARTA ============ -->
+<section class="page">
+  <div class="card">
+    <img class="card-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+    <h2>Karta szybkiej reakcji</h2>
+    <div class="cut">Wydrukuj, powieś przy komputerze, rozdaj na zebraniu.</div>
+
+    <ol class="steps">
+      <li><strong>Spokój.</strong> Podziękuj dziecku. Bez kar i zawstydzania.</li>
+      <li><strong>Przerwij kontakt,</strong> nic nie usuwaj.</li>
+      <li><strong>Zrzuty ekranu:</strong> wiadomość, nick/ID lub numer, link jako tekst, data i godzina.</li>
+      <li><strong>Co wyciekło?</strong> Hasło · kod · karta/BLIK · plik/program · zdjęcia · adres/PESEL.</li>
+      <li><strong>Zabezpiecz:</strong> nowe hasło (z czystego urządzenia) → wyloguj wszystkie sesje → weryfikacja dwuetapowa. Pieniądze → bank od razu.</li>
+      <li><strong>Zgłoś:</strong> platforma + CERT Polska; przy stratach lub kontakcie dorosłego → Policja.</li>
+      <li><strong>Wróćcie do tematu</strong> za kilka dni i wdrożcie jedno zabezpieczenie.</li>
+    </ol>
+
+    <table style="margin-top:4mm">
+      <tr><td class="k bignum">112</td><td>zagrożenie życia, spotkanie dziecka z obcym dorosłym, szantaż</td></tr>
+      <tr><td class="k bignum">incydent.cert.pl</td><td>fałszywa strona, link, złośliwy plik, e-mail</td></tr>
+      <tr><td class="k bignum">8080</td><td>przekaż podejrzany SMS (bezpłatnie)</td></tr>
+      <tr><td class="k bignum">dyzurnet.pl</td><td>treści seksualne z udziałem dzieci</td></tr>
+      <tr><td class="k bignum">116 111</td><td>telefon zaufania dla dziecka, 24/7</td></tr>
+      <tr><td class="k bignum">800 100 100</td><td>wsparcie dla rodziców i nauczycieli</td></tr>
+      <tr><td class="k bignum">828 828 828</td><td>zastrzeganie kart płatniczych</td></tr>
+    </table>
+
+    <div class="rule-big" style="margin-top:3mm">
+      <div class="r">Darmowe + link = <span>pytam dorosłego</span></div>
+      <p class="small muted" style="margin:2mm 0 0">Kod jest jak klucz do domu. Nikomu go nie daję.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
