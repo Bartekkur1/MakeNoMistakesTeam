@@ -49,18 +49,22 @@ export function evaluate(answers, hints) {
   const pressure = has('payment') && has('urgency');
   const prizeLink = has('prize') && (choices.verify.includes('message_link') || recognized.verify.includes('message_link'));
   const signals = [...credentials.map(id => 'credential_' + id),
-    ...(pressure ? ['payment_pressure'] : []), ...(prizeLink ? ['prize_link'] : []), ...(has('urgency') ? ['urgency'] : [])];
+    ...(pressure ? ['payment_pressure'] : has('payment') ? ['payment'] : []),
+    ...(prizeLink ? ['prize_link'] : has('prize') ? ['prize'] : []), ...(has('urgency') ? ['urgency'] : [])];
   const unknowns = [];
   if (!choices.sender.length || choices.sender.some(id => ['unknown', 'unknown_sender'].includes(id))) unknowns.push('sender');
-  if (!request.length || request.includes('unknown')) unknowns.push('request', 'urgency');
+  if (!request.length || request.includes('unknown')) {
+    if (!recognized.request.some(id => id !== 'urgency')) unknowns.push('request');
+    if (!has('urgency')) unknowns.push('urgency');
+  }
   if (!choices.verify.includes('independent_channel')) unknowns.push('official_channel');
   const mismatches = ['password', 'code'].filter(id => recognized.request.includes(id) && request.length && !request.includes('unknown') && !request.includes(id))
     .map(id => Object.freeze({ questionId: 'request', answerId: id, messageKey: 'credential_' + id }));
   if (mismatches.length) unknowns.push('conflict');
-  const stepId = credentials.length ? 'protect_credentials' : pressure ? 'verify_payment' : prizeLink ? 'verify_prize'
+  const stepId = credentials.length ? 'protect_credentials' : pressure ? 'verify_payment' : has('prize') ? 'verify_prize'
     : has('urgency') ? 'pause_and_verify' : has('payment') ? 'verify_payment' : 'independent_check';
   return Object.freeze({
-    summaryKey: mismatches.length ? 'conflicting_answers' : signals.length || has('payment') ? 'caution' : unknowns.length ? 'insufficient_information' : 'no_signals',
+    summaryKey: mismatches.length ? 'conflicting_answers' : signals.length ? 'caution' : unknowns.length ? 'insufficient_information' : 'no_signals',
     signals: Object.freeze(signals), unknowns: Object.freeze(unknowns),
     step: Object.freeze({ id: stepId, explanationKey: stepId + '_how' }), mismatches: Object.freeze(mismatches),
   });
