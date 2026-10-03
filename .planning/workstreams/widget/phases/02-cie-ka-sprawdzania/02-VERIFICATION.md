@@ -30,7 +30,12 @@ covered_files:
   - projects/widget/tests/unit/presence.test.js
 covered_digest: "v2:sha256:fb4fa20506a043d4c758045a0ca40f1c1310f2294efb615eb125b4dc1c6ec482"
 behavior_unverified: 0
-overrides_applied: 0
+overrides_applied: 1
+overrides:
+  - must_have: "Reguły zgodne z regułami osoby 4 / CHK-01 z shared/content/"
+    reason: "D-13: shared/content/ nie istnieje; roboczy pakiet w projects/widget czeka na przegląd osoby 4 i późniejsze dopasowanie bez zmiany ustalonych zachowań"
+    accepted_by: "pbartela"
+    accepted_at: "2026-10-03T22:45:02Z"
 human_verification:
   - test: "Decyzja: czy roboczy pakiet reguł widgetu (src/core/check.js + src/ui/strings.pl.js) spełnia sformułowanie celu „zgodnie z regułami osoby 4” i dopisek CHK-01 „reguły i treści z shared/content/”?"
     expected: "Albo osoba 4 przegląda i akceptuje pakiet (wtedy prawda przechodzi na VERIFIED), albo właściciel projektu dodaje override z uzasadnieniem D-13 (szablon w sekcji Human Verification)."
