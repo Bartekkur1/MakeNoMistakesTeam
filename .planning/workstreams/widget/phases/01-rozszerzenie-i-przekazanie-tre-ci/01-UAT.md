@@ -1,20 +1,14 @@
 ---
-status: testing
+status: diagnosed
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
 source: [01-VERIFICATION.md]
 started: "2026-10-03T17:22:05.578826+00:00"
-updated: "2026-10-03T17:51:26.347470+00:00"
+updated: "2026-10-03T18:03:14.313105+00:00"
 ---
 
 ## Current Test
 
-number: 2
-name: G-01-2: rekin znika w formularzu widgetu i wraca po zamknięciu
-expected: |
-  Załaduj nowy ZIP albo widget/dist, przeładuj rozszerzenie i odśwież kartę.
-  Przejdź ręczny retest G-01-2 w README: paste/preview chowają rekina,
-  × i Escape przywracają go, szkic zostaje, panel mieści się po resize.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -24,7 +18,7 @@ result: pass
 
 ### 2. Discord: podgląd, klawiatura i zaznaczenie kompozytora
 expected: Na fikcyjnym koncie przejdź kroki 4–5 README: tylko zaznaczony fragment i hostname discord.com, informacja dla opiekuna, edycja nie trafia do kompozytora i nie uruchamia skrótów; fragment wpisanego zdania przechodzi dokładnie bez wysłania wiadomości; zatwierdzenie daje neutralne Gotowe!.
-result: [pending]
+result: issue
 reported: "2 wiekszosc pass, rekin powinien znikac kiedy pojawia sie pole do wpisywania (chyba, ze nie jest to zgodne z wymaganiami)"
 severity: minor
 
@@ -44,8 +38,8 @@ result: pass
 
 total: 5
 passed: 4
-issues: 0
-pending: 1
+issues: 1
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -53,7 +47,7 @@ blocked: 0
 
 - gap_id: G-01-2
   truth: "Rekin znika po otwarciu formularza widgetu i wraca po jego zamknięciu."
-  status: implemented_awaiting_retest
+  status: superseded
   reason: "User reported: 2 wiekszosc pass, rekin powinien znikac kiedy pojawia sie pole do wpisywania (chyba, ze nie jest to zgodne z wymaganiami)"
   severity: minor
   test: 2
@@ -66,9 +60,35 @@ blocked: 0
   missing:
     - "Osobna widoczność avatar-wrap w formularzu paste i preview, bez chowania panelu."
     - "Powrót awatara po zamknięciu formularza z zachowaniem pozycji i szkicu."
+  superseded_by: G-01-2-drag
+  resolution_note: "Użytkownik zmienił kryterium: rekin może zostać widoczny, jeśli otwarte okno podąża za nim."
   diagnosis_note: "Użytkownik potwierdził opcję 1: chodzi o formularz widgetu. Rekin ma znikać po otwarciu formularza i wracać po jego zamknięciu; nie chodzi o pisanie w kompozytorze Discorda."
 
+
+- gap_id: G-01-2-drag
+  truth: "Przeciąganie widocznego rekina przesuwa również otwarty panel, bez utraty szkicu."
+  status: failed
+  reason: "User reported: przesuniecie rekina powinno przesunac tez otwarte okna, rekin jednak nie musi znikac o ile okno bedzie sie przesuwalo razem z nim"
+  severity: minor
+  test: 2
+  root_cause: "moveTo zmienia wyłącznie style hosta. Panel ma position: fixed i własne left/top; panel.place jest wywoływane przez render/resize, bez powiadomienia o przeciąganiu. setFormOpen dodatkowo ukrywa i blokuje rekina w paste/preview."
+  artifacts:
+    - path: widget/src/content/avatar.js
+      issue: "Brak powiadomienia o zmianie pozycji; setFormOpen ukrywa uchwyt przeciągania."
+    - path: widget/src/content/main.js
+      issue: "Brak aktualizacji pozycji panelu na pointermove; render przebudowuje formularz."
+    - path: widget/src/ui/panel.js
+      issue: "Panel jest fixed i potrzebuje jawnego place po zmianie pozycji awatara."
+  missing:
+    - "Powiadomienie o ruchu rekina i aktualizacja samej pozycji otwartego panelu."
+    - "Widoczny, aktywny rekin również w formularzu."
+    - "Regresje dla tekstu, fokusu, kliknięcia po drag i krawędzi ekranu."
+  debug_session: .planning/workstreams/widget/debug/drag-open-panel.md
 
 ## Gap closure execution
 
 01-05 implemented and automated checks passed: 38 Vitest, 38 Playwright (one existing expected failure). Original report retained above; user has not yet accepted the visual fix. Four prior pass results remain unchanged. Retest artifact: `/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-05.zip`.
+
+## Latest UAT report
+
+przesuniecie rekina powinno przesunac tez otwarte okna, rekin jednak nie musi znikac o ile okno bedzie sie przesuwalo razem z nim
