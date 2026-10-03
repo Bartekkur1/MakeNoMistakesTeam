@@ -594,18 +594,18 @@ ASVS level 1 (`security_asvs_level: 1`), `security_block_on: high`.
 | A10 | esbuild package name/provenance (training knowledge; registry verdict OK) | Package audit | Very low |
 | A11 | Orphaned content scripts after an extension reload are not re-injected into existing tabs | Pitfall 5 | Low; dev-only annoyance |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **A draft exists and the child selects new text, then clicks the avatar.**
+1. **A draft exists and the child selects new text, then clicks the avatar.** RESOLVED by the user as **D-17** (2026-10-03).
    - What we know: D-12 says the draft comes back on click. D-09 says a selection opens the preview with that selection.
-   - What's unclear: which one wins.
-   - Recommendation: restore the draft and offer „Wstaw nowe zaznaczenie” to replace it. This needs confirmation in the UI phase (`/gsd-ui-phase`) or by the user.
-2. **Open vs closed shadow root.**
+   - What was unclear: which one wins.
+   - Resolution: the draft comes back and a „Wstaw nowe zaznaczenie” button replaces it only on the child's click (D-17). Implemented in plan 01-04 Task 1 (`pendingSelection`, `insertPendingSelection`).
+2. **Open vs closed shadow root.** RESOLVED: open mode, as an accepted risk (plan default).
    - What we know: open mode lets the page read the draft, but closed mode doesn't stop composed-event leakage, and Playwright can't pierce closed roots.
-   - Recommendation: open mode plus a documented accepted risk. Escalate to the iframe panel only if Pitfall 3 bites.
-3. **Remember the dragged position?** It is allowed by discretion, but it needs the `storage` permission. Recommendation: **don't** in phase 1. That keeps "the extension has no storage permission" as a clean privacy claim. Position resets on reload.
-4. **Auto-fill the link field from a URL inside the selected text?** This is cheap and stays within the selection (D-02). Recommendation: yes, using a regex on the selected text only and never DOM `href`s. The child can edit or clear it.
-5. **Demo browser:** Is the demo machine running Google Chrome (load unpacked through the UI) or Chromium? The planner should add a demo-setup checklist item.
+   - Resolution: `attachShadow({ mode: 'open' })` in plan 01-01 Task 2, accepted as threat T-01-06. The iframe panel is the fallback if the blocking Discord keyboard check at the end of the plan 01-01 tracer fails (Pitfall 3).
+3. **Remember the dragged position?** RESOLVED: no stored position in phase 1 (plan default). The position lives in memory only and resets on reload, so the manifest keeps no `storage` permission and "the extension has no storage permission" stays a clean privacy claim. Implemented in plan 01-03 Task 1.
+4. **Auto-fill the link field from a URL inside the selected text?** RESOLVED: yes, from the selected text only (plan default). `extractFirstLink` runs a regex on the selected text and never on DOM `href`s; pasted links come only from the link field, and the child can edit or clear the pre-filled link. Implemented in plan 01-04 Task 1.
+5. **Demo browser:** RESOLVED by the user as **D-18** (2026-10-03): the demo runs in Google Chrome (load unpacked through the UI); E2E tests run on the local Chromium at `/usr/bin/chromium`. The Google Chrome load steps and the pre-demo checklist are in `widget/README.md` (plan 01-04 Task 2).
 
 ## Sources
 

@@ -21,7 +21,13 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   1. Rozszerzenie uruchamia awatara na komputerze
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Bramka pakietów npm, tracer zaznacz → kliknij rekina → podgląd → zatwierdź → sprawa w service workerze, blokujący test klawiatury na Discordzie
+- [ ] 01-02-PLAN.md — Strażnik D-04 (test szpiegujący + skan źródeł, Vitest z CSS), zaznaczenie w polach i kompozytorze w prawdziwym Chromium, limit przechwytywania klawiatury, jedno zatwierdzenie = jedna sprawa
+- [ ] 01-03-PLAN.md — Awatar zawsze pod ręką: przeciąganie, chowanie, przywracanie ikoną (z odzyskiem po przeładowaniu rozszerzenia), menu bez zaznaczenia, wklejanie z buforem, „Jak to działa”, okno na ekranie
+- [ ] 01-04-PLAN.md — Szkic na karcie (D-12, D-17, prawdziwy bfcache), link z zaznaczenia, przypadki brzegowe treści, uczciwa awaria i spóźnione odpowiedzi, README z listą kontrolną demo w Google Chrome
 **UI hint**: yes
 
 ### Phase 2: Ścieżka sprawdzania
