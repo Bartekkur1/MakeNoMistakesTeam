@@ -307,7 +307,24 @@ export interface AddCommentInput {
   body: string;
 }
 
-// RED skeleton (plan 01-05 Task 2): not implemented yet.
-export async function addComment(_input: AddCommentInput): Promise<ReportComment> {
-  throw new Error("not implemented");
+// Appends one comment to the parent+teacher thread (D-11). Comments are append-only (D-10):
+// no update or delete function exists anywhere, and the database blocks updates by trigger.
+// Only the row Supabase returned is confirmed; an error, a throw or no row is a 503.
+export async function addComment(input: AddCommentInput): Promise<ReportComment> {
+  const data = await run("add_comment", () =>
+    getSupabase()
+      .from("report_comments")
+      .insert({
+        report_id: input.reportId,
+        author_id: input.authorId,
+        author_role: input.authorRole,
+        body: input.body,
+      })
+      .select(COMMENT_COLUMNS)
+      .single(),
+  );
+  if (data === null || data === undefined) {
+    throw new StorageUnavailableError("add_comment returned no row");
+  }
+  return mapComment(data);
 }

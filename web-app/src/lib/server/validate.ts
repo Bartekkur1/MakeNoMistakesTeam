@@ -261,3 +261,23 @@ export function parseTransition(body: Record<string, unknown>): ValidationResult
   if (errors.length > 0 || action === null) return { ok: false, errors };
   return { ok: true, value: { action, comment } };
 }
+
+// ---------------------------------------------------------------------------
+// POST /api/reports/{id}/comments (contract "Komentarze", D-11)
+// ---------------------------------------------------------------------------
+
+export interface CommentInput {
+  body: string;
+}
+
+// Only body is read; author fields and every other key are dropped (the author is the session).
+export function parseComment(body: Record<string, unknown>): ValidationResult<CommentInput> {
+  const text = typeof body.body === "string" ? body.body.trim() : "";
+  if (text === "") {
+    return { ok: false, errors: [{ field: "body", message: "Komentarz nie może być pusty." }] };
+  }
+  if (charLength(text) > LIMITS.commentMaxChars) {
+    return { ok: false, errors: [{ field: "body", message: "Komentarz jest za długi (maks. 2000 znaków)." }] };
+  }
+  return { ok: true, value: { body: text } };
+}
