@@ -28,6 +28,99 @@ model:GetAttributeChangedSignal("ScamerinoPatrolPaused"):Connect(function()
 	end
 end)
 
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local dialogueEvent = ReplicatedStorage:FindFirstChild("ScamerinoDialogueEvent") :: RemoteEvent?
+if not dialogueEvent then
+	dialogueEvent = Instance.new("RemoteEvent")
+	dialogueEvent.Name = "ScamerinoDialogueEvent"
+	dialogueEvent.Parent = ReplicatedStorage
+end
+local remoteEvent: RemoteEvent = dialogueEvent :: RemoteEvent
+
+local activeConversations: { [Player]: boolean } = {}
+
+local function updatePauseState()
+	local anyActive = false
+	for activePlayer, active in activeConversations do
+		if active and activePlayer.Parent == Players then
+			anyActive = true
+			break
+		end
+	end
+	model:SetAttribute("ScamerinoPatrolPaused", anyActive)
+end
+
+local function facePlayer(targetPlayer: Player)
+	local char = targetPlayer.Character
+	local targetRoot = char and char:FindFirstChild("HumanoidRootPart")
+	if targetRoot and targetRoot:IsA("BasePart") and root then
+		local lookPos = Vector3.new(targetRoot.Position.X, root.Position.Y, targetRoot.Position.Z)
+		pcall(function()
+			root.CFrame = CFrame.lookAt(root.Position, lookPos)
+		end)
+	end
+end
+
+local function startDialogueWithPlayer(targetPlayer: Player)
+	activeConversations[targetPlayer] = true
+	updatePauseState()
+	facePlayer(targetPlayer)
+end
+
+local function endDialogueWithPlayer(targetPlayer: Player)
+	if activeConversations[targetPlayer] then
+		activeConversations[targetPlayer] = nil
+		updatePauseState()
+	end
+end
+
+remoteEvent.OnServerEvent:Connect(function(speakingPlayer: Player, action: any)
+	if action == "startDialogue" or action == "open" then
+		startDialogueWithPlayer(speakingPlayer)
+	elseif action == "endDialogue" or action == "close" then
+		endDialogueWithPlayer(speakingPlayer)
+	end
+end)
+
+local torso = model:FindFirstChild("Torso")
+local prompt = torso and torso:FindFirstChild("ChatPrompt")
+if prompt and prompt:IsA("ProximityPrompt") then
+	prompt.Triggered:Connect(function(triggerPlayer)
+		startDialogueWithPlayer(triggerPlayer)
+		remoteEvent:FireClient(triggerPlayer, "open")
+	end)
+end
+
+local function hookPlayer(targetPlayer: Player)
+	targetPlayer.CharacterRemoving:Connect(function()
+		endDialogueWithPlayer(targetPlayer)
+	end)
+end
+Players.PlayerAdded:Connect(hookPlayer)
+for _, p in Players:GetPlayers() do
+	hookPlayer(p)
+end
+Players.PlayerRemoving:Connect(function(leavingPlayer)
+	endDialogueWithPlayer(leavingPlayer)
+end)
+
+task.spawn(function()
+	while model:IsDescendantOf(workspace) do
+		task.wait(1)
+		for targetPlayer, active in activeConversations do
+			if active then
+				local char = targetPlayer.Character
+				local targetRoot = char and char:FindFirstChild("HumanoidRootPart")
+				if not targetRoot or (targetRoot.Position - root.Position).Magnitude > 22 then
+					endDialogueWithPlayer(targetPlayer)
+				end
+			end
+		end
+	end
+end)
+
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
 rayParams.FilterDescendantsInstances = { model }

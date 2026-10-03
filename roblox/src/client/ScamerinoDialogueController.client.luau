@@ -285,6 +285,7 @@ local function openUI()
 		return
 	end
 	isDialogueOpen = true
+	remoteEvent:FireServer("startDialogue")
 	mainFrame.Visible = true
 	mainFrame.Position = UDim2.fromScale(0.5, 1.4)
 	local tw = TweenService:Create(
@@ -300,6 +301,7 @@ local function closeUI()
 		return
 	end
 	isDialogueOpen = false
+	remoteEvent:FireServer("endDialogue")
 	local tw = TweenService:Create(
 		mainFrame,
 		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
