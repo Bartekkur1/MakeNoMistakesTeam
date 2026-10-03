@@ -1,12 +1,7 @@
 import { normalizeText, capCodePoints, normalizeLink, extractFirstLink, isValidCase } from './case.js';
-import { detectHints, evaluate } from './check.js';
+import { QUESTIONS, detectHints, evaluate } from './check.js';
 export { detectHints, evaluate } from './check.js';
 
-const QUESTIONS = Object.freeze({
-  sender: ['known_person', 'claims_organization', 'unknown_sender', 'unknown'],
-  request: ['password', 'code', 'prize', 'payment', 'urgency', 'ordinary', 'unknown'],
-  verify: ['independent_channel', 'message_link', 'no_channel', 'unknown'],
-});
 const ORDER = Object.keys(QUESTIONS);
 const freezeAnswers = answers => Object.freeze(Object.fromEntries(Object.entries(answers).map(([id, values]) => [id, Object.freeze(values)])));
 const checkView = step => step === 'safety' || step === 'result' ? step : 'question';

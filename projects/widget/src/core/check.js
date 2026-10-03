@@ -1,12 +1,12 @@
 import { normalizeText, extractFirstLink } from './case.js';
 
-const OPTIONS = Object.freeze({
+const freezeLists = lists => Object.freeze(Object.fromEntries(Object.entries(lists).map(([id, values]) => [id, Object.freeze(values)])));
+export const QUESTIONS = freezeLists({
   sender: ['known_person', 'claims_organization', 'unknown_sender', 'unknown'],
   request: ['password', 'code', 'prize', 'payment', 'urgency', 'ordinary', 'unknown'],
   verify: ['independent_channel', 'message_link', 'no_channel', 'unknown'],
 });
-const freezeLists = lists => Object.freeze(Object.fromEntries(Object.entries(lists).map(([id, values]) => [id, Object.freeze(values)])));
-const validLists = lists => Object.fromEntries(Object.entries(OPTIONS).map(([id, options]) =>
+const validLists = lists => Object.fromEntries(Object.entries(QUESTIONS).map(([id, options]) =>
   [id, options.filter(option => Array.isArray(lists?.[id]) && lists[id].includes(option))]));
 const matchingText = raw => normalizeText(typeof raw === 'string' ? raw : '').normalize('NFD').toLowerCase()
   .replace(/\p{M}/gu, '').replace(/\u0142/g, 'l').replace(/\s+/g, ' ');

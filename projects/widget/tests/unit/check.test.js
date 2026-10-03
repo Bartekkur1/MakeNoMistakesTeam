@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { detectHints, evaluate } from '../../src/core/check.js';
+import { QUESTIONS, detectHints, evaluate } from '../../src/core/check.js';
 import { buildCase, capCodePoints, MAX_CONTENT } from '../../src/core/case.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 
@@ -7,6 +7,11 @@ const honest = { sender: ['known_person'], request: ['ordinary'], verify: ['inde
 const unknown = { sender: ['unknown'], request: ['unknown'], verify: ['unknown'] };
 const result = (summaryKey, signals, unknowns, stepId, mismatches = []) => ({
   summaryKey, signals, unknowns, step: { id: stepId, explanationKey: stepId + '_how' }, mismatches,
+});
+test('the working content pack matches the shared immutable answer-option IDs', () => {
+  expect(STRINGS.checkQuestions.map(q => [q.id, q.options.map(o => o.id)])).toEqual(Object.entries(QUESTIONS));
+  expect(Object.isFrozen(QUESTIONS)).toBe(true);
+  for (const options of Object.values(QUESTIONS)) expect(Object.isFrozen(options)).toBe(true);
 });
 const fixtures = [
   ['account code', 'Podaj kod do konta, aby odebrać nagrodę', '',
