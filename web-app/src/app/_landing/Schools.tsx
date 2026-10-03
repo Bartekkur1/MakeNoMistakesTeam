@@ -27,7 +27,7 @@ export function Schools() {
           </dl>
         </figure>
       </div>
-      <figure className="mt-14">
+      <figure className="mx-auto mt-14 max-w-4xl">
         <h3 className="font-display text-lg font-bold text-navy-slate">{MISSION_VIDEO.title}</h3>
         {/* preload="none": only the poster loads with the page, the video only after play. */}
         <video
@@ -39,7 +39,7 @@ export function Schools() {
           width={MISSION_VIDEO.width}
           height={MISSION_VIDEO.height}
           aria-label={MISSION_VIDEO.label}
-          className="mt-4 h-auto w-full max-w-4xl rounded-xl border border-titanium-border bg-navy-slate"
+          className="mt-4 h-auto w-full rounded-xl border border-titanium-border bg-navy-slate"
         >
           <source src={MISSION_VIDEO.src} type="video/mp4" />
         </video>
