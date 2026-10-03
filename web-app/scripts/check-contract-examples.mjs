@@ -28,8 +28,10 @@ import {
   ATTACK_TYPE_LABELS_PL,
   ATTACK_TYPES,
   CHILD_FIELDS,
+  COMMENT_FIELDS,
   HISTORY_ACTION_LABELS_PL,
   HISTORY_ACTIONS,
+  HISTORY_FIELDS,
   INITIAL_REPORT_STATE,
   LIMITS,
   LOGIN_SCOPE_LABELS_PL,
@@ -56,6 +58,7 @@ import {
   demoChildOfParent,
   demoChildrenForAccount,
   findDemoAccountByEmail,
+  teacherTeachesChild,
 } from "../src/lib/contract/demo-accounts.ts";
 
 const DEFAULT_DIR = fileURLToPath(new URL("../../.planning/shared/examples/", import.meta.url));
@@ -385,6 +388,193 @@ function checkChildInfo(c, label) {
   expectJson(c, demo, label);
 }
 
+function checkHistoryEntry(h, label) {
+  if (!isObject(h)) fail(`${label} must be an object`);
+  sameKeys(h, HISTORY_FIELDS, label);
+  checkUuid(h.id, `${label}.id`);
+  checkUuid(h.report_id, `${label}.report_id`);
+  oneOf(h.action, HISTORY_ACTIONS, `${label}.action`);
+  if (h.from_state !== null) oneOf(h.from_state, REPORT_STATES, `${label}.from_state`);
+  oneOf(h.to_state, REPORT_STATES, `${label}.to_state`);
+  checkUuid(h.actor_id, `${label}.actor_id`);
+  oneOf(h.actor_role, ACTOR_ROLES, `${label}.actor_role`);
+  if (h.comment !== null) {
+    nonBlankString(h.comment, LIMITS.transitionCommentMaxChars, `${label}.comment`);
+    if (h.comment !== h.comment.trim()) fail(`${label}.comment must be stored trimmed`);
+  }
+  checkTimestamp(h.created_at, `${label}.created_at`);
+}
+
+function checkComment(c, label) {
+  if (!isObject(c)) fail(`${label} must be an object`);
+  sameKeys(c, COMMENT_FIELDS, label);
+  checkUuid(c.id, `${label}.id`);
+  checkUuid(c.report_id, `${label}.report_id`);
+  checkUuid(c.author_id, `${label}.author_id`);
+  oneOf(c.author_role, ACCOUNT_ROLES, `${label}.author_role`);
+  nonBlankString(c.body, LIMITS.commentMaxChars, `${label}.body`);
+  if (c.body !== c.body.trim()) fail(`${label}.body must be stored trimmed`);
+  checkTimestamp(c.created_at, `${label}.created_at`);
+}
+
+// The TRANSITIONS row that allows `action` from `state`, or null.
+function transitionRule(action, state) {
+  return TRANSITIONS.find((row) => row.action === action && row.from.includes(state)) ?? null;
+}
+
+// An account (parent or teacher) may act on a report: the parent owns it, the teacher teaches the child.
+function isLinkedAccount(accountId, role, report) {
+  if (role === "parent") return accountId === report.parent_id;
+  if (role === "teacher") return teacherTeachesChild(accountId, report.child_id);
+  return false;
+}
+
+// History must replay the transition matrix from "submit" to the report's current state (D-08, D-09, D-10).
+function checkTimeline(report, history, comments, label) {
+  if (history.length === 0) fail(`${label} has no history`);
+  const first = history[0];
+  if (first.action !== "submit") fail(`${label} history must start with "submit"`);
+  if (first.from_state !== null || first.to_state !== INITIAL_REPORT_STATE) {
+    fail(`${label} submit entry must go from null to "${INITIAL_REPORT_STATE}"`);
+  }
+  if (first.actor_id !== report.child_id || first.actor_role !== "child") fail(`${label} submit entry actor must be the child`);
+  if (first.comment !== null) fail(`${label} submit entry comment must be null`);
+  if (first.created_at !== report.created_at) fail(`${label} submit entry created_at must equal the report created_at`);
+  for (let i = 1; i < history.length; i++) {
+    const prev = history[i - 1];
+    const e = history[i];
+    const where = `${label} history[${i}]`;
+    if (e.action === "submit") fail(`${where} repeats "submit"`);
+    if (e.from_state !== prev.to_state) fail(`${where}.from_state "${e.from_state}" does not follow "${prev.to_state}"`);
+    const rule = transitionRule(e.action, e.from_state);
+    if (!rule) fail(`${where}: "${e.action}" is not allowed from "${e.from_state}"`);
+    if (e.to_state !== rule.to) fail(`${where}.to_state is "${e.to_state}", expected "${rule.to}"`);
+    if (!rule.roles.includes(e.actor_role)) fail(`${where}: role "${e.actor_role}" may not "${e.action}"`);
+    if (!isLinkedAccount(e.actor_id, e.actor_role, report)) fail(`${where}: actor is not linked to this report`);
+    if (TRANSITION_COMMENT_REQUIRED[e.action] && e.comment === null) fail(`${where}: "${e.action}" requires a comment`);
+    if (e.created_at < prev.created_at) fail(`${where}.created_at is earlier than the previous entry`);
+  }
+  const last = history[history.length - 1];
+  if (last.to_state !== report.state) fail(`${label} history ends in "${last.to_state}" but the report state is "${report.state}"`);
+  if (last.created_at !== report.updated_at) fail(`${label} updated_at must equal the last history entry created_at`);
+  comments.forEach((c, i) => {
+    const where = `${label} comments[${i}]`;
+    if (!isLinkedAccount(c.author_id, c.author_role, report)) fail(`${where}: author is not linked to this report`);
+    if (c.created_at < report.created_at) fail(`${where}.created_at is earlier than the report`);
+    if (i > 0 && c.created_at < comments[i - 1].created_at) fail(`${where}.created_at is earlier than the previous comment`);
+  });
+}
+
+// Visibility reference rule (D-11, D-15).
+function canView(account, report) {
+  if (account.role === "parent") return report.parent_id === account.id;
+  if (account.role === "teacher") {
+    return teacherTeachesChild(account.id, report.child_id) && TEACHER_VISIBLE_STATES.includes(report.state);
+  }
+  return false;
+}
+
+// Server's exact cursor encoding; clients treat it as opaque.
+function encodeCursor(report) {
+  return Buffer.from(JSON.stringify({ c: report.created_at, i: report.id })).toString("base64url");
+}
+
+function decodeCursor(value, label) {
+  let parsed;
+  try {
+    parsed = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+  } catch {
+    fail(`${label} is not a valid cursor`);
+  }
+  if (!isObject(parsed)) fail(`${label} is not a valid cursor`);
+  sameKeys(parsed, ["c", "i"], `${label} (decoded)`);
+  checkTimestamp(parsed.c, `${label}.c`);
+  checkUuid(parsed.i, `${label}.i`);
+  if (encodeCursor({ created_at: parsed.c, id: parsed.i }) !== value) fail(`${label} is not in canonical encoding`);
+  return parsed;
+}
+
+// List order: created_at desc, then id desc.
+function newestFirst(a, b) {
+  if (a.created_at !== b.created_at) return a.created_at < b.created_at ? 1 : -1;
+  return a.id < b.id ? 1 : a.id > b.id ? -1 : 0;
+}
+
+// What GET /api/reports must return for `account` and the query (D-15, D-16).
+function expectedList(account, query) {
+  const limit = query.limit ?? LIMITS.pageDefault;
+  let rows = requireDataset()
+    .reports.filter((r) => canView(account, r))
+    .filter((r) => query.state === undefined || r.state === query.state)
+    .sort(newestFirst);
+  if (query.cursor !== undefined) {
+    const { c, i } = query.cursor;
+    rows = rows.filter((r) => r.created_at < c || (r.created_at === c && r.id < i));
+  }
+  const page = rows.slice(0, limit);
+  return { reports: page, next_cursor: rows.length > limit ? encodeCursor(page[page.length - 1]) : null };
+}
+
+// ---------------------------------------------------------------------------
+// demo-dataset.json (checked first; kept for the route checkers)
+// ---------------------------------------------------------------------------
+
+let DATASET = null;
+
+function requireDataset() {
+  if (!DATASET) fail("demo-dataset.json is required (missing or invalid)");
+  return DATASET;
+}
+
+function checkDatasetFile(doc) {
+  sameKeys(doc, ["description", "dataset"], "file");
+  nonBlankString(doc.description, 1000, "description");
+  if (!isObject(doc.dataset)) fail("dataset must be an object");
+  sameKeys(doc.dataset, ["reports", "history", "comments"], "dataset");
+  const { reports, history, comments } = doc.dataset;
+  for (const [list, name] of [
+    [reports, "reports"],
+    [history, "history"],
+    [comments, "comments"],
+  ]) {
+    if (!Array.isArray(list)) fail(`dataset.${name} must be an array`);
+  }
+  if (reports.length === 0) fail("dataset.reports must not be empty");
+  reports.forEach((r, i) => checkReport(r, `dataset.reports[${i}]`));
+  history.forEach((h, i) => checkHistoryEntry(h, `dataset.history[${i}]`));
+  comments.forEach((c, i) => checkComment(c, `dataset.comments[${i}]`));
+  checkUnique([...reports, ...history, ...comments].map((x) => x.id), "dataset ids");
+  const reportIds = new Set(reports.map((r) => r.id));
+  history.forEach((h, i) => {
+    if (!reportIds.has(h.report_id)) fail(`dataset.history[${i}].report_id is not a dataset report`);
+  });
+  comments.forEach((c, i) => {
+    if (!reportIds.has(c.report_id)) fail(`dataset.comments[${i}].report_id is not a dataset report`);
+  });
+  for (const r of reports) {
+    checkTimeline(
+      r,
+      history.filter((h) => h.report_id === r.id),
+      comments.filter((c) => c.report_id === r.id),
+      `report ${r.id}`,
+    );
+  }
+  DATASET = { reports, history, comments, ids: new Set([...reportIds, ...history.map((h) => h.id), ...comments.map((c) => c.id)]) };
+}
+
+function datasetReport(id) {
+  return requireDataset().reports.find((r) => r.id === id) ?? null;
+}
+
+function datasetDetail(report) {
+  const { history, comments } = requireDataset();
+  return {
+    ...report,
+    history: history.filter((h) => h.report_id === report.id),
+    comments: comments.filter((c) => c.report_id === report.id),
+  };
+}
+
 // The example's `auth` says who calls: null (no token) or { email, scope } of a demo account.
 // Examples never store a real token. Returns { account, scope } or null.
 function authAccount(ex) {
@@ -480,6 +670,78 @@ const routeCheckers = {
       expectJson(r[key], value, `response.body.${key}`);
     }
     if (r.created_at !== r.updated_at) fail("a new report must have updated_at equal to created_at");
+    if (DATASET && DATASET.ids.has(r.id)) fail("response.body.id must be a new id, not one from demo-dataset.json");
+  },
+
+  "GET /api/auth/me"(ex) {
+    matchPath(ex.route, ex.path);
+    const { account, scope } = requireAuth(ex);
+    requireNullRequest(ex);
+    expectStatus(ex.response, 200);
+    const body = ex.response.body;
+    if (!isObject(body)) fail("response.body must be an object");
+    sameKeys(body, ["expires_at", "scope", "account", "children"], "response.body");
+    checkTimestamp(body.expires_at, "response.body.expires_at");
+    if (body.scope !== scope) fail(`response.body.scope is "${body.scope}", expected the token scope "${scope}"`);
+    checkAccountInfo(body.account, "response.body.account");
+    if (body.account.id !== account.id) fail("response.body.account is not the logged-in account");
+    if (!Array.isArray(body.children)) fail("response.body.children must be an array");
+    body.children.forEach((c, i) => checkChildInfo(c, `response.body.children[${i}]`));
+    expectJson(body.children, demoChildrenForAccount(account), "response.body.children");
+  },
+
+  "GET /api/reports"(ex) {
+    const { query } = matchPath(ex.route, ex.path);
+    const { account } = requireAuth(ex);
+    requireNullRequest(ex);
+    const parsed = {};
+    for (const key of new Set(query.keys())) {
+      if (!["limit", "cursor", "state"].includes(key)) fail(`unknown query parameter "${key}"`);
+      if (query.getAll(key).length !== 1) fail(`query parameter "${key}" appears more than once`);
+    }
+    if (query.has("limit")) {
+      const raw = query.get("limit");
+      if (!/^[0-9]+$/.test(raw)) fail(`query limit "${raw}" is not an integer`);
+      const n = Number(raw);
+      if (n < 1 || n > LIMITS.pageMax) fail(`query limit must be 1..${LIMITS.pageMax}`);
+      parsed.limit = n;
+    }
+    if (query.has("cursor")) parsed.cursor = decodeCursor(query.get("cursor"), "query cursor");
+    if (query.has("state")) {
+      oneOf(query.get("state"), REPORT_STATES, "query state");
+      parsed.state = query.get("state");
+    }
+    expectStatus(ex.response, 200);
+    const body = ex.response.body;
+    if (!isObject(body)) fail("response.body must be an object");
+    sameKeys(body, ["reports", "next_cursor"], "response.body");
+    if (!Array.isArray(body.reports)) fail("response.body.reports must be an array");
+    body.reports.forEach((r, i) => checkReport(r, `response.body.reports[${i}]`));
+    if (body.next_cursor !== null) decodeCursor(body.next_cursor, "response.body.next_cursor");
+    const expected = expectedList(account, parsed);
+    const got = body.reports.map((r) => r.id).join(", ");
+    const want = expected.reports.map((r) => r.id).join(", ");
+    if (got !== want) fail(`response.body.reports are [${got}], expected [${want}] for ${account.email}`);
+    expectJson(body, expected, "response.body");
+  },
+
+  "GET /api/reports/{id}"(ex) {
+    const { params } = matchPath(ex.route, ex.path);
+    const { account, scope } = requireAuth(ex);
+    if (scope !== "panel") fail("report details need the panel scope; the extension scope never sees history or comments");
+    requireNullRequest(ex);
+    checkUuid(params.id, "path id");
+    const report = datasetReport(params.id);
+    if (!report) fail("path id is not a demo-dataset.json report (the server would answer 404)");
+    if (!canView(account, report)) fail(`${account.email} cannot view this report (the server would answer 404)`);
+    expectStatus(ex.response, 200);
+    const body = ex.response.body;
+    checkReport(body, "response.body", ["history", "comments"]);
+    if (!Array.isArray(body.history)) fail("response.body.history must be an array");
+    if (!Array.isArray(body.comments)) fail("response.body.comments must be an array");
+    body.history.forEach((h, i) => checkHistoryEntry(h, `response.body.history[${i}]`));
+    body.comments.forEach((c, i) => checkComment(c, `response.body.comments[${i}]`));
+    expectJson(body, datasetDetail(report), "response.body");
   },
 
   "GET /api/health"(ex) {
@@ -540,7 +802,7 @@ function checkErrorsFile(doc) {
 // Runner
 // ---------------------------------------------------------------------------
 
-function checkFile(path) {
+function checkFile(path, name) {
   let doc;
   try {
     doc = JSON.parse(readFileSync(path, "utf8"));
@@ -550,6 +812,10 @@ function checkFile(path) {
   if (!isObject(doc)) fail("top level must be an object");
   checkUrls(doc, "file");
   checkEmails(doc, "file");
+  if (name === DATASET_FILE) {
+    checkDatasetFile(doc);
+    return;
+  }
   if ("errors" in doc) {
     checkErrorsFile(doc);
     return;
@@ -593,7 +859,7 @@ if (existsSync(join(dir, DATASET_FILE))) {
 let failed = 0;
 for (const name of files) {
   try {
-    checkFile(join(dir, name));
+    checkFile(join(dir, name), name);
     console.log(`OK ${name}`);
   } catch (e) {
     failed++;

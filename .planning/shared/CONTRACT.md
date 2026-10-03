@@ -162,6 +162,72 @@ Stan (`state`, D-08):
 
 Sygnały wykryte przez pomocnika i działanie wybrane w misji są odłożone (D-13) — zgłoszenie ich nie zawiera.
 
+### Wpis historii
+
+Każda zmiana stanu zgłoszenia zapisuje wpis historii (D-10). Historia jest **tylko do dopisywania**: wpisów nie da się edytować ani usuwać. Pierwszy wpis każdego zgłoszenia to `submit` (utworzenie).
+
+| Pole | Typ | Reguły |
+|---|---|---|
+| `id` | string (UUID) | nadaje backend |
+| `report_id` | string (UUID) | zgłoszenie, którego dotyczy wpis |
+| `action` | string (enum) | `submit` / `approve` / `reject` / `escalate` / `close` / `reopen` |
+| `from_state` | string (enum) \| null | stan przed zmianą; `null` tylko dla `submit` |
+| `to_state` | string (enum) | stan po zmianie |
+| `actor_id` | string (UUID) | kto wykonał zmianę (dla `submit`: dziecko) |
+| `actor_role` | string (enum) | `child` (dziecko) / `parent` (rodzic) / `teacher` (nauczyciel) |
+| `comment` | string \| null | opcjonalna notatka, maks. 1000 znaków; wymagana przy `escalate` (do kogo eskalowano) |
+| `created_at` | string (ISO 8601 UTC) | czas zmiany; równy `updated_at` zgłoszenia po tej zmianie |
+
+Akcje historii (`action`):
+
+| Wartość | Etykieta PL |
+|---|---|
+| `submit` | zgłoszenie |
+| `approve` | zatwierdź |
+| `reject` | odrzuć |
+| `escalate` | eskaluj |
+| `close` | zamknij |
+| `reopen` | wznów |
+
+Szczegóły zgłoszenia zwracają historię w kolejności chronologicznej (najstarszy wpis pierwszy).
+
+### Komentarz
+
+Zgłoszenie ma wątek komentarzy dla **rodzica i nauczyciela** (D-11). Wątek jest **niewidoczny dla dziecka**: token wtyczki (zakres `extension`) nigdy go nie dostaje. Komentarze są tylko do dopisywania — nie da się ich edytować ani usuwać. To nie jest odpowiedź do dziecka.
+
+| Pole | Typ | Reguły |
+|---|---|---|
+| `id` | string (UUID) | nadaje backend |
+| `report_id` | string (UUID) | zgłoszenie, którego dotyczy komentarz |
+| `author_id` | string (UUID) | zalogowane konto, które dodało komentarz |
+| `author_role` | string (enum) | `parent` / `teacher` |
+| `body` | string | po przycięciu spacji niepusty, maks. 2000 znaków; serwer zapisuje wersję przyciętą |
+| `created_at` | string (ISO 8601 UTC) | nadaje serwer |
+
+Szczegóły zgłoszenia zwracają komentarze w kolejności chronologicznej (najstarszy pierwszy).
+
+### Konto
+
+Zwracane przez `POST /api/auth/login` i `GET /api/auth/me`.
+
+| Pole | Typ | Reguły |
+|---|---|---|
+| `id` | string (UUID) | id konta demo |
+| `email` | string | e-mail w domenie `bezpiecznaaura.example` |
+| `role` | string (enum) | `parent` (rodzic) / `teacher` (nauczyciel) |
+| `display_name` | string | fikcyjna nazwa z dopiskiem „(demo)” albo „(smoke)” |
+
+### Dziecko
+
+Zwracane w polu `children` logowania i sesji. Dziecko nie ma konta i się nie loguje.
+
+| Pole | Typ | Reguły |
+|---|---|---|
+| `id` | string (UUID) | id dziecka demo (= `child_id` zgłoszeń) |
+| `display_name` | string | fikcyjne imię z dopiskiem „(demo)” albo „(smoke)” |
+| `parent_id` | string (UUID) | rodzic dziecka |
+| `class_id` | string | klasa dziecka (`class-5a`, `class-6b`, `class-test`) |
+
 ### Wynik testu/misji
 
 | Obiekt | Pola |
@@ -169,6 +235,34 @@ Sygnały wykryte przez pomocnika i działanie wybrane w misji są odłożone (D-
 | Wynik testu/misji | participant_code, scenario_id, phase (pre / training / post), selected_action, justification, hints_used, score, origin |
 
 Endpointy dla wyników dochodzą w fazie 3 web-app (API-03..05). Ta wersja kontraktu ich nie definiuje.
+
+## Widoczność
+
+Kto co widzi (D-11, D-15):
+
+| Kto | Lista i szczegóły zgłoszeń | Historia i komentarze |
+|---|---|---|
+| Rodzic (`panel`) | wszystkie zgłoszenia **swojego** dziecka, w każdym stanie | tak, w szczegółach zgłoszenia |
+| Rodzic przez wtyczkę (`extension`) | lista zgłoszeń swojego dziecka; **bez** szczegółów | **nigdy** |
+| Nauczyciel (`panel`) | pełne zgłoszenia dzieci ze **swoich klas**, tylko w stanach `with_teacher`, `escalated`, `closed` (czyli zatwierdzone przez rodzica) | tak, w szczegółach zgłoszenia |
+| Dziecko | nie loguje się; zgłasza przez wtyczkę rodzica | **nigdy** |
+
+- Zgłoszenie w stanie `pending_parent` albo `rejected` jest dla nauczyciela niewidoczne. Gdy rodzic ponownie je odrzuci (`reject` z `with_teacher`), nauczyciel **traci** do niego dostęp — także do historii i komentarzy, które sam wcześniej dodał.
+- Zgłoszenie, którego konto nie może zobaczyć, odpowiada **404 `report_not_found`** — tak samo jak nieistniejące. API nie zdradza, że takie zgłoszenie istnieje.
+- Szczegóły (`GET /api/reports/{id}`) wymagają zakresu `panel`; token wtyczki dostaje 403 `forbidden`.
+
+## Paginacja
+
+`GET /api/reports` zwraca listę stronami, kursorem (D-16). Nie ma sztywnego limitu całej listy.
+
+- Parametry zapytania: `?limit=&cursor=` oraz opcjonalny filtr `state`. Przykład: `GET /api/reports?limit=20&cursor=<next_cursor>`.
+- `limit`: liczba całkowita 1–100, domyślnie 20.
+- `cursor`: nieprzezroczysty napis — klient bierze go **dosłownie** z pola `next_cursor` poprzedniej odpowiedzi i niczego w nim nie zmienia.
+- Kolejność: `created_at` malejąco (najnowsze pierwsze), przy remisie `id` malejąco. Kolejna strona zaczyna się tuż za ostatnim zgłoszeniem poprzedniej.
+- Odpowiedź: `{ "reports": [...], "next_cursor": "..." }`. Na ostatniej stronie `next_cursor` to `null`.
+- `state` (`pending_parent` / `rejected` / `with_teacher` / `escalated` / `closed`) zawęża listę do jednego stanu, w granicach widoczności konta.
+- Gdy nic nie pasuje do filtra, odpowiedź to 200 z pustą listą `{ "reports": [], "next_cursor": null }`, nigdy 404.
+- Zła wartość `limit`, `state` albo uszkodzony `cursor`: 400 `validation_error`.
 
 ## Endpointy
 
@@ -192,7 +286,16 @@ Logowanie demo (sekcja „Logowanie demo”).
 - Nieznany e-mail albo kod inny niż `0000`: 401 `invalid_credentials` (ten sam błąd w obu przypadkach).
 - Nauczyciel z `"scope": "extension"`: 403 `forbidden`.
 - Brak `email` lub `code` albo zła wartość `scope`: 400 `validation_error`.
-- Przykład: `shared/examples/post-auth-login.json`.
+- Przykłady: `shared/examples/post-auth-login.json` (panel), `shared/examples/post-auth-login-extension.json` (wtyczka).
+
+### GET /api/auth/me
+
+Zwraca dane bieżącej sesji (panel i wtyczka sprawdzają nim, czy token jest jeszcze ważny).
+
+- Wymaga `Authorization: Bearer <token>` (zakres `panel` albo `extension`).
+- Odpowiedź 200: `{ "expires_at", "scope", "account", "children" }` — te same pola co przy logowaniu, bez tokenu.
+- Brak tokenu, uszkodzony albo wygasły token: 401 `unauthorized`.
+- Przykład: `shared/examples/get-auth-me.json`.
 
 ### POST /api/reports
 
@@ -207,6 +310,24 @@ Tworzy zgłoszenie dziecka (widget: „Pokaż rodzicowi”). Woła je wtyczka za
 - Endpoint **nie jest idempotentny** (D-17): klient nie powtarza go automatycznie.
 - Przykład: `shared/examples/post-reports.json`.
 
+### GET /api/reports
+
+Zwraca stronę listy zgłoszeń widocznych dla zalogowanego konta (panel rodzica i nauczyciela, lista we wtyczce).
+
+- Wymaga `Authorization: Bearer <token>` (zakres `panel` albo `extension`).
+- Parametry `?limit=&cursor=&state=` — sekcja „Paginacja”. Widoczność — sekcja „Widoczność”.
+- Odpowiedź 200: `{ "reports": [Zgłoszenie, ...], "next_cursor": string | null }`. Zgłoszenia **bez** historii i komentarzy.
+- Przykłady: `shared/examples/get-reports.json` (rodzic, pierwsza strona po 2), `shared/examples/get-reports-teacher.json` (nauczyciel).
+
+### GET /api/reports/{id}
+
+Zwraca jedno zgłoszenie razem z historią i komentarzami (panel).
+
+- Wymaga `Authorization: Bearer <token>` z zakresem `panel`. Token wtyczki: 403 `forbidden`.
+- Odpowiedź 200: Zgłoszenie z dodatkowymi polami `history` (lista Wpisów historii) i `comments` (lista Komentarzy), obie najstarsze pierwsze.
+- Nieznane albo niepoprawne `id` (także nie-UUID) oraz zgłoszenie niewidoczne dla konta: 404 `report_not_found`.
+- Przykład: `shared/examples/get-report.json`.
+
 ### GET /api/health
 
 - Nie wymaga logowania.
@@ -214,14 +335,46 @@ Tworzy zgłoszenie dziecka (widget: „Pokaż rodzicowi”). Woła je wtyczka za
 - Widget może go wywołać, żeby pokazać „brak połączenia” (ERR-01).
 - Przykład: `shared/examples/get-health.json`.
 
+## Dane demo
+
+Kanoniczne, fikcyjne dane demo są w `shared/examples/demo-dataset.json`: 6 zgłoszeń, 13 wpisów historii i 3 komentarze. **seed.sql powstaje z demo-dataset.json (plan 01-05).** Panel i widget mogą na tych danych pracować, zanim backend będzie dostępny. Wszystkie czasy to 2026-10-03 (UTC).
+
+Stały schemat id (wszystkie to poprawne UUID): prefiks `00000000-0000-4000-8000-0000000`, a po nim:
+
+| Obiekt | Końcówka | Przykład |
+|---|---|---|
+| konto rodzica | `a000N` | `00000000-0000-4000-8000-0000000a0001` |
+| konto nauczyciela | `b000N` | `00000000-0000-4000-8000-0000000b0001` |
+| dziecko | `c000N` | `00000000-0000-4000-8000-0000000c0001` |
+| zgłoszenie | `d00NN` | `00000000-0000-4000-8000-0000000d0002` |
+| wpis historii | `e00RK` (R = nr zgłoszenia, K = nr wpisu) | `00000000-0000-4000-8000-0000000e0023` |
+| komentarz | `f00RK` (R = nr zgłoszenia, K = nr komentarza) | `00000000-0000-4000-8000-0000000f0021` |
+
+| Zgłoszenie | Dziecko | Rodzaj ataku | Źródło | Stan | Historia |
+|---|---|---|---|---|---|
+| R1 `…d0001` | Ola (C1) | `data_request` | gra | `pending_parent` | zgłoszenie 08:05 |
+| R2 `…d0002` | Ola (C1) | `phishing` | mail | `closed` | zgłoszenie 08:40 → rodzic zatwierdza 08:52 → nauczycielka eskaluje do CERT Polska (NASK) 09:10 → zamyka 09:40; 2 komentarze |
+| R3 `…d0003` | Ola (C1) | `purchase_trap` | SMS | `rejected` | zgłoszenie 09:15 → rodzic odrzuca z wyjaśnieniem 09:30 |
+| R4 `…d0004` | Kuba (C2) | `fake_prize` | Discord | `with_teacher` | zgłoszenie 10:30 → rodzic zatwierdza z prośbą o pomoc 10:41 |
+| R5 `…d0005` | Zosia (C3) | `impersonation` | gra | `escalated` | zgłoszenie 11:00 → rodzic zatwierdza 11:08 → nauczyciel eskaluje do moderatorów gry i CERT Polska (NASK) 11:25; 1 komentarz |
+| R6 `…d0006` | Kuba (C2) | `other` | inne | `pending_parent` | zgłoszenie 11:45 (zaproszenie na warsztaty — niegroźne) |
+
+Przykłady żądań zapisujących (`post-reports.json`, przejścia, komentarze) pokazują **nowe** id i czasy od 12:00 — po wczytaniu danych demo.
+
 ## Przykłady
 
 Katalog `.planning/shared/examples/` (zgodność sprawdza `node web-app/scripts/check-contract-examples.mjs`). Każdy plik przykładu ma pola `description`, `method`, `route`, `path`, `auth`, `request`, `response`. Pole `auth` to `null` (bez logowania) albo `{ "email", "scope" }` konta demo, które wysyła żądanie — prawdziwy token nigdy nie trafia do przykładów.
 
 | Plik | Znaczenie |
 |---|---|
+| `shared/examples/demo-dataset.json` | Kanoniczne dane demo: 6 zgłoszeń z historią i komentarzami (sekcja „Dane demo”); źródło seed.sql. |
 | `shared/examples/post-auth-login.json` | Mama Oli loguje się do panelu e-mailem i kodem `0000`; odpowiedź z tokenem, kontem i dzieckiem. |
+| `shared/examples/post-auth-login-extension.json` | Mama Oli loguje się we wtyczce (zakres `extension`). |
+| `shared/examples/get-auth-me.json` | Wychowawczyni 5a sprawdza sesję; widzi dzieci ze swojej klasy. |
 | `shared/examples/post-reports.json` | Wtyczka (konto Mamy Oli, zakres `extension`) tworzy zgłoszenie fałszywej nagrody z gry; odpowiedź 201. |
+| `shared/examples/get-reports.json` | Mama Oli listuje zgłoszenia po 2 na stronę; pierwsza strona i `next_cursor`. |
+| `shared/examples/get-reports-teacher.json` | Wychowawczyni 5a widzi tylko zgłoszenia zatwierdzone przez rodziców swojej klasy. |
+| `shared/examples/get-report.json` | Szczegóły zgłoszenia R2 z pełną historią i dwoma komentarzami. |
 | `shared/examples/get-health.json` | Sprawdzenie, czy backend i baza działają. |
 
 ## Reguły

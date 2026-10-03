@@ -1,0 +1,257 @@
+{
+  "description": "Kanoniczne, fikcyjne dane demo: 6 zgłoszeń dzieci (Ola, Kuba, Zosia) w różnych stanach, z pełną historią zmian i wątkami komentarzy rodzica i nauczyciela. Wszystkie czasy 2026-10-03 UTC. Historia i komentarze są podane per zgłoszenie w kolejności chronologicznej — ta kolejność jest kanoniczna. Z tego pliku plan 01-05 generuje seed.sql; panel i widget mogą na nim pracować offline.",
+  "dataset": {
+    "reports": [
+      {
+        "id": "00000000-0000-4000-8000-0000000d0001",
+        "child_id": "00000000-0000-4000-8000-0000000c0001",
+        "parent_id": "00000000-0000-4000-8000-0000000a0001",
+        "attack_type": "data_request",
+        "taken_actions": [],
+        "source": "game",
+        "content": "Na czacie w grze ktoś napisał: „Rozdaję 10 000 diamentów za darmo! Podaj tylko kod z SMS-a, który zaraz ci przyjdzie.” Nie znam tego gracza.",
+        "state": "pending_parent",
+        "created_at": "2026-10-03T08:05:00.000Z",
+        "updated_at": "2026-10-03T08:05:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000d0002",
+        "child_id": "00000000-0000-4000-8000-0000000c0001",
+        "parent_id": "00000000-0000-4000-8000-0000000a0001",
+        "attack_type": "phishing",
+        "taken_actions": [
+          "clicked_link"
+        ],
+        "source": "email",
+        "content": "Temat: Twoje konto szkolne zostanie zablokowane dziś o 18:00! Aby tego uniknąć, zaloguj się w ciągu godziny: https://dziennik-szkolny-weryfikacja.example/logowanie",
+        "state": "closed",
+        "created_at": "2026-10-03T08:40:00.000Z",
+        "updated_at": "2026-10-03T09:40:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000d0003",
+        "child_id": "00000000-0000-4000-8000-0000000c0001",
+        "parent_id": "00000000-0000-4000-8000-0000000a0001",
+        "attack_type": "purchase_trap",
+        "taken_actions": [],
+        "source": "sms",
+        "content": "SMS: Twoja paczka czeka w sortowni. Dopłać 1,99 zł za doręczenie, inaczej wróci do nadawcy: https://doplata-paczka.example/zaplac",
+        "state": "rejected",
+        "created_at": "2026-10-03T09:15:00.000Z",
+        "updated_at": "2026-10-03T09:30:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000d0004",
+        "child_id": "00000000-0000-4000-8000-0000000c0002",
+        "parent_id": "00000000-0000-4000-8000-0000000a0002",
+        "attack_type": "fake_prize",
+        "taken_actions": [
+          "clicked_link",
+          "shared_personal_data"
+        ],
+        "source": "discord",
+        "content": "Wiadomość od bota „GiveawayKing”: Gratulacje! Wygrałeś roczne konto premium za darmo! Odbierz nagrodę w ciągu 10 minut: https://nagrody-premium.example/odbierz",
+        "state": "with_teacher",
+        "created_at": "2026-10-03T10:30:00.000Z",
+        "updated_at": "2026-10-03T10:41:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000d0005",
+        "child_id": "00000000-0000-4000-8000-0000000c0003",
+        "parent_id": "00000000-0000-4000-8000-0000000a0003",
+        "attack_type": "impersonation",
+        "taken_actions": [
+          "replied"
+        ],
+        "source": "game",
+        "content": "Ktoś na czacie gry podaje się za koleżankę z mojej klasy i prosi, żebym kupiła kartę podarunkową, bo „zgubiła portfel”.",
+        "state": "escalated",
+        "created_at": "2026-10-03T11:00:00.000Z",
+        "updated_at": "2026-10-03T11:25:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000d0006",
+        "child_id": "00000000-0000-4000-8000-0000000c0002",
+        "parent_id": "00000000-0000-4000-8000-0000000a0002",
+        "attack_type": "other",
+        "taken_actions": [],
+        "source": "other",
+        "content": "Biblioteka miejska zaprasza na bezpłatne warsztaty z robotyki dla dzieci 9–13 lat w sobotę o 10:00. Zapisy: https://biblioteka-miejska.example/warsztaty-robotyki",
+        "state": "pending_parent",
+        "created_at": "2026-10-03T11:45:00.000Z",
+        "updated_at": "2026-10-03T11:45:00.000Z"
+      }
+    ],
+    "history": [
+      {
+        "id": "00000000-0000-4000-8000-0000000e0011",
+        "report_id": "00000000-0000-4000-8000-0000000d0001",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0001",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T08:05:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0021",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0001",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T08:40:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0022",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "action": "approve",
+        "from_state": "pending_parent",
+        "to_state": "with_teacher",
+        "actor_id": "00000000-0000-4000-8000-0000000a0001",
+        "actor_role": "parent",
+        "comment": null,
+        "created_at": "2026-10-03T08:52:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0023",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "action": "escalate",
+        "from_state": "with_teacher",
+        "to_state": "escalated",
+        "actor_id": "00000000-0000-4000-8000-0000000b0001",
+        "actor_role": "teacher",
+        "comment": "Zgłoszono do CERT Polska (NASK) przez formularz incydentów: fałszywa strona logowania do dziennika.",
+        "created_at": "2026-10-03T09:10:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0024",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "action": "close",
+        "from_state": "escalated",
+        "to_state": "closed",
+        "actor_id": "00000000-0000-4000-8000-0000000b0001",
+        "actor_role": "teacher",
+        "comment": "Hasło zmienione razem z rodzicem, konto jest bezpieczne. Klasa dostała przypomnienie o fałszywych mailach.",
+        "created_at": "2026-10-03T09:40:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0031",
+        "report_id": "00000000-0000-4000-8000-0000000d0003",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0001",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T09:15:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0032",
+        "report_id": "00000000-0000-4000-8000-0000000d0003",
+        "action": "reject",
+        "from_state": "pending_parent",
+        "to_state": "rejected",
+        "actor_id": "00000000-0000-4000-8000-0000000a0001",
+        "actor_role": "parent",
+        "comment": "Wyjaśniliśmy to w domu — to znany fałszywy SMS, nie trzeba angażować szkoły.",
+        "created_at": "2026-10-03T09:30:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0041",
+        "report_id": "00000000-0000-4000-8000-0000000d0004",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0002",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T10:30:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0042",
+        "report_id": "00000000-0000-4000-8000-0000000d0004",
+        "action": "approve",
+        "from_state": "pending_parent",
+        "to_state": "with_teacher",
+        "actor_id": "00000000-0000-4000-8000-0000000a0002",
+        "actor_role": "parent",
+        "comment": "Kuba podał imię i nazwę szkoły. Prosimy o pomoc.",
+        "created_at": "2026-10-03T10:41:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0051",
+        "report_id": "00000000-0000-4000-8000-0000000d0005",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0003",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T11:00:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0052",
+        "report_id": "00000000-0000-4000-8000-0000000d0005",
+        "action": "approve",
+        "from_state": "pending_parent",
+        "to_state": "with_teacher",
+        "actor_id": "00000000-0000-4000-8000-0000000a0003",
+        "actor_role": "parent",
+        "comment": null,
+        "created_at": "2026-10-03T11:08:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0053",
+        "report_id": "00000000-0000-4000-8000-0000000d0005",
+        "action": "escalate",
+        "from_state": "with_teacher",
+        "to_state": "escalated",
+        "actor_id": "00000000-0000-4000-8000-0000000b0002",
+        "actor_role": "teacher",
+        "comment": "Przekazano moderatorom gry i zgłoszono do CERT Polska (NASK).",
+        "created_at": "2026-10-03T11:25:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000e0061",
+        "report_id": "00000000-0000-4000-8000-0000000d0006",
+        "action": "submit",
+        "from_state": null,
+        "to_state": "pending_parent",
+        "actor_id": "00000000-0000-4000-8000-0000000c0002",
+        "actor_role": "child",
+        "comment": null,
+        "created_at": "2026-10-03T11:45:00.000Z"
+      }
+    ],
+    "comments": [
+      {
+        "id": "00000000-0000-4000-8000-0000000f0021",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "author_id": "00000000-0000-4000-8000-0000000a0001",
+        "author_role": "parent",
+        "body": "Ola kliknęła w link, ale nie wpisała hasła. Czy inni uczniowie też dostali ten mail?",
+        "created_at": "2026-10-03T08:53:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000f0022",
+        "report_id": "00000000-0000-4000-8000-0000000d0002",
+        "author_id": "00000000-0000-4000-8000-0000000b0001",
+        "author_role": "teacher",
+        "body": "Tak, kilkoro uczniów z 5a. Zgłosiłam stronę i jutro przypomnę klasie zasady.",
+        "created_at": "2026-10-03T09:12:00.000Z"
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000f0051",
+        "report_id": "00000000-0000-4000-8000-0000000d0005",
+        "author_id": "00000000-0000-4000-8000-0000000b0002",
+        "author_role": "teacher",
+        "body": "Rozmawiałem z klasą — nikt z 6b nie pisał do Zosi z tego konta.",
+        "created_at": "2026-10-03T11:30:00.000Z"
+      }
+    ]
+  }
+}
