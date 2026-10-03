@@ -37,7 +37,7 @@ export function createPanel({ root, strings, handlers }) {
     el,
     render(state, ctx) {
       body.replaceChildren();
-      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result'].includes(state.view);
       if (el.hidden) return;
       if (state.view === 'menu') {
         const menu = node('div', undefined, 'menu');
@@ -69,6 +69,57 @@ export function createPanel({ root, strings, handlers }) {
         done.type = 'button';
         done.addEventListener('click', () => handlers.onClose());
         body.append(node('h2', strings.confirmationHeading), node('p', strings.confirmationBody), done);
+        return;
+      }
+      if (state.view === 'safety') {
+        body.append(node('p', strings.safetyNotice, 'notice'), button(strings.next, 'btn-primary', () => handlers.onSafetyNext()));
+        body.querySelector('button').focus();
+        return;
+      }
+      if (state.view === 'question') {
+        const question = strings.checkQuestions.find(q => q.id === state.check.step);
+        const selected = state.check.answers[question.id];
+        const group = node('fieldset', undefined, 'question-options');
+        group.append(node('legend', question.title));
+        for (const option of question.options) {
+          const row = node('div', undefined, 'question-option');
+          const input = node('input');
+          input.type = question.multiple ? 'checkbox' : 'radio';
+          input.name = question.id;
+          input.id = 'check-' + question.id + '-' + option.id;
+          input.value = option.id;
+          input.checked = selected.includes(option.id);
+          input.addEventListener('change', () => handlers.onAnswer(question.id, option.id));
+          const label = node('label');
+          label.htmlFor = input.id;
+          label.append(input, node('span', option.label));
+          row.append(label);
+          if (state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
+          group.append(row);
+        }
+        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext());
+        next.disabled = !selected.length;
+        const row = node('div', undefined, 'row');
+        row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
+        body.append(group, row);
+        group.querySelector('input').focus();
+        return;
+      }
+      if (state.view === 'result') {
+        const result = state.check.result;
+        body.append(node('h2', strings.checkSummaries[result.summaryKey]));
+        for (const key of ['signals', 'unknowns']) {
+          const section = node('section', undefined, 'result-section');
+          const list = node('ul');
+          const copy = key === 'signals' ? strings.checkSignals : strings.checkUnknowns;
+          for (const id of result[key].length ? result[key] : ['none']) list.append(node('li', copy[id]));
+          section.append(node('h3', strings.resultSections[key]), list);
+          body.append(section);
+        }
+        const step = node('section', undefined, 'result-section result-step');
+        step.append(node('h3', strings.resultSections.step), node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
+        body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()));
+        body.querySelector('button').focus();
         return;
       }
       if (state.pendingSelection) {

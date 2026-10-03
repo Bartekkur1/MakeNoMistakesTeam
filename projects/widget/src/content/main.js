@@ -26,6 +26,11 @@ function boot() {
     onPasteEdit(patch) { store.editPaste(patch); },
     onEdit(patch) { store.edit(patch); },
     onClose() { store.close(); render(); },
+    onSafetyNext() { store.startQuestions(); render(); },
+    onAnswer(questionId, answerId) { store.answer(questionId, answerId); render(); },
+    onQuestionNext() { store.nextQuestion(); render(); },
+    onQuestionBack() { store.previousQuestion(); render(); },
+    onFixAnswers() { store.fixAnswers(); render(); },
     async onApprove() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
@@ -33,7 +38,7 @@ function boot() {
       const token = store.beginSubmit();
       if (token === null) return;
       render();
-      try { await submitCase(c); store.approved(token); }
+      try { await submitCase(c); store.approved(token, c); }
       catch { store.submitFailed(token); }
       render();
     },
