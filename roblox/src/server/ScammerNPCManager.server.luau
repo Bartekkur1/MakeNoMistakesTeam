@@ -13,16 +13,22 @@ if not npc then
 end
 
 local hrp = npc:WaitForChild("HumanoidRootPart", 5) :: BasePart?
-local upperTorso = npc:WaitForChild("UpperTorso", 5) :: BasePart?
 local head = npc:WaitForChild("Head", 5) :: BasePart?
-local lowerTorso = npc:WaitForChild("LowerTorso", 5) :: BasePart?
+local upperTorso = (npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")) :: BasePart?
+local lowerTorso = (npc:FindFirstChild("LowerTorso") or npc:FindFirstChild("Torso")) :: BasePart?
 local humanoid = npc:FindFirstChildOfClass("Humanoid")
 
-if not hrp or not upperTorso or not head or not lowerTorso or not humanoid then
+if not hrp or not head or not humanoid then
 	return
 end
 
 humanoid.DisplayName = "MatiBuilds"
+
+-- Ensure NPC can physically move via PathfindingService and server has network ownership
+hrp.Anchored = false
+pcall(function()
+	hrp:SetNetworkOwner(nil)
+end)
 
 -- Per D-03: Disable ProximityPrompt so interaction is triggered by proximity approach, not [E]
 local prompt = hrp:FindFirstChildOfClass("ProximityPrompt")
@@ -72,7 +78,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 
 	if targetChar and neck and baseNeckC0 then
 		local targetHead = targetChar:FindFirstChild("Head") :: BasePart?
-		if targetHead then
+		if targetHead and upperTorso then
 			local localPos = upperTorso.CFrame:PointToObjectSpace(targetHead.Position)
 			local yaw = math.clamp(-math.atan2(localPos.X, localPos.Z) - math.pi, -math.rad(60), math.rad(60))
 			local pitch = math.clamp(math.atan2(localPos.Y, -localPos.Z), -math.rad(25), math.rad(25))

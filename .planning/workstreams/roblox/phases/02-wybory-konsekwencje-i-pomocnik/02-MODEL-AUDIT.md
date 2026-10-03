@@ -97,3 +97,11 @@ OBSERVED: `HipHeight=0.1` nie pasował do nowego rozstawienia nóg. W R6 wysoko�
 Actual desktop Play po korekcie: podłoże Cobblestone Y=0.600000024; spód lewej nogi Y=0.600002050, prawej Y=0.600001931; odstęp około 0.000002 studa. Health=100. Studio wróciło do Edit. Jest to kontrola neutralnej pozycji po korekcie, a nie ponowne zaliczenie chodu zmodyfikowanej sylwetki. Odbiór wizualny oraz aktualizacja eksportu nadal PENDING.
 
 Źródło wzoru: https://create.roblox.com/docs/reference/engine/classes/Humanoid/HipHeight
+
+## Trwały patrol po zgłoszeniu braku chodzenia
+
+Robert potwierdził poprawne położenie modelu, ale zgłosił brak chodzenia po ponownym Play. OBSERVED: model zawierał wyłącznie ScamerinoMotion; wcześniejsze MoveTo były demonstracją w runtime, nie trwałym patrolem. Dodano `roblox/src/server/ScamerinoPatrol.server.luau`, synchronizowany przez scripts-only Rojo. Patrol wybiera osiągalne cele 6–12 studów wokół początkowego miejsca, używa PathfindingService, reaguje na blokadę i timeout. `ScamerinoPatrolPaused=true` przerywa jego ruch; przyszły ScamerinoNPCManager musi ustawić ten atrybut PRZED własnym MoveTo lub przejąć patrol i usunąć osobny skrypt, aby nie uruchamiać dwóch kontrolerów ruchu.
+
+Actual desktop Play: root przeszedł od okolic (11.29,3.125,24.44) do (11.12,3.125,17.22), następnie (13.69,3.125,34.77); odczyt prędkości około 5 studów/s, FloorMaterial=Cobblestone, Health=100. Biodro w ruchu około 0.393 rad. Położenie i proporcje użytkownika zachowane. Studio pozostawione w Play do oceny. Gest, alarm i integracja pomocy nadal niezaliczone.
+
+Dokumentacja nawigacji: https://create.roblox.com/docs/characters/pathfinding
