@@ -1,0 +1,8 @@
+# Official releases checked 2026-10-03; use Rokit 1.2.0.
+# Rojo: https://github.com/rojo-rbx/rojo/releases/tag/v7.7.1
+# Selene: https://github.com/Kampfkarren/selene/releases/tag/0.32.0
+# StyLua: https://github.com/JohnnyMorganz/StyLua/releases/tag/v2.5.2
+[tools]
+rojo = "rojo-rbx/rojo@7.7.1"
+selene = "Kampfkarren/selene@0.32.0"
+stylua = "JohnnyMorganz/StyLua@2.5.2"
