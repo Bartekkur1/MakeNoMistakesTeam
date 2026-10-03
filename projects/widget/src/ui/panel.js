@@ -36,6 +36,7 @@ export function createPanel({ root, strings, handlers }) {
   return {
     el,
     render(state, ctx) {
+      const focusedId = state.view === 'question' ? root.activeElement?.id : undefined;
       body.replaceChildren();
       el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result'].includes(state.view);
       if (el.hidden) return;
@@ -102,7 +103,8 @@ export function createPanel({ root, strings, handlers }) {
         const row = node('div', undefined, 'row');
         row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
         body.append(group, row);
-        group.querySelector('input').focus();
+        const focused = [...group.querySelectorAll('input')].find(input => input.id === focusedId);
+        (focused ?? group.querySelector('input:checked') ?? group.querySelector('input')).focus();
         return;
       }
       if (state.view === 'result') {
