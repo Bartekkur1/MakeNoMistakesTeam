@@ -16,7 +16,6 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
 local dialogueEvent = ReplicatedStorage:WaitForChild("ScamerinoDialogueEvent") :: RemoteEvent
-local alertEvent = ReplicatedStorage:WaitForChild("ScamerinoAlertEvent") :: RemoteEvent
 
 -- Utwórz lub pobierz ScreenGui
 local screenGui = playerGui:FindFirstChild("ScamerinoDialogueGui") :: ScreenGui?
@@ -258,9 +257,10 @@ closeBtn.MouseButton1Click:Connect(closeUI)
 
 -- Dialogi
 local showMainMenu: () -> ()
-local showMission: () -> ()
 local showPhishingInfo: () -> ()
+local showScamSigns: () -> ()
 local showRules: () -> ()
+local showReportAdvice: () -> ()
 
 showMainMenu = function()
 	clearButtons()
@@ -268,91 +268,61 @@ showMainMenu = function()
 	badgeLabel.BackgroundColor3 = Color3.fromRGB(255, 180, 20)
 
 	dialogBox.Text =
-		"Cześć! Jestem Scamerino Alertinio – Twój Cyber-Pomocnik! 🦈🛡️\nPilnuję, aby nikt w Roblox nie wyłudził Twojego hasła, konta ani Robuxów.\nCo chcesz dziś sprawdzić?"
+		"Cześć! Jestem Scamerino Alertinio – Twój Cyber-Pomocnik! 🦈🛡️\nPilnuję, aby nikt w Roblox nie wyłudził Twojego hasła, konta ani Robuxów.\nO czym chcesz dowiedzieć się więcej?"
 
-	createChoiceBtn(1, "🎮 Trening: Misja 'Darmowe Robuxy'", function()
-		showMission()
+	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
+		showPhishingInfo()
 	end, Color3.fromRGB(30, 100, 200))
 
-	createChoiceBtn(2, "🔍 Czym jest Phishing?", function()
-		showPhishingInfo()
-	end)
+	createChoiceBtn(2, "⚠️ Czerwone flagi oszusta", function()
+		showScamSigns()
+	end, Color3.fromRGB(180, 110, 20))
 
 	createChoiceBtn(3, "🛡️ 3 Złote Zasady", function()
 		showRules()
 	end)
 
-	createChoiceBtn(4, "👋 Do widzenia", function()
+	createChoiceBtn(4, "🚨 Podejrzany gracz w lobby!", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(5, "👋 Do widzenia", function()
 		closeUI()
 	end, Color3.fromRGB(60, 70, 90))
-end
-
-showMission = function()
-	clearButtons()
-	dialogBox.Text =
-		"⚠️ SYMULACJA: Gracz 'ProRobuxGiver_2026' pisze: \"Siemka! Wygrałeś 10 000 Robuxów! Podaj mi szybko 6-cyfrowy kod SMS z telefonu mamy! Masz 60 sekund!\" Co robisz?"
-
-	createChoiceBtn(1, "🚀 Podaję kod od razu!", function()
-		alertEvent:FireServer("alert")
-		badgeLabel.Text = "STATUS: ALARM!\n🚨 SCAM"
-		badgeLabel.BackgroundColor3 = Color3.fromRGB(230, 40, 40)
-
-		clearButtons()
-		dialogBox.Text =
-			"🚨 STOP! CZERWONY ALARM! Kod SMS to zatwierdzenie kradzieży konta lub karty! Oszuści stosują presję czasu ('60 sekund!'), byś nie zdążył pomyśleć ani zapytać rodzica. Nikt nie rozdaje darmowych Robuxów!"
-
-		createChoiceBtn(1, "🔄 Spróbuj ponownie", function()
-			showMission()
-		end, Color3.fromRGB(200, 100, 30))
-
-		createChoiceBtn(2, "🔙 Wróć do menu", function()
-			showMainMenu()
-		end)
-	end, Color3.fromRGB(190, 40, 40))
-
-	createChoiceBtn(2, "🛑 Odrzucam i mówię rodzicowi!", function()
-		alertEvent:FireServer("win")
-		badgeLabel.Text = "STATUS: SUKCES!\n🌟 MISTRZ"
-		badgeLabel.BackgroundColor3 = Color3.fromRGB(40, 200, 80)
-
-		clearButtons()
-		dialogBox.Text =
-			"🌟 BRAWO! WZOROWA REAKCJA! Rozpoznałeś czerwone flagi: nieznane źródło, presję czasu i prośbę o kod SMS. Zdobywasz Złotą Tarczę Cyber-Obrońcy!"
-
-		createChoiceBtn(1, "🔍 Analiza przez Lupę", function()
-			showPhishingInfo()
-		end, Color3.fromRGB(30, 130, 60))
-
-		createChoiceBtn(2, "🔙 Wróć do menu", function()
-			showMainMenu()
-		end)
-	end, Color3.fromRGB(40, 160, 60))
-
-	createChoiceBtn(3, "🔍 Badam ofertę przez Lupę...", function()
-		clearButtons()
-		dialogBox.Text =
-			"🔍 ANALIZA SCAMERINO: 3 czerwone flagi: 1) Obietnica darmowych Robuxów, 2) Presja czasu ('60 sekund'), 3) Żądanie kodu SMS. Wniosek: To w 100% Phishing!"
-
-		createChoiceBtn(1, "🔙 Podejmij decyzję", function()
-			showMission()
-		end, Color3.fromRGB(30, 100, 200))
-
-		createChoiceBtn(2, "🏠 Menu", function()
-			showMainMenu()
-		end)
-	end, Color3.fromRGB(180, 130, 20))
 end
 
 showPhishingInfo = function()
 	clearButtons()
 	dialogBox.Text =
-		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (darmowe Robuxy, fałszywy link). Gdy połkniesz haczyk i podasz hasło lub kod – oszust przejmuje Twoje konto! Zawsze sprawdzaj oferty przez Lupę!"
+		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (np. darmowe Robuxy, rzadki pet, fałszywy link). Gdy gracz połknie haczyk i poda hasło lub kod SMS – oszust przejmuje konto! Zawsze sprawdzaj oferty przez Lupę!"
 
-	createChoiceBtn(1, "🎮 Przetestuj się w misji", function()
-		showMission()
-	end, Color3.fromRGB(30, 100, 200))
+	createChoiceBtn(1, "⚠️ Jak rozpoznać oszusta?", function()
+		showScamSigns()
+	end, Color3.fromRGB(180, 110, 20))
 
-	createChoiceBtn(2, "🔙 Wróć do menu", function()
+	createChoiceBtn(2, "🛡️ Złote zasady", function()
+		showRules()
+	end)
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+showScamSigns = function()
+	clearButtons()
+	dialogBox.Text =
+		"⚠️ 3 CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe ('Darmowe 10 000 Robuxów!')\n2. ⏱️ Presja czasu ('Tylko 60 sekund!')\n3. 🔑 Prośba o kod SMS lub hasło. Prawdziwy pracownik Roblox NIGDY o to nie pyta!"
+
+	createChoiceBtn(1, "🚨 Ktoś na placu rozdaje Robuxy!", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(2, "🛡️ Złote zasady", function()
+		showRules()
+	end)
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
 		showMainMenu()
 	end)
 end
@@ -360,11 +330,29 @@ end
 showRules = function()
 	clearButtons()
 	dialogBox.Text =
-		"🛡️ 3 ZŁOTE ZASADY BEZPIECZEŃSTWA:\n1. 🔑 NIGDY nie podawaj nikomu hasła ani kodów SMS.\n2. 👮 Roblox NIGDY nie prosi o hasło na czacie.\n3. ⏱️ Gdy ktoś każe działać 'szybko' – zwolnij i zapytaj rodzica!"
+		"🛡️ 3 ZŁOTE ZASADY BEZPIECZEŃSTWA:\n1. 🔑 NIGDY nie podawaj nikomu hasła ani kodów SMS.\n2. 👮 Roblox NIGDY nie prosi o hasło na czacie.\n3. ⏱️ Gdy ktoś każe działać 'szybko' – zwolnij i zapytaj rodzica lub opiekuna!"
 
-	createChoiceBtn(1, "🎮 Zagraj w misję", function()
-		showMission()
+	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
+		showPhishingInfo()
 	end, Color3.fromRGB(30, 100, 200))
+
+	createChoiceBtn(2, "🚨 Podejrzany gracz w lobby", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+showReportAdvice = function()
+	clearButtons()
+	dialogBox.Text =
+		"👀 ZAUWAŻYŁEŚ GRACZA 'FreeRobux_Giver'? To klasyczny podstęp! Podejdź do niego [E] i sprawdź, czy rozpoznasz jego manipulacje. Pamiętaj: pod żadnym pozorem nie podawaj kodu – odrzuć ofertę!"
+
+	createChoiceBtn(1, "🚶 Idę sprawdzić oszusta!", function()
+		closeUI()
+	end, Color3.fromRGB(40, 160, 60))
 
 	createChoiceBtn(2, "🔙 Wróć do menu", function()
 		showMainMenu()
