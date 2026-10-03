@@ -2,7 +2,7 @@
 
 Właściciel: osoba 3. Osoba 2 potwierdza przed implementacją. Źródło: `ideas/defence/taski.md` oraz decyzje D-08…D-18 w `.planning/workstreams/web-app/phases/01-kontrakt-i-backend-spraw/01-CONTEXT.md`.
 
-**Status:** wersja 2 — szkic (plan 01-01), do zatwierdzenia przez osobę 2
+**Status:** wersja 2 — przesłana do zatwierdzenia osobie 2 (2026-10-03)
 **Wersja:** 2 (2026-10-03)
 
 Wersja 1 (sprawy i odpowiedzi opiekuna, bez logowania) nie została zatwierdzona i jest wycofana; zastępuje ją model zgłoszeń z decyzji CONTEXT D-08…D-18 opisany poniżej.
@@ -236,6 +236,32 @@ Zwracane w polu `children` logowania i sesji. Dziecko nie ma konta i się nie lo
 
 Endpointy dla wyników dochodzą w fazie 3 web-app (API-03..05). Ta wersja kontraktu ich nie definiuje.
 
+## Obieg zgłoszenia
+
+Obieg (D-08, D-09): dziecko zgłasza → **rodzic** zatwierdza albo odrzuca → zatwierdzone trafia do **nauczyciela** → nauczyciel **nie zatwierdza**, tylko prowadzi sprawę, może ją **eskalować** i **zamyka**, gdy jest rozwiązana. Decyzje można cofać: rodzic może zmienić zdanie, a odrzucone albo zamknięte zgłoszenie można wznowić.
+
+Pięć stanów: `pending_parent` (czeka na rodzica), `rejected` (odrzucone przez rodzica), `with_teacher` (u nauczyciela), `escalated` (eskalowane), `closed` (zamknięte).
+
+**Utworzenie:** `POST /api/reports` zapisuje zgłoszenie w stanie `pending_parent` i wpis historii `submit` (z `null` do `pending_parent`). Aktorem tego wpisu jest **dziecko** (`actor_role` = `child`, `actor_id` = `child_id`), bo to dziecko zgłasza — przez wtyczkę zalogowaną kontem rodzica.
+
+Macierz przejść (`TRANSITIONS` w `types.ts`). Przejście wykonuje `POST /api/reports/{id}/transitions`; każde zapisuje wpis historii.
+
+| Akcja | Z jakiego stanu | Do jakiego | Kto może | Komentarz |
+|---|---|---|---|---|
+| `approve` (zatwierdź) | `pending_parent`, `rejected` | `with_teacher` | rodzic | opcjonalny |
+| `reject` (odrzuć) | `pending_parent`, `with_teacher` | `rejected` | rodzic | opcjonalny |
+| `escalate` (eskaluj) | `with_teacher` | `escalated` | nauczyciel | **wymagany** — do kogo eskalowano |
+| `close` (zamknij) | `with_teacher`, `escalated` | `closed` | nauczyciel | opcjonalny |
+| `reopen` (wznów) | `closed` | `with_teacher` | rodzic, nauczyciel | opcjonalny |
+| `reopen` (wznów) | `rejected` | `pending_parent` | rodzic | opcjonalny |
+
+- **Eskalacja** (do NASK / CERT Polska, moderatorów platformy itp.) to w MVP tylko zmiana stanu na `escalated` i wpis w historii z notatką, do kogo eskalowano. Backend niczego nigdzie nie wysyła (D-08).
+- Rodzic zmienia decyzję: `approve` z `rejected` albo `reject` z `with_teacher`. Po `reject` z `with_teacher` nauczyciel traci dostęp do zgłoszenia (sekcja „Widoczność”).
+- **403 `forbidden`**, gdy rola **nigdy** nie może wykonać tej akcji (np. nauczyciel wysyła `approve`, rodzic wysyła `escalate`).
+- **409 `invalid_transition`**, gdy rola może wykonać akcję, ale nie z obecnego stanu (np. rodzic wysyła `approve` dla zgłoszenia `closed`).
+- **Powtórzenie przejścia jest bezpieczne:** drugie identyczne żądanie dostaje 409 `invalid_transition`, bo stan już się zmienił. Klient może więc ponowić przejście po utraconej odpowiedzi.
+- **Równoczesne zmiany:** wygrywa pierwsza zapisana; druga dostaje 409 `invalid_transition`. Stan i wpis historii zapisują się razem albo wcale.
+
 ## Widoczność
 
 Kto co widzi (D-11, D-15):
@@ -328,12 +354,99 @@ Zwraca jedno zgłoszenie razem z historią i komentarzami (panel).
 - Nieznane albo niepoprawne `id` (także nie-UUID) oraz zgłoszenie niewidoczne dla konta: 404 `report_not_found`.
 - Przykład: `shared/examples/get-report.json`.
 
+### POST /api/reports/{id}/transitions
+
+Zmienia stan zgłoszenia według macierzy z sekcji „Obieg zgłoszenia” i dopisuje wpis historii.
+
+- Wymaga `Authorization: Bearer <token>` z zakresem `panel` (rodzic albo nauczyciel, który widzi zgłoszenie). Token wtyczki: 403 `forbidden`.
+- Treść: `{ "action": "approve" | "reject" | "escalate" | "close" | "reopen", "comment": "..." }`. `comment` jest opcjonalny (string albo `null`), po przycięciu spacji niepusty, maks. 1000 znaków; przy `escalate` wymagany (brak: 400 `validation_error`). Serwer zapisuje wersję przyciętą.
+- Odpowiedź 201: `{ "report": Zgłoszenie po zmianie, "entry": nowy Wpis historii }`. `report.updated_at` = `entry.created_at`.
+- Zgłoszenie nieistniejące albo niewidoczne dla konta: 404 `report_not_found`. Rola, która nigdy nie może wykonać akcji: 403 `forbidden`. Akcja niedozwolona z obecnego stanu: 409 `invalid_transition`.
+- Bezpieczne do ponowienia: powtórka dostaje 409 i niczego nie zmienia.
+- Przykłady: `shared/examples/post-report-transition-approve.json` (rodzic zatwierdza), `shared/examples/post-report-transition-escalate.json` (nauczycielka eskaluje do CERT Polska).
+
+### POST /api/reports/{id}/comments
+
+Dodaje komentarz do wątku rodzica i nauczyciela.
+
+- Wymaga `Authorization: Bearer <token>` z zakresem `panel` (rodzic albo nauczyciel, który widzi zgłoszenie). Token wtyczki: 403 `forbidden`.
+- Treść: `{ "body": "..." }` — po przycięciu spacji niepusta, maks. 2000 znaków. Serwer zapisuje wersję przyciętą.
+- Odpowiedź 201: zapisany Komentarz. Komentarz nie zmienia stanu zgłoszenia.
+- Komentarze są **tylko do dopisywania**: nie ma edycji ani usuwania. Nigdy nie są widoczne w zakresie `extension` (dziecko ich nie widzi).
+- Endpoint **nie jest idempotentny**: ponowienie po utraconej odpowiedzi może dodać komentarz dwa razy, więc klient ponawia tylko ręcznie.
+- Zgłoszenie nieistniejące albo niewidoczne dla konta: 404 `report_not_found`.
+- Przykład: `shared/examples/post-report-comments.json`.
+
 ### GET /api/health
 
 - Nie wymaga logowania.
 - 200 `{ "status": "ok" }`, gdy baza odpowiada; 503 `storage_unavailable` w przeciwnym razie.
 - Widget może go wywołać, żeby pokazać „brak połączenia” (ERR-01).
 - Przykład: `shared/examples/get-health.json`.
+
+## Błędy
+
+Każdy błąd ma tę samą kopertę:
+
+```json
+{ "error": { "code": "validation_error", "message": "Niepoprawne dane — szczegóły w polu details.", "details": [ { "field": "content", "message": "Treść nie może być pusta." } ] } }
+```
+
+`details` (lista obiektów `field` + `message`) pojawia się tylko przy `validation_error`.
+
+| Kod | HTTP | Znaczenie | `message` |
+|---|---|---|---|
+| `invalid_json` | 400 | treść żądania nie jest obiektem JSON | Treść żądania nie jest poprawnym obiektem JSON. |
+| `validation_error` | 400 | pola lub parametry zapytania łamią reguły kontraktu | Niepoprawne dane — szczegóły w polu details. |
+| `invalid_credentials` | 401 | logowanie: nieznany e-mail albo kod inny niż `0000` | Nieprawidłowy e-mail lub kod. |
+| `unauthorized` | 401 | brak nagłówka `Authorization`, token uszkodzony albo wygasły | Brak ważnego logowania — zaloguj się ponownie. |
+| `forbidden` | 403 | zalogowane konto (rola lub zakres) nie może wykonać tej operacji | To konto nie może wykonać tej operacji. |
+| `report_not_found` | 404 | zgłoszenie nie istnieje, `id` jest niepoprawne albo zgłoszenie jest niewidoczne dla konta | Nie znaleziono zgłoszenia. |
+| `invalid_transition` | 409 | akcja niedozwolona z obecnego stanu zgłoszenia (także powtórzone przejście) | Tej zmiany nie można wykonać w obecnym stanie zgłoszenia. |
+| `payload_too_large` | 413 | treść żądania większa niż 32 KB | Żądanie jest za duże (limit 32 KB). |
+| `storage_unavailable` | 503 | baza niedostępna; nic nie zostało zapisane ani potwierdzone | Nie udało się zapisać ani odczytać danych — baza jest niedostępna. Nic nie zostało potwierdzone, spróbuj ponownie. |
+| `internal_error` | 500 | nieoczekiwany błąd serwera | Wystąpił nieoczekiwany błąd serwera. |
+
+Kolejność sprawdzania (pierwszy pasujący błąd wygrywa):
+
+1. 401 `unauthorized` — brak albo nieważny token (endpointy wymagające logowania).
+2. 403 `forbidden` — rola albo zakres tokenu nie ma dostępu do endpointu (np. nauczyciel przy `POST /api/reports`, wtyczka przy szczegółach).
+3. 413 `payload_too_large`, potem 400 `invalid_json` — treść żądania.
+4. 400 `validation_error` — pola treści i parametry zapytania.
+5. 404 `report_not_found` — niepoprawne `id` albo zgłoszenie niewidoczne dla konta.
+6. 403 `forbidden` — rola nigdy nie może wykonać tej akcji przejścia.
+7. 409 `invalid_transition` — akcja niedozwolona z obecnego stanu.
+8. 503 `storage_unavailable` / 500 `internal_error`.
+
+Nieobsługiwana metoda HTTP (np. `DELETE`) dostaje 405 bezpośrednio od Next.js, bez treści JSON.
+
+Przykłady wszystkich kodów: `shared/examples/errors.json`.
+
+## Limity
+
+Te same wartości są w `LIMITS` w `web-app/src/lib/contract/types.ts`.
+
+| Limit (`LIMITS`) | Wartość | Przekroczenie |
+|---|---|---|
+| `maxBodyBytes` — rozmiar treści żądania | 32 KB (32768 bajtów) | 413 `payload_too_large` |
+| `emailMaxChars` — e-mail przy logowaniu | maks. 254 znaki | 400 `validation_error` |
+| `codeMaxChars` — kod przy logowaniu | maks. 16 znaków | 400 `validation_error` |
+| `contentMaxChars` — `content` zgłoszenia | maks. 5000 znaków, niepusty | 400 `validation_error` |
+| `commentMaxChars` — `body` komentarza | maks. 2000 znaków, niepusty | 400 `validation_error` |
+| `transitionCommentMaxChars` — `comment` przejścia | maks. 1000 znaków, niepusty, jeśli podany | 400 `validation_error` |
+| `pageDefault` — domyślny `limit` listy | 20 | — |
+| `pageMax` — największy `limit` listy | 100 | 400 `validation_error` |
+| `tokenTtlSeconds` — ważność tokenu | 43200 s (12 h) | 401 `unauthorized` |
+
+## CORS
+
+- `Access-Control-Allow-Origin: *`
+- `Access-Control-Allow-Methods: GET, POST, OPTIONS`
+- `Access-Control-Allow-Headers: Content-Type, Authorization`
+- `Access-Control-Max-Age: 86400`
+- Bez credentials i bez ciasteczek: token jedzie w nagłówku `Authorization`, więc nie jest wysyłany automatycznie przez przeglądarkę.
+
+Każda odpowiedź ma te nagłówki, także odpowiedzi z błędem. Każda ścieżka odpowiada na `OPTIONS` (preflight) statusem 204. To obejmuje wywołania z rozszerzenia (`chrome-extension://...`) i ze strony mobilnej.
 
 ## Dane demo
 
@@ -375,7 +488,19 @@ Katalog `.planning/shared/examples/` (zgodność sprawdza `node web-app/scripts/
 | `shared/examples/get-reports.json` | Mama Oli listuje zgłoszenia po 2 na stronę; pierwsza strona i `next_cursor`. |
 | `shared/examples/get-reports-teacher.json` | Wychowawczyni 5a widzi tylko zgłoszenia zatwierdzone przez rodziców swojej klasy. |
 | `shared/examples/get-report.json` | Szczegóły zgłoszenia R2 z pełną historią i dwoma komentarzami. |
+| `shared/examples/post-report-transition-approve.json` | Mama Oli zatwierdza R1; zgłoszenie trafia do nauczycielki, nowy wpis historii. |
+| `shared/examples/post-report-transition-escalate.json` | Wychowawczyni 5a eskaluje R4 do CERT Polska (NASK) z wymaganą notatką. |
+| `shared/examples/post-report-comments.json` | Wychowawczyni 5a dodaje komentarz do R4. |
 | `shared/examples/get-health.json` | Sprawdzenie, czy backend i baza działają. |
+| `shared/examples/errors.json` | Po jednej odpowiedzi dla każdego z 10 kodów błędu. |
+
+## Bezpieczeństwo i dane demo
+
+- Logowanie demo (e-mail + stały kod `0000`) **nie jest zabezpieczeniem produkcyjnym**. Działa tylko na fikcyjnych kontach i fikcyjnych danych. Produkcyjne uwierzytelnianie i przypisanie dziecka do opiekuna to API-V2-03.
+- Tylko dane fikcyjne: konta, dzieci, treści i linki używają domen `.example`; nazwy mają dopisek „(demo)” albo „(smoke)”. Checker odrzuca każdy przykład z adresem URL lub e-mailem spoza `.example`.
+- Sekret do podpisywania tokenów i klucz Supabase są wyłącznie w zmiennych środowiskowych serwera (lokalnie i na Heroku). Nigdy w kliencie.
+- Token jest przesyłany tylko w nagłówku `Authorization`, nigdy w URL-u, w logach ani w przykładach.
+- Logi serwera nigdy nie zawierają treści zgłoszeń, komentarzy, notatek z historii, adresów e-mail ani tokenów.
 
 ## Reguły
 

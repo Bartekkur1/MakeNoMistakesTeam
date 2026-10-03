@@ -744,6 +744,81 @@ const routeCheckers = {
     expectJson(body, datasetDetail(report), "response.body");
   },
 
+  "POST /api/reports/{id}/transitions"(ex) {
+    const { params } = matchPath(ex.route, ex.path);
+    const { account, scope } = requireAuth(ex);
+    if (scope !== "panel") fail("transitions need the panel scope");
+    checkUuid(params.id, "path id");
+    const report = datasetReport(params.id);
+    if (!report) fail("path id is not a demo-dataset.json report (the server would answer 404)");
+    if (!canView(account, report)) fail(`${account.email} cannot view this report (the server would answer 404)`);
+    const req = ex.request;
+    if (!isObject(req)) fail("request must be an object");
+    checkKeysWithin(req, ["action", "comment"], "request");
+    oneOf(req.action, TRANSITION_ACTIONS, "request.action");
+    const hasComment = req.comment !== undefined && req.comment !== null;
+    if (hasComment) nonBlankString(req.comment, LIMITS.transitionCommentMaxChars, "request.comment");
+    if (TRANSITION_COMMENT_REQUIRED[req.action] && !hasComment) {
+      fail(`"${req.action}" requires a comment (the server would answer 400 validation_error)`);
+    }
+    if (!TRANSITIONS.some((row) => row.action === req.action && row.roles.includes(account.role))) {
+      fail(`role "${account.role}" may never "${req.action}" (the server would answer 403 forbidden)`);
+    }
+    const rule = transitionRule(req.action, report.state);
+    if (!rule || !rule.roles.includes(account.role)) {
+      fail(`"${req.action}" is not allowed from "${report.state}" for role "${account.role}" (the server would answer 409 invalid_transition)`);
+    }
+    expectStatus(ex.response, 201);
+    const body = ex.response.body;
+    if (!isObject(body)) fail("response.body must be an object");
+    sameKeys(body, ["report", "entry"], "response.body");
+    const entry = body.entry;
+    checkHistoryEntry(entry, "response.body.entry");
+    if (requireDataset().ids.has(entry.id)) fail("response.body.entry.id must be a new id, not one from demo-dataset.json");
+    expectJson(
+      { ...entry, id: null, created_at: null },
+      {
+        id: null,
+        report_id: report.id,
+        action: req.action,
+        from_state: report.state,
+        to_state: rule.to,
+        actor_id: account.id,
+        actor_role: account.role,
+        comment: hasComment ? req.comment.trim() : null,
+        created_at: null,
+      },
+      "response.body.entry (without id and created_at)",
+    );
+    if (entry.created_at <= report.updated_at) fail("response.body.entry.created_at must be later than the report updated_at");
+    checkReport(body.report, "response.body.report");
+    expectJson(body.report, { ...report, state: rule.to, updated_at: entry.created_at }, "response.body.report");
+  },
+
+  "POST /api/reports/{id}/comments"(ex) {
+    const { params } = matchPath(ex.route, ex.path);
+    const { account, scope } = requireAuth(ex);
+    if (scope !== "panel") fail("comments need the panel scope; the extension scope never sees the thread");
+    checkUuid(params.id, "path id");
+    const report = datasetReport(params.id);
+    if (!report) fail("path id is not a demo-dataset.json report (the server would answer 404)");
+    if (!canView(account, report)) fail(`${account.email} cannot view this report (the server would answer 404)`);
+    const req = ex.request;
+    if (!isObject(req)) fail("request must be an object");
+    sameKeys(req, ["body"], "request");
+    nonBlankString(req.body, LIMITS.commentMaxChars, "request.body");
+    expectStatus(ex.response, 201);
+    const c = ex.response.body;
+    checkComment(c, "response.body");
+    if (requireDataset().ids.has(c.id)) fail("response.body.id must be a new id, not one from demo-dataset.json");
+    expectJson(
+      { report_id: c.report_id, author_id: c.author_id, author_role: c.author_role, body: c.body },
+      { report_id: report.id, author_id: account.id, author_role: account.role, body: req.body.trim() },
+      "response.body",
+    );
+    if (c.created_at <= report.created_at) fail("response.body.created_at must be later than the report created_at");
+  },
+
   "GET /api/health"(ex) {
     matchPath(ex.route, ex.path);
     requireNoAuth(ex);
@@ -786,6 +861,7 @@ function checkErrorsFile(doc) {
     if (err.message !== API_ERROR_MESSAGES_PL[entry.code]) {
       fail(`${label}.body.error.message differs from API_ERROR_MESSAGES_PL.${entry.code}`);
     }
+    if (entry.code === "validation_error" && !("details" in err)) fail(`${label}.body.error.details is required for validation_error`);
     if ("details" in err) {
       if (!Array.isArray(err.details) || err.details.length === 0) fail(`${label}.body.error.details must be a non-empty array`);
       err.details.forEach((d, j) => {
@@ -796,6 +872,8 @@ function checkErrorsFile(doc) {
       });
     }
   });
+  const missing = API_ERROR_CODES.filter((code) => !seen.has(code));
+  if (missing.length > 0) fail(`errors must cover every API_ERROR_CODES value; missing: ${missing.join(", ")}`);
 }
 
 // ---------------------------------------------------------------------------
