@@ -46,26 +46,29 @@ Jedno zdanie: kim jesteśmy i co robimy. Pokazujemy Scamerino. Nie czytamy slajd
 # Dzieci grają tam, gdzie są oszuści
 
 <div class="grid grid-cols-3 gap-5 mt-4">
-  <div class="card">
+  <div class="card flex flex-col">
     <div class="stat">4,72 mln</div>
     <div class="stat-label">użytkowników Robloxa w Polsce. To lider gier w PL.</div>
     <div class="src">Mediapanel, VIII 2025</div>
   </div>
-  <div class="card">
+  <div class="card flex flex-col">
     <div class="stat red">28%</div>
     <div class="stat-label">polskich nastolatków padło ofiarą cyberataku: <b>12%</b> włamanie na konto, <b>8%</b> kradzież przedmiotów w grach.</div>
     <div class="src">NASK „Nastolatki” 2024, N = 3665</div>
   </div>
-  <div class="card">
+  <div class="card flex flex-col">
     <div class="stat amber">#2</div>
     <div class="stat-label">Roblox to druga najczęściej podszywana marka w phishingu (12,3% prób), zaraz po Microsofcie.</div>
     <div class="src">NordVPN, Consumer Cybersecurity Report 2026</div>
   </div>
 </div>
 
-<div class="card mt-5 flex items-center gap-4">
-  <div class="stat red" style="font-size: 1.8rem">610 tys.</div>
-  <div class="stat-label" style="margin: 0">kont Roblox przejętych przez malware udające narzędzia do gry w ciągu 4 miesięcy.<span class="src"> · CERT Orange Polska, 09.2026</span></div>
+<div class="card compact mt-4 flex flex-col">
+  <div class="flex items-center gap-4">
+    <div class="stat red" style="font-size: 1.8rem">610 tys.</div>
+    <div class="stat-label" style="margin: 0">kont Roblox przejętych przez malware udające narzędzia do gry w ciągu 4 miesięcy.</div>
+  </div>
+  <div class="src">CERT Orange Polska, 09.2026</div>
 </div>
 
 <!--
@@ -79,20 +82,20 @@ Liczby tylko z pierwotnych źródeł. 51% dzieci 8-14 w UK gra w Roblox (Ofcom 2
 # Nikt nie stoi obok dziecka w chwili ataku
 
 <div class="grid grid-cols-3 gap-5 mt-4">
-  <div class="card">
-    <div class="pill amber">Rodzice nie widzą</div>
+  <div class="card flex flex-col">
+    <div class="pill amber self-start">Rodzice nie widzą</div>
     <div class="stat mt-3">57% → 21%</div>
     <div class="stat-label">57% rodziców mówi, że monitoruje dziecko w sieci. Potwierdza to 21% nastolatków.</div>
     <div class="src">NASK „Nastolatki” 2024</div>
   </div>
-  <div class="card">
-    <div class="pill amber">Dzieci milczą</div>
+  <div class="card flex flex-col">
+    <div class="pill amber self-start">Dzieci milczą</div>
     <div class="stat mt-3">13% vs 28%</div>
     <div class="stat-label">Rodzice wiedzą o cyberataku na dziecko w 13% przypadków, a doświadczyło go 28%.</div>
     <div class="src">NASK „Nastolatki” 2024</div>
   </div>
-  <div class="card">
-    <div class="pill amber">Szkolenie zanika</div>
+  <div class="card flex flex-col">
+    <div class="pill amber self-start">Szkolenie zanika</div>
     <div class="stat mt-3">4 tygodnie</div>
     <div class="stat-label">Po treningu dzieci były o 14% lepsze. Po miesiącu efekt zniknął.</div>
     <div class="src">Lastdrager i in., SOUPS 2017 (NL)</div>
@@ -176,17 +179,26 @@ Hasło za CERT Orange Polska. AI Act art. 50 - awatar informuje, że jest AI.
 # Co zbudowaliśmy w 24 godziny
 
 <div class="grid grid-cols-3 gap-5 mt-2">
-  <div class="card h-[280px] flex flex-col">
-    <b>Misja Roblox</b>
-    <div class="flex-1 mt-2 rounded-xl grid place-items-center text-xs" style="background: var(--silver); color: var(--muted)">[zrzut ekranu]</div>
+  <div class="card compact">
+    <div class="video-ph">
+      <div class="play">▶&#xFE0E;</div>
+      <div>[film - wkrótce]</div>
+    </div>
+    <div class="demo-title">Misja Roblox</div>
   </div>
-  <div class="card h-[280px] flex flex-col">
-    <b>Pomocnik: rozszerzenie i strona</b>
-    <div class="flex-1 mt-2 rounded-xl grid place-items-center text-xs" style="background: var(--silver); color: var(--muted)">[zrzut ekranu]</div>
+  <div class="card compact">
+    <div class="video-ph">
+      <div class="play">▶&#xFE0E;</div>
+      <div>[film - wkrótce]</div>
+    </div>
+    <div class="demo-title">Pomocnik: rozszerzenie i strona</div>
   </div>
-  <div class="card h-[280px] flex flex-col">
-    <b>Panel opiekuna i wyniki klasy</b>
-    <div class="flex-1 mt-2 rounded-xl grid place-items-center text-xs" style="background: var(--silver); color: var(--muted)">[zrzut ekranu]</div>
+  <div class="card compact">
+    <div class="video-ph">
+      <div class="play">▶&#xFE0E;</div>
+      <div>[film - wkrótce]</div>
+    </div>
+    <div class="demo-title">Panel opiekuna i wyniki klasy</div>
   </div>
 </div>
 
@@ -195,7 +207,7 @@ W demo używamy wyłącznie fikcyjnych wiadomości i danych. Link do repozytoriu
 </p>
 
 <!--
-TODO: podmienić placeholdery na zrzuty, gdy MVP będzie gotowe.
+TODO: podmienić placeholdery na filmy (element video wewnątrz .video-ph, w-full h-full object-cover rounded-xl), gdy będą nagrane.
 -->
 
 ---

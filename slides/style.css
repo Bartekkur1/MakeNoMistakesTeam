@@ -139,3 +139,38 @@ tr.us td { background: rgba(15, 98, 219, 0.07); font-weight: 700; }
   hyphens: manual;
   -webkit-hyphens: manual;
 }
+
+/* Źródło przypięte do dołu karty: karta musi mieć klasy flex flex-col, a .src musi być ostatnim dzieckiem */
+.card.flex-col > .src {
+  margin-top: auto;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--silver);
+}
+.card.flex-col > :has(+ .src) { margin-bottom: 0.7rem; }
+
+/* Placeholder filmu demo 16:9 */
+.video-ph {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  background: var(--silver);
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+}
+.video-ph .play {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: var(--shark);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  padding-left: 0.15rem;
+}
+.demo-title { font-weight: 800; line-height: 1.3; margin-top: 0.6rem; }
