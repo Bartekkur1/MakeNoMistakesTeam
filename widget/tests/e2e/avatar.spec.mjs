@@ -4,11 +4,11 @@ const avatar = p => p.getByRole('button', {name:'Scamerinio',exact:true});
 const formText = p => p.getByRole('textbox', {name:'Wiadomość',exact:true});
 const formButton = (p, name) => p.getByRole('button', {name,exact:true});
 async function checkForm(page) {
-  await expect(page.locator('.avatar')).toBeHidden();
-  await expect(page.locator('.hide')).toBeHidden();
+  await expect(avatar(page)).toBeVisible();
+  await expect(page.locator('.hide')).toBeVisible();
   await expect(page.locator('bezpieczna-aura-widget')).toBeVisible();
   await expect(formText(page)).toBeVisible(); await expect(formText(page)).toBeEditable();
-  await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert', true);
+  await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert', false);
   const r = await page.getByRole('dialog').boundingBox(), v = page.viewportSize();
   expect(r.x).toBeGreaterThanOrEqual(8); expect(r.y).toBeGreaterThanOrEqual(8);
   expect(r.x+r.width).toBeLessThanOrEqual(v.width-8); expect(r.y+r.height).toBeLessThanOrEqual(v.height-8);
@@ -24,12 +24,14 @@ for (const close of ['button', 'Escape']) test(`form preserves anchor and draft 
   await formButton(page,'Dalej').click(); await checkForm(page);
   const panel = await page.getByRole('dialog').boundingBox();
   expect(panel.x+panel.width).toBeCloseTo(before.x+before.width);
-  // Traverse the document's tab order: neither hidden avatar button may receive focus.
+  // The visible drag handle stays available in the document's tab order.
   await formText(page).focus();
+  let focusedAvatar = false;
   for (let i=0;i<12;i++) {
     await page.keyboard.press('Tab');
-    expect(await page.locator('bezpieczna-aura-widget').evaluate(host => host.shadowRoot.activeElement?.closest('.avatar-wrap') !== null && Boolean(host.shadowRoot.activeElement))).toBe(false);
+    focusedAvatar ||= await avatar(page).evaluate(el => el.getRootNode().activeElement === el);
   }
+  expect(focusedAvatar).toBe(true);
   await page.setViewportSize({width:640,height:480}); await checkForm(page);
   await formText(page).fill('Szkic po zmianie rozmiaru');
   const resized = await page.locator('.avatar').evaluate(el => {const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};});
@@ -42,7 +44,7 @@ for (const close of ['button', 'Escape']) test(`form preserves anchor and draft 
   await formButton(page,'Zamknij okno').click(); await formButton(page,'Schowaj pomocnika').click();
   await expect(page.locator('bezpieczna-aura-widget')).toBeHidden(); await assertOnlyLocal(netlog);
 });
-test('selected preview hides avatar until confirmation', async ({page,netlog}) => {
+test('selected preview keeps avatar visible through confirmation', async ({page,netlog}) => {
   await page.goto(url); await page.locator('#msg').selectText(); await avatar(page).click(); await checkForm(page);
   await formButton(page,'Zatwierdzam').click(); await expect(page.getByRole('heading',{name:'Gotowe!',exact:true})).toBeVisible();
   await expect(avatar(page)).toBeVisible(); await expect(page.locator('.hide')).toBeVisible();
@@ -52,6 +54,96 @@ async function gesture(page, dx, dy) {
   const r = await avatar(page).boundingBox(); const x = r.x + 32, y = r.y + 32;
   await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x+dx,y+dy,{steps:10}); await page.mouse.up();
 }
+async function openView(page, view) {
+  await page.goto(url);
+  await avatar(page).click();
+  if (view === 'howto') await formButton(page, 'Jak to działa').click();
+  if (['paste', 'preview', 'confirmation'].includes(view)) {
+    await formButton(page, 'Sprawdź wiadomość').click();
+    await formText(page).fill('Fikcyjny szkic do przeciągania');
+    await page.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true }).fill('https://example.test/wiadomosc');
+    if (view !== 'paste') await formButton(page, 'Dalej').click();
+    if (view === 'confirmation') await formButton(page, 'Zatwierdzam').click();
+  }
+}
+async function expectBounded(page) {
+  const v = page.viewportSize();
+  for (const target of [avatar(page), page.getByRole('dialog')]) {
+    const r = await target.boundingBox();
+    expect(r.x).toBeGreaterThanOrEqual(8); expect(r.y).toBeGreaterThanOrEqual(8);
+    expect(r.x + r.width).toBeLessThanOrEqual(v.width - 8);
+    expect(r.y + r.height).toBeLessThanOrEqual(v.height - 8);
+  }
+  // A clamped panel must not cover the handle needed to move it again.
+  const r = await avatar(page).boundingBox();
+  expect(await avatar(page).evaluate((el, point) => el.getRootNode().elementFromPoint(point.x, point.y) === el,
+    { x: r.x + r.width / 2, y: r.y + r.height / 2 })).toBe(true);
+}
+for (const view of ['menu', 'howto', 'paste', 'preview', 'confirmation']) {
+  test(`open ${view} follows avatar throughout drag without rebuilding or submitting`, async ({page, serviceWorker, netlog}) => {
+    await page.setViewportSize({ width: 1400, height: 1000 });
+    await openView(page, view);
+    const editing = ['paste', 'preview'].includes(view);
+    if (editing) {
+      await formText(page).focus();
+      await formText(page).evaluate(el => el.setSelectionRange(4, 10));
+    }
+    const snapshot = await page.locator('bezpieczna-aura-widget').evaluate(host => {
+      const root = host.shadowRoot;
+      host.__dragNodes = [...root.querySelectorAll('.panel input, .panel textarea, .panel button')];
+      host.__dragFocus = root.activeElement;
+      return host.__dragNodes.map(el => ({ value: el.value, start: el.selectionStart, end: el.selectionEnd }));
+    });
+    const messages = await serviceWorker.evaluate(() => self.__aura.messages.length);
+    const panelBefore = await page.getByRole('dialog').boundingBox(), sharkBefore = await avatar(page).boundingBox();
+    await page.mouse.move(sharkBefore.x + 32, sharkBefore.y + 32); await page.mouse.down();
+    for (const [dx, dy] of [[-30, -20], [-60, -40], [-90, -60]]) {
+      await page.mouse.move(sharkBefore.x + 32 + dx, sharkBefore.y + 32 + dy, { steps: 3 });
+      const shark = await avatar(page).boundingBox(), panel = await page.getByRole('dialog').boundingBox();
+      expect(shark.x - sharkBefore.x).toBeCloseTo(dx); expect(shark.y - sharkBefore.y).toBeCloseTo(dy);
+      expect(panel.x - panelBefore.x).toBeCloseTo(dx); expect(panel.y - panelBefore.y).toBeCloseTo(dy);
+    }
+    await page.mouse.up();
+    expect(await page.locator('bezpieczna-aura-widget').evaluate(host => {
+      const nodes = [...host.shadowRoot.querySelectorAll('.panel input, .panel textarea, .panel button')];
+      return nodes.length === host.__dragNodes.length && nodes.every((el, i) => el === host.__dragNodes[i]);
+    })).toBe(true);
+    expect(await page.locator('bezpieczna-aura-widget').evaluate(host =>
+      host.__dragNodes.map(el => ({ value: el.value, start: el.selectionStart, end: el.selectionEnd })))).toEqual(snapshot);
+    if (editing) expect(await page.locator('bezpieczna-aura-widget').evaluate(host => host.shadowRoot.activeElement === host.__dragFocus)).toBe(true);
+    expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(messages);
+    await expectBounded(page); await assertOnlyLocal(netlog);
+  });
+}
+test('open preview stays reachable at edges and after resize without recapturing page selection', async ({page, serviceWorker, netlog}) => {
+  await openView(page, 'preview');
+  await page.locator('#msg2').selectText();
+  for (const [dx, dy] of [[-2000, -2000], [2000, -2000], [0, 2000], [-2000, 0]]) {
+    await gesture(page, dx, dy); await expectBounded(page);
+    await expect(formText(page)).toHaveValue('Fikcyjny szkic do przeciągania');
+    await expect(formButton(page, 'Wstaw nowe zaznaczenie')).toHaveCount(0);
+  }
+  await page.setViewportSize({ width: 640, height: 480 });
+  await expect.poll(async () => { const r = await avatar(page).boundingBox(); return r.y + r.height; }).toBeLessThanOrEqual(472);
+  await expectBounded(page);
+  await expect(formText(page)).toHaveValue('Fikcyjny szkic do przeciągania');
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(0);
+  await assertOnlyLocal(netlog);
+});
+test('pointer cancellation ends drag and allows another gesture with open paste', async ({page, netlog}) => {
+  await openView(page, 'paste');
+  const r = await avatar(page).boundingBox();
+  await page.mouse.move(r.x + 32, r.y + 32); await page.mouse.down();
+  await page.mouse.move(r.x - 30, r.y - 30);
+  await avatar(page).dispatchEvent('pointercancel', { pointerId: 1 });
+  const before = await avatar(page).boundingBox();
+  await page.mouse.move(r.x - 50, r.y - 50); await page.mouse.up();
+  expect(await avatar(page).boundingBox()).toEqual(before);
+  await expect(avatar(page)).not.toHaveClass(/dragging/);
+  await gesture(page, -30, -20);
+  await expect(formText(page)).toHaveValue('Fikcyjny szkic do przeciągania');
+  await expectBounded(page); await assertOnlyLocal(netlog);
+});
 test('avatar mounts once on each ordinary page', async ({page,netlog}) => {
   await page.goto(url); await expect(avatar(page)).toBeVisible(); await expect(page.locator('bezpieczna-aura-widget')).toHaveCount(1);
   await page.goto('http://127.0.0.1:4173/other.html'); await expect(avatar(page)).toBeVisible(); await expect(page.locator('bezpieczna-aura-widget')).toHaveCount(1); await assertOnlyLocal(netlog);

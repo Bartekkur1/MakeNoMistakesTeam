@@ -63,13 +63,15 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 8. Przeładuj rozszerzenie na `chrome://extensions` bez odświeżania karty z rekinem. Kliknij ikonę na tej karcie. Pozostaje jeden rekin, a zaznacz → rekin → zatwierdź kończy się „Gotowe!”.
 9. Przeczytaj wszystkie teksty: po polsku, przyjazne dla dzieci 9–13 lat, bez straszenia i zawstydzania; trzy kroki i zdanie o prywatności.
 
-## Ręczny retest G-01-2
+## Ręczny retest G-01-2-drag
 
-Po załadowaniu nowego buildu w Google Chrome przeładuj rozszerzenie i odśwież kartę Discorda z fikcyjnymi danymi.
+Po załadowaniu nowego buildu w Google Chrome przeładuj rozszerzenie i odśwież kartę Discorda z fikcyjnymi danymi. Aktualne kryterium zastępuje wcześniejsze chowanie rekina: rekin pozostaje widoczny, a otwarte okno podąża za nim.
 
-1. Przeciągnij rekina, kliknij go bez zaznaczenia i wybierz „Sprawdź wiadomość”. Rekin i jego × znikają; wpisz fikcyjną wiadomość i przejdź przez „Dalej”. Formularz pozostaje widoczny i edytowalny, także po zmianie rozmiaru okna. Tab nie powinien trafiać do ukrytych przycisków rekina.
-2. Zamknij formularz przez „Zamknij okno” (×). Rekin wraca w zachowanym miejscu; kliknij go ponownie i sprawdź zachowany tekst. Zamknij także przez Escape i sprawdź ten sam powrót.
-3. Zaznacz fikcyjny tekst na stronie i otwórz podgląd. Rekin znika; po zatwierdzeniu i „Gotowe!” wraca. Menu i „Jak to działa” nadal pokazują rekina. Po zamknięciu okna sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
+1. Kliknij rekina bez zaznaczenia. Przeciągnij go z otwartym menu, a następnie z otwartym „Jak to działa”. Okno przesuwa się razem z nim już podczas przeciągania; puszczenie nie zmienia widoku.
+2. Otwórz „Sprawdź wiadomość”, wpisz fikcyjny tekst i link. Przeciągnij rekina: formularz podąża za nim, tekst i link zostają, aktywne pole oraz zaznaczenie w polu nie zmieniają się. Przejdź przez „Dalej” i powtórz w podglądzie. Rekin i jego × pozostają widoczne.
+3. Przeciągnij rekina do krawędzi ekranu i zmień rozmiar okna Chrome. Panel pozostaje na ekranie, a rekin dostępny do kolejnego przeciągnięcia. Przy krawędziach panel może zmienić stronę względem rekina, aby zmieścić się w oknie.
+4. Zamknij formularz przez „Zamknij okno” (×), otwórz go ponownie i sprawdź szkic. Powtórz przez Escape. Przeciąganie nie wysyła wiadomości, nie zastępuje szkicu zaznaczeniem z Discorda ani nie uruchamia jego skrótów.
+5. Zaznacz fikcyjny tekst na stronie, otwórz podgląd i przeciągnij rekina. Dopiero świadome „Zatwierdzam” pokazuje „Gotowe!”. Także to okno podąża za rekinem. Sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
 
 Wynik retestu zgłoś przez `$gsd-verify-work 1 --ws widget`; testy automatyczne nie zastępują tej oceny wizualnej.
 
