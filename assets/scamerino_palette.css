@@ -1,0 +1,38 @@
+/**
+ * Scamerino Alertinio Design Palette
+ * Source: assets/Scamerino_Alertinio.png
+ * Make No Mistakes Team - HackYeah 2026
+ */
+
+:root {
+  /* Brand / Primary */
+  --color-shark-blue: #0F62DB;
+  --color-shark-blue-rgb: 15, 98, 219;
+  --color-shark-blue-dark: #0A3B8C;
+
+  /* Shield & Defense */
+  --color-shield-silver: #E2E8F0;
+  --color-shield-silver-border: #CBD5E1;
+
+  /* Alerts & Security */
+  --color-siren-amber: #FF8A00;
+  --color-siren-amber-rgb: 255, 138, 0;
+  --color-padlock-gold: #FFB800;
+  --color-padlock-gold-rgb: 255, 184, 0;
+
+  /* Threat / Phishing */
+  --color-hook-crimson: #EA3323;
+  --color-hook-crimson-rgb: 234, 51, 35;
+
+  /* Surfaces & Typography */
+  --color-surface-bg: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-text-primary: #0F172A;
+  --color-text-muted: #64748B;
+
+  /* Glow & Shadows */
+  --shadow-siren-glow: 0 0 16px rgba(255, 138, 0, 0.45);
+  --shadow-shield-card: 0 4px 20px -2px rgba(15, 98, 219, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  --radius-widget: 1.25rem; /* 20px */
+  --radius-dashboard: 0.75rem; /* 12px */
+}

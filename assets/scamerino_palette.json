@@ -1,0 +1,113 @@
+{
+  "name": "Scamerino Alertinio Design Palette",
+  "version": "1.0.0",
+  "description": "Design tokens and color palette extracted from Scamerino Alertinio mascot for Cyberpomocnik widget and Guardian platform",
+  "source": "assets/Scamerino_Alertinio.png",
+  "tokens": {
+    "primary": {
+      "name": "Shark Blue",
+      "hex": "#0F62DB",
+      "rgb": "rgb(15, 98, 219)",
+      "hsl": "hsl(216, 87%, 46%)",
+      "role": "Primary Brand & Trust",
+      "usage": "Main CTA buttons, navbar, mascot accents, primary active states"
+    },
+    "primary_dark": {
+      "name": "Deep Ocean Blue",
+      "hex": "#0A3B8C",
+      "rgb": "rgb(10, 59, 140)",
+      "hsl": "hsl(217, 87%, 29%)",
+      "role": "Primary Dark",
+      "usage": "Button hover states, dark card headers, active navigation pills"
+    },
+    "secondary": {
+      "name": "Shield Silver",
+      "hex": "#E2E8F0",
+      "rgb": "rgb(226, 232, 240)",
+      "hsl": "hsl(214, 32%, 91%)",
+      "role": "Defense & Structure",
+      "usage": "Shield borders, neutral card outlines, container dividers"
+    },
+    "secondary_border": {
+      "name": "Titanium Border",
+      "hex": "#CBD5E1",
+      "rgb": "rgb(203, 213, 225)",
+      "hsl": "hsl(214, 20%, 84%)",
+      "role": "Borders & Frames",
+      "usage": "Input field borders, card framing, table lines"
+    },
+    "warning": {
+      "name": "Siren Amber",
+      "hex": "#FF8A00",
+      "rgb": "rgb(255, 138, 0)",
+      "hsl": "hsl(32, 100%, 50%)",
+      "role": "Alert & Caution",
+      "usage": "Glowing beacon badge, warning banners, pending review tags, urgent signals"
+    },
+    "success": {
+      "name": "Padlock Gold",
+      "hex": "#FFB800",
+      "rgb": "rgb(255, 184, 0)",
+      "hsl": "hsl(43, 100%, 50%)",
+      "role": "Security & Verified",
+      "usage": "Padlock emblems, verified safe status, cyber-points, achievement stars"
+    },
+    "danger": {
+      "name": "Hook Crimson",
+      "hex": "#EA3323",
+      "rgb": "rgb(234, 51, 35)",
+      "hsl": "hsl(5, 82%, 53%)",
+      "role": "Phishing & Threat",
+      "usage": "Phishing detected badges, high-risk scam warnings, block action buttons"
+    },
+    "surface": {
+      "name": "Ice Surface",
+      "hex": "#F8FAFC",
+      "rgb": "rgb(248, 250, 252)",
+      "hsl": "hsl(210, 40%, 98%)",
+      "role": "App Background",
+      "usage": "Main page background, soft container fills"
+    },
+    "surface_white": {
+      "name": "Clean White",
+      "hex": "#FFFFFF",
+      "rgb": "rgb(255, 255, 255)",
+      "hsl": "hsl(0, 0%, 100%)",
+      "role": "Card Background",
+      "usage": "Card surfaces, input boxes, modal overlays, underbelly white"
+    },
+    "text_dark": {
+      "name": "Navy Slate",
+      "hex": "#0F172A",
+      "rgb": "rgb(15, 23, 42)",
+      "hsl": "hsl(222, 47%, 11%)",
+      "role": "Primary Typography",
+      "usage": "Headlines, high-contrast body text, deep shadows"
+    },
+    "text_muted": {
+      "name": "Muted Slate",
+      "hex": "#64748B",
+      "rgb": "rgb(100, 116, 139)",
+      "hsl": "hsl(215, 16%, 47%)",
+      "role": "Secondary Typography",
+      "usage": "Subtitles, helper text, timestamps, metadata"
+    }
+  },
+  "tailwind": {
+    "colors": {
+      "shark-blue": {
+        "DEFAULT": "#0F62DB",
+        "dark": "#0A3B8C"
+      },
+      "shield-silver": {
+        "DEFAULT": "#E2E8F0",
+        "border": "#CBD5E1"
+      },
+      "siren-amber": "#FF8A00",
+      "padlock-gold": "#FFB800",
+      "hook-crimson": "#EA3323",
+      "cyber-surface": "#F8FAFC",
+      "cyber-navy": "#0F172A"
+    }
+  }
+}
