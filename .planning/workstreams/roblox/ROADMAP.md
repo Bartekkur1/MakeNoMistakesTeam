@@ -6,7 +6,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 
 ## Phases
 
-- [ ] **Phase 1: Studio, publikacja i szkielet levelu** - ryzyko publikacji zbadane, mały level z NPC
+- [x] **Phase 1: Studio, publikacja i szkielet levelu** - ryzyko publikacji zbadane, mały level z NPC
 - [ ] **Phase 2: Wybory, konsekwencje i pomocnik** - decyzje, wyjaśnienia, ponowna próba
 - [ ] **Phase 3: Wynik, nagroda i przekazanie** - punkty, odznaka, eksport zgodny z kontraktem
 
@@ -21,11 +21,13 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   2. Gracz przechodzi start → NPC → podejrzana oferta → decyzja → zakończenie
 **Plans**: 2 plans in 2 waves
 
-**Wave 1**
-- [ ] 01-01-PLAN.md — publikacja, zachowanie Place1 i bezpieczne granice Rojo
+**Completion scope:** demo w Studio na komputerze. Potwierdzone sync, dialog, oba wybory, powtórka i wysłanie nagrania na Discordzie. Ograniczenia dowodów oraz odłożone testy opisano w `01-02-SUMMARY.md` i `01-PLAYTEST.md`.
 
-**Wave 2 *(blocked on Wave 1 completion)***
-- [ ] 01-02-PLAN.md — pełna ścieżka misji, GUI mobilne i weryfikacja Play
+**Wave 1**
+- [x] 01-01-PLAN.md — publikacja, zachowanie Place1 i bezpieczne granice Rojo
+
+**Wave 2 *(completed for desktop demo; mobile testing deferred by user)***
+- [x] 01-02-PLAN.md — ścieżka misji i Play na komputerze potwierdzone przez Roberta; test mobilny odłożony
 
 ### Phase 2: Wybory, konsekwencje i pomocnik
 **Goal**: Poprawna i błędna decyzja prowadzą do różnych skutków z wyjaśnieniem
