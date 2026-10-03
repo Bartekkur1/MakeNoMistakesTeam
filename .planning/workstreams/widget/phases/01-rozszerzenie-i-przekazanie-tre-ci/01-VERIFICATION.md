@@ -1,10 +1,10 @@
 ---
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
-verified: "2026-10-03T17:22:05.578826+00:00"
+verified: "2026-10-03T17:51:26.347470+00:00"
 status: human_needed
-score: "47/49 must-haves verified automatically"
+score: "51/53 must-haves verified automatically; prior UAT 4 pass; G-01-2 visual retest pending"
 behavior_unverified: 0
-covered_digest: "v2:sha256:2b725cfe57ae1be83a07e3823c169feed5d85a357832aa70bcb01d2a06f6fb93"
+covered_digest: "v2:sha256:df0526f7a79346bcddb306e0d63527515c17224cd9726744dfb382c9ad7ce102"
 covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-01-SUMMARY.md
@@ -14,6 +14,8 @@ covered_files:
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-03-SUMMARY.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-04-PLAN.md
   - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-04-SUMMARY.md
+  - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-05-PLAN.md
+  - .planning/workstreams/widget/phases/01-rozszerzenie-i-przekazanie-tre-ci/01-05-SUMMARY.md
   - widget/README.md
   - widget/build.mjs
   - widget/manifest.json
@@ -55,21 +57,10 @@ covered_files:
   - widget/tests/unit/source-scan.test.js
   - widget/vitest.config.mjs
 human_verification:
-  - test: "Google Chrome: wygląd i obecność rekina"
-    expected: "Załaduj widget/dist przez chrome://extensions. Na zwykłej stronie i Discordzie rekin jest ostry, ma poprawne kolory, nieuciętą płetwę, nie zasłania kompozytora; przeciąganie, chowanie i powrót działają."
-    why_human: "Requires Google Chrome UI, fictional authenticated Discord and visual or tone judgment"
-  - test: "Discord: podgląd, klawiatura i zaznaczenie kompozytora"
-    expected: "Na fikcyjnym koncie przejdź kroki 4–5 README: tylko zaznaczony fragment i hostname discord.com, informacja dla opiekuna, edycja nie trafia do kompozytora i nie uruchamia skrótów; fragment wpisanego zdania przechodzi dokładnie bez wysłania wiadomości; zatwierdzenie daje neutralne Gotowe!."
-    why_human: "Requires Google Chrome UI, fictional authenticated Discord and visual or tone judgment"
-  - test: "Discord: zmiana kanału i przeładowanie"
-    expected: "Szkic zostaje po zmianie kanału, a znika po przeładowaniu dokumentu; menu wraca przy pustym zaznaczeniu."
-    why_human: "Requires Google Chrome UI, fictional authenticated Discord and visual or tone judgment"
-  - test: "Prawdziwa ikona: nieziniektowana karta i przeładowanie rozszerzenia"
-    expected: "Przejdź kroki 7–8 README: prawdziwe kliknięcie ikony na karcie otwartej przy wyłączonym rozszerzeniu montuje rekina; po przeładowaniu rozszerzenia bez odświeżenia karty zostaje jeden działający rekin i zatwierdzenie działa."
-    why_human: "Requires Google Chrome UI, fictional authenticated Discord and visual or tone judgment"
-  - test: "Język i ton dla dzieci 9–13"
-    expected: "Wszystkie widoki są po polsku, przyjazne, bez straszenia i zawstydzania. Jak to działa zawiera trzy uporządkowane kroki i zdanie o prywatności."
-    why_human: "Requires Google Chrome UI, fictional authenticated Discord and visual or tone judgment"
+  - test: "G-01-2: rekin znika w formularzu widgetu i wraca po zamknięciu"
+    expected: "W Google Chrome na Discordzie przejdź ręczny retest G-01-2 z README: paste i preview chowają rekina oraz jego ×, panel jest edytowalny, po resize mieści się na ekranie, × i Escape przywracają rekina oraz zachowują szkic. Menu, Jak to działa, Gotowe i przywrócenie ikoną działają."
+    why_human: "User-requested visual retest of the fixed original UAT issue on the updated build."
+
 ---
 
 # Phase 01 Verification
@@ -162,3 +153,30 @@ Avatar click → captureSelection → draft preview; approve → buildCase → b
 5. **Język i ton dla dzieci 9–13** — Wszystkie widoki są po polsku, przyjazne, bez straszenia i zawstydzania. Jak to działa zawiera trzy uporządkowane kroki i zdanie o prywatności.
 
 Phase remains pending until 01-UAT.md passes. No phase.complete or next-phase advancement executed.
+
+## Re-verification after 01-05
+
+All five plans and summaries were cross-checked against actual source and the full current test run. Original phase proof and accepted limitations remain valid; previous Chrome/Discord UAT has four user-confirmed passes. Only G-01-2 needs another user visual check. The two older HUMAN NEEDED rows above are supported by the prior UAT and retained as historical automatic-proof limits.
+
+| Gap-plan truth | Status | Current evidence |
+|---|---|---|
+| Paste/preview hide shark and badge while keeping panel usable, including pending/error | VERIFIED | presence integration lifecycle and deferred submit tests; Chromium form and selected-preview tests |
+| Close and Escape restore position and retained draft | VERIFIED | both Chromium close variants, draft E2E and presence integration |
+| Menu/howto/confirmation and manual hide/toolbar restore retain behavior | VERIFIED | presence integration, selected-confirmation E2E and existing restore suite |
+| Hidden anchor and resize maintain panel bounds | VERIFIED | exact pre-hide anchor equality, panel right-edge alignment and resized viewport checks |
+
+Artifacts: all four 01-05 artifacts exist and are wired. main.render invokes avatar.setFormOpen before panel.render; panel.place continues using avatar.rect. WID-01 and WID-02 are implemented and tested; final requirement completion stays pending the visual retest.
+
+### Test Quality Audit
+
+New presence integration tests exercise main.js and deferred submission. New avatar E2E tests use an actual loaded extension, value/behavior assertions, conserved geometry and twelve Tab steps. No skipped/todo tests or generated circular expectations were found. The old capture-phase focus-stealing test is an explicit expected failure, not proof of full isolation. Full Vitest: 38 pass / 8 files. Full Playwright: 38 pass, including that declared expected failure. Build passes.
+
+### Decision Coverage
+
+18/18 trackable CONTEXT decisions honored; advisory query returned no missing decisions. G-01-2 implements the clarified form-only visibility decision without changing capture or draft persistence.
+
+### Packaging
+
+`/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-05.zip`: 7 files; manifest.json at archive root; CRC validation passes. SHA256: 12025ea974c05cf4d336821981a67fc18c20e8235f6a2d2c138f56ca21e73bf8.
+
+Status remains human_needed solely for the updated G-01-2 visual retest; Phase 1 is not marked complete.

@@ -1,14 +1,20 @@
 ---
-status: complete
+status: testing
 phase: 01-rozszerzenie-i-przekazanie-tre-ci
 source: [01-VERIFICATION.md]
 started: "2026-10-03T17:22:05.578826+00:00"
-updated: "2026-10-03T17:38:53.684491+00:00"
+updated: "2026-10-03T17:51:26.347470+00:00"
 ---
 
 ## Current Test
 
-[testing complete]
+number: 2
+name: G-01-2: rekin znika w formularzu widgetu i wraca po zamknięciu
+expected: |
+  Załaduj nowy ZIP albo widget/dist, przeładuj rozszerzenie i odśwież kartę.
+  Przejdź ręczny retest G-01-2 w README: paste/preview chowają rekina,
+  × i Escape przywracają go, szkic zostaje, panel mieści się po resize.
+awaiting: user response
 
 ## Tests
 
@@ -18,7 +24,7 @@ result: pass
 
 ### 2. Discord: podgląd, klawiatura i zaznaczenie kompozytora
 expected: Na fikcyjnym koncie przejdź kroki 4–5 README: tylko zaznaczony fragment i hostname discord.com, informacja dla opiekuna, edycja nie trafia do kompozytora i nie uruchamia skrótów; fragment wpisanego zdania przechodzi dokładnie bez wysłania wiadomości; zatwierdzenie daje neutralne Gotowe!.
-result: issue
+result: [pending]
 reported: "2 wiekszosc pass, rekin powinien znikac kiedy pojawia sie pole do wpisywania (chyba, ze nie jest to zgodne z wymaganiami)"
 severity: minor
 
@@ -38,8 +44,8 @@ result: pass
 
 total: 5
 passed: 4
-issues: 1
-pending: 0
+issues: 0
+pending: 1
 skipped: 0
 blocked: 0
 
@@ -47,7 +53,7 @@ blocked: 0
 
 - gap_id: G-01-2
   truth: "Rekin znika po otwarciu formularza widgetu i wraca po jego zamknięciu."
-  status: failed
+  status: implemented_awaiting_retest
   reason: "User reported: 2 wiekszosc pass, rekin powinien znikac kiedy pojawia sie pole do wpisywania (chyba, ze nie jest to zgodne z wymaganiami)"
   severity: minor
   test: 2
@@ -62,3 +68,7 @@ blocked: 0
     - "Powrót awatara po zamknięciu formularza z zachowaniem pozycji i szkicu."
   diagnosis_note: "Użytkownik potwierdził opcję 1: chodzi o formularz widgetu. Rekin ma znikać po otwarciu formularza i wracać po jego zamknięciu; nie chodzi o pisanie w kompozytorze Discorda."
 
+
+## Gap closure execution
+
+01-05 implemented and automated checks passed: 38 Vitest, 38 Playwright (one existing expected failure). Original report retained above; user has not yet accepted the visual fix. Four prior pass results remain unchanged. Retest artifact: `/workspace/artifacts/bezpieczna-aura-widget-phase1-gap-01-05.zip`.

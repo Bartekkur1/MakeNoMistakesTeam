@@ -23,7 +23,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
 
-**Plans**: 4/5 plans executed; UAT: 4 pass, 1 minor issue — fix plan ready
+**Plans**: 5/5 plans executed; G-01-2 implemented, visual retest pending
 
 Plans:
 **Wave 1**
@@ -39,7 +39,7 @@ Plans:
 - [x] 01-04-PLAN.md — Szkic na karcie (D-12, D-17, prawdziwy bfcache), link z zaznaczenia, przypadki brzegowe treści, uczciwa awaria i spóźnione odpowiedzi, README z listą kontrolną demo w Google Chrome
 
 **Wave 5 — UAT gap closure**
-- [ ] 01-05-PLAN.md — G-01-2: chowanie rekina w formularzu widgetu i powrót po zamknięciu
+- [x] 01-05-PLAN.md — G-01-2: chowanie rekina w formularzu widgetu i powrót po zamknięciu
 
 **UI hint**: yes
 

@@ -20,3 +20,5 @@ total: 2
 |---------|----------|-------------|----------|
 | WR-01 | warning | fixed | content.test.js, commit 4a6c66d |
 | WR-02 | warning | fixed | menu.spec.mjs narrow viewport, commit 4a6c66d |
+
+01-05 review: no new findings; prior fixed dispositions preserved.

@@ -26,3 +26,7 @@ At width 280, the panel right edge was 328 instead of at most 272. Added max-wid
 ## Outcome
 
 Both findings fixed and verified. No open critical or warning findings. Expected capture-phase limitation and readable open shadow DOM are explicit plan-accepted risks, documented in README and SECURITY; they are not claimed fixed.
+
+## Gap closure review 01-05 (2026-10-03T17:51:26.347470+00:00)
+
+Standard inline review of the six files changed by f375978 and bce3760, with cross-checks against panel.js and draft.js. No new critical, warning or info findings. Verified visibility affects only avatar-wrap, inert excludes both buttons, rect preserves geometry, render tracks paste/preview including pending/error, close restores avatar and draft, and no capture/storage/permission/dependency changes occurred. 38 Vitest and 38 Playwright tests pass (one existing expected capture-phase failure). Prior WR-01 and WR-02 remain fixed.

@@ -61,3 +61,7 @@ Page to content script: only deliberate selected text or child-entered paste. Co
 ## Sign-Off
 
 Mitigations verified against source and passing tests. Final demo behavior and tone await human UAT.
+
+## 01-05 regression assessment
+
+The gap changes only avatar visibility and inert interaction state. No new trust boundary, permission, package, storage, capture or send path. Existing mitigations remain exercised by the passing privacy/source-scan suite and full browser suite. threats_open remains 0.
