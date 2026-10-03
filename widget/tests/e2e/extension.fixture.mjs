@@ -4,11 +4,13 @@ import { resolveBrowser } from './browser.mjs';
 
 const dist = path.resolve(import.meta.dirname, '../../dist');
 export const test = base.extend({
+  bfcache: [false, { option: true }],
   netlog: async ({}, use) => {
     await use({ entries: [], startedAt: null });
   },
-  context: async ({ netlog }, use) => {
+  context: async ({ netlog, bfcache }, use) => {
     const context = await chromium.launchPersistentContext('', {
+      ...(bfcache ? { ignoreDefaultArgs: ['--disable-back-forward-cache'] } : {}),
       headless: !process.env.AURA_HEADED,
       args: [`--disable-extensions-except=${dist}`, `--load-extension=${dist}`],
       ...resolveBrowser(),

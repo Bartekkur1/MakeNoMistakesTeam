@@ -71,6 +71,11 @@ export function createPanel({ root, strings, handlers }) {
         body.append(node('h2', strings.confirmationHeading), node('p', strings.confirmationBody), done);
         return;
       }
+      if (state.pendingSelection) {
+        const insert = button(strings.insertNewSelection, 'btn-secondary', () => handlers.onInsertSelection());
+        insert.disabled = Boolean(state.submitting);
+        body.append(node('p', strings.newSelectionHint, 'hint'), insert);
+      }
       const textarea = node('textarea');
       textarea.setAttribute('aria-label', strings.messageLabel);
       textarea.value = state.draft.text;

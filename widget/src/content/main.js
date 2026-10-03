@@ -18,6 +18,7 @@ function boot() {
   const { host, root } = createHost();
   const store = createDraftStore();
   const panel = createPanel({ root, strings: STRINGS, handlers: {
+    onInsertSelection() { store.insertPendingSelection(); render(); },
     onCheck() { store.showPaste(); render(); },
     onHowTo() { store.showHowTo(); render(); },
     onBack() { store.back(); render(); },
@@ -48,9 +49,11 @@ function boot() {
   }
   const resize = () => { avatar.reclamp({ width: innerWidth, height: innerHeight }); render(); };
   window.addEventListener('resize', resize);
+  const pagehide = () => { store.resetForNewDocument(); render(); };
+  window.addEventListener('pagehide', pagehide);
   host.addEventListener('bezpieczna-aura-ping', event => {
     if (isLive()) event.preventDefault();
-    else { host.remove(); window.removeEventListener('resize', resize); }
+    else { host.remove(); window.removeEventListener('resize', resize); window.removeEventListener('pagehide', pagehide); }
   });
   runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!isLive() || sender?.id !== runtime.id || msg?.type !== MSG_SHOW) return;

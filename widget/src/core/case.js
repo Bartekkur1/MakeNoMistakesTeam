@@ -31,3 +31,8 @@ export function isValidCase(c) {
     && typeof c.created_at === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(c.created_at) && Number.isFinite(Date.parse(c.created_at))
     && typeof c.truncated === 'boolean';
 }
+
+export function extractFirstLink(text) {
+  const match = String(text ?? '').match(/(?:https?:\/\/|www\.)[^\s<>"'\u201e\u201d\u00ab\u00bb]+/i);
+  return match ? normalizeLink(match[0].replace(/[.,;:!?\)\]\}'"\u201d\u00bb]+$/, '')) : '';
+}
