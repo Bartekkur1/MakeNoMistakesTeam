@@ -13,12 +13,14 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 ## Phase Details
 
 ### Phase 1: Studio, publikacja i szkielet levelu
+
 **Goal**: Wiadomo, czy gra da się udostępnić, i istnieje przechodzalny szkielet misji
 **Depends on**: Nothing (first phase)
 **Requirements**: RBX-01, MIS-01
 **Success Criteria** (what must be TRUE):
   1. Ograniczenia publikacji zgłoszone zespołowi do 2 h; gotowy wariant pokazu w Studio
   2. Gracz przechodzi start → NPC → podejrzana oferta → decyzja → zakończenie
+
 **Plans**: 2 plans in 2 waves
 
 **Completion scope:** demo w Studio na komputerze. Potwierdzone sync, dialog, oba wybory, powtórka i wysłanie nagrania na Discordzie. Ograniczenia dowodów oraz odłożone testy opisano w `01-02-SUMMARY.md` i `01-PLAYTEST.md`.
@@ -30,6 +32,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 - [x] 01-02-PLAN.md — ścieżka misji i Play na komputerze potwierdzone przez Roberta; test mobilny odłożony
 
 ### Phase 2: Wybory, konsekwencje i pomocnik
+
 **Goal**: Decyzje prowadzą do różnych skutków z wyjaśnieniem; scammer podchodzi do gracza, a spójny Scamerino 3D przychodzi po wybraniu pomocy
 **Depends on**: Phase 1, `shared/content/` (dialogi i wyjaśnienia)
 **Requirements**: MIS-02, MIS-03, MIS-04, MIS-05, MIS-06, MIS-07
@@ -41,11 +44,21 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   5. Scamerino ma spójny tors, głowę i kończyny; poprawiony model nie rozpada się ani nie deformuje podczas chodzenia
   6. Scammer chodzi po mapie i podchodzi do gracza, zatrzymując się przed nim i respektując przeszkody
   7. Wybranie pomocy w dialogu powoduje podejście Scamerino i uruchomienie jego wskazówek; restart przywraca NPC do stanu początkowego
+
 **Plans**: TBD
+**Wave 1**
+- [ ] 02-01-PLAN.md
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-02-PLAN.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 02-03-PLAN.md
 
 **Zarys kolejności prac:** poprawa i przygotowanie modelu Scamerino do chodzenia → ruch scammera → cztery ścieżki dialogu i wezwanie Scamerino → sprawdzenie całości w Play na komputerze. Ustalenia użytkownika i kryteria odbioru: `phases/02-wybory-konsekwencje-i-pomocnik/02-SCOPE.md`.
 
 ### Phase 3: Wynik, nagroda i przekazanie
+
 **Goal**: Misja kończy się wynikiem z użyciem podpowiedzi, nagrodą i zapisem zgodnym z kontraktem
 **Depends on**: Phase 2, `shared/MEASUREMENT.md`, `shared/CONTRACT.md`
 **Requirements**: SCR-01, SCR-02, SCR-03
@@ -53,6 +66,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   1. Punkty liczone według wspólnych zasad, wynik zawiera hints_used
   2. Ukończenie daje jedną kosmetyczną nagrodę; zgłoszenia nie są punktowane
   3. Wynik można wyeksportować w formacie kontraktu; import ręczny jest oznaczony w demo
+
 **Plans**: TBD
 
 ---
