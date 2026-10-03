@@ -145,7 +145,7 @@ Routes to the resume-project workflow which handles:
   </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/resume-project.md
+@/workspace/.codex/gsd-core/workflows/resume-project.md
 </execution_context>
 
 <process>

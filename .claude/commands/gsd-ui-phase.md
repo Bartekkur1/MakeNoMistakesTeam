@@ -21,8 +21,8 @@ Flow: Validate → Research UI → Verify UI-SPEC → Done
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/ui-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/workflows/ui-phase.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

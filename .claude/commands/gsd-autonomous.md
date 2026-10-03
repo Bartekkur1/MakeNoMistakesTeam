@@ -27,8 +27,8 @@ Uses ROADMAP.md phase discovery and Skill() flat invocations for each phase comm
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/autonomous.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/workflows/autonomous.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

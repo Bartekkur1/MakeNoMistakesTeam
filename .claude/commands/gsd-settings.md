@@ -22,7 +22,7 @@ Routes to the settings workflow which handles:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/settings.md
+@/workspace/.claude/gsd-core/workflows/settings.md
 </execution_context>
 
 <process>

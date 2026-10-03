@@ -21,9 +21,9 @@ Three modes:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/undo.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gate-prompts.md
+@/workspace/.claude/gsd-core/workflows/undo.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/references/gate-prompts.md
 </execution_context>
 
 <context>

@@ -6,7 +6,7 @@ artifacts that `gsd-core/bin/**` needs at runtime.
 ## Why
 
 `gsd-core/bin/**` is copied by the installer into trees that have **no
-`node_modules`** (e.g. `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/`). Any external (non-relative,
+`node_modules`** (e.g. `/workspace/.codex/gsd-core/`). Any external (non-relative,
 non-builtin) `require()`/`import` under `gsd-core/bin/**` breaks `verify`
 (and everything else) for every installed user, because the module simply
 cannot be resolved there. The fix is to vendor the compiled artifact

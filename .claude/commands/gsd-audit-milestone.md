@@ -18,7 +18,7 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/audit-milestone.md
+@/workspace/.claude/gsd-core/workflows/audit-milestone.md
 </execution_context>
 
 <context>

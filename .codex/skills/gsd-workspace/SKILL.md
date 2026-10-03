@@ -152,10 +152,10 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/new-workspace.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/list-workspaces.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/remove-workspace.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/ui-brand.md
+@/workspace/.codex/gsd-core/workflows/new-workspace.md
+@/workspace/.codex/gsd-core/workflows/list-workspaces.md
+@/workspace/.codex/gsd-core/workflows/remove-workspace.md
+@/workspace/.codex/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

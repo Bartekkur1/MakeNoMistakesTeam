@@ -13,7 +13,7 @@ Display comprehensive project statistics including phase progress, plan executio
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/stats.md
+@/workspace/.claude/gsd-core/workflows/stats.md
 </execution_context>
 
 <process>

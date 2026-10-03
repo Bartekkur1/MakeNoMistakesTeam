@@ -8,6 +8,14 @@
             "command": "\"/home/turu/.config/nvm/versions/node/v22.20.0/bin/node\" \"/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/hooks/gsd-check-update.js\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/usr/local/bin/node\" \"/workspace/.codex/hooks/gsd-check-update.js\""
+          }
+        ]
       }
     ]
   }

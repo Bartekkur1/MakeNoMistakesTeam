@@ -25,7 +25,7 @@ Routes to the update workflow which handles:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/update.md
+@/workspace/.claude/gsd-core/workflows/update.md
 </execution_context>
 
 <flags>
@@ -44,6 +44,6 @@ Parse the first token of $ARGUMENTS:
 </process>
 
 <execution_context_extended>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/sync-skills.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/reapply-patches.md
+@/workspace/.claude/gsd-core/workflows/sync-skills.md
+@/workspace/.claude/gsd-core/workflows/reapply-patches.md
 </execution_context_extended>

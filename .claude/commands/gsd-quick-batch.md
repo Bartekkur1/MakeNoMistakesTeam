@@ -44,7 +44,7 @@ instead, or file the tasks individually.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/quick-batch.md
+@/workspace/.claude/gsd-core/workflows/quick-batch.md
 </execution_context>
 
 <context>

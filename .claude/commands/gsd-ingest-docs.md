@@ -27,10 +27,10 @@ Auto-synthesizes most conflicts using the precedence rule `ADR > SPEC > PRD > DO
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/ingest-docs.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/gate-prompts.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/doc-conflict-engine.md
+@/workspace/.claude/gsd-core/workflows/ingest-docs.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/references/gate-prompts.md
+@/workspace/.claude/gsd-core/references/doc-conflict-engine.md
 </execution_context>
 
 <context>

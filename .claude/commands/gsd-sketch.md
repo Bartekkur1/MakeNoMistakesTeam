@@ -30,13 +30,13 @@ Does not require prior new-project setup — auto-creates `.planning/sketches/` 
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/sketch.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/sketch-wrap-up.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/sketch-theme-system.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/sketch-interactivity.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/sketch-tooling.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/sketch-variant-patterns.md
+@/workspace/.claude/gsd-core/workflows/sketch.md
+@/workspace/.claude/gsd-core/workflows/sketch-wrap-up.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/references/sketch-theme-system.md
+@/workspace/.claude/gsd-core/references/sketch-interactivity.md
+@/workspace/.claude/gsd-core/references/sketch-tooling.md
+@/workspace/.claude/gsd-core/references/sketch-variant-patterns.md
 </execution_context>
 
 

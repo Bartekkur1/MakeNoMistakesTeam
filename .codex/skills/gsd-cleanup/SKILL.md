@@ -139,7 +139,7 @@ Use when `.planning/phases/` has accumulated directories from past milestones.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/cleanup.md
+@/workspace/.codex/gsd-core/workflows/cleanup.md
 </execution_context>
 
 <process>
