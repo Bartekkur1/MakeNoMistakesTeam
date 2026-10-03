@@ -79,10 +79,14 @@ async function expectBounded(page) {
   expect(await avatar(page).evaluate((el, point) => el.getRootNode().elementFromPoint(point.x, point.y) === el,
     { x: r.x + r.width / 2, y: r.y + r.height / 2 })).toBe(true);
 }
-for (const view of ['menu', 'howto', 'paste', 'preview', 'confirmation']) {
+for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
   test(`open ${view} follows avatar throughout drag without rebuilding or submitting`, async ({page, serviceWorker, netlog}) => {
     await page.setViewportSize({ width: 1400, height: 1000 });
     await openView(page, view);
+    if (view === 'safety') {
+      await expect(page.getByText('Zanim sprawdzimy: nie podawaj hasła ani kodu i nie klikaj nieznanego linku.', { exact: true })).toBeVisible();
+      expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+    }
     const editing = ['paste', 'preview'].includes(view);
     if (editing) {
       await formText(page).focus();
