@@ -59,7 +59,7 @@ Plans:
 **Plans**: TBD
 - [x] 02-01-PLAN.md
 - [x] 02-02-PLAN.md
-- [ ] 02-03-PLAN.md
+- [x] 02-03-PLAN.md
 
 **UI hint**: yes
 
