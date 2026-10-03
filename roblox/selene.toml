@@ -1,0 +1,3 @@
+# Roblox standard library includes the Luau dialect and Roblox globals.
+# https://kampfkarren.github.io/selene/roblox.html
+std = "roblox"

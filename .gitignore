@@ -5,3 +5,6 @@ node_modules/
 slides/dist/
 slides/.slidev/
 slides/components/.vite/
+
+# macOS Finder metadata
+.DS_Store

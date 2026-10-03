@@ -1,0 +1,38 @@
+{
+  "name": "Phase1",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$className": "Workspace",
+      "MarketplaceLobby": {
+        "$path": "assets/MarketplaceLobby.rbxm"
+      },
+      "MissionStart": {
+        "$className": "SpawnLocation",
+        "$properties": {
+          "Position": [0, 0.5, 30],
+          "Size": [12, 1, 12],
+          "Anchored": true,
+          "Enabled": true,
+          "Neutral": true,
+          "Color": [0.314, 0.471, 0.627]
+        }
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$path": "src/server"
+    },
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$path": "src/shared"
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$path": "src/client"
+      }
+    }
+  }
+}
