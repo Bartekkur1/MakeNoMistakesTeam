@@ -2109,6 +2109,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "MissionGui"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 10
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
 
 local panel = Instance.new("Frame")
@@ -2215,40 +2216,61 @@ choicesLayout.Parent = choices
 -- Karta Zasad Roblox (Rule Card Frame)
 local ruleCardFrame = Instance.new("Frame")
 ruleCardFrame.Name = "RuleCardFrame"
-ruleCardFrame.Size = UDim2.fromOffset(440, 340)
+ruleCardFrame.Size = UDim2.fromOffset(480, 360)
 ruleCardFrame.Position = UDim2.fromScale(0.5, 0.5)
 ruleCardFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-ruleCardFrame.BackgroundColor3 = Color3.fromRGB(16, 20, 32)
+ruleCardFrame.BackgroundColor3 = Color3.fromRGB(16, 20, 34)
 ruleCardFrame.BorderSizePixel = 0
 ruleCardFrame.Visible = false
 ruleCardFrame.ZIndex = 20
 ruleCardFrame.Parent = gui
 
 local rcCorner = Instance.new("UICorner")
-rcCorner.CornerRadius = UDim.new(0, 10)
+rcCorner.CornerRadius = UDim.new(0, 12)
 rcCorner.Parent = ruleCardFrame
 
 local rcStroke = Instance.new("UIStroke")
 rcStroke.Color = Color3.fromRGB(80, 140, 240)
-rcStroke.Thickness = 2
+rcStroke.Thickness = 2.5
 rcStroke.Parent = ruleCardFrame
 
 local rcTitle = label("RcTitle", ruleCardFrame, 15)
-rcTitle.Font = Enum.Font.GothamBold
+rcTitle.Font = Enum.Font.FredokaOne
 rcTitle.Position = UDim2.fromOffset(16, 14)
-rcTitle.Size = UDim2.new(1, -32, 0, 22)
+rcTitle.Size = UDim2.new(1, -64, 0, 24)
 rcTitle.TextColor3 = Color3.fromRGB(255, 215, 80)
 rcTitle.Text = "🛡️ ZASADY BEZPIECZEŃSTWA ROBLOX"
+rcTitle.ZIndex = 25
+
+local rcTopCloseBtn = Instance.new("TextButton")
+rcTopCloseBtn.Name = "RcTopCloseBtn"
+rcTopCloseBtn.Size = UDim2.fromOffset(26, 26)
+rcTopCloseBtn.Position = UDim2.new(1, -38, 0, 12)
+rcTopCloseBtn.BackgroundColor3 = Color3.fromRGB(200, 45, 55)
+rcTopCloseBtn.BorderSizePixel = 0
+rcTopCloseBtn.Font = Enum.Font.FredokaOne
+rcTopCloseBtn.Text = "✕"
+rcTopCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+rcTopCloseBtn.TextSize = 13
+rcTopCloseBtn.AutoButtonColor = true
+rcTopCloseBtn.ZIndex = 25
+rcTopCloseBtn.Parent = ruleCardFrame
+
+local rcTopCorner = Instance.new("UICorner")
+rcTopCorner.CornerRadius = UDim.new(0, 6)
+rcTopCorner.Parent = rcTopCloseBtn
 
 local rcScroll = Instance.new("ScrollingFrame")
 rcScroll.Name = "RcScroll"
-rcScroll.Position = UDim2.fromOffset(16, 42)
-rcScroll.Size = UDim2.new(1, -32, 1, -110)
+rcScroll.Position = UDim2.fromOffset(16, 46)
+rcScroll.Size = UDim2.new(1, -32, 1, -140)
 rcScroll.BackgroundTransparency = 1
 rcScroll.BorderSizePixel = 0
-rcScroll.ScrollBarThickness = 3
+rcScroll.ScrollBarThickness = 4
+rcScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 140, 240)
 rcScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 rcScroll.CanvasSize = UDim2.new()
+rcScroll.ZIndex = 25
 rcScroll.Parent = ruleCardFrame
 
 local rcList = Instance.new("UIListLayout")
@@ -2256,26 +2278,29 @@ rcList.Padding = UDim.new(0, 8)
 rcList.SortOrder = Enum.SortOrder.LayoutOrder
 rcList.Parent = rcScroll
 
-local rcSource = label("RcSource", ruleCardFrame, 10)
-rcSource.Position = UDim2.new(0, 16, 1, -64)
-rcSource.Size = UDim2.new(1, -32, 0, 24)
-rcSource.TextColor3 = Color3.fromRGB(150, 160, 180)
+local rcSource = label("RcSource", ruleCardFrame, 11)
+rcSource.Position = UDim2.new(0, 16, 1, -86)
+rcSource.Size = UDim2.new(1, -32, 0, 38)
+rcSource.TextColor3 = Color3.fromRGB(160, 175, 205)
 rcSource.TextWrapped = true
+rcSource.ZIndex = 25
 
 local rcCloseBtn = Instance.new("TextButton")
 rcCloseBtn.Name = "RcCloseBtn"
-rcCloseBtn.Size = UDim2.new(1, -32, 0, 32)
-rcCloseBtn.Position = UDim2.new(0, 16, 1, -36)
-rcCloseBtn.BackgroundColor3 = Color3.fromRGB(40, 110, 220)
+rcCloseBtn.Size = UDim2.new(1, -32, 0, 36)
+rcCloseBtn.Position = UDim2.new(0, 16, 1, -42)
+rcCloseBtn.BackgroundColor3 = Color3.fromRGB(36, 110, 224)
 rcCloseBtn.BorderSizePixel = 0
-rcCloseBtn.Font = Enum.Font.GothamBold
+rcCloseBtn.Font = Enum.Font.FredokaOne
 rcCloseBtn.TextSize = 13
 rcCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 rcCloseBtn.Text = "Rozumiem, wracam do rozmowy"
+rcCloseBtn.AutoButtonColor = true
+rcCloseBtn.ZIndex = 25
 rcCloseBtn.Parent = ruleCardFrame
 
 local rcBtnCorner = Instance.new("UICorner")
-rcBtnCorner.CornerRadius = UDim.new(0, 6)
+rcBtnCorner.CornerRadius = UDim.new(0, 8)
 rcBtnCorner.Parent = rcCloseBtn
 
 local latest: MissionContent.MissionSnapshot? = nil
@@ -2367,12 +2392,14 @@ render = function(snapshot)
 		rcTitle.Text = "🛡️ " .. string.upper(snapshot.ruleCard.title)
 		clear(rcScroll)
 		for i, point in ipairs(snapshot.ruleCard.bulletPoints) do
-			local row = label("Point", rcScroll, 12)
-			row.Size = UDim2.new(1, -6, 0, 0)
+			local row = label("Point", rcScroll, 13)
+			row.Size = UDim2.new(1, -8, 0, 0)
 			row.AutomaticSize = Enum.AutomaticSize.Y
 			row.TextWrapped = true
 			row.Text = "• " .. point
-			row.TextColor3 = Color3.fromRGB(235, 238, 245)
+			row.TextColor3 = Color3.fromRGB(240, 244, 255)
+			row.Font = Enum.Font.GothamMedium
+			row.ZIndex = 26
 			row.LayoutOrder = i
 		end
 		rcSource.Text = "Źródło: "
@@ -2491,13 +2518,16 @@ for index, conversation in { "mati", "scamerino" } do
 	end)
 end
 
-rcCloseBtn.Activated:Connect(function()
+local function closeRuleCard()
 	if not latest then
 		return
 	end
 	ruleCardFrame.Visible = false
 	request:FireServer("close_rule_card", latest.revision)
-end)
+end
+
+rcCloseBtn.Activated:Connect(closeRuleCard)
+rcTopCloseBtn.Activated:Connect(closeRuleCard)
 
 close.Activated:Connect(function()
 	if not latest then
