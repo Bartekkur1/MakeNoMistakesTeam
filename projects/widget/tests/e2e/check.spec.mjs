@@ -5,11 +5,12 @@ const honest = 'Dziś gramy o 17, spotkajmy się w naszej grupie';
 const safety = 'Zanim sprawdzimy: nie podawaj hasła ani kodu i nie klikaj nieznanego linku.';
 const summary = 'Nie widzę typowych sygnałów oszustwa. To nie daje pewności — sprawdź wiadomość oficjalnym kanałem.';
 
-async function approve(page, serviceWorker, text = honest) {
+async function approve(page, serviceWorker, text = honest, link = '') {
   await page.goto(url);
   await page.getByRole('button', { name: 'Scamerinio', exact: true }).click();
   await page.getByRole('button', { name: 'Sprawdź wiadomość', exact: true }).click();
   await page.getByRole('textbox', { name: 'Wiadomość', exact: true }).fill(text);
+  if (link) await page.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true }).fill(link);
   await page.getByRole('button', { name: 'Dalej', exact: true }).click();
   expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(0);
   await page.getByRole('button', { name: 'Zatwierdzam', exact: true }).click();
@@ -30,6 +31,53 @@ async function untouchedQuestion(dialog, title) {
 
 const shark = page => page.getByRole('button', { name: 'Scamerinio', exact: true });
 const clearSelection = page => page.evaluate(() => getSelection().removeAllRanges());
+
+test('guardian demo request reaches confirmation', async ({ page, serviceWorker, netlog }) => {
+  const text = 'Podaj kod do konta';
+  const link = 'https://demo.example/check';
+  const dialog = await approve(page, serviceWorker, text, link);
+  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests ?? [])).toEqual([]);
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
+  await next.click();
+  for (const label of ['Nie znam nadawcy', 'Podania kodu do konta', 'Nie mam innego sposobu']) {
+    await dialog.getByLabel(label, { exact: true }).check();
+    await next.click();
+  }
+  await expect(dialog.locator('.result-section')).toHaveCount(3);
+  await expect(dialog.locator('.result-step')).toHaveCount(1);
+  await expect(dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true })).toBeFocused();
+  const before = await serviceWorker.evaluate(() => ({
+    messages: self.__aura.messages.length, cases: self.__aura.cases,
+    requests: self.__aura.guardianRequests ?? [],
+  }));
+  expect(before.messages).toBe(1);
+  expect(before.cases).toHaveLength(1);
+  expect(before.cases[0]).toMatchObject({ content: text, link, origin: 'paste' });
+  expect(before.requests).toEqual([]);
+
+  const request = dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true });
+  await expect(request).toBeVisible();
+  await expect(dialog.locator('.result-section').getByRole('button')).toHaveCount(0);
+  await request.click();
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
+  await expect(dialog).toContainText('To pokaz działania. Sprawa i wynik są zapisane tylko w pamięci rozszerzenia. Prawdziwa wysyłka do opiekuna będzie dostępna w fazie 3.');
+  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
+  const after = await serviceWorker.evaluate(() => ({
+    messages: self.__aura.messages.map(m => m.type), cases: self.__aura.cases,
+    requests: self.__aura.guardianRequests,
+  }));
+  expect(after.messages).toEqual(['aura/case-approved', 'aura/guardian-request']);
+  expect(after.cases).toEqual(before.cases);
+  expect(after.requests).toEqual([{
+    case: before.cases[0],
+    result: {
+      summaryKey: 'caution', signals: ['credential_code'], unknowns: ['sender', 'official_channel'],
+      step: { id: 'protect_credentials', explanationKey: 'protect_credentials_how' }, mismatches: [],
+    },
+  }]);
+  await assertOnlyLocal(netlog);
+});
+
 async function reachStep(dialog, step) {
   if (step === 'safety') return;
   const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
