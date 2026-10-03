@@ -23,11 +23,11 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
   2. Zaznaczona treść lub wklejona wiadomość/link trafia do pomocnika
   3. Rozszerzenie czyta stronę wyłącznie na działanie użytkownika
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 
 Plans:
 **Wave 1**
-- [ ] 01-01-PLAN.md — Bramka pakietów npm, tracer zaznacz → kliknij rekina → podgląd → zatwierdź → sprawa w service workerze, blokujący test klawiatury na Discordzie
+- [x] 01-01-PLAN.md — Bramka pakietów npm, tracer zaznacz → kliknij rekina → podgląd → zatwierdź → sprawa w service workerze, blokujący test klawiatury na Discordzie
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02-PLAN.md — Strażnik D-04 (test szpiegujący + skan źródeł, Vitest z CSS), zaznaczenie w polach i kompozytorze w prawdziwym Chromium, limit przechwytywania klawiatury, jedno zatwierdzenie = jedna sprawa
