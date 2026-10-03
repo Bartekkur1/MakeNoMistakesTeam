@@ -1,0 +1,28 @@
+{
+  "description": "Opiekun zmienia status sprawy z „nowa” na „w rozmowie” (dane fikcyjne).",
+  "method": "PATCH",
+  "route": "/api/cases/{id}",
+  "path": "/api/cases/5e1a0c1e-0000-4000-8000-000000000001",
+  "request": {
+    "status": "in_progress"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "id": "5e1a0c1e-0000-4000-8000-000000000001",
+      "demo_child_id": "demo-child-1",
+      "source": "game",
+      "content": "Na czacie w grze ktoś napisał: „Rozdaję 10 000 diamentów za darmo! Podaj tylko kod z SMS-a, który zaraz ci przyjdzie.” Nie znam tego gracza.",
+      "signals": [
+        "prosba_o_kod",
+        "obietnica_nagrody",
+        "nieznany_nadawca"
+      ],
+      "selected_action": "nie_podaje_kodu",
+      "already_acted": "no",
+      "status": "in_progress",
+      "created_at": "2026-10-03T08:05:00.000Z",
+      "updated_at": "2026-10-03T12:00:00.000Z"
+    }
+  }
+}

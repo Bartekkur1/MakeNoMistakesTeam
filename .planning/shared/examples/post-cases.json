@@ -1,0 +1,29 @@
+{
+  "description": "Widget tworzy nową sprawę po rozmowie z pomocnikiem w grze (dane fikcyjne).",
+  "method": "POST",
+  "route": "/api/cases",
+  "path": "/api/cases",
+  "request": {
+    "demo_child_id": "demo-child-1",
+    "source": "game",
+    "content": "Gracz MistrzKlocków99 napisał na czacie: „Dam ci 5000 monet za darmo, tylko przepisz mi kod, który przyszedł ci SMS-em. Szybko, zanim oferta zniknie!”",
+    "signals": ["prosba_o_kod", "obietnica_nagrody"],
+    "selected_action": "nie_podaje_kodu",
+    "already_acted": "no"
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "5e1a0c1e-0000-4000-8000-000000000006",
+      "demo_child_id": "demo-child-1",
+      "source": "game",
+      "content": "Gracz MistrzKlocków99 napisał na czacie: „Dam ci 5000 monet za darmo, tylko przepisz mi kod, który przyszedł ci SMS-em. Szybko, zanim oferta zniknie!”",
+      "signals": ["prosba_o_kod", "obietnica_nagrody"],
+      "selected_action": "nie_podaje_kodu",
+      "already_acted": "no",
+      "status": "new",
+      "created_at": "2026-10-03T12:30:00.000Z",
+      "updated_at": "2026-10-03T12:30:00.000Z"
+    }
+  }
+}

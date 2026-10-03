@@ -1,0 +1,87 @@
+{
+  "description": "Lista spraw fikcyjnego dziecka demo-child-1, najnowsza pierwsza, bez odpowiedzi. Te pięć spraw to także dane seed bazy (plan 01-03).",
+  "method": "GET",
+  "route": "/api/cases",
+  "path": "/api/cases?demo_child_id=demo-child-1",
+  "request": null,
+  "response": {
+    "status": 200,
+    "body": {
+      "cases": [
+        {
+          "id": "5e1a0c1e-0000-4000-8000-000000000005",
+          "demo_child_id": "demo-child-1",
+          "source": "other",
+          "content": "Biblioteka miejska zaprasza na bezpłatne warsztaty z robotyki dla dzieci 9–13 lat w sobotę o 10:00. Zapisy w wypożyczalni albo na stronie https://biblioteka-miejska.example/warsztaty-robotyki",
+          "signals": [],
+          "selected_action": "sprawdzam_oficjalnie",
+          "already_acted": "no",
+          "status": "new",
+          "created_at": "2026-10-03T11:45:00.000Z",
+          "updated_at": "2026-10-03T11:45:00.000Z"
+        },
+        {
+          "id": "5e1a0c1e-0000-4000-8000-000000000004",
+          "demo_child_id": "demo-child-1",
+          "source": "discord",
+          "content": "Wiadomość od bota „GiveawayKing”: Gratulacje! Wygrałeś roczne konto premium za darmo! Odbierz nagrodę w ciągu 10 minut, inaczej przepadnie: https://nagrody-premium.example/odbierz",
+          "signals": [
+            "obietnica_nagrody",
+            "presja_czasu"
+          ],
+          "selected_action": null,
+          "already_acted": "unsure",
+          "status": "in_progress",
+          "created_at": "2026-10-03T10:30:00.000Z",
+          "updated_at": "2026-10-03T10:45:00.000Z"
+        },
+        {
+          "id": "5e1a0c1e-0000-4000-8000-000000000003",
+          "demo_child_id": "demo-child-1",
+          "source": "sms",
+          "content": "SMS: Twoja paczka czeka w sortowni. Dopłać 1,99 zł za doręczenie, inaczej wróci do nadawcy: https://doplata-paczka.example/zaplac",
+          "signals": [
+            "ukryty_koszt",
+            "podejrzany_link"
+          ],
+          "selected_action": "usuwam_wiadomosc",
+          "already_acted": "no",
+          "status": "closed",
+          "created_at": "2026-10-03T09:15:00.000Z",
+          "updated_at": "2026-10-03T09:35:00.000Z"
+        },
+        {
+          "id": "5e1a0c1e-0000-4000-8000-000000000002",
+          "demo_child_id": "demo-child-1",
+          "source": "email",
+          "content": "Temat: Twoje konto szkolne zostanie zablokowane dziś o 18:00! Aby tego uniknąć, zaloguj się w ciągu godziny: https://dziennik-szkolny-weryfikacja.example/logowanie",
+          "signals": [
+            "presja_czasu",
+            "podejrzany_link"
+          ],
+          "selected_action": "pytam_opiekuna",
+          "already_acted": "clicked",
+          "status": "in_progress",
+          "created_at": "2026-10-03T08:40:00.000Z",
+          "updated_at": "2026-10-03T08:55:00.000Z"
+        },
+        {
+          "id": "5e1a0c1e-0000-4000-8000-000000000001",
+          "demo_child_id": "demo-child-1",
+          "source": "game",
+          "content": "Na czacie w grze ktoś napisał: „Rozdaję 10 000 diamentów za darmo! Podaj tylko kod z SMS-a, który zaraz ci przyjdzie.” Nie znam tego gracza.",
+          "signals": [
+            "prosba_o_kod",
+            "obietnica_nagrody",
+            "nieznany_nadawca"
+          ],
+          "selected_action": "nie_podaje_kodu",
+          "already_acted": "no",
+          "status": "new",
+          "created_at": "2026-10-03T08:05:00.000Z",
+          "updated_at": "2026-10-03T08:05:00.000Z"
+        }
+      ]
+    }
+  }
+}
