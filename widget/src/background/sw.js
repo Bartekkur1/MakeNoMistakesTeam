@@ -1,4 +1,4 @@
-import { MSG_CASE_APPROVED } from '../core/messages.js';
+import { MSG_CASE_APPROVED, MSG_SHOW } from '../core/messages.js';
 import { isValidCase } from '../core/case.js';
 
 const cases = [];
@@ -12,4 +12,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (cases.length > 100) cases.shift();
   sendResponse({ ok: true });
 });
-self.__aura = { cases, messages };
+export async function onActionClicked(tab) {
+  if (!Number.isInteger(tab?.id)) return { ok: false, via: 'none' };
+  try { if ((await chrome.tabs.sendMessage(tab.id, { type: MSG_SHOW }))?.ok === true) return { ok: true, via: 'message' }; } catch {}
+  try { await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }); }
+  catch { return { ok: false, via: 'inject-failed' }; }
+  try { if ((await chrome.tabs.sendMessage(tab.id, { type: MSG_SHOW }))?.ok === true) return { ok: true, via: 'inject' }; } catch {}
+  return { ok: false, via: 'no-ack' };
+}
+chrome.action.onClicked.addListener(onActionClicked);
+self.__aura = { cases, messages, onActionClicked };

@@ -4,10 +4,17 @@ import { createPanel } from '../ui/panel.js';
 import { STRINGS } from '../ui/strings.pl.js';
 import { createDraftStore } from '../core/draft.js';
 import { buildCase } from '../core/case.js';
+import { MSG_SHOW } from '../core/messages.js';
 import { submitCase } from '../core/integration.js';
 
 function boot() {
-  if (document.querySelector(HOST_TAG)) return;
+  const runtime = chrome.runtime;
+  const isLive = () => { try { return Boolean(runtime?.id); } catch { return false; } };
+  const existing = document.querySelector(HOST_TAG);
+  if (existing) {
+    if (!existing.dispatchEvent(new CustomEvent('bezpieczna-aura-ping', { cancelable: true }))) return;
+    existing.remove();
+  }
   const { host, root } = createHost();
   const store = createDraftStore();
   const panel = createPanel({ root, strings: STRINGS, handlers: {
@@ -26,13 +33,24 @@ function boot() {
     },
   } });
   const avatar = createAvatar({ host, root, strings: STRINGS,
-    onActivate(captured) { store.onAvatarClick(captured); render(); } });
+    onActivate(captured) { store.onAvatarClick(captured); render(); },
+    onHide() { store.hide(); render(); } });
   function render() {
     const state = store.get();
     avatar.setHidden(state.hidden);
     panel.render(state, { host: location.hostname });
     if (state.view !== 'closed') panel.place(avatar.rect(), { width: innerWidth, height: innerHeight });
   }
+  const resize = () => { avatar.reclamp({ width: innerWidth, height: innerHeight }); render(); };
+  window.addEventListener('resize', resize);
+  host.addEventListener('bezpieczna-aura-ping', event => {
+    if (isLive()) event.preventDefault();
+    else { host.remove(); window.removeEventListener('resize', resize); }
+  });
+  runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!isLive() || sender?.id !== runtime.id || msg?.type !== MSG_SHOW) return;
+    store.show(); render(); sendResponse({ ok: true });
+  });
   render();
 }
 boot();
