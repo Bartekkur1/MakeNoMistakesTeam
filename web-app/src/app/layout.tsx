@@ -6,7 +6,7 @@ import "./globals.css";
 const display = Unbounded({
   variable: "--font-unbounded",
   subsets: ["latin", "latin-ext"],
-  weight: ["500", "700"],
+  weight: ["500", "600", "700"],
 });
 
 const body = Atkinson_Hyperlegible_Next({
