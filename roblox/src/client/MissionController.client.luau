@@ -17,17 +17,22 @@ screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
--- Main container frame (responsive center-bottom anchor, phone-safe width)
+-- Main container frame (lower-third dialogue bar, avatar-safe)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "DialogueFrame"
-mainFrame.Size = UDim2.fromScale(0.85, 0.45)
-mainFrame.Position = UDim2.fromScale(0.5, 0.72)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 24, 34)
-mainFrame.BackgroundTransparency = 0.05
+mainFrame.Size = UDim2.fromScale(0.92, 0.28)
+mainFrame.Position = UDim2.new(0.5, 0, 1, -20)
+mainFrame.AnchorPoint = Vector2.new(0.5, 1)
+mainFrame.BackgroundColor3 = Color3.fromRGB(14, 20, 32)
+mainFrame.BackgroundTransparency = 0.08
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.Parent = screenGui
+
+local sizeConstraint = Instance.new("UISizeConstraint")
+sizeConstraint.MaxSize = Vector2.new(820, 220)
+sizeConstraint.MinSize = Vector2.new(320, 160)
+sizeConstraint.Parent = mainFrame
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0, 16)
@@ -35,14 +40,14 @@ uiCorner.Parent = mainFrame
 
 local uiStroke = Instance.new("UIStroke")
 uiStroke.Color = Color3.fromRGB(0, 170, 255)
-uiStroke.Thickness = 3
+uiStroke.Thickness = 2.5
 uiStroke.Parent = mainFrame
 
--- Helper Portrait (ImageLabel)
+-- Helper Portrait (compact left column)
 local portraitFrame = Instance.new("Frame")
 portraitFrame.Name = "PortraitFrame"
-portraitFrame.Size = UDim2.fromScale(0.2, 0.75)
-portraitFrame.Position = UDim2.fromScale(0.02, 0.12)
+portraitFrame.Size = UDim2.new(0, 110, 1, -20)
+portraitFrame.Position = UDim2.fromOffset(10, 10)
 portraitFrame.BackgroundColor3 = Color3.fromRGB(15, 30, 50)
 portraitFrame.BorderSizePixel = 0
 portraitFrame.Parent = mainFrame
@@ -53,39 +58,44 @@ portraitCorner.Parent = portraitFrame
 
 local portraitImage = Instance.new("ImageLabel")
 portraitImage.Name = "ScamerinoPortrait"
-portraitImage.Size = UDim2.fromScale(1, 1)
+portraitImage.Size = UDim2.new(1, 0, 1, -26)
+portraitImage.Position = UDim2.new(0, 0, 0, 0)
 portraitImage.BackgroundTransparency = 1
--- Use fallback local avatar or asset ID if available
-portraitImage.Image = "rbxassetid://10769168213" -- placeholder / moderated ID
+portraitImage.Image = "rbxassetid://10769168213"
 portraitImage.ScaleType = Enum.ScaleType.Fit
 portraitImage.Parent = portraitFrame
 
 local portraitLabel = Instance.new("TextLabel")
 portraitLabel.Name = "PortraitName"
-portraitLabel.Size = UDim2.fromScale(1, 0.25)
-portraitLabel.Position = UDim2.fromScale(0, 0.75)
+portraitLabel.Size = UDim2.new(1, 0, 0, 24)
+portraitLabel.Position = UDim2.new(0, 0, 1, -24)
 portraitLabel.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 portraitLabel.Text = "SCAMERINO"
 portraitLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 portraitLabel.Font = Enum.Font.FredokaOne
-portraitLabel.TextSize = 14
+portraitLabel.TextSize = 13
 portraitLabel.TextWrapped = true
 portraitLabel.Parent = portraitFrame
+
+local pLabelCorner = Instance.new("UICorner")
+pLabelCorner.CornerRadius = UDim.new(0, 8)
+pLabelCorner.Parent = portraitLabel
 
 -- Content Frame (right side of portrait)
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
-contentFrame.Size = UDim2.fromScale(0.74, 0.85)
-contentFrame.Position = UDim2.fromScale(0.24, 0.08)
+contentFrame.Size = UDim2.new(1, -135, 1, -20)
+contentFrame.Position = UDim2.fromOffset(125, 10)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.fromScale(1, 0.2)
+titleLabel.Size = UDim2.new(1, 0, 0, 24)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Font = Enum.Font.FredokaOne
-titleLabel.TextSize = 20
+titleLabel.TextSize = 18
 titleLabel.TextColor3 = Color3.fromRGB(255, 220, 50)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.TextWrapped = true
@@ -94,11 +104,11 @@ titleLabel.Parent = contentFrame
 
 local bodyLabel = Instance.new("TextLabel")
 bodyLabel.Name = "BodyLabel"
-bodyLabel.Size = UDim2.fromScale(1, 0.45)
-bodyLabel.Position = UDim2.fromScale(0, 0.2)
+bodyLabel.Size = UDim2.new(1, 0, 1, -80)
+bodyLabel.Position = UDim2.fromOffset(0, 26)
 bodyLabel.BackgroundTransparency = 1
-bodyLabel.Font = Enum.Font.SourceSans
-bodyLabel.TextSize = 16
+bodyLabel.Font = Enum.Font.GothamMedium
+bodyLabel.TextSize = 14
 bodyLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 bodyLabel.TextXAlignment = Enum.TextXAlignment.Left
 bodyLabel.TextYAlignment = Enum.TextYAlignment.Top
@@ -109,8 +119,8 @@ bodyLabel.Parent = contentFrame
 -- Choices container with UIListLayout for ordering
 local choicesContainer = Instance.new("Frame")
 choicesContainer.Name = "ChoicesContainer"
-choicesContainer.Size = UDim2.fromScale(1, 0.35)
-choicesContainer.Position = UDim2.fromScale(0, 0.65)
+choicesContainer.Size = UDim2.new(1, 0, 0, 48)
+choicesContainer.Position = UDim2.new(0, 0, 1, -48)
 choicesContainer.BackgroundTransparency = 1
 choicesContainer.Parent = contentFrame
 
@@ -118,7 +128,7 @@ local listLayout = Instance.new("UIListLayout")
 listLayout.FillDirection = Enum.FillDirection.Horizontal
 listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-listLayout.Padding = UDim.new(0, 10)
+listLayout.Padding = UDim.new(0, 12)
 listLayout.Parent = choicesContainer
 
 local function clearChoices()
@@ -131,18 +141,24 @@ end
 
 local function createChoiceButton(label: string, color: Color3, callback: () -> ()): TextButton
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.fromOffset(150, 44) -- min 44px touch target height
+	btn.Size = UDim2.fromOffset(180, 44) -- min 44px touch target height
 	btn.BackgroundColor3 = color
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.FredokaOne
-	btn.TextSize = 16
+	btn.TextSize = 15
 	btn.TextWrapped = true
 	btn.Text = label
 	btn.AutoButtonColor = true
 
 	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.CornerRadius = UDim.new(0, 10)
 	btnCorner.Parent = btn
+
+	local btnStroke = Instance.new("UIStroke")
+	btnStroke.Color = Color3.fromRGB(255, 255, 255)
+	btnStroke.Thickness = 1
+	btnStroke.Transparency = 0.6
+	btnStroke.Parent = btn
 
 	btn.Activated:Connect(callback)
 	btn.Parent = choicesContainer

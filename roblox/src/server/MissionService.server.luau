@@ -92,58 +92,56 @@ end
 setupPromptListener()
 
 -- Reconnect if scene reloaded
-Workspace
-	.ChildAdded
-	:Connect(function(child)
-		if child.Name == "MarketplaceLobby" then
-			task.wait(0.2)
-			setupPromptListener()
-		end
-	end)
-	-- Handle player actions
-	(requestActionRemote :: RemoteEvent)
-	.OnServerEvent
-	:Connect(function(player: Player, actionId: any)
-		if typeof(actionId) ~= "string" then
-			return
-		end
+Workspace.ChildAdded:Connect(function(child)
+	if child.Name == "MarketplaceLobby" then
+		task.wait(0.2)
+		setupPromptListener()
+	end
+end)
 
-		local now = os.clock()
-		local state = getOrCreateState(player)
+-- Handle player actions
+local actionRemote = requestActionRemote :: RemoteEvent
+actionRemote.OnServerEvent:Connect(function(player: Player, actionId: any)
+	if typeof(actionId) ~= "string" then
+		return
+	end
 
-		-- Rate limiting: ignore rapid requests within 0.25s
-		if now - state.lastActionTime < 0.25 then
-			return
-		end
-		state.lastActionTime = now
+	local now = os.clock()
+	local state = getOrCreateState(player)
 
-		if actionId == "replay" then
-			state.stage = "start"
-			teleportToStart(player)
-			sendUpdate(player, "start")
-			return
-		end
+	-- Rate limiting: ignore rapid requests within 0.25s
+	if now - state.lastActionTime < 0.25 then
+		return
+	end
+	state.lastActionTime = now
 
-		if actionId == "close" then
-			state.stage = "closed"
-			sendUpdate(player, "closed")
-			return
-		end
+	if actionId == "replay" then
+		state.stage = "start"
+		teleportToStart(player)
+		sendUpdate(player, "start")
+		return
+	end
 
-		-- Only allow choices when player is in 'decision' stage
-		if state.stage ~= "decision" then
-			return
-		end
+	if actionId == "close" then
+		state.stage = "closed"
+		sendUpdate(player, "closed")
+		return
+	end
 
-		local choice = MissionContent.getChoice(actionId)
-		if not choice or not choice.enabled then
-			return
-		end
+	-- Only allow choices when player is in 'decision' stage
+	if state.stage ~= "decision" then
+		return
+	end
 
-		-- Authoritatively set next stage
-		state.stage = choice.nextStage
-		sendUpdate(player, state.stage)
-	end)
+	local choice = MissionContent.getChoice(actionId)
+	if not choice or not choice.enabled then
+		return
+	end
+
+	-- Authoritatively set next stage
+	state.stage = choice.nextStage
+	sendUpdate(player, state.stage)
+end)
 
 Players.PlayerRemoving:Connect(function(player: Player)
 	playerStates[player] = nil
