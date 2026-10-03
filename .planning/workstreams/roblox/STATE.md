@@ -1,13 +1,13 @@
 ---
 gsd_state_version: "1.0"
-current_phase: "02"
+current_phase: 02
 current_plan: N/A
-status: Ready to discuss
-stopped_at: Phase 1 desktop demo complete; Phase 2 ready for discussion
-last_updated: "2026-10-03"
+status: planning
+stopped_at: Phase 2 context gathered; ready for planning
+last_updated: "2026-10-03T19:40:43.206Z"
 last_activity: 2026-10-03
-last_activity_desc: Phase 1 desktop demo closed with user-confirmed sync, Play, choices, replay and Discord handoff
-state_head: c64f60f30e927262234ba132fc69a11b245d77a3
+last_activity_desc: "Phase 2 scope expanded by Robert: coherent Scamerino model, roaming scammer and Scamerino approach after help choice"
+state_head: 14179e2781308978fd7ae6fba617a9e2cab50ccd
 progress:
   total_phases: 3
   completed_phases: 1
@@ -23,10 +23,10 @@ current_phase_name: Wybory, konsekwencje i pomocnik
 
 ## Current Position
 
-**Status:** Ready to discuss
+**Status:** Ready to plan
 **Current Phase:** 02 — Wybory, konsekwencje i pomocnik
-**Last Activity:** 2026-10-03 — Phase 1 desktop demo complete
-**Last Activity Description:** Robert potwierdził sync, Play i dialog, oba wybory, powtórkę i przekazanie filmu na Discordzie. Test mobilny odłożony na jego decyzję.
+**Last Activity:** 2026-10-03 — Phase 2 scope expanded
+**Last Activity Description:** Robert dodał poprawę torsu i spójności Scamerino, chodzenie scammera po mapie i podejście do gracza oraz podejście Scamerino po wybraniu pomocy. Szczegóły: phases/02-wybory-konsekwencje-i-pomocnik/02-SCOPE.md.
 
 ## Progress
 
@@ -35,10 +35,10 @@ current_phase_name: Wybory, konsekwencje i pomocnik
 
 ## Session Continuity
 
-**Last session:** 2026-10-03T13:32:06.005Z
+**Last session:** 2026-10-03T19:40:43.193Z
 
-**Stopped At:** Faza 1 zamknięta dla demo na komputerze; następna faza: wybory i pomocnik.
-**Resume File:** .planning/workstreams/roblox/ROADMAP.md
+**Stopped At:** Phase 2 context gathered; ready for planning
+**Resume File:** .planning/workstreams/roblox/phases/02-wybory-konsekwencje-i-pomocnik/02-CONTEXT.md
 
 ### Quick Tasks Completed
 
