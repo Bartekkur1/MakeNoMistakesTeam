@@ -7,7 +7,7 @@ threats_open: 0
 asvs_level: 1
 block_on: high
 created: "2026-10-03"
-deploy_pending: true
+deploy_pending: false
 ---
 
 # Phase 01 - Security
@@ -43,7 +43,7 @@ deploy_pending: true
 | T-01-08 | Information disclosure | COVERAGE.md and STATE notes | low | mitigate | Key-shaped-string grep clean | closed |
 | T-01-09 | Information disclosure | supabase.ts, client bundles | high | mitigate | Single SDK import, unprefixed env names, no secrets in `.next/static` | closed |
 | T-01-10 | Information disclosure | error responses | medium | mitigate | Contract-constant messages only | closed |
-| T-01-11 | Denial of service | readJsonBody | medium | mitigate | Streaming 32 KB cap (CR-01 fix 9d68cc4) | closed (code) - deploy pending |
+| T-01-11 | Denial of service | readJsonBody | medium | mitigate | Streaming 32 KB cap (CR-01 fix 9d68cc4) | closed (deployed 1696a64, live smoke OK 2026-10-03) |
 | T-01-12 | Spoofing | bearer tokens | high | mitigate | HMAC-SHA256, timingSafeEqual, exp, account and scope checks | closed |
 | T-01-13 | Spoofing | brute force / enumeration | low | accept | D-14, identical error bodies, see AR-02 | closed |
 | T-01-14 | Elevation of privilege | extension scope for a teacher | medium | mitigate | 403 on login, verifyToken rejects | closed |
@@ -61,7 +61,7 @@ deploy_pending: true
 | T-01-26 | Information disclosure | empty scope returning all rows | high | mitigate | Throws in code and in list_reports | closed |
 | T-01-27 | Elevation of privilege | forbidden transitions | high | mitigate | resolveTransition before write, DB CHECK | closed |
 | T-01-28 | Tampering | concurrent transitions | medium | mitigate | Conditional update on expected state, 409 | closed |
-| T-01-29 | Repudiation | history and comment tampering | medium | mitigate | Insert-only API, update triggers; delete/truncate guards in migration 20261003170200 (WR-03) | closed (code) - migration pending |
+| T-01-29 | Repudiation | history and comment tampering | medium | mitigate | Insert-only API, update triggers; delete/truncate guards in migration 20261003170200 (WR-03) | closed (migration applied 2026-10-03, reported by user) |
 | T-01-30 | Spoofing | actor / author identity | high | mitigate | Taken from the session only | closed |
 | T-01-31 | Information disclosure | comments thread | high | mitigate | Panel scope + canView | closed |
 | T-01-32 | Tampering | seed re-run on shared project | low | mitigate | Single delete limited to 6 dataset ids, generated seed | closed |
@@ -70,7 +70,7 @@ deploy_pending: true
 | T-01-35 | Spoofing | weak production DEMO_AUTH_SECRET | high | mitigate | Server refuses < 32 chars; human generated with openssl | closed |
 | T-01-36 | Information disclosure | Heroku logs | low | mitigate | Same as T-01-15 | closed |
 | T-01-37 | Tampering | demo data during presentation | low | mitigate | Smoke writes with smoke accounts only; seed resets | closed |
-| T-01-38 | Denial of service | public endpoint | medium | mitigate | Body cap, page cap, fail-fast validation, 8 s storage timeout (WR-02) | closed (code) - deploy pending |
+| T-01-38 | Denial of service | public endpoint | medium | mitigate | Body cap, page cap, fail-fast validation, 8 s storage timeout (WR-02) | closed (deployed 1696a64, live smoke OK 2026-10-03) |
 | T-01-39 | Spoofing / Information disclosure | transport | low | mitigate | https only in CONTRACT.md; live https smoke OK | closed |
 | T-01-SC (01-01) | Tampering | package installs | low | accept | No installs, see AR-05 | closed |
 | T-01-SC (01-02) | Tampering | npm installs | high | mitigate | Blocking-human legitimacy checkpoint, approved | closed |
@@ -105,8 +105,8 @@ Evidence (file:line per threat) is in the 2026-10-03 auditor verdict; key files:
 
 Code-level status is closed for all threats. Production lags on:
 
-1. **T-01-11, T-01-38** - redeploy the branch containing merge `91ad48c` to Heroku (CR-01 streaming body cap, WR-02 storage timeout, WR-01 validation). Until then a chunked body without Content-Length is unbounded on https://bezpieczna-aura.pl.
-2. **T-01-29** - apply `web-app/supabase/migrations/20261003170200_append_only_guards.sql` in Supabase. Until then the live DB blocks only UPDATE of history and comments (the originally declared mitigation); DELETE/TRUNCATE guards are missing.
+1. ~~**T-01-11, T-01-38**~~ - branch at 1696a64 (contains merge 91ad48c) deployed to Heroku; live `SMOKE OK (https://bezpieczna-aura.pl)` reported by the user on 2026-10-03. Closed in production.
+2. ~~**T-01-29**~~ - migration `20261003170200_append_only_guards.sql` applied in Supabase by the user on 2026-10-03 (as reported). Closed in production.
 
 Informational, no threat ID: `npm audit` reports 5 high advisories in the dev-only `eslint-config-next` chain (01-03-SUMMARY); not shipped to production.
 
@@ -127,4 +127,4 @@ Informational, no threat ID: `npm audit` reports 5 high advisories in the dev-on
 - [x] `threats_open: 0` confirmed
 - [x] `status: verified` set in frontmatter
 
-**Approval:** verified 2026-10-03 (code); production closure pending redeploy and migration 20261003170200
+**Approval:** verified 2026-10-03 (code); migration 20261003170200 applied 2026-10-03; fixes deployed (1696a64) and live smoke OK 2026-10-03 - all threats closed in production
