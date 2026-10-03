@@ -1,0 +1,33 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Kontrakt i backend spraw",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "Panel opiekuna",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Test przed–po i wyniki",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "Integracja na prawdziwych zapisach",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 02 of 4 · 25% · executing"
+  },
+  "updated_at": "2026-10-03T22:09:20.479Z"
+}

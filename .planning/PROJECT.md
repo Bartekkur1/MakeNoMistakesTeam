@@ -31,7 +31,7 @@ Szczegółowe wymagania są w workstreamach (`.planning/workstreams/<nazwa>/REQU
 
 - [ ] **roblox**: jedna misja Roblox (oferta darmowego przedmiotu → prośba o kod konta) z wyborami, konsekwencjami, pomocnikiem, wynikiem i kosmetyczną nagrodą
 - [ ] **widget**: rozszerzenie przeglądarkowe z awatarem i ścieżką sprawdzania oraz mobilna strona do wklejenia treści
-- [ ] **api-ui**: backend (sprawy, odpowiedzi, wyniki testów), panel opiekuna, ekran testu przed–po i panel wyników klasy
+- [ ] **web-app**: backend (sprawy, odpowiedzi, wyniki testów), panel opiekuna, ekran testu przed–po i panel wyników klasy
 - [ ] **presentation**: prezentacja (do 10 slajdów), scenariusz demo, nagranie zapasowe, materiały zgłoszeniowe Defence
 - [ ] **shared**: kontrakt integracji, pakiet treści, zestawy testowe A/B, klucz oceny, definicje pomiaru, zasady nagród
 
@@ -69,7 +69,7 @@ Szczegółowe wymagania są w workstreamach (`.planning/workstreams/<nazwa>/REQU
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Workstreamy: api-ui, widget, roblox, presentation | Osobne ROADMAP/STATE/fazy, żeby tory pracy się nie mieszały | — Pending |
+| Workstreamy: web-app, widget, roblox, presentation | Osobne ROADMAP/STATE/fazy, żeby tory pracy się nie mieszały | — Pending |
 | `.planning/shared/` na kontrakt, treści i pomiar | Jedno źródło prawdy dla wszystkich torów; właściciel edytuje, reszta czyta | — Pending |
 | Kontrakt API prowadzi osoba 3, potwierdza osoba 2 | Zgodnie z taski.md; implementacja po potwierdzeniu | — Pending |
 | Dwa zestawy testowe A/B o podobnej trudności | Test przed–po bez pomocnika, bez kopiowania scenariusza treningowego | — Pending |

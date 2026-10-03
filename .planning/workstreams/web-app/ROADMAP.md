@@ -56,7 +56,24 @@ Plans:
   3. Odpowiedź i zmiana statusu są widoczne po stronie dziecka
   4. Przełączanie ról jest oznaczone jako demonstracyjne
 
-**Plans**: TBD
+**Plans**: 4/5 plans executed
+
+Plans:
+**Wave 1**
+- [x] 02-01-PLAN.md — Logowanie dwuetapowe, sesja w przeglądarce, strażnik /panel z wylogowaniem; testy guardrail (bez importów serwera, bez oznaczeń demo, bez widoku dziecka) (PAN-04)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 02-02-PLAN.md — Pierwsza strona listy zgłoszeń: etykieta stanu, data, fragment treści, dziecko, źródło, rodzaj ataku; czas polski, skracanie treści, waga nagłówków 600 (PAN-01)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 02-03-PLAN.md — Lista: „Pokaż więcej zgłoszeń”, filtr stanu, „Odśwież listę”, stany puste/ładowania/błędów, znacznik ryzyka (PAN-01)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [x] 02-04-PLAN.md — Szczegóły zgłoszenia: treść, „Co dziecko już zrobiło”, oś czasu historii i komentarzy, „Odśwież zgłoszenie”, nowy komentarz (PAN-02, PAN-03)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 02-05-PLAN.md — Zmiana stanu w okienku potwierdzenia: tylko dozwolone akcje, wymagana notatka eskalacji, obsługa 409/404/błędów, widoczność dla drugiej strony (PAN-03)
+
 **UI hint**: yes
 
 ### Phase 3: Test przed–po i wyniki

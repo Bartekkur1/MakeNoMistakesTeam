@@ -2,7 +2,7 @@
 
 ## Overview
 
-Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na regułach, po przekazanie opiekunowi z obsługą błędów i wersję mobilną. Zależy od kontraktu i backendu z `api-ui` oraz treści z `shared/content/`.
+Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na regułach, po przekazanie opiekunowi z obsługą błędów i wersję mobilną. Zależy od kontraktu i backendu z `web-app` oraz treści z `shared/content/`.
 
 ## Phases
 
@@ -37,7 +37,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
 
 ### Phase 3: Przekazanie opiekunowi i błędy
 **Goal**: Dziecko świadomie wysyła sprawę i widzi odpowiedź; awarie nie udają sukcesu
-**Depends on**: Phase 2, `api-ui` Phase 1 (API spraw)
+**Depends on**: Phase 2, `web-app` Phase 1 (API spraw)
 **Requirements**: HND-01, HND-02, HND-03, ERR-01
 **Success Criteria** (what must be TRUE):
   1. Przed wysłaniem dziecko widzi dokładnie, co udostępnia, i potwierdza

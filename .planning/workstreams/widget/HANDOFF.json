@@ -22,7 +22,7 @@
   "async_jobs": [],
   "human_actions_pending": [
     {"action": "Ustalić zamykanie okna, zmianę strony, brak zaznaczenia i zachowanie szkicu", "context": "Dyskusja przerwana przed tym obszarem", "blocking": false},
-    {"action": "Uzgodnić z api-ui automatyczne tworzenie i późniejszą aktualizację sprawy", "context": "Nowa decyzja dla fazy 3 różni się od starszych dokumentów", "blocking": false}
+    {"action": "Uzgodnić z web-app automatyczne tworzenie i późniejszą aktualizację sprawy", "context": "Nowa decyzja dla fazy 3 różni się od starszych dokumentów", "blocking": false}
   ],
   "decisions": [
     {"decision": "Chrome: stały awatar na wszystkich obsługiwanych stronach; małe okno przy awatarze", "rationale": "Wybór użytkownika", "phase": "1"},

@@ -25,7 +25,7 @@ Najpierw treści i zasady pomiaru dla pozostałych torów (to blokuje je w 2–3
 
 ### Phase 2: Weryfikacja i test integracyjny
 **Goal**: Cała historia demo przechodzi, a błędy są spisane
-**Depends on**: Phase 1, grywalna misja (`roblox`), widget i panel (`widget`, `api-ui`)
+**Depends on**: Phase 1, grywalna misja (`roblox`), widget i panel (`widget`, `web-app`)
 **Requirements**: VER-01, VER-02
 **Success Criteria** (what must be TRUE):
   1. Pełna historia demo przechodzi od dziecka do opiekuna i z powrotem
