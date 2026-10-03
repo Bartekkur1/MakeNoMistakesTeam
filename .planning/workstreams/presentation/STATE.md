@@ -43,3 +43,4 @@ created: 2026-10-03
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261003-o36 | Poprawki prezentacji Scamerino: myslniki, justowanie, slajdy 2/6/7/8 | 2026-10-03 | cb72d5b | [261003-o36-poprawki-prezentacji-scamerino-myslniki-](./quick/261003-o36-poprawki-prezentacji-scamerino-myslniki-/) |
