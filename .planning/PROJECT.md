@@ -1,8 +1,10 @@
-# Cyberpomocnik dla dzieci (nazwa robocza)
+# BezpiecznaAura — cyberpomocnik dla dzieci
 
 ## What This Is
 
 Kreskówkowy awatar-pomocnik uczy dzieci 10–13 lat rozpoznawać phishing, wyłudzanie danych i pułapki zakupowe. Działa w treningu szkolnym (misja w Roblox, test przed–po) oraz pomaga przy podejrzanej wiadomości z gry, maila, SMS-a lub Discorda: dziecko przekazuje treść, pomocnik zadaje krótkie pytania, wyjaśnia sygnały zagrożenia i proponuje następny krok. Opiekun widzi sprawy przekazane przez dziecko i może odpowiedzieć; nauczyciel widzi wyniki ćwiczeń, nie prywatne sprawy.
+
+Maskotką rozwiązania jest **Scamerinio Alertinio** (model i paleta w `assets/`).
 
 Zgłoszenie na HackYeah 2026 (Kraków), ścieżka **Defence**. Źródło: `ideas/defence/koncepcja.md` i `ideas/defence/taski.md`.
 

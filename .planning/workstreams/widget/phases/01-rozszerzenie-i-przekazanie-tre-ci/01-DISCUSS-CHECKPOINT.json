@@ -1,0 +1,113 @@
+{
+  "phase": "1",
+  "phase_name": "Rozszerzenie i przekazanie treści",
+  "timestamp": "2026-10-03T13:41:15.867Z",
+  "areas_completed": [
+    "Model pomocy i granice dostępu",
+    "Przekazanie opiekunowi — ustalenia dla fazy 3",
+    "Obecność i obsługa w Chrome"
+  ],
+  "areas_remaining": [
+    "Zachowanie małego okna i awatara",
+    "Podsumowanie i zatwierdzenie kontekstu fazy 1"
+  ],
+  "decisions": {
+    "Model pomocy i granice dostępu": [
+      {
+        "question": "Kiedy pomocnik rozpoczyna rozmowę?",
+        "answer": "Na prośbę dziecka; w naszej grze Roblox również w zaplanowanych momentach. Bez automatycznego monitorowania poza grą.",
+        "options_presented": [
+          "Na prośbę dziecka i w przygotowanych momentach naszej gry",
+          "Zawsze tylko na prośbę dziecka",
+          "Automatycznie na wybranych stronach"
+        ]
+      },
+      {
+        "question": "Co dziecko widzi najpierw w codziennym użyciu?",
+        "answer": "Krótką wskazówkę bezpieczeństwa i 2–3 pytania, następnie wyjaśnienie i proponowany krok. Ustalenie dla fazy 2.",
+        "options_presented": [
+          "Wskazówka i pytania",
+          "Najpierw pytania",
+          "Od razu ocena"
+        ]
+      },
+      {
+        "question": "Do jakiej treści pomocnik ma dostęp w sprawdzaniu?",
+        "answer": "Wybrany tekst i opcjonalny link. Podgląd, edycja i zatwierdzenie przed sprawdzeniem. Bez zbierania całej rozmowy.",
+        "options_presented": [
+          "Wybrany tekst i opcjonalny link",
+          "Tekst i otaczający fragment rozmowy",
+          "Tylko ręczne wklejanie"
+        ]
+      }
+    ],
+    "Przekazanie opiekunowi — ustalenia dla fazy 3": [
+      {
+        "question": "Które sprawy są przekazywane opiekunowi?",
+        "answer": "Każda sprawdzana sprawa automatycznie. Dziecko jest jasno informowane przed rozpoczęciem, że treść i wynik zobaczy opiekun. To zmiana względem wcześniejszego opcjonalnego przycisku wysyłki; nie aktualizowano jeszcze wspólnych dokumentów.",
+        "options_presented": [
+          "Dziecko zatwierdza każde zgłoszenie",
+          "Wysyłanie automatyczne"
+        ]
+      },
+      {
+        "question": "Kiedy sprawa trafia do opiekuna?",
+        "answer": "Od razu po zatwierdzeniu treści jako sprawdzanie w toku, później uzupełnienie wyniku. Przerwanie rozmowy nie usuwa zgłoszenia.",
+        "options_presented": [
+          "Po zatwierdzeniu treści",
+          "Po zakończeniu sprawdzania"
+        ]
+      }
+    ],
+    "Obecność i obsługa w Chrome": [
+      {
+        "question": "Jaki zakres platform w MVP?",
+        "answer": "Rozszerzenie Chrome, zwykłe strony i Discord w przeglądarce. Bez integracji z natywnym Discordem.",
+        "options_presented": [
+          "Discord w przeglądarce i strony",
+          "Również aplikacja desktopowa Discord",
+          "Również aplikacja Discord na telefonie"
+        ]
+      },
+      {
+        "question": "Gdzie awatar pojawia się automatycznie?",
+        "answer": "Na wszystkich stronach obsługiwanych przez Chrome, nie tylko na ręcznie włączonych witrynach. Wymaga szerokiego dostępu do stron; ograniczenie odczytu do treści przekazanej przez dziecko egzekwujemy w kodzie.",
+        "options_presented": [
+          "Na stronach włączonych przez użytkownika lub opiekuna",
+          "Na wszystkich obsługiwanych stronach",
+          "Na ustalonej liście"
+        ]
+      },
+      {
+        "question": "Jak dziecko przekazuje wiadomość?",
+        "answer": "Zaznacza tekst i klika awatara. Podgląd z edycją, opcjonalnym linkiem i informacją o przekazaniu opiekunowi; zatwierdzenie rozpoczyna sprawdzanie. Dostępne także ręczne wklejenie.",
+        "options_presented": [
+          "Zaznaczenie i kliknięcie awatara",
+          "Przycisk obok zaznaczenia",
+          "Kliknięcie awatara i wklejenie"
+        ]
+      },
+      {
+        "question": "Jak wygląda otwarta rozmowa?",
+        "answer": "Małe okno przy awatarze, bez dużego okna modalnego i bez panelu bocznego Chrome.",
+        "options_presented": [
+          "Małe okno przy awatarze",
+          "Panel po prawej stronie przeglądarki",
+          "Duże okno na środku"
+        ]
+      }
+    ]
+  },
+  "deferred_ideas": [
+    "Ścieżka rozmowy należy do fazy 2, przekazywanie opiekunowi do fazy 3; nie poszerzać implementacji fazy 1 o te funkcje.",
+    "Roblox: wspólny pomocnik we własnej grze, osobny workstream. Telefon: mobilna strona w dalszej fazie; bez natywnego widgetu w MVP.",
+    "Prywatne zgłoszenia nie trafiają do nauczyciela; punkty za trening, nie liczbę zgłoszeń."
+  ],
+  "canonical_refs": [
+    ".planning/PROJECT.md",
+    ".planning/workstreams/widget/ROADMAP.md",
+    ".planning/workstreams/widget/REQUIREMENTS.md",
+    ".planning/shared/CONTRACT.md",
+    "ideas/defence/koncepcja.md"
+  ]
+}
