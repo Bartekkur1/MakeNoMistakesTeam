@@ -1,4 +1,4 @@
-import { SCHOOLS, SECTION_IDS, TRAINING_FACT } from "./content";
+import { MISSION_VIDEO, SCHOOLS, SECTION_IDS, TRAINING_FACT } from "./content";
 import { Footnote } from "./Footnote";
 import { Section } from "./Section";
 
@@ -27,6 +27,24 @@ export function Schools() {
           </dl>
         </figure>
       </div>
+      <figure className="mt-14">
+        <h3 className="font-display text-lg font-bold text-navy-slate">{MISSION_VIDEO.title}</h3>
+        {/* preload="none": only the poster loads with the page, the video only after play. */}
+        <video
+          controls
+          muted
+          playsInline
+          preload="none"
+          poster={MISSION_VIDEO.poster}
+          width={MISSION_VIDEO.width}
+          height={MISSION_VIDEO.height}
+          aria-label={MISSION_VIDEO.label}
+          className="mt-4 h-auto w-full max-w-4xl rounded-xl border border-titanium-border bg-navy-slate"
+        >
+          <source src={MISSION_VIDEO.src} type="video/mp4" />
+        </video>
+        <figcaption className="mt-3 max-w-2xl text-sm text-muted-slate">{MISSION_VIDEO.caption}</figcaption>
+      </figure>
     </Section>
   );
 }

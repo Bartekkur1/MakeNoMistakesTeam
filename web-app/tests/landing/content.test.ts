@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import * as content from "@/app/_landing/content";
 import {
@@ -6,7 +8,9 @@ import {
   FAQ,
   HONEST_EXAMPLE,
   INSTALL,
+  MISSION_VIDEO,
   NAV_LINKS,
+  PLUGIN_SCREENSHOT,
   RELEASES_URL,
   SCAMS,
   SECTION_IDS,
@@ -112,5 +116,15 @@ describe("landing content", () => {
     const mobileAnswer = FAQ.items.find((item) => item.question.includes("urządzeniach"));
 
     expect(mobileAnswer?.answer).toContain("przygotowujemy");
+  });
+
+  it("ships the plugin screenshot and the Roblox mission video from public/", () => {
+    const publicFile = (src: string) => join(process.cwd(), "public", src);
+
+    for (const src of [PLUGIN_SCREENSHOT.src, MISSION_VIDEO.src, MISSION_VIDEO.poster]) {
+      expect(existsSync(publicFile(src))).toBe(true);
+    }
+    expect(PLUGIN_SCREENSHOT.alt.trim()).not.toBe("");
+    expect(MISSION_VIDEO.caption.trim()).not.toBe("");
   });
 });

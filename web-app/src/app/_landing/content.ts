@@ -190,6 +190,26 @@ export const HOW_IT_WORKS = {
     "Ta sama postać prowadzi misję w Roblox. Tam dziecko ćwiczy reakcję na oszustwo bez prawdziwego ryzyka.",
 };
 
+export const PLUGIN_SCREENSHOT = {
+  src: "/landing/plugin-demo.png",
+  width: 1783,
+  height: 858,
+  alt: "Okno pomocnika Scamerino obok czatu na Discordzie. Pomocnik pokazuje, jaką wiadomość dziecko przekaże, i pozwala poprawić tekst przed zatwierdzeniem.",
+  caption:
+    "Pomocnik w przeglądarce. Dziecko widzi dokładnie, co przekaże, może usunąć swoje imię albo inne dane i dopiero wtedy zatwierdza.",
+};
+
+export const MISSION_VIDEO = {
+  src: "/landing/roblox-mission.mp4",
+  poster: "/landing/roblox-mission-poster.jpg",
+  width: 1058,
+  height: 752,
+  title: "Misja w Roblox",
+  caption:
+    "Gracz obiecuje 1500 Robuxów i prosi o login i hasło. Dziecko samo wybiera odpowiedź, a Scamerino jest obok, gdy potrzebna jest pomoc.",
+  label: "Nagranie misji w Roblox: rozmowa z graczem, który prosi o login i hasło",
+};
+
 export const PARENTS = {
   title: "Co widzisz jako rodzic, a czego nie",
   intro: "Dziecko samo decyduje, co Ci pokazuje.",
