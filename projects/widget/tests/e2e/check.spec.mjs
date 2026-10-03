@@ -46,6 +46,8 @@ test('honest approval reaches three deliberate questions and a limited-confidenc
     await expect(dialog.getByRole('heading', { name: heading, exact: true })).toBeVisible();
   }
   await expect(dialog.locator('.result-step')).toHaveCount(1);
+  await expect(dialog.getByRole('region', { name: 'Co zwraca uwagę', exact: true })).toContainText('Nie widzę typowych sygnałów oszustwa w wiadomości ani w Twoich odpowiedziach.');
+  await expect(dialog.getByRole('region', { name: 'Czego jeszcze nie wiemy', exact: true })).toContainText('Nie wskazano dodatkowych brakujących informacji. To nie potwierdza tożsamości nadawcy ani bezpieczeństwa wiadomości.');
   await expect(dialog.locator('.result-step')).toContainText('Otwórz znaną Ci oficjalną aplikację lub stronę bezpośrednio albo skontaktuj się z nadawcą przez wcześniej znany kontakt.');
   await expect(dialog.getByRole('group')).toHaveCount(0);
   await expect(dialog.getByRole('link')).toHaveCount(0);
@@ -157,3 +159,53 @@ for (const branch of ['retain', 'correct']) {
     await assertOnlyLocal(netlog);
   });
 }
+
+for (const scenario of [
+  {
+    name: 'prize with a link', text: 'Odbierz darmową nagrodę: https://nagroda.example/prezent',
+    choices: [['Ktoś podaje się za firmę lub organizację'], ['Odebrania darmowej nagrody'], ['Tylko przez link z tej wiadomości']],
+    reasons: ['Wiadomość zachęca do odebrania darmowej nagrody przez podany link. Sprawdź tę ofertę poza wiadomością.'],
+    missing: ['Nie wiemy jeszcze, jak sprawdzić wiadomość niezależnie.'],
+    action: 'Sprawdź nagrodę poza wiadomością',
+    explanation: 'Otwórz znaną Ci oficjalną aplikację lub stronę samodzielnie, bez podanego linku. Sprawdź, czy taka nagroda jest tam opisana, lub poproś zaufaną osobę dorosłą o pomoc.',
+  },
+  {
+    name: 'payment with pressure', text: 'Zapłać natychmiast, inaczej stracisz konto.',
+    choices: [['Nie znam nadawcy'], ['Zapłaty lub przelewu', 'Szybkiego działania, bez czasu na sprawdzenie'], ['Nie mam innego sposobu']],
+    reasons: ['Prośba o zapłatę wymaga sprawdzenia poza wiadomością. Pośpiech lub groźba straty utrudnia spokojną decyzję.', 'Pośpiech utrudnia sprawdzenie wiadomości. Możesz się zatrzymać.'],
+    missing: ['Nie wiemy jeszcze, kto naprawdę wysłał wiadomość.', 'Nie wiemy jeszcze, jak sprawdzić wiadomość niezależnie.'],
+    action: 'Sprawdź prośbę, zanim zapłacisz',
+    explanation: 'Skontaktuj się z nadawcą przez wcześniej znany kontakt. Możesz poprosić zaufaną osobę o pomoc, zanim przekażesz pieniądze.',
+  },
+  {
+    name: 'ambiguous message', text: 'Zobacz to', choices: [['Nie wiem'], ['Nie wiem'], ['Nie wiem']],
+    reasons: ['Nie widzę typowych sygnałów oszustwa w wiadomości ani w Twoich odpowiedziach.'],
+    missing: ['Nie wiemy jeszcze, kto naprawdę wysłał wiadomość.', 'Nie wiemy jeszcze, czego nadawca oczekuje.', 'Nie wiemy jeszcze, czy nadawca pogania i ile masz czasu na sprawdzenie.', 'Nie wiemy jeszcze, jak sprawdzić wiadomość niezależnie.'],
+    action: 'Sprawdź przez znany Ci kanał',
+    explanation: 'Otwórz znaną Ci oficjalną aplikację lub stronę bezpośrednio albo skontaktuj się z nadawcą przez wcześniej znany kontakt.',
+  },
+]) test(`D-14 ${scenario.name} renders reasons, missing facts and one explained action locally`, async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker, scenario.text);
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
+  await next.click();
+  for (const [index, title] of ['Kto wysłał wiadomość?', 'Czego chce nadawca i czy pogania?', 'Jak możesz sprawdzić poza tą wiadomością?'].entries()) {
+    await untouchedQuestion(dialog, title);
+    for (const label of scenario.choices[index]) await dialog.getByLabel(label, { exact: true }).check();
+    await next.click();
+  }
+  await expect(dialog.locator('.result-section')).toHaveCount(3);
+  const signals = dialog.getByRole('region', { name: 'Co zwraca uwagę', exact: true });
+  const unknowns = dialog.getByRole('region', { name: 'Czego jeszcze nie wiemy', exact: true });
+  for (const reason of scenario.reasons) await expect(signals).toContainText(reason);
+  for (const fact of scenario.missing) await expect(unknowns).toContainText(fact);
+  const action = dialog.getByRole('region', { name: 'Co możesz teraz zrobić', exact: true });
+  await expect(dialog.locator('.result-step')).toHaveCount(1);
+  await expect(action.locator('p')).toHaveCount(2);
+  await expect(action.locator('p').first()).toHaveText(scenario.action);
+  await expect(action.locator('p').last()).toHaveText(scenario.explanation);
+  await expect(dialog).not.toContainText(/undefined|credential_|prize_link|payment_pressure|official_channel|_how|wiadomość jest bezpieczna/i);
+  await expect(dialog.getByRole('link')).toHaveCount(0);
+  if (scenario.name === 'ambiguous message') await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Brakuje nam informacji. Możesz spokojnie sprawdzić wiadomość przez znany Ci kontakt.');
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await assertOnlyLocal(netlog);
+});
