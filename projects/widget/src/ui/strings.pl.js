@@ -20,6 +20,12 @@ export const STRINGS = Object.freeze({
   safetyNotice: 'Zanim sprawdzimy: nie podawaj hasła ani kodu i nie klikaj nieznanego linku.',
   hintBadge: 'Podpowiedź z wiadomości',
   fixAnswers: 'Popraw odpowiedzi',
+  correctAnswer: 'Popraw odpowiedź',
+  keepAnswer: 'Zostaw moją odpowiedź',
+  checkMismatches: Object.freeze({
+    credential_code: 'W wiadomości jest prośba o kod. Czy chcesz zmienić odpowiedź?',
+    credential_password: 'W wiadomości jest prośba o hasło. Czy chcesz zmienić odpowiedź?',
+  }),
   checkQuestions: Object.freeze([
     Object.freeze({ id: 'sender', title: 'Kto wysłał wiadomość?', multiple: false, options: Object.freeze([
       { id: 'known_person', label: 'Osoba, którą znam' },
@@ -48,11 +54,14 @@ export const STRINGS = Object.freeze({
     no_signal: 'Nie widzę typowych sygnałów oszustwa. To nie daje pewności — sprawdź wiadomość oficjalnym kanałem.',
     missing_information: 'Brakuje nam informacji. Możesz spokojnie sprawdzić wiadomość przez znany Ci kontakt.',
     caution: 'Ta wiadomość wymaga ostrożności. Sprawdź, co zwraca uwagę, zanim zrobisz kolejny krok.',
+    conflicting_answers: 'Twoja odpowiedź różni się od prośby rozpoznanej w wiadomości. Nie mamy pewności, jak ją rozumieć; ostrzeżenie o haśle lub kodzie pozostaje.',
   }),
   checkSignals: Object.freeze({
     none: 'W tych odpowiedziach nie widzę typowych sygnałów oszustwa.',
     password: 'Prośba o hasło to sygnał ostrzegawczy. Nie podawaj go.',
     code: 'Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.',
+    credential_password: 'Prośba o hasło to sygnał ostrzegawczy. Nie podawaj go.',
+    credential_code: 'Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.',
     payment: 'Prośba o zapłatę wymaga sprawdzenia poza wiadomością.',
     urgency: 'Pośpiech utrudnia sprawdzenie wiadomości. Możesz się zatrzymać.',
     prize: 'Darmową nagrodę warto sprawdzić w znanej Ci oficjalnej aplikacji lub stronie.',
@@ -62,12 +71,15 @@ export const STRINGS = Object.freeze({
     sender: 'Nie wiemy jeszcze, kto naprawdę wysłał wiadomość.',
     request: 'Nie wiemy jeszcze, czego nadawca oczekuje.',
     verify: 'Nie wiemy jeszcze, jak sprawdzić wiadomość niezależnie.',
+    conflict: 'Nie wiemy, jak rozumieć różnicę między Twoją odpowiedzią a prośbą w wiadomości. Nie podawaj hasła ani kodu, zanim sprawdzisz ją niezależnie.',
   }),
   checkSteps: Object.freeze({
     independent_check: 'Sprawdź przez znany Ci kanał',
     independent_check_how: 'Otwórz znaną Ci oficjalną aplikację lub stronę bezpośrednio albo skontaktuj się z nadawcą przez wcześniej znany kontakt.',
     do_not_share: 'Zatrzymaj się i nie podawaj hasła ani kodu',
     do_not_share_how: 'Nie odpowiadaj hasłem ani kodem. Otwórz znaną Ci aplikację bezpośrednio lub poproś zaufaną osobę o pomoc w sprawdzeniu.',
+    protect_credentials: 'Zatrzymaj się i nie podawaj hasła ani kodu',
+    protect_credentials_how: 'Nie odpowiadaj hasłem ani kodem. Poproś zaufaną osobę dorosłą o pomoc lub skontaktuj się z pomocą przez znaną Ci oficjalną aplikację albo stronę, otwartą bez linku z wiadomości.',
     verify_payment: 'Sprawdź prośbę, zanim zapłacisz',
     verify_payment_how: 'Skontaktuj się z nadawcą przez wcześniej znany kontakt. Możesz poprosić zaufaną osobę o pomoc, zanim przekażesz pieniądze.',
   }),

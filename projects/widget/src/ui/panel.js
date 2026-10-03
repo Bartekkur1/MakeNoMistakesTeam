@@ -98,11 +98,20 @@ export function createPanel({ root, strings, handlers }) {
           if (state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
           group.append(row);
         }
-        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext());
+        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext(false));
         next.disabled = !selected.length;
         const row = node('div', undefined, 'row');
         row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
         body.append(group, row);
+        if (state.check.discrepancy) {
+          const mismatch = state.check.discrepancy;
+          const prompt = node('div', undefined, 'notice');
+          prompt.setAttribute('role', 'alert');
+          prompt.append(node('p', strings.checkMismatches[mismatch.messageKey]),
+            button(strings.correctAnswer, 'btn-secondary', () => handlers.onAnswer(mismatch.questionId, mismatch.answerId)),
+            button(strings.keepAnswer, 'btn-primary', () => handlers.onQuestionNext(true)));
+          body.append(prompt);
+        }
         const focused = [...group.querySelectorAll('input')].find(input => input.id === focusedId);
         (focused ?? group.querySelector('input:checked') ?? group.querySelector('input')).focus();
         return;

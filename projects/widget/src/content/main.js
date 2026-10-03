@@ -28,7 +28,7 @@ function boot() {
     onClose() { store.close(); render(); },
     onSafetyNext() { store.startQuestions(); render(); },
     onAnswer(questionId, answerId) { store.answer(questionId, answerId); render(); },
-    onQuestionNext() { store.nextQuestion(); render(); },
+    onQuestionNext(keep = false) { store.nextQuestion(keep); render(); },
     onQuestionBack() { store.previousQuestion(); render(); },
     onFixAnswers() { store.fixAnswers(); render(); },
     async onApprove() {
