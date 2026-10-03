@@ -32,3 +32,9 @@ export async function POST(request: Request): Promise<Response> {
     return handleRouteError(err);
   }
 }
+
+// RED skeleton: not implemented yet.
+export async function GET(request: Request): Promise<Response> {
+  void request;
+  return apiError("internal_error");
+}

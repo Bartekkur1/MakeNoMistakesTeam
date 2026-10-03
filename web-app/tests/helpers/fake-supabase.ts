@@ -467,3 +467,58 @@ fakeSupabase.rpcHandlers.create_report = (args, fake) => {
   });
   return { data: clone(report), error: null };
 };
+
+function raise(message: string): FakeResult {
+  return { data: null, error: { code: "P0001", message } };
+}
+
+function stringList(value: unknown): string[] | null {
+  if (value === null || value === undefined) return null;
+  if (!Array.isArray(value)) return null;
+  return value.map(String);
+}
+
+function timeMs(value: unknown): number {
+  return Date.parse(String(value));
+}
+
+// Row comparison (a.created_at, a.id) vs (b.created_at, b.id), like Postgres on timestamptz and uuid.
+function compareCreatedId(aCreated: unknown, aId: unknown, bCreated: unknown, bId: unknown): number {
+  const diff = timeMs(aCreated) - timeMs(bCreated);
+  if (diff !== 0) return diff;
+  const a = String(aId);
+  const b = String(bId);
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+// public.list_reports: every non-null filter applies; the cursor keeps rows strictly after it in
+// (created_at desc, id desc) order; an empty scope or a bad limit raises (never "all reports").
+fakeSupabase.rpcHandlers.list_reports = (args, fake) => {
+  const parentId = args.p_parent_id ?? null;
+  const childIds = stringList(args.p_child_ids);
+  const states = stringList(args.p_states);
+  const state = args.p_state ?? null;
+  const cursorCreated = args.p_cursor_created_at ?? null;
+  const cursorId = args.p_cursor_id ?? null;
+  const limit = args.p_limit;
+
+  if (parentId === null && childIds === null) return raise("list_reports: parent or child scope required");
+  if (typeof limit !== "number" || !Number.isInteger(limit) || limit < 1 || limit > 101) {
+    return raise("list_reports: limit must be between 1 and 101");
+  }
+
+  const rows = fake.tables.reports
+    .filter((r) => parentId === null || r.parent_id === parentId)
+    .filter((r) => childIds === null || childIds.includes(String(r.child_id)))
+    .filter((r) => states === null || states.includes(String(r.state)))
+    .filter((r) => state === null || r.state === state)
+    .filter(
+      (r) =>
+        cursorCreated === null ||
+        cursorId === null ||
+        compareCreatedId(r.created_at, r.id, cursorCreated, cursorId) < 0,
+    )
+    .sort((a, b) => compareCreatedId(b.created_at, b.id, a.created_at, a.id))
+    .slice(0, limit);
+  return { data: rows.map((r) => clone(r)), error: null };
+};
