@@ -40,13 +40,17 @@ function boot() {
   } });
   const avatar = createAvatar({ host, root, strings: STRINGS,
     onActivate(captured) { store.onAvatarClick(captured); render(); },
-    onHide() { store.hide(); render(); } });
+    onHide() { store.hide(); render(); },
+    onMove: placePanel });
+  function placePanel(rect) {
+    const state = store.get();
+    if (!state.hidden && state.view !== 'closed') panel.place(rect, { width: innerWidth, height: innerHeight });
+  }
   function render() {
     const state = store.get();
     avatar.setHidden(state.hidden);
-    avatar.setFormOpen(['paste', 'preview'].includes(state.view));
     panel.render(state, { host: location.hostname });
-    if (state.view !== 'closed') panel.place(avatar.rect(), { width: innerWidth, height: innerHeight });
+    placePanel(avatar.rect());
   }
   const resize = () => { avatar.reclamp({ width: innerWidth, height: innerHeight }); render(); };
   window.addEventListener('resize', resize);

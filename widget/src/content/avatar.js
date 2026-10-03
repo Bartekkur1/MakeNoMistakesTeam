@@ -9,7 +9,7 @@ export function clampToViewport({ x, y }, { width, height }, size = AVATAR_SIZE,
   const clamp = (v, extent) => Math.max(margin, Math.min(v, Math.max(margin, extent - size - margin)));
   return { x: clamp(x, width), y: clamp(y, height) };
 }
-export function createAvatar({ host, root, doc = document, strings, onActivate, onHide }) {
+export function createAvatar({ host, root, doc = document, strings, onActivate, onHide, onMove = () => {} }) {
   const wrap = doc.createElement('div');
   wrap.className = 'avatar-wrap';
   const button = doc.createElement('button');
@@ -32,6 +32,7 @@ export function createAvatar({ host, root, doc = document, strings, onActivate, 
   function moveTo({ x, y }) {
     moved = true;
     for (const [key, value] of Object.entries({ left: x + 'px', top: y + 'px', right: 'auto', bottom: 'auto' })) host.style.setProperty(key, value, 'important');
+    onMove(button.getBoundingClientRect());
   }
   button.addEventListener('pointerdown', e => {
     start = { x: e.clientX, y: e.clientY }; dragged = false;
@@ -52,7 +53,6 @@ export function createAvatar({ host, root, doc = document, strings, onActivate, 
   hide.textContent = strings.closeSymbol; hide.setAttribute('aria-label', strings.hideLabel); hide.title = strings.hideTitle;
   hide.addEventListener('mousedown', e => e.preventDefault()); hide.addEventListener('click', () => onHide()); wrap.append(hide);
   return { el: button, rect: () => button.getBoundingClientRect(),
-    setFormOpen(open) { wrap.style.visibility = open ? 'hidden' : 'visible'; wrap.inert = open; },
     reclamp(v) { if (moved) { const r = host.getBoundingClientRect(); moveTo(clampToViewport({ x: r.left, y: r.top }, v)); } },
     setHidden(hidden) { host.style.setProperty('display', hidden ? 'none' : 'block', 'important'); } };
 }

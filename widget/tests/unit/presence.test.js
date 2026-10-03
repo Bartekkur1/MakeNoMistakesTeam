@@ -11,13 +11,13 @@ async function bootForm() {
   const click = name => [...root.querySelectorAll('button')].find(b => b.textContent === name).click();
   const check = (open, panelVisible = true) => {
     expect(host.style.display).toBe('block');
-    expect(root.querySelector('.avatar-wrap').style.visibility).toBe(open ? 'hidden' : 'visible');
-    expect(root.querySelector('.avatar-wrap').inert).toBe(open);
+    expect(root.querySelector('.avatar-wrap').style.visibility).not.toBe('hidden');
+    expect(root.querySelector('.avatar-wrap').inert).not.toBe(true);
     expect(root.querySelector('.panel').hidden).toBe(!panelVisible);
   };
   return { c, host, root, click, check };
 }
-test('form hides only avatar, restores it on close and Escape, and retains draft', async () => {
+test('form keeps avatar usable and retains draft after close and Escape', async () => {
   const { c, host, root, click, check } = await bootForm();
   root.querySelector('.avatar').click(); check(false);
   click(STRINGS.menuHowTo); check(false); click(STRINGS.back); check(false);
@@ -31,7 +31,7 @@ test('form hides only avatar, restores it on close and Escape, and retains draft
   c.runtime.onMessage.addListener.mock.calls[0][0]({type:'aura/show'}, {id:'test-ext'}, vi.fn()); check(false, false);
   root.querySelector('.avatar').click(); check(true); expect(root.querySelector('textarea').value).toBe('Fikcyjny szkic');
 });
-test('selection preview stays hidden during pending and failed submit, restores on confirmation', async () => {
+test('selection preview keeps avatar usable during pending and failed submit and confirmation', async () => {
   const { c, root, click, check } = await bootForm();
   document.getSelection.mockReturnValue({ toString: () => 'Fikcyjne zaznaczenie' });
   root.querySelector('.avatar').click(); check(true);
@@ -52,10 +52,13 @@ test('drag threshold and viewport clamp', () => {
 });
 for (const [x,y,calls] of [[130,100,0],[103,104,1]]) test(`gesture ${x},${y}`, () => {
   const host = document.createElement('div'); const root = host.attachShadow({ mode: 'open' });
-  const activate = vi.fn(); const selection = vi.spyOn(document,'getSelection').mockReturnValue({toString:()=>''});
-  const a = avatarModule.createAvatar({host,root,strings:STRINGS,onActivate:activate,onHide:vi.fn()});
+  const activate = vi.fn(), move = vi.fn(); const selection = vi.spyOn(document,'getSelection').mockReturnValue({toString:()=>''});
+  const a = avatarModule.createAvatar({host,root,strings:STRINGS,onActivate:activate,onHide:vi.fn(),onMove:move});
+  expect(move).not.toHaveBeenCalled();
   for (const [type,cx,cy] of [['pointerdown',100,100],['pointermove',x,y],['pointerup',x,y]]) a.el.dispatchEvent(new PointerEvent(type,{clientX:cx,clientY:cy,pointerId:1}));
   a.el.click(); expect(activate).toHaveBeenCalledTimes(calls); expect(selection).toHaveBeenCalledTimes(calls);
+  expect(move).toHaveBeenCalledTimes(calls ? 0 : 1);
+  if (!calls) expect(move).toHaveBeenCalledWith(a.rect());
   if (!calls) expect(host.style.left).not.toBe('');
 });
 test('empty body, duplicate live boot, foreign and orphan recovery with acknowledged restore', async () => {
