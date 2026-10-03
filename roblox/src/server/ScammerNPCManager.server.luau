@@ -23,6 +23,9 @@ if not hrp or not head or not humanoid then
 end
 
 humanoid.DisplayName = "MatiBuilds"
+humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+humanoid.NameDisplayDistance = 100
+humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.DisplayWhenDamaged
 humanoid.WalkSpeed = 8
 local stopWalkAnimation = NPCWalkAnimation.start(npc)
 npc.Destroying:Connect(stopWalkAnimation)
@@ -37,6 +40,12 @@ end)
 local prompt = hrp:FindFirstChildOfClass("ProximityPrompt")
 if prompt then
 	prompt.Enabled = false
+end
+
+-- Keep only standard player nametag; remove custom badge BillboardGui if present
+local customTag = head:FindFirstChild("ScammerTag") or head:FindFirstChildOfClass("BillboardGui")
+if customTag then
+	customTag:Destroy()
 end
 
 local neck = (head:FindFirstChild("Neck") or (upperTorso and upperTorso:FindFirstChild("Neck"))) :: Motor6D?
