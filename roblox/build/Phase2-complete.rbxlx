@@ -1,0 +1,2994 @@
+<roblox version="4">
+  <Item class="ReplicatedStorage" referent="0">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="ModuleScript" referent="1">
+      <Properties>
+        <string name="Name">MissionContent</string>
+        <string name="Source"><![CDATA[--!strict
+export type ChoiceRecord = {
+	id: string,
+	label: string,
+	nextStage: string,
+	enabled: boolean,
+}
+
+export type ChatMessage = {
+	sender: string,
+	text: string,
+	time: number?,
+}
+
+export type RuleCardInfo = {
+	title: string,
+	bulletPoints: { string },
+	sourceTitle: string,
+	sourceUrl: string,
+	sourceVerifiedAt: string,
+}
+
+export type MissionSnapshot = {
+	revision: number,
+	sequence: number,
+	activeConversation: string, -- "mati" | "scamerino" | "none"
+	histories: {
+		mati: { ChatMessage },
+		scamerino: { ChatMessage },
+	},
+	choices: { ChoiceRecord },
+	status: string, -- "start" | "decision" | "refusal_pressure" | "rule_card" | "decision_after_check" | "decision_after_help" | "ending_good" | "ending_bad" | "closed"
+	title: string?,
+	interlocutorName: string?,
+	ruleCard: RuleCardInfo?,
+}
+
+local MissionContent = {}
+
+MissionContent.initialMatiMessages = {
+	{
+		sender = "MatiBuilds",
+		text = "Hej, fajny skin :)",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Robimy w grupie giveaway. Mam dla ciebie 1500 Robuxów.",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Do wypłaty muszę wejść na twoje konto. Podasz login i hasło?",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Potem zmienisz hasło. Tylko szybko, zostało jedno miejsce.",
+	},
+} :: { ChatMessage }
+
+MissionContent.ruleCard = {
+	title = "Oficjalne Zasady Bezpieczeństwa Roblox",
+	bulletPoints = {
+		"Wypłaty Robuxów z grup, kupno gamepassów i transfery NIGDY nie wymagają logowania na cudze konto ani podawania hasła.",
+		"Administratorzy i twórcy gier Roblox NIGDY nie proszą o hasła ani kody 2FA/SMS na czacie.",
+		"Podanie hasła obcej osobie to najczęstsza przyczyna kradzieży konta i wirtualnych przedmiotów.",
+	},
+	sourceTitle = "Roblox Account Security & Theft Prevention",
+	sourceUrl = "https://en.help.roblox.com/hc/en-us/articles/203313380-Account-Security-Theft-Prevention",
+	sourceVerifiedAt = "2026-10-04",
+} :: RuleCardInfo
+
+MissionContent.texts = {
+	offer_intro = "MatiBuilds: Hej, fajny skin :)\n"
+		.. "MatiBuilds: Robimy w grupie giveaway. Mam dla ciebie 1500 Robuxów.\n"
+		.. "MatiBuilds: Do wypłaty muszę wejść na twoje konto. Podasz login i hasło?\n"
+		.. "MatiBuilds: Potem zmienisz hasło. Tylko szybko, zostało jedno miejsce.",
+	decision = "Co odpowiadasz?",
+	pressure_shout = "Zostało ostatnie miejsce w giveawayu Robuxów, zaraz przepada!",
+	refusal_pressure_npc = "Czekaj, przecież możesz potem od razu zmienić hasło! Nic nie ryzykujesz, a 1500 Robuxów przepada za minutę.",
+	refusal_final_npc = "Dobra, twoja strata. Jak nie chcesz, to nie.",
+	offer_check_question = "Dlaczego potrzebujesz mojego hasła do wysłania Robuxów?",
+	offer_check_excuse = "Bo wysyłam je przez panel grupy i system wymaga autoryzacji konta odbiorcy. Wszyscy tak robią, to w 100% bezpieczne!",
+	help_requested_user = "Muszę się upewnić... Scamerino, potrzebuję pomocy!",
+	help_undermine_npc = "On przesadza, po co go wołasz? Przecież to tylko giveaway!",
+	scamerino_advice = "Widzę, że ktoś próbuje wyłudzić Twoje hasło! 🦈🛡️ Pamiętaj: do przekazania Robuxów nigdy nie podaje się hasła ani kodów. To klasyczna próba phishingu!",
+	scamerino_hint = "Wskazówka: Oszuści stosują presję czasu i obiecują darmowe nagrody, aby uśpić Twoją czujność.",
+	fake_password_user = "OK, moje hasło to: **********",
+	fake_password_npc = "Haha, dzięki za darmowe konto i rzadkie itemy! Nara frajerze!",
+	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
+		.. "Oszuści w Robloxie często obiecują darmowe Robuxy i twierdzą, że „muszą się zalogować, żeby je przelać”. Zapamiętaj: nikt uczciwy (nawet administrator ani twórca gry) nie potrzebuje Twojego hasła.\n\n"
+		.. "W prawdziwej grze w takiej sytuacji: nie podawaj żadnych danych, zgłoś gracza przez menu Roblox [Report Abuse] i powiedz o rozmowie zaufanemu dorosłemu.",
+	ending_bad = "Uważaj! Twoje konto i wirtualne przedmioty zostały przejęte!\n\n"
+		.. "Gdy podasz hasło obcej osobie, oszust natychmiast zmienia dane logowania, kradnie Twoje rzadkie skiny i odcina Cię od konta. W Robloxie transfer Robuxów nigdy nie wymaga logowania się na konto odbiorcy.\n\n"
+		.. "To było tylko bezpieczne ćwiczenie. Jeśli podobna sytuacja przydarzy Ci się naprawdę: natychmiast powiedz rodzicom lub zaufanemu dorosłemu, aby pomogli Ci odzyskać konto przez pomoc techniczną Roblox.",
+}
+
+MissionContent.initialChoices = {
+	{
+		id = "refuse",
+		label = "Nie, nie podam hasła.",
+		nextStage = "refusal_pressure",
+		enabled = true,
+	},
+	{
+		id = "check_offer",
+		label = "Po co ci hasło? (Sprawdź ofertę)",
+		nextStage = "rule_card",
+		enabled = true,
+	},
+	{
+		id = "ask_for_help",
+		label = "Poproś o pomoc (Scamerino)",
+		nextStage = "decision_after_help",
+		enabled = true,
+	},
+	{
+		id = "share_fake_password",
+		label = "OK, podam hasło.",
+		nextStage = "ending_bad",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+MissionContent.refusalChoices = {
+	{
+		id = "refuse_final",
+		label = "Nadal nie. Nie podam hasła nikomu!",
+		nextStage = "ending_good",
+		enabled = true,
+	},
+	{
+		id = "check_offer",
+		label = "Pokaż zasady (Sprawdź ofertę)",
+		nextStage = "rule_card",
+		enabled = true,
+	},
+	{
+		id = "ask_for_help",
+		label = "Poproś o pomoc (Scamerino)",
+		nextStage = "decision_after_help",
+		enabled = true,
+	},
+	{
+		id = "share_fake_password",
+		label = "No dobra, niech będzie... podam.",
+		nextStage = "ending_bad",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+MissionContent.afterCheckChoices = {
+	{
+		id = "refuse_final",
+		label = "To wbrew zasadom – nie podam hasła!",
+		nextStage = "ending_good",
+		enabled = true,
+	},
+	{
+		id = "ask_for_help",
+		label = "Poproś o pomoc (Scamerino)",
+		nextStage = "decision_after_help",
+		enabled = true,
+	},
+	{
+		id = "share_fake_password",
+		label = "Mimo to zaryzykuję i podam hasło.",
+		nextStage = "ending_bad",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+MissionContent.afterHelpChoices = {
+	{
+		id = "refuse_final",
+		label = "Nie podam hasła – to oszustwo!",
+		nextStage = "ending_good",
+		enabled = true,
+	},
+	{
+		id = "share_fake_password",
+		label = "I tak podam hasło (Zignoruj pomoc)",
+		nextStage = "ending_bad",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+MissionContent.quizChoices = {
+	{
+		id = "quiz_correct",
+		label = "Chce przejąć moje konto i cenne itemy!",
+		nextStage = "decision_after_help",
+		enabled = true,
+	},
+	{
+		id = "quiz_wrong_1",
+		label = "Bo system wymaga hasła do wysyłki",
+		nextStage = "helper_quiz",
+		enabled = true,
+	},
+	{
+		id = "quiz_wrong_2",
+		label = "Żeby sprawdzić czy mam miejsce na Robuxy",
+		nextStage = "helper_quiz",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+MissionContent.choices = MissionContent.initialChoices
+
+function MissionContent.getChoicesForStage(stage: string): { ChoiceRecord }
+	if stage == "refusal_pressure" then
+		return MissionContent.refusalChoices
+	elseif stage == "decision_after_check" then
+		return MissionContent.afterCheckChoices
+	elseif stage == "decision_after_help" then
+		return MissionContent.afterHelpChoices
+	elseif stage == "helper_quiz" then
+		return MissionContent.quizChoices
+	elseif stage == "decision" then
+		return MissionContent.initialChoices
+	end
+	return {}
+end
+
+function MissionContent.getChoice(choiceId: string, stage: string?): ChoiceRecord?
+	local choicesList = if stage then MissionContent.getChoicesForStage(stage) else nil
+	if choicesList and #choicesList > 0 then
+		for _, choice in ipairs(choicesList) do
+			if choice.id == choiceId then
+				return choice
+			end
+		end
+	end
+	-- Fallback lookup across all choice lists
+	for _, list in ipairs({
+		MissionContent.initialChoices,
+		MissionContent.refusalChoices,
+		MissionContent.afterCheckChoices,
+		MissionContent.afterHelpChoices,
+		MissionContent.quizChoices,
+	}) do
+		for _, choice in ipairs(list) do
+			if choice.id == choiceId then
+				return choice
+			end
+		end
+	end
+	return nil
+end
+
+return MissionContent
+]]></string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="2">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="3">
+      <Properties>
+        <string name="Name">MissionService</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
+local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+local ScamerinoNPCManager = require(script.Parent:WaitForChild("ScamerinoNPCManager") :: ModuleScript)
+local arbiter = NPCNavigation.getDefaultArbiter()
+
+local folder = ReplicatedStorage:FindFirstChild("MissionRemotes")
+if not folder then
+	folder = Instance.new("Folder")
+	folder.Name = "MissionRemotes"
+	folder.Parent = ReplicatedStorage
+end
+local function ensure(name: string, className: string): Instance
+	local instance = folder:FindFirstChild(name)
+	if not instance then
+		instance = Instance.new(className)
+		instance.Name = name
+		instance.Parent = folder
+	end
+	return instance
+end
+local request = ensure("RequestAction", "RemoteEvent") :: RemoteEvent
+local update = ensure("MissionUpdate", "RemoteEvent") :: RemoteEvent
+local beginEvent = ensure("BeginEncounterEvent", "BindableEvent") :: BindableEvent
+local cancelEvent = ensure("CancelEncounterEvent", "BindableEvent") :: BindableEvent
+local stateEvent = ensure("EncounterStateChanged", "BindableEvent") :: BindableEvent
+local query = ensure("QueryEncounterState", "BindableFunction") :: BindableFunction
+local publicBubble = ensure("PublicNpcBubble", "RemoteEvent") :: RemoteEvent
+
+type State = {
+	stage: string,
+	revision: number,
+	sequence: number,
+	activeConversation: string,
+	histories: { mati: { MissionContent.ChatMessage }, scamerino: { MissionContent.ChatMessage } },
+	lastActionTime: number,
+	refusalCount: number,
+	helpReceived: boolean,
+	quizAttempts: number,
+}
+local states: { [Player]: State } = {}
+local function stateFor(player: Player): State
+	local existing = states[player]
+	if existing then
+		return existing
+	end
+	local state: State = {
+		stage = "start",
+		revision = 0,
+		sequence = 0,
+		activeConversation = "none",
+		histories = { mati = {}, scamerino = {} },
+		lastActionTime = 0,
+		refusalCount = 0,
+		helpReceived = false,
+		quizAttempts = 0,
+	}
+	states[player] = state
+	return state
+end
+
+local function send(player: Player, state: State)
+	if not player.Parent then
+		return
+	end
+	state.sequence += 1
+	local isDecisionStage = state.stage == "decision"
+		or state.stage == "refusal_pressure"
+		or state.stage == "decision_after_check"
+		or state.stage == "decision_after_help"
+		or state.stage == "helper_quiz"
+	local choices = if isDecisionStage then MissionContent.getChoicesForStage(state.stage) else {}
+	local snapshot: MissionContent.MissionSnapshot = {
+		revision = state.revision,
+		sequence = state.sequence,
+		activeConversation = state.activeConversation,
+		histories = state.histories,
+		choices = choices,
+		status = state.stage,
+		title = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
+		interlocutorName = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
+		ruleCard = if state.stage == "rule_card" then MissionContent.ruleCard else nil,
+	}
+	update:FireClient(player, snapshot)
+end
+
+local function setStage(player: Player, state: State, stage: string)
+	state.stage = stage
+	stateEvent:Fire(player, state.revision, stage)
+end
+
+local function current(player: Player, state: State, revision: number): boolean
+	return player.Parent == Players and states[player] == state and state.revision == revision
+end
+
+local function appendMati(state: State, sender: string, text: string)
+	table.insert(state.histories.mati, { sender = sender, text = text, time = os.clock() })
+end
+
+local function appendScamerino(state: State, sender: string, text: string)
+	table.insert(state.histories.scamerino, { sender = sender, text = text, time = os.clock() })
+end
+
+local function cancel(player: Player)
+	local state = states[player]
+	if state then
+		state.revision += 1
+		state.activeConversation = "none"
+		setStage(player, state, "closed")
+		send(player, state)
+	end
+	arbiter.releaseOwner(player)
+	ScamerinoNPCManager.cancelPlayer(player)
+end
+
+local function getMatiHead(): BasePart?
+	local lobby = workspace:FindFirstChild("MarketplaceLobby")
+	local scammer = lobby and lobby:FindFirstChild("ScammerNPC")
+	local head = scammer and scammer:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		return head
+	end
+	return nil
+end
+
+query.OnInvoke = function(player: Player)
+	local state = stateFor(player)
+	return { stage = state.stage, revision = state.revision }
+end
+
+beginEvent.Event:Connect(function(player: Player)
+	if not arbiter.isOwner(player) then
+		return
+	end
+	local state = stateFor(player)
+	if state.stage ~= "start" and state.stage ~= "closed" then
+		return
+	end
+	state.revision += 1
+	local revision = state.revision
+	local token = arbiter.getToken(player)
+	if token then
+		token.revision = revision
+	end
+	state.activeConversation = "mati"
+	state.histories = { mati = {}, scamerino = {} }
+	state.refusalCount = 0
+	state.helpReceived = false
+	state.quizAttempts = 0
+	setStage(player, state, "presenting")
+	send(player, state)
+	task.spawn(function()
+		for index, message in MissionContent.initialMatiMessages do
+			task.wait(if index == 1 then 0.55 else 1.25)
+			if not current(player, state, revision) or not arbiter.isOwner(player) or state.stage ~= "presenting" then
+				return
+			end
+			appendMati(state, message.sender, message.text)
+			send(player, state)
+		end
+		if not current(player, state, revision) or not arbiter.isOwner(player) then
+			return
+		end
+		setStage(player, state, "decision")
+		send(player, state)
+	end)
+end)
+
+cancelEvent.Event:Connect(cancel)
+
+request.OnServerEvent:Connect(function(player: Player, action: any, revision: any)
+	if typeof(action) ~= "string" then
+		return
+	end
+	local state = stateFor(player)
+	if action == "ready" then
+		send(player, state)
+		return
+	end
+	if typeof(revision) ~= "number" or revision ~= state.revision then
+		return
+	end
+	local now = os.clock()
+	if now - state.lastActionTime < 0.25 then
+		return
+	end
+	state.lastActionTime = now
+
+	if action == "close" then
+		cancel(player)
+		return
+	end
+
+	if action == "close_rule_card" then
+		if state.stage ~= "rule_card" or not arbiter.isOwner(player) then
+			return
+		end
+		setStage(player, state, "decision_after_check")
+		send(player, state)
+		return
+	end
+
+	if action == "switch_to_mati" then
+		state.activeConversation = "mati"
+		send(player, state)
+		return
+	elseif action == "switch_to_scamerino" then
+		state.activeConversation = "scamerino"
+		send(player, state)
+		return
+	end
+
+	if action == "replay" then
+		if state.stage ~= "ending_good" and state.stage ~= "ending_bad" then
+			return
+		end
+		state.revision += 1
+		state.histories = { mati = {}, scamerino = {} }
+		state.activeConversation = "none"
+		state.refusalCount = 0
+		state.helpReceived = false
+		state.quizAttempts = 0
+		arbiter.cancelPlayer(player)
+		ScamerinoNPCManager.resetForPlayer(player, state.revision)
+		setStage(player, state, "start")
+		local spawn = workspace:FindFirstChild("MissionStart")
+		if spawn and spawn:IsA("BasePart") and player.Character then
+			player.Character:PivotTo(spawn.CFrame + Vector3.new(0, 3, 0))
+		end
+		send(player, state)
+		return
+	end
+
+	local isDecisionStage = state.stage == "decision"
+		or state.stage == "refusal_pressure"
+		or state.stage == "decision_after_check"
+		or state.stage == "decision_after_help"
+		or state.stage == "helper_quiz"
+	if not isDecisionStage or not arbiter.isOwner(player) then
+		return
+	end
+
+	local choice = MissionContent.getChoice(action, state.stage)
+	if not choice or not choice.enabled then
+		return
+	end
+
+	local capturedRevision = state.revision
+
+	-- Obsługa etapu quizu pomocnika
+	if state.stage == "helper_quiz" then
+		appendScamerino(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+
+			if choice.id == "quiz_correct" then
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Brawo! Dokładnie tak. Oszuści obiecują darmowe nagrody i stosują presję czasu, aby wyłudzić hasło. Nigdy go nie podawaj!"
+				)
+				send(player, state)
+				task.wait(1.0)
+				if not current(player, state, capturedRevision) then
+					return
+				end
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Wróć teraz do rozmowy z MatiBuilds i podejmij bezpieczną decyzję!"
+				)
+				setStage(player, state, "decision_after_help")
+				send(player, state)
+			else
+				state.quizAttempts += 1
+				if state.quizAttempts == 1 then
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Nie do końca! Zastanów się: do przesłania Robuxów wystarczy sam nick. Po co mu Twoje hasło?"
+					)
+					setStage(player, state, "helper_quiz")
+					send(player, state)
+				else
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Pamiętaj: NIKT uczciwy nie potrzebuje Twojego hasła do przelania Robuxów. Każda taka prośba to próba kradzieży konta!"
+					)
+					send(player, state)
+					task.wait(1.0)
+					if not current(player, state, capturedRevision) then
+						return
+					end
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Wróć teraz do rozmowy z MatiBuilds i podejmij bezpieczną decyzję!"
+					)
+					setStage(player, state, "decision_after_help")
+					send(player, state)
+				end
+			end
+		end)
+		return
+	end
+
+	if action == "refuse" then
+		-- Pierwsza odmowa -> presja czasu
+		state.refusalCount = 1
+		appendMati(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "MatiBuilds", MissionContent.texts.refusal_pressure_npc)
+			setStage(player, state, "refusal_pressure")
+			send(player, state)
+		end)
+	elseif action == "refuse_final" then
+		-- Druga / ostateczna odmowa -> dobre zakończenie
+		state.refusalCount += 1
+		appendMati(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "MatiBuilds", MissionContent.texts.refusal_final_npc)
+			send(player, state)
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "System", MissionContent.texts.ending_good)
+			if state.helpReceived then
+				ScamerinoNPCManager.setOutcome(player, "safe")
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Świetnie! Hasło zostało u Ciebie, a konto jest bezpieczne. Dobra robota! 🦈🛡️"
+				)
+			end
+			setStage(player, state, "ending_good")
+			arbiter.releaseOwner(player)
+			send(player, state)
+		end)
+	elseif action == "check_offer" then
+		-- Sprawdzenie oferty -> dopytanie, wymówka i karta zasad
+		appendMati(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "MatiBuilds", MissionContent.texts.offer_check_excuse)
+			send(player, state)
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "System", "Sprawdzasz oficjalne zasady bezpieczeństwa Roblox...")
+			setStage(player, state, "rule_card")
+			send(player, state)
+		end)
+	elseif action == "ask_for_help" then
+		-- Wezwanie pomocy -> Scamerino podchodzi fizycznie, dymek scammera, otwarcie helper_quiz
+		appendMati(state, "Ty", choice.label)
+		setStage(player, state, "waiting_for_helper")
+		send(player, state)
+
+		local head = getMatiHead()
+		if head then
+			publicBubble:FireAllClients(head, MissionContent.texts.help_undermine_npc)
+		end
+
+		appendMati(state, "MatiBuilds", MissionContent.texts.help_undermine_npc)
+		send(player, state)
+
+		ScamerinoNPCManager.requestHelp(player, state.revision, function(res)
+			if not current(player, state, capturedRevision) then
+				return
+			end
+
+			if res == "arrived" then
+				state.helpReceived = true
+				state.activeConversation = "scamerino"
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Widzę, że ktoś próbuje wyłudzić Twoje hasło! 🦈🛡️ Zastanów się: do przekazania Robuxów nie potrzeba hasła. Dlaczego on o nie prosi?"
+				)
+				setStage(player, state, "helper_quiz")
+				send(player, state)
+			else
+				-- no_path lub timeout
+				state.helpReceived = false
+				appendMati(
+					state,
+					"System",
+					"Scamerino nie mógł dotrzeć na czas. Pamiętaj: nigdy nie podawaj nikomu hasła ani kodów!"
+				)
+				setStage(player, state, "decision_after_check")
+				send(player, state)
+			end
+		end)
+	elseif action == "share_fake_password" then
+		-- Fikcyjne podanie hasła -> zła decyzja i symulacja przejęcia konta
+		appendMati(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "MatiBuilds", MissionContent.texts.fake_password_npc)
+			send(player, state)
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+			appendMati(state, "System", MissionContent.texts.ending_bad)
+			if state.helpReceived then
+				ScamerinoNPCManager.setOutcome(player, "alarm")
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Stop! Hasło daje pełny dostęp do konta. To było ćwiczenie — spróbuj jeszcze raz!"
+				)
+			end
+			setStage(player, state, "ending_bad")
+			arbiter.releaseOwner(player)
+			send(player, state)
+		end)
+	end
+end)
+
+local function hookPlayer(player: Player)
+	player.CharacterRemoving:Connect(function()
+		cancel(player)
+	end)
+end
+Players.PlayerAdded:Connect(hookPlayer)
+for _, player in Players:GetPlayers() do
+	hookPlayer(player)
+end
+Players.PlayerRemoving:Connect(function(player)
+	arbiter.cancelPlayer(player)
+	ScamerinoNPCManager.cancelPlayer(player)
+	states[player] = nil
+end)
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="4">
+      <Properties>
+        <string name="Name">NPCNavigation</string>
+        <string name="Source"><![CDATA[--!strict
+local PathfindingService = game:GetService("PathfindingService")
+
+local NPCNavigation = {}
+
+-- Named configuration constants per D-08, D-10, D-11
+NPCNavigation.NOTICE_DISTANCE = 28
+NPCNavigation.STOP_DISTANCE = 7
+NPCNavigation.BREAK_DISTANCE = 32
+NPCNavigation.FOLLOW_GRACE = 5
+NPCNavigation.PATH_TIMEOUT = 8
+
+export type NavigationResult = "arrived" | "cancelled" | "no_path" | "timeout" | "lost_player"
+
+export type NavigationToken = {
+	isCancelled: boolean,
+	revision: number,
+	cancel: () -> (),
+}
+
+export type ArbiterConfig = {
+	noticeDistance: number?,
+	stopDistance: number?,
+	breakDistance: number?,
+	followGrace: number?,
+	pathTimeout: number?,
+}
+
+export type Arbiter = {
+	getOwner: () -> Player?,
+	tryClaim: (player: Player, revision: number?) -> boolean,
+	enqueue: (player: Player) -> (),
+	advanceQueue: () -> Player?,
+	releaseOwner: (player: Player) -> Player?,
+	cancelPlayer: (player: Player) -> (),
+	isOwner: (player: Player) -> boolean,
+	getToken: (player: Player) -> NavigationToken?,
+	createToken: (player: Player, revision: number) -> NavigationToken,
+	getQueueLength: () -> number,
+	getQueue: () -> { Player },
+	isInQueue: (player: Player) -> boolean,
+}
+
+function NPCNavigation.createToken(revision: number?): NavigationToken
+	local token = {
+		isCancelled = false,
+		revision = revision or 1,
+	}
+	token.cancel = function()
+		token.isCancelled = true
+	end
+	return token
+end
+
+function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
+	local currentOwner: Player? = nil
+	local ownerTokens: { [Player]: NavigationToken } = {}
+	local queue: { Player } = {}
+	local queueTimes: { [Player]: number } = {}
+
+	local arbiter: Arbiter = {} :: Arbiter
+
+	local function isSamePlayer(a: Player?, b: Player?): boolean
+		if a == b then
+			return a ~= nil
+		end
+		if a and b and a.UserId and b.UserId and a.UserId ~= 0 and a.UserId == b.UserId then
+			return true
+		end
+		return false
+	end
+
+	function arbiter.getOwner(): Player?
+		return currentOwner
+	end
+
+	function arbiter.isOwner(player: Player): boolean
+		return isSamePlayer(currentOwner, player)
+	end
+
+	function arbiter.getToken(player: Player): NavigationToken?
+		return ownerTokens[player]
+	end
+
+	function arbiter.getQueueLength(): number
+		return #queue
+	end
+
+	function arbiter.createToken(player: Player, revision: number): NavigationToken
+		local prevToken = ownerTokens[player]
+		if prevToken then
+			prevToken.cancel()
+		end
+
+		local token = NPCNavigation.createToken(revision)
+		ownerTokens[player] = token
+		return token
+	end
+
+	function arbiter.enqueue(player: Player)
+		if isSamePlayer(currentOwner, player) then
+			return
+		end
+		for _, p in ipairs(queue) do
+			if isSamePlayer(p, player) then
+				return
+			end
+		end
+		table.insert(queue, player)
+		queueTimes[player] = os.clock()
+
+		-- Sort FIFO by enqueue time, tie-break by UserId per D-24
+		table.sort(queue, function(a, b)
+			local tA = queueTimes[a] or 0
+			local tB = queueTimes[b] or 0
+			if tA == tB then
+				return a.UserId < b.UserId
+			end
+			return tA < tB
+		end)
+	end
+
+	function arbiter.tryClaim(player: Player, revision: number?): boolean
+		if currentOwner == nil then
+			currentOwner = player
+			arbiter.createToken(player, revision or 1)
+			return true
+		end
+		return isSamePlayer(currentOwner, player)
+	end
+
+	function arbiter.isInQueue(player: Player): boolean
+		for _, p in ipairs(queue) do
+			if isSamePlayer(p, player) then
+				return true
+			end
+		end
+		return false
+	end
+
+	function arbiter.getQueue(): { Player }
+		return table.clone(queue)
+	end
+
+	function arbiter.advanceQueue(): Player?
+		if currentOwner ~= nil then
+			return currentOwner
+		end
+		while #queue > 0 do
+			local nextPlayer = table.remove(queue, 1)
+			queueTimes[nextPlayer] = nil
+			if nextPlayer and nextPlayer.Parent and nextPlayer.Character then
+				local hum = nextPlayer.Character:FindFirstChildOfClass("Humanoid")
+				local root = nextPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if hum and hum.Health > 0 and root then
+					currentOwner = nextPlayer
+					arbiter.createToken(nextPlayer, 1)
+					return nextPlayer
+				end
+			end
+		end
+		return nil
+	end
+
+	function arbiter.releaseOwner(player: Player): Player?
+		if isSamePlayer(currentOwner, player) then
+			local ownerRef = currentOwner
+			local token = if ownerRef then ownerTokens[ownerRef] else nil
+			if not token then
+				token = ownerTokens[player]
+			end
+			if token then
+				token.cancel()
+				if ownerRef then
+					ownerTokens[ownerRef] = nil
+				end
+				ownerTokens[player] = nil
+			end
+			currentOwner = nil
+			return arbiter.advanceQueue()
+		end
+		return nil
+	end
+
+	function arbiter.cancelPlayer(player: Player)
+		for i, p in ipairs(queue) do
+			if isSamePlayer(p, player) then
+				table.remove(queue, i)
+				queueTimes[p] = nil
+				queueTimes[player] = nil
+				break
+			end
+		end
+		local token = ownerTokens[player]
+		if token then
+			token.cancel()
+			ownerTokens[player] = nil
+		end
+		if isSamePlayer(currentOwner, player) then
+			currentOwner = nil
+		end
+	end
+
+	return arbiter
+end
+
+-- Default shared arbiter for MatiBuilds
+local defaultArbiter = NPCNavigation.newArbiter()
+
+function NPCNavigation.getDefaultArbiter(): Arbiter
+	return defaultArbiter
+end
+
+function NPCNavigation.cancelPlayer(player: Player)
+	defaultArbiter.cancelPlayer(player)
+end
+
+function NPCNavigation.releaseOwner(player: Player): Player?
+	return defaultArbiter.releaseOwner(player)
+end
+
+function NPCNavigation.walkToPlayer(
+	character: Model,
+	targetPlayer: Player,
+	options: { stopDistance: number?, timeout: number? }?,
+	token: NavigationToken?
+): NavigationResult
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not rootPart then
+		return "no_path"
+	end
+
+	local targetChar = targetPlayer.Character
+	if not targetChar then
+		return "lost_player"
+	end
+	local targetRoot = targetChar:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not targetRoot then
+		return "lost_player"
+	end
+
+	local stopDistance = if options and options.stopDistance then options.stopDistance else NPCNavigation.STOP_DISTANCE
+	local timeout = if options and options.timeout then options.timeout else NPCNavigation.PATH_TIMEOUT
+
+	-- Immediate proximity check
+	local initialDist = (rootPart.Position - targetRoot.Position).Magnitude
+	if initialDist <= stopDistance then
+		humanoid:MoveTo(rootPart.Position)
+		return "arrived"
+	end
+
+	local startTime = os.clock()
+
+	-- Path calculation
+	local path = PathfindingService:CreatePath({
+		AgentRadius = 2.5,
+		AgentHeight = 5.0,
+		AgentCanJump = false,
+		WaypointSpacing = 4.0,
+	})
+
+	local computeSuccess, _ = pcall(function()
+		path:ComputeAsync(rootPart.Position, targetRoot.Position)
+	end)
+
+	if not computeSuccess or path.Status ~= Enum.PathStatus.Success then
+		-- Fallback to direct MoveTo if path computation is blocked or failed
+		humanoid:MoveTo(targetRoot.Position)
+		local moveFinished = false
+		local conn = humanoid.MoveToFinished:Connect(function()
+			moveFinished = true
+		end)
+
+		while not moveFinished do
+			if token and token.isCancelled then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "cancelled"
+			end
+			if os.clock() - startTime > timeout then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "timeout"
+			end
+			if not targetChar.Parent or not targetRoot.Parent then
+				conn:Disconnect()
+				return "lost_player"
+			end
+			if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "arrived"
+			end
+			task.wait(0.1)
+		end
+		conn:Disconnect()
+
+		if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance + 2 then
+			humanoid:MoveTo(rootPart.Position)
+			return "arrived"
+		end
+		return "no_path"
+	end
+
+	local waypoints = path:GetWaypoints()
+	for _, waypoint in ipairs(waypoints) do
+		if token and token.isCancelled then
+			humanoid:MoveTo(rootPart.Position)
+			return "cancelled"
+		end
+
+		if os.clock() - startTime > timeout then
+			humanoid:MoveTo(rootPart.Position)
+			return "timeout"
+		end
+
+		if not targetChar.Parent or not targetRoot.Parent then
+			humanoid:MoveTo(rootPart.Position)
+			return "lost_player"
+		end
+
+		local currentDist = (rootPart.Position - targetRoot.Position).Magnitude
+		if currentDist <= stopDistance then
+			humanoid:MoveTo(rootPart.Position)
+			return "arrived"
+		end
+
+		humanoid:MoveTo(waypoint.Position)
+
+		local reachedWaypoint = false
+		local conn = humanoid.MoveToFinished:Connect(function()
+			reachedWaypoint = true
+		end)
+
+		local waypointWait = 0
+		while not reachedWaypoint and waypointWait < 1.5 do
+			if token and token.isCancelled then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "cancelled"
+			end
+			if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "arrived"
+			end
+			task.wait(0.05)
+			waypointWait += 0.05
+		end
+		conn:Disconnect()
+	end
+
+	local finalDist = (rootPart.Position - targetRoot.Position).Magnitude
+	if finalDist <= stopDistance + 2 then
+		humanoid:MoveTo(rootPart.Position)
+		return "arrived"
+	end
+
+	return "no_path"
+end
+
+return NPCNavigation
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="5">
+      <Properties>
+        <string name="Name">NPCWalkAnimation</string>
+        <string name="Source"><![CDATA[--!strict
+local RunService = game:GetService("RunService")
+
+local NPCWalkAnimation = {}
+
+-- Drive procedural walk animation for both R6 and R15 rigs.
+-- C0 is replicated to all clients; Transform is local only.
+-- Does not touch Neck/Waist, which are controlled by NPC head tracking.
+function NPCWalkAnimation.start(model: Model): () -> ()
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not root then
+		return function() end
+	end
+
+	local isR6 = humanoid.RigType == Enum.HumanoidRigType.R6
+
+	local joints: { [string]: Motor6D } = {}
+	local rest: { [string]: CFrame } = {}
+
+	local r15JointNames = {
+		LeftHip = true,
+		RightHip = true,
+		LeftKnee = true,
+		RightKnee = true,
+		LeftAnkle = true,
+		RightAnkle = true,
+		LeftShoulder = true,
+		RightShoulder = true,
+		LeftElbow = true,
+		RightElbow = true,
+	}
+
+	local r6JointNames = {
+		["Left Hip"] = true,
+		["Right Hip"] = true,
+		["Left Shoulder"] = true,
+		["Right Shoulder"] = true,
+	}
+
+	for _, instance in model:GetDescendants() do
+		if instance:IsA("Motor6D") then
+			if (isR6 and r6JointNames[instance.Name]) or (not isR6 and r15JointNames[instance.Name]) then
+				joints[instance.Name] = instance
+				rest[instance.Name] = instance.C0
+			end
+		end
+	end
+
+	local phase = 0
+	local blend = 0
+	local stopped = false
+	local connection: RBXScriptConnection? = nil
+
+	local function stop()
+		if stopped then
+			return
+		end
+		stopped = true
+		if connection then
+			connection:Disconnect()
+		end
+		for name, joint in joints do
+			if joint.Parent then
+				joint.C0 = rest[name]
+			end
+		end
+	end
+
+	local function rotateR15(name: string, angle: number)
+		local joint = joints[name]
+		if joint then
+			joint.C0 = rest[name] * CFrame.Angles(angle, 0, 0)
+		end
+	end
+
+	local function rotateR6(name: string, angle: number)
+		local joint = joints[name]
+		if joint then
+			joint.C0 = rest[name] * CFrame.Angles(0, 0, angle)
+		end
+	end
+
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if not model:IsDescendantOf(workspace) or humanoid.Health <= 0 then
+			stop()
+			return
+		end
+
+		local v = root.AssemblyLinearVelocity
+		local speed = Vector3.new(v.X, 0, v.Z).Magnitude
+		local walking = speed > 0.35 and humanoid.FloorMaterial ~= Enum.Material.Air
+		local targetBlend = if walking then math.clamp(speed / 6, 0, 1) else 0
+		blend += (targetBlend - blend) * (1 - math.exp(-dt * 14))
+
+		if walking then
+			-- Synchronize cadence with ground velocity (stride of ~2.4 studs) to prevent foot sliding/skating
+			local strideLength = 2.4
+			local stepFrequency = (speed / strideLength) * math.pi
+			phase += dt * stepFrequency
+		end
+
+		local swing = math.sin(phase)
+
+		if isR6 then
+			local legAngle = swing * 0.70 * blend
+			local armAngle = swing * 0.50 * blend
+
+			-- In R6 coordinate frame, Z rotation drives forward/backward pitch:
+			-- Left Hip: -legAngle is forward
+			-- Right Hip: -legAngle is backward (alternating)
+			rotateR6("Left Hip", -legAngle)
+			rotateR6("Right Hip", -legAngle)
+
+			-- Opposite arm swing: Left Leg forward -> Right Arm forward
+			rotateR6("Right Shoulder", armAngle)
+			rotateR6("Left Shoulder", armAngle)
+		else
+			-- R15 joints
+			rotateR15("LeftHip", swing * 0.48 * blend)
+			rotateR15("RightHip", -swing * 0.48 * blend)
+			rotateR15("LeftKnee", math.max(0, -swing) * 0.70 * blend)
+			rotateR15("RightKnee", math.max(0, swing) * 0.70 * blend)
+			rotateR15("LeftAnkle", -math.max(0, -swing) * 0.20 * blend)
+			rotateR15("RightAnkle", -math.max(0, swing) * 0.20 * blend)
+			rotateR15("LeftShoulder", -swing * 0.30 * blend)
+			rotateR15("RightShoulder", swing * 0.30 * blend)
+			rotateR15("LeftElbow", -0.12 * blend)
+			rotateR15("RightElbow", -0.12 * blend)
+		end
+	end)
+
+	return stop
+end
+
+return NPCWalkAnimation
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="6">
+      <Properties>
+        <string name="Name">ScamerinoNPCManager</string>
+        <string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+
+local ScamerinoNPCManager = {}
+
+local modelInstance = workspace:WaitForChild("ScamerinoAlertinio", 15) :: Instance?
+local model = if modelInstance and modelInstance:IsA("Model") then modelInstance else nil
+
+type HelpRequest = {
+	player: Player,
+	revision: number,
+	createdAt: number,
+	callback: (result: string) -> (),
+}
+
+local queue: { HelpRequest } = {}
+local currentOwner: Player? = nil
+local currentOwnerRevision: number = 0
+local isNavigating = false
+local currentToken: NPCNavigation.NavigationToken? = nil
+
+local DEADLINE_SECONDS = 12
+local NAV_TIMEOUT_SECONDS = 8
+
+local function getRoot(): BasePart?
+	if not model then
+		return nil
+	end
+	local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("Torso")
+	if hrp and hrp:IsA("BasePart") then
+		return hrp
+	end
+	return nil
+end
+
+local function getHead(): BasePart?
+	if not model then
+		return nil
+	end
+	local head = model:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		return head
+	end
+	return nil
+end
+
+local function getSiren(): PointLight?
+	local head = getHead()
+	local siren = head and head:FindFirstChild("SirenLight")
+	if siren and siren:IsA("PointLight") then
+		return siren
+	end
+	return nil
+end
+
+local function pausePatrol(paused: boolean)
+	if model then
+		model:SetAttribute("ScamerinoPatrolPaused", paused)
+	end
+end
+
+local function processQueue()
+	if isNavigating or currentOwner ~= nil then
+		return
+	end
+	if #queue == 0 then
+		pausePatrol(false)
+		return
+	end
+
+	local now = os.clock()
+	while #queue > 0 do
+		local req = queue[1]
+		if not req.player.Parent or (now - req.createdAt) > DEADLINE_SECONDS then
+			table.remove(queue, 1)
+			pcall(req.callback, "timeout")
+		else
+			break
+		end
+	end
+
+	if #queue == 0 then
+		pausePatrol(false)
+		return
+	end
+
+	local req = table.remove(queue, 1) :: HelpRequest
+	local targetPlayer = req.player
+	local revision = req.revision
+	currentOwner = targetPlayer
+	currentOwnerRevision = revision
+	isNavigating = true
+	pausePatrol(true)
+
+	task.spawn(function()
+		local token = NPCNavigation.createToken(revision)
+		currentToken = token
+
+		local navResult = "no_path"
+		if model and targetPlayer.Character then
+			navResult = NPCNavigation.walkToPlayer(
+				model,
+				targetPlayer,
+				{ stopDistance = 6, timeout = NAV_TIMEOUT_SECONDS },
+				token
+			)
+		end
+
+		local hrp = getRoot()
+		if hrp then
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.AssemblyAngularVelocity = Vector3.zero
+		end
+
+		if navResult == "arrived" and not token.isCancelled and currentOwner == targetPlayer then
+			local char = targetPlayer.Character
+			local targetHrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if hrp and targetHrp then
+				pcall(function()
+					hrp.CFrame = CFrame.lookAt(
+						hrp.Position,
+						Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
+					)
+				end)
+			end
+			isNavigating = false
+			pcall(req.callback, "arrived")
+		else
+			isNavigating = false
+			currentOwner = nil
+			currentOwnerRevision = 0
+			pcall(req.callback, navResult)
+			processQueue()
+		end
+	end)
+end
+
+function ScamerinoNPCManager.requestHelp(player: Player, revision: number, callback: (result: string) -> ())
+	-- Deduplicate: if player already has pending request in queue or is current owner
+	if currentOwner == player and currentOwnerRevision == revision then
+		callback("already_owner")
+		return
+	end
+	for _, req in ipairs(queue) do
+		if req.player == player and req.revision == revision then
+			callback("already_queued")
+			return
+		end
+	end
+
+	local req: HelpRequest = {
+		player = player,
+		revision = revision,
+		createdAt = os.clock(),
+		callback = callback,
+	}
+	table.insert(queue, req)
+	processQueue()
+end
+
+function ScamerinoNPCManager.cancelPlayer(player: Player)
+	for i = #queue, 1, -1 do
+		if queue[i].player == player then
+			local req = table.remove(queue, i)
+			pcall(req.callback, "cancelled")
+		end
+	end
+
+	if currentOwner == player then
+		if currentToken then
+			currentToken.cancel()
+		end
+		currentOwner = nil
+		currentOwnerRevision = 0
+		isNavigating = false
+		pausePatrol(false)
+		processQueue()
+	end
+end
+
+function ScamerinoNPCManager.setOutcome(_player: Player, outcome: string)
+	local siren = getSiren()
+	if outcome == "alarm" then
+		if siren then
+			task.spawn(function()
+				local origColor = siren.Color
+				local origBrightness = siren.Brightness
+				siren.Color = Color3.fromRGB(255, 30, 30)
+				for _ = 1, 8 do
+					siren.Brightness = 3
+					siren.Enabled = true
+					task.wait(0.25)
+					siren.Brightness = 0.5
+					task.wait(0.25)
+				end
+				siren.Color = origColor
+				siren.Brightness = origBrightness
+			end)
+		end
+	elseif outcome == "safe" then
+		if siren then
+			siren.Color = Color3.fromRGB(80, 220, 100)
+			siren.Brightness = 2
+			task.delay(3, function()
+				siren.Color = Color3.fromRGB(255, 180, 20)
+				siren.Brightness = 1
+			end)
+		end
+	end
+end
+
+function ScamerinoNPCManager.resetForPlayer(player: Player, revision: number)
+	for i = #queue, 1, -1 do
+		if queue[i].player == player and queue[i].revision == revision then
+			table.remove(queue, i)
+		end
+	end
+
+	if currentOwner == player and currentOwnerRevision == revision then
+		if currentToken then
+			currentToken.cancel()
+		end
+		currentOwner = nil
+		currentOwnerRevision = 0
+		isNavigating = false
+		pausePatrol(false)
+		processQueue()
+	end
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	ScamerinoNPCManager.cancelPlayer(player)
+end)
+
+return ScamerinoNPCManager
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="7">
+      <Properties>
+        <string name="Name">ScamerinoPatrol</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[--!strict
+-- Idle patrol; the mission helper can pause it before taking ownership of movement.
+local PathfindingService = game:GetService("PathfindingService")
+local modelInstance = workspace:WaitForChild("ScamerinoAlertinio", 15)
+if not modelInstance or not modelInstance:IsA("Model") then
+	return
+end
+local model = modelInstance :: Model
+local humanoid = model:FindFirstChildOfClass("Humanoid")
+local rootInstance = model:FindFirstChild("HumanoidRootPart")
+if not humanoid or not rootInstance or not rootInstance:IsA("BasePart") then
+	return
+end
+local root = rootInstance :: BasePart
+local home = root.Position
+local random = Random.new()
+local revision = 0
+local moving = false
+
+local function paused(): boolean
+	return model:GetAttribute("ScamerinoPatrolPaused") == true
+end
+
+model:GetAttributeChangedSignal("ScamerinoPatrolPaused"):Connect(function()
+	revision += 1
+	if paused() and moving then
+		humanoid:MoveTo(root.Position)
+	end
+end)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local dialogueEvent = ReplicatedStorage:FindFirstChild("ScamerinoDialogueEvent") :: RemoteEvent?
+if not dialogueEvent then
+	dialogueEvent = Instance.new("RemoteEvent")
+	dialogueEvent.Name = "ScamerinoDialogueEvent"
+	dialogueEvent.Parent = ReplicatedStorage
+end
+local remoteEvent: RemoteEvent = dialogueEvent :: RemoteEvent
+
+local activeConversations: { [Player]: boolean } = {}
+
+local function updatePauseState()
+	local anyActive = false
+	for activePlayer, active in activeConversations do
+		if active and activePlayer.Parent == Players then
+			anyActive = true
+			break
+		end
+	end
+	model:SetAttribute("ScamerinoPatrolPaused", anyActive)
+end
+
+local function facePlayer(targetPlayer: Player)
+	local char = targetPlayer.Character
+	local targetRoot = char and char:FindFirstChild("HumanoidRootPart")
+	if targetRoot and targetRoot:IsA("BasePart") and root then
+		local lookPos = Vector3.new(targetRoot.Position.X, root.Position.Y, targetRoot.Position.Z)
+		pcall(function()
+			root.CFrame = CFrame.lookAt(root.Position, lookPos)
+		end)
+	end
+end
+
+local function startDialogueWithPlayer(targetPlayer: Player)
+	activeConversations[targetPlayer] = true
+	updatePauseState()
+	facePlayer(targetPlayer)
+end
+
+local function endDialogueWithPlayer(targetPlayer: Player)
+	if activeConversations[targetPlayer] then
+		activeConversations[targetPlayer] = nil
+		updatePauseState()
+	end
+end
+
+remoteEvent.OnServerEvent:Connect(function(speakingPlayer: Player, action: any)
+	if action == "startDialogue" or action == "open" then
+		startDialogueWithPlayer(speakingPlayer)
+	elseif action == "endDialogue" or action == "close" then
+		endDialogueWithPlayer(speakingPlayer)
+	end
+end)
+
+local torso = model:FindFirstChild("Torso")
+local prompt = torso and torso:FindFirstChild("ChatPrompt")
+if prompt and prompt:IsA("ProximityPrompt") then
+	prompt.Triggered:Connect(function(triggerPlayer)
+		startDialogueWithPlayer(triggerPlayer)
+		remoteEvent:FireClient(triggerPlayer, "open")
+	end)
+end
+
+local function hookPlayer(targetPlayer: Player)
+	targetPlayer.CharacterRemoving:Connect(function()
+		endDialogueWithPlayer(targetPlayer)
+	end)
+end
+Players.PlayerAdded:Connect(hookPlayer)
+for _, p in Players:GetPlayers() do
+	hookPlayer(p)
+end
+Players.PlayerRemoving:Connect(function(leavingPlayer)
+	endDialogueWithPlayer(leavingPlayer)
+end)
+
+task.spawn(function()
+	while model:IsDescendantOf(workspace) do
+		task.wait(1)
+		for targetPlayer, active in activeConversations do
+			if active then
+				local char = targetPlayer.Character
+				local targetRoot = char and char:FindFirstChild("HumanoidRootPart")
+				if not targetRoot or (targetRoot.Position - root.Position).Magnitude > 22 then
+					endDialogueWithPlayer(targetPlayer)
+				end
+			end
+		end
+	end
+end)
+
+local rayParams = RaycastParams.new()
+rayParams.FilterType = Enum.RaycastFilterType.Exclude
+rayParams.FilterDescendantsInstances = { model }
+root:SetNetworkOwner(nil)
+
+while model:IsDescendantOf(workspace) and humanoid.Health > 0 do
+	if paused() then
+		task.wait(0.2)
+		continue
+	end
+	local capturedRevision = revision
+	local angle = random:NextNumber(0, 2 * math.pi)
+	local radius = random:NextNumber(6, 12)
+	local target = home + Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+	local ground = workspace:Raycast(target + Vector3.new(0, 12, 0), Vector3.new(0, -30, 0), rayParams)
+	if not ground or ground.Normal.Y < 0.8 then
+		task.wait(0.5)
+		continue
+	end
+	local path = PathfindingService:CreatePath({
+		AgentRadius = 3,
+		AgentHeight = 7,
+		AgentCanJump = false,
+		WaypointSpacing = 4,
+	})
+	local ok = pcall(function()
+		path:ComputeAsync(root.Position, ground.Position)
+	end)
+	if not ok or path.Status ~= Enum.PathStatus.Success then
+		task.wait(1)
+		continue
+	end
+	local blocked = false
+	local currentWaypoint = 2
+	local connection = path.Blocked:Connect(function(index)
+		if index >= currentWaypoint then
+			blocked = true
+		end
+	end)
+	moving = true
+	for index, waypoint in path:GetWaypoints() do
+		if index == 1 then
+			continue
+		end
+		currentWaypoint = index
+		if paused() or capturedRevision ~= revision or blocked then
+			break
+		end
+		humanoid:MoveTo(waypoint.Position)
+		local deadline = os.clock() + 5
+		repeat
+			task.wait(0.1)
+			local delta = root.Position - waypoint.Position
+			if Vector3.new(delta.X, 0, delta.Z).Magnitude < 1 then
+				break
+			end
+		until os.clock() >= deadline
+			or paused()
+			or capturedRevision ~= revision
+			or blocked
+			or not model:IsDescendantOf(workspace)
+			or humanoid.Health <= 0
+		if os.clock() >= deadline or paused() or capturedRevision ~= revision or blocked then
+			break
+		end
+	end
+	connection:Disconnect()
+	-- Never overwrite a new movement owner's command after a pause/cancel.
+	if capturedRevision == revision and not paused() then
+		humanoid:MoveTo(root.Position)
+	end
+	moving = false
+	task.wait(random:NextNumber(1.5, 3))
+end
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="8">
+      <Properties>
+        <string name="Name">ScammerNPCManager</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[--!strict
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+local NPCWalkAnimation = require(script.Parent:WaitForChild("NPCWalkAnimation") :: ModuleScript)
+
+local lobby = workspace:WaitForChild("MarketplaceLobby", 10) :: Instance?
+local npc = lobby and (lobby:WaitForChild("ScammerNPC", 10) :: Model?)
+if not npc then
+	return
+end
+
+local hrp = npc:WaitForChild("HumanoidRootPart", 5) :: BasePart?
+local head = npc:WaitForChild("Head", 5) :: BasePart?
+local upperTorso = (npc:FindFirstChild("UpperTorso") or npc:FindFirstChild("Torso")) :: BasePart?
+local lowerTorso = (npc:FindFirstChild("LowerTorso") or npc:FindFirstChild("Torso")) :: BasePart?
+local humanoid = npc:FindFirstChildOfClass("Humanoid")
+
+if not hrp or not head or not humanoid then
+	return
+end
+
+humanoid.DisplayName = "MatiBuilds"
+humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+humanoid.NameDisplayDistance = 100
+humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.DisplayWhenDamaged
+humanoid.WalkSpeed = 8
+humanoid.MaxHealth = 100
+humanoid.Health = 100
+humanoid.RequiresNeck = false
+humanoid.BreakJointsOnDeath = false
+local stopWalkAnimation = NPCWalkAnimation.start(npc)
+npc.Destroying:Connect(stopWalkAnimation)
+
+-- Ensure NPC can physically move via PathfindingService and server has network ownership
+hrp.Anchored = false
+pcall(function()
+	hrp:SetNetworkOwner(nil)
+end)
+
+-- Per D-03: Disable ProximityPrompt so interaction is triggered by proximity approach, not [E]
+local prompt = hrp:FindFirstChildOfClass("ProximityPrompt")
+if prompt then
+	prompt.Enabled = false
+end
+
+-- Keep only standard player nametag; remove custom badge BillboardGui if present
+local customTag = head:FindFirstChild("ScammerTag") or head:FindFirstChildOfClass("BillboardGui")
+if customTag then
+	customTag:Destroy()
+end
+
+local neck = (head:FindFirstChild("Neck") or (upperTorso and upperTorso:FindFirstChild("Neck"))) :: Motor6D?
+local waist = (upperTorso:FindFirstChild("Waist") or (lowerTorso and lowerTorso:FindFirstChild("Waist"))) :: Motor6D?
+
+local baseNeckC0 = if neck then neck.C0 else CFrame.new()
+local baseWaistC0 = if waist then waist.C0 else CFrame.new()
+
+local arbiter = NPCNavigation.getDefaultArbiter()
+local remotes = ReplicatedStorage:WaitForChild("MissionRemotes")
+local stateChanged = remotes:WaitForChild("EncounterStateChanged") :: BindableEvent
+local publicBubble = remotes:WaitForChild("PublicNpcBubble") :: RemoteEvent
+
+local queryArbiter = remotes:FindFirstChild("QueryArbiter") :: BindableFunction?
+if not queryArbiter then
+	local fn = Instance.new("BindableFunction")
+	fn.Name = "QueryArbiter"
+	fn.Parent = remotes
+	queryArbiter = fn
+end
+queryArbiter.OnInvoke = function()
+	local q = arbiter.getQueue()
+	local qNames = {}
+	for _, p in ipairs(q) do
+		table.insert(qNames, p.Name)
+	end
+	return {
+		owner = if arbiter.getOwner() then arbiter.getOwner().Name else nil,
+		queueLength = arbiter.getQueueLength(),
+		queue = qNames,
+	}
+end
+
+local testEnqueue = remotes:FindFirstChild("TestEnqueuePlayer") :: BindableEvent?
+if not testEnqueue then
+	local ev = Instance.new("BindableEvent")
+	ev.Name = "TestEnqueuePlayer"
+	ev.Parent = remotes
+	testEnqueue = ev
+end
+testEnqueue.Event:Connect(function(player: Player)
+	arbiter.enqueue(player)
+end)
+
+local stages: { [Player]: string } = {}
+local suppressed: { [Player]: Vector3 } = {}
+stateChanged.Event:Connect(function(player: Player, _revision: number, stage: string)
+	stages[player] = stage
+	if stage == "closed" or stage == "responding" or stage == "ending_good" or stage == "ending_bad" then
+		suppressed[player] = hrp.Position
+	elseif stage == "start" then
+		suppressed[player] = nil
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	stages[player] = nil
+	suppressed[player] = nil
+end)
+
+-- Breathing & Head tracking
+local currentTargetPlayer: Player? = nil
+local clock = 0
+
+RunService.Heartbeat:Connect(function(dt: number)
+	clock += dt
+
+	-- Gentle breathing
+	local breath = math.sin(clock * 2.2) * 0.02
+	local sway = math.cos(clock * 1.5) * 0.015
+
+	if waist and baseWaistC0 then
+		waist.C0 = baseWaistC0 * CFrame.Angles(breath * 0.5, sway, 0)
+	end
+
+	-- Head tracking towards current target player or nearest player
+	local targetChar = if currentTargetPlayer then currentTargetPlayer.Character else nil
+	if not targetChar then
+		local nearestDist = NPCNavigation.NOTICE_DISTANCE
+		for _, player in ipairs(Players:GetPlayers()) do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") then
+				local charHrp = char.HumanoidRootPart :: BasePart
+				local dist = (charHrp.Position - hrp.Position).Magnitude
+				if dist < nearestDist then
+					nearestDist = dist
+					targetChar = char
+				end
+			end
+		end
+	end
+
+	if targetChar and neck and baseNeckC0 then
+		local targetHead = targetChar:FindFirstChild("Head") :: BasePart?
+		if targetHead and upperTorso then
+			local localPos = upperTorso.CFrame:PointToObjectSpace(targetHead.Position)
+			local yaw = math.clamp(-math.atan2(localPos.X, localPos.Z) - math.pi, -math.rad(60), math.rad(60))
+			local pitch = math.clamp(math.atan2(localPos.Y, -localPos.Z), -math.rad(25), math.rad(25))
+			if waist then
+				neck.C0 = baseNeckC0 * CFrame.Angles(pitch, yaw, 0)
+			else
+				neck.C0 = baseNeckC0 * CFrame.Angles(-pitch * 0.7, 0, 0) * CFrame.Angles(0, 0, -yaw * 0.7)
+			end
+		end
+	elseif neck and baseNeckC0 then
+		if waist then
+			neck.C0 = baseNeckC0 * CFrame.Angles(breath * 0.5, 0, 0)
+		else
+			neck.C0 = baseNeckC0 * CFrame.Angles(-breath * 0.5, 0, 0)
+		end
+	end
+end)
+
+local function triggerBeginEncounter(player: Player, revision: number)
+	local bEvent = remotes:FindFirstChild("BeginEncounterEvent") :: BindableEvent?
+	if bEvent then
+		bEvent:Fire(player, revision)
+	end
+end
+
+local function triggerCancelEncounter(player: Player)
+	local cEvent = remotes:FindFirstChild("CancelEncounterEvent") :: BindableEvent?
+	if cEvent then
+		cEvent:Fire(player)
+	end
+end
+
+-- Patrol waypoints
+local basePos = hrp.Position
+local patrolPoints = {
+	basePos + Vector3.new(0, 0, 0),
+	basePos + Vector3.new(6, 0, -5),
+	basePos + Vector3.new(-6, 0, -4),
+	basePos + Vector3.new(0, 0, 6),
+}
+local currentPatrolIdx = 1
+
+local isNavigating = false
+
+-- Continuous proximity scanner for FIFO queue management
+task.spawn(function()
+	while npc and npc.Parent do
+		task.wait(0.35)
+
+		for _, player in ipairs(Players:GetPlayers()) do
+			local char = player.Character
+			local charHrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if char and charHrp and charHrp.Parent and hum and hum.Health > 0 then
+				local dist = (charHrp.Position - hrp.Position).Magnitude
+				local dismissedAt = suppressed[player]
+				if dismissedAt and (charHrp.Position - dismissedAt).Magnitude > NPCNavigation.BREAK_DISTANCE then
+					suppressed[player] = nil
+				end
+				local stage = stages[player] or "start"
+				local available = (stage == "start" or stage == "closed") and not suppressed[player]
+
+				if available and dist <= NPCNavigation.NOTICE_DISTANCE then
+					if not arbiter.isOwner(player) and not arbiter.isInQueue(player) then
+						arbiter.enqueue(player)
+					end
+				elseif arbiter.isInQueue(player) and dist > NPCNavigation.BREAK_DISTANCE then
+					arbiter.cancelPlayer(player)
+				end
+			elseif arbiter.isInQueue(player) then
+				arbiter.cancelPlayer(player)
+			end
+		end
+	end
+end)
+
+-- Main navigation & encounter worker
+task.spawn(function()
+	while npc and npc.Parent do
+		task.wait(0.2)
+
+		-- Get the next player to serve: active owner or advance from FIFO queue
+		local targetPlayer: Player? = arbiter.getOwner()
+		if not targetPlayer then
+			targetPlayer = arbiter.advanceQueue()
+		end
+
+		if targetPlayer then
+			local char = targetPlayer.Parent and targetPlayer.Character
+			local targetHrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+			if char and targetHrp and hum and hum.Health > 0 then
+				isNavigating = true
+				currentTargetPlayer = targetPlayer
+				local token = arbiter.getToken(targetPlayer)
+
+				-- Walk to player with obstacle avoidance
+				local navResult = NPCNavigation.walkToPlayer(
+					npc,
+					targetPlayer,
+					{ stopDistance = NPCNavigation.STOP_DISTANCE, timeout = NPCNavigation.PATH_TIMEOUT },
+					token
+				)
+
+				if navResult == "arrived" and not (token and token.isCancelled) then
+					-- Stop all residual momentum and anchor NPC firmly in place during dialogue
+					humanoid:Move(Vector3.zero, false)
+					hrp.AssemblyLinearVelocity = Vector3.zero
+					hrp.AssemblyAngularVelocity = Vector3.zero
+					hrp.Anchored = true
+
+					-- Turn to face player
+					if targetHrp and targetHrp.Parent then
+						hrp.CFrame = CFrame.lookAt(
+							hrp.Position,
+							Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
+						)
+					end
+
+					-- A public bubble is visual only; no real player whisper is sent.
+					publicBubble:FireAllClients(head, "Hej, fajny skin :)")
+
+					-- Start simulated private chat encounter
+					local revision = if token then token.revision else 1
+					triggerBeginEncounter(targetPlayer, revision)
+
+					-- Monitor distance and interaction state
+					local decisionStartedAt: number? = nil
+					local followUntil: number? = nil
+					local gavePressureShout = false
+
+					while targetPlayer and targetPlayer.Parent and arbiter.isOwner(targetPlayer) do
+						task.wait(0.2)
+						local currentChar = targetPlayer.Character
+						local cHrp = currentChar and currentChar:FindFirstChild("HumanoidRootPart") :: BasePart?
+
+						if not currentChar or not cHrp or not cHrp.Parent then
+							triggerCancelEncounter(targetPlayer)
+							break
+						end
+
+						local currentDist = (cHrp.Position - hrp.Position).Magnitude
+						-- Distance break per D-11: if player walks away further than BREAK_DISTANCE (32 studs)
+						if currentDist > NPCNavigation.BREAK_DISTANCE then
+							triggerCancelEncounter(targetPlayer)
+							arbiter.releaseOwner(targetPlayer)
+							break
+						end
+
+						-- Keep NPC smoothly facing player while anchored in place
+						hrp.CFrame =
+							CFrame.lookAt(hrp.Position, Vector3.new(cHrp.Position.X, hrp.Position.Y, cHrp.Position.Z))
+
+						-- Start the response timer after the last private message, never during typing.
+						if stages[targetPlayer] == "decision" then
+							decisionStartedAt = decisionStartedAt or os.clock()
+							if not gavePressureShout and os.clock() - decisionStartedAt >= 10 then
+								gavePressureShout = true
+								followUntil = os.clock() + 15
+								publicBubble:FireAllClients(head, "Zostało jedno miejsce, zaraz przepada!")
+							end
+							if followUntil and os.clock() >= followUntil then
+								triggerCancelEncounter(targetPlayer)
+								break
+							end
+						end
+					end
+
+					-- Always unanchor NPC when conversation ends so he can walk again
+					hrp.Anchored = false
+					pcall(function()
+						hrp:SetNetworkOwner(nil)
+					end)
+
+					if arbiter.isOwner(targetPlayer) then
+						arbiter.releaseOwner(targetPlayer)
+					end
+				else
+					-- Path blocked or timeout or cancelled
+					arbiter.releaseOwner(targetPlayer)
+				end
+
+				-- Ensure unanchored if loop exited unexpectedly
+				hrp.Anchored = false
+				pcall(function()
+					hrp:SetNetworkOwner(nil)
+				end)
+
+				currentTargetPlayer = nil
+				isNavigating = false
+			else
+				-- Target player has invalid character
+				arbiter.releaseOwner(targetPlayer)
+			end
+		else
+			-- No players in queue: perform idle patrol
+			if not isNavigating and arbiter.getQueueLength() == 0 and not arbiter.getOwner() then
+				local targetPoint = patrolPoints[currentPatrolIdx]
+				humanoid:MoveTo(targetPoint)
+				local reached = false
+				local conn = humanoid.MoveToFinished:Connect(function()
+					reached = true
+				end)
+
+				local waitTime = 0
+				while not reached and waitTime < 4 do
+					task.wait(0.2)
+					waitTime += 0.2
+					if arbiter.getQueueLength() > 0 or arbiter.getOwner() then
+						break
+					end
+				end
+				conn:Disconnect()
+
+				currentPatrolIdx = (currentPatrolIdx % #patrolPoints) + 1
+				local pause = math.random(2, 4)
+				local elapsed = 0
+				while elapsed < pause do
+					task.wait(0.2)
+					elapsed += 0.2
+					if arbiter.getQueueLength() > 0 or arbiter.getOwner() then
+						break
+					end
+				end
+			end
+		end
+	end
+end)
+]]></string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="9">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="10">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="11">
+        <Properties>
+          <string name="Name">MissionController</string>
+          <string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local remotes = ReplicatedStorage:WaitForChild("MissionRemotes")
+local request = remotes:WaitForChild("RequestAction") :: RemoteEvent
+local update = remotes:WaitForChild("MissionUpdate") :: RemoteEvent
+local publicBubble = remotes:WaitForChild("PublicNpcBubble") :: RemoteEvent
+
+local oldGui = playerGui:FindFirstChild("MissionGui")
+if oldGui then
+	oldGui:Destroy()
+end
+local gui = Instance.new("ScreenGui")
+gui.Name = "MissionGui"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 10
+gui.Parent = playerGui
+
+local panel = Instance.new("Frame")
+panel.Name = "SimulatedChatFrame"
+panel.Size = UDim2.fromScale(0.32, 0.56)
+panel.AnchorPoint = Vector2.new(0, 1)
+panel.Position = UDim2.new(0, 16, 1, -24)
+panel.BackgroundColor3 = Color3.fromRGB(28, 29, 32)
+panel.BackgroundTransparency = 0.1
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Parent = gui
+
+local constraint = Instance.new("UISizeConstraint")
+constraint.MinSize = Vector2.new(300, 340)
+constraint.MaxSize = Vector2.new(420, 520)
+constraint.Parent = panel
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = panel
+
+local alertStroke = Instance.new("UIStroke")
+alertStroke.Name = "AlertStroke"
+alertStroke.Color = Color3.fromRGB(240, 60, 60)
+alertStroke.Thickness = 2.5
+alertStroke.Enabled = false
+alertStroke.Parent = panel
+
+local function label(name: string, parent: Instance, size: number): TextLabel
+	local text = Instance.new("TextLabel")
+	text.Name = name
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.Gotham
+	text.TextSize = size
+	text.TextColor3 = Color3.fromRGB(235, 235, 238)
+	text.TextXAlignment = Enum.TextXAlignment.Left
+	text.TextYAlignment = Enum.TextYAlignment.Top
+	text.Parent = parent
+	return text
+end
+
+local title = label("TitleLabel", panel, 15)
+title.Font = Enum.Font.GothamMedium
+title.Position = UDim2.fromOffset(12, 10)
+title.Size = UDim2.new(1, -54, 0, 20)
+
+local subtitle = label("SubTitleLabel", panel, 11)
+subtitle.Text = "Rozmowa prywatna"
+subtitle.TextColor3 = Color3.fromRGB(174, 176, 182)
+subtitle.Position = UDim2.fromOffset(12, 32)
+subtitle.Size = UDim2.new(1, -24, 0, 16)
+
+local close = Instance.new("TextButton")
+close.Name = "CloseButton"
+close.Size = UDim2.fromOffset(30, 30)
+close.Position = UDim2.new(1, -36, 0, 5)
+close.BackgroundTransparency = 1
+close.Font = Enum.Font.Gotham
+close.Text = "×"
+close.TextSize = 24
+close.TextColor3 = Color3.fromRGB(225, 225, 228)
+close.Parent = panel
+
+local tabs = Instance.new("Frame")
+tabs.Name = "ConversationTabs"
+tabs.Position = UDim2.fromOffset(12, 52)
+tabs.Size = UDim2.new(1, -24, 0, 28)
+tabs.BackgroundTransparency = 1
+tabs.Visible = false
+tabs.Parent = panel
+
+local scroll = Instance.new("ScrollingFrame")
+scroll.Name = "MessageScroll"
+scroll.Position = UDim2.fromOffset(12, 54)
+scroll.Size = UDim2.new(1, -24, 1, -164)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 3
+scroll.ScrollBarImageColor3 = Color3.fromRGB(130, 132, 138)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.CanvasSize = UDim2.new()
+scroll.ClipsDescendants = true
+scroll.Parent = panel
+
+local messageLayout = Instance.new("UIListLayout")
+messageLayout.Padding = UDim.new(0, 9)
+messageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+messageLayout.Parent = scroll
+
+local status = label("TypingStatus", panel, 11)
+status.TextColor3 = Color3.fromRGB(174, 176, 182)
+
+local choices = Instance.new("Frame")
+choices.Name = "ChoicesContainer"
+choices.BackgroundTransparency = 1
+choices.Parent = panel
+
+local choicesLayout = Instance.new("UIListLayout")
+choicesLayout.Padding = UDim.new(0, 6)
+choicesLayout.SortOrder = Enum.SortOrder.LayoutOrder
+choicesLayout.Parent = choices
+
+-- Karta Zasad Roblox (Rule Card Frame)
+local ruleCardFrame = Instance.new("Frame")
+ruleCardFrame.Name = "RuleCardFrame"
+ruleCardFrame.Size = UDim2.fromOffset(440, 340)
+ruleCardFrame.Position = UDim2.fromScale(0.5, 0.5)
+ruleCardFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+ruleCardFrame.BackgroundColor3 = Color3.fromRGB(16, 20, 32)
+ruleCardFrame.BorderSizePixel = 0
+ruleCardFrame.Visible = false
+ruleCardFrame.ZIndex = 20
+ruleCardFrame.Parent = gui
+
+local rcCorner = Instance.new("UICorner")
+rcCorner.CornerRadius = UDim.new(0, 10)
+rcCorner.Parent = ruleCardFrame
+
+local rcStroke = Instance.new("UIStroke")
+rcStroke.Color = Color3.fromRGB(80, 140, 240)
+rcStroke.Thickness = 2
+rcStroke.Parent = ruleCardFrame
+
+local rcTitle = label("RcTitle", ruleCardFrame, 15)
+rcTitle.Font = Enum.Font.GothamBold
+rcTitle.Position = UDim2.fromOffset(16, 14)
+rcTitle.Size = UDim2.new(1, -32, 0, 22)
+rcTitle.TextColor3 = Color3.fromRGB(255, 215, 80)
+rcTitle.Text = "🛡️ ZASADY BEZPIECZEŃSTWA ROBLOX"
+
+local rcScroll = Instance.new("ScrollingFrame")
+rcScroll.Name = "RcScroll"
+rcScroll.Position = UDim2.fromOffset(16, 42)
+rcScroll.Size = UDim2.new(1, -32, 1, -110)
+rcScroll.BackgroundTransparency = 1
+rcScroll.BorderSizePixel = 0
+rcScroll.ScrollBarThickness = 3
+rcScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+rcScroll.CanvasSize = UDim2.new()
+rcScroll.Parent = ruleCardFrame
+
+local rcList = Instance.new("UIListLayout")
+rcList.Padding = UDim.new(0, 8)
+rcList.SortOrder = Enum.SortOrder.LayoutOrder
+rcList.Parent = rcScroll
+
+local rcSource = label("RcSource", ruleCardFrame, 10)
+rcSource.Position = UDim2.new(0, 16, 1, -64)
+rcSource.Size = UDim2.new(1, -32, 0, 24)
+rcSource.TextColor3 = Color3.fromRGB(150, 160, 180)
+rcSource.TextWrapped = true
+
+local rcCloseBtn = Instance.new("TextButton")
+rcCloseBtn.Name = "RcCloseBtn"
+rcCloseBtn.Size = UDim2.new(1, -32, 0, 32)
+rcCloseBtn.Position = UDim2.new(0, 16, 1, -36)
+rcCloseBtn.BackgroundColor3 = Color3.fromRGB(40, 110, 220)
+rcCloseBtn.BorderSizePixel = 0
+rcCloseBtn.Font = Enum.Font.GothamBold
+rcCloseBtn.TextSize = 13
+rcCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+rcCloseBtn.Text = "Rozumiem, wracam do rozmowy"
+rcCloseBtn.Parent = ruleCardFrame
+
+local rcBtnCorner = Instance.new("UICorner")
+rcBtnCorner.CornerRadius = UDim.new(0, 6)
+rcBtnCorner.Parent = rcCloseBtn
+
+local latest: MissionContent.MissionSnapshot? = nil
+local selectedConversation = "mati"
+local latestSequence = -1
+local latestRevision = -1
+local pendingAction = false
+
+local function clear(parent: Instance)
+	for _, child in parent:GetChildren() do
+		if child:IsA("GuiObject") then
+			child:Destroy()
+		end
+	end
+end
+
+local function escape(text: string): string
+	local escaped = text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+	return escaped
+end
+
+local function messageRow(message: MissionContent.ChatMessage, index: number)
+	local row = label("Message", scroll, 14)
+	row.Size = UDim2.new(1, -6, 0, 0)
+	row.AutomaticSize = Enum.AutomaticSize.Y
+	row.TextWrapped = true
+	row.RichText = true
+	row.LayoutOrder = index
+	local color = if message.sender == "Ty"
+		then "#B3CFFF"
+		elseif message.sender == "System" then "#D1D1D6"
+		elseif message.sender == "Scamerino" then "#72D0FF"
+		else "#F1C58C"
+	local name = if message.sender == "Ty" then player.DisplayName else message.sender
+	row.Text = '<font color="' .. color .. '"><b>' .. escape(name) .. ":</b></font> " .. escape(message.text)
+end
+
+local function actionButton(text: string, order: number, callback: () -> ())
+	local button = Instance.new("TextButton")
+	button.Name = "Choice"
+	button.Size = UDim2.new(1, 0, 0, 34)
+	button.BackgroundColor3 = Color3.fromRGB(55, 57, 63)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.Gotham
+	button.TextSize = 13
+	button.TextColor3 = Color3.fromRGB(240, 240, 243)
+	button.TextWrapped = true
+	button.Text = text
+	button.LayoutOrder = order
+	button.Active = not pendingAction
+	button.AutoButtonColor = not pendingAction
+	local rounding = Instance.new("UICorner")
+	rounding.CornerRadius = UDim.new(0, 4)
+	rounding.Parent = button
+	button.Activated:Connect(callback)
+	button.Parent = choices
+end
+
+local render: (MissionContent.MissionSnapshot) -> ()
+render = function(snapshot)
+	if snapshot.status == "start" or snapshot.status == "closed" or snapshot.activeConversation == "none" then
+		panel.Visible = false
+		ruleCardFrame.Visible = false
+		return
+	end
+	panel.Visible = true
+	panel:SetAttribute("Revision", snapshot.revision)
+	panel:SetAttribute("Status", snapshot.status)
+	title.Text = if selectedConversation == "scamerino" then "Scamerino" else "MatiBuilds"
+
+	-- Alert stroke & subtitles
+	if snapshot.status == "ending_bad" then
+		alertStroke.Enabled = true
+		subtitle.Text = "⚠️ SYMULACJA: UTRATA DOSTĘPU DO KONTA"
+		subtitle.TextColor3 = Color3.fromRGB(255, 80, 80)
+	elseif snapshot.status == "ending_good" then
+		alertStroke.Enabled = false
+		subtitle.Text = "🛡️ KONTO BEZPIECZNE"
+		subtitle.TextColor3 = Color3.fromRGB(80, 220, 100)
+	else
+		alertStroke.Enabled = false
+		subtitle.Text = if selectedConversation == "scamerino" then "Cyber-Pomocnik" else "Rozmowa prywatna"
+		subtitle.TextColor3 = Color3.fromRGB(174, 176, 182)
+	end
+
+	-- Rule card visibility and population
+	if snapshot.status == "rule_card" and snapshot.ruleCard then
+		ruleCardFrame.Visible = true
+		rcTitle.Text = "🛡️ " .. string.upper(snapshot.ruleCard.title)
+		clear(rcScroll)
+		for i, point in ipairs(snapshot.ruleCard.bulletPoints) do
+			local row = label("Point", rcScroll, 12)
+			row.Size = UDim2.new(1, -6, 0, 0)
+			row.AutomaticSize = Enum.AutomaticSize.Y
+			row.TextWrapped = true
+			row.Text = "• " .. point
+			row.TextColor3 = Color3.fromRGB(235, 238, 245)
+			row.LayoutOrder = i
+		end
+		rcSource.Text = "Źródło: "
+			.. snapshot.ruleCard.sourceTitle
+			.. " ("
+			.. snapshot.ruleCard.sourceUrl
+			.. ")\nZweryfikowano: "
+			.. snapshot.ruleCard.sourceVerifiedAt
+	else
+		ruleCardFrame.Visible = false
+	end
+
+	local hasHelper = #snapshot.histories.scamerino > 0
+	tabs.Visible = hasHelper
+	local top = if hasHelper then 88 else 54
+	local nearBottom = scroll.CanvasPosition.Y + scroll.AbsoluteSize.Y >= scroll.AbsoluteCanvasSize.Y - 20
+	local oldPosition = scroll.CanvasPosition
+	clear(scroll)
+	local history = if selectedConversation == "scamerino"
+		then snapshot.histories.scamerino
+		else snapshot.histories.mati
+	for index, message in history do
+		messageRow(message, index)
+	end
+
+	clear(choices)
+	local count = 0
+	local function submit(action: string)
+		if pendingAction or not latest or latest.revision ~= snapshot.revision then
+			return
+		end
+		pendingAction = true
+		request:FireServer(action, snapshot.revision)
+	end
+
+	local isDecision = snapshot.status == "decision"
+		or snapshot.status == "refusal_pressure"
+		or snapshot.status == "decision_after_check"
+		or snapshot.status == "decision_after_help"
+		or snapshot.status == "helper_quiz"
+
+	local showChoices = (snapshot.status == "helper_quiz" and selectedConversation == "scamerino")
+		or (isDecision and selectedConversation == "mati")
+
+	if showChoices then
+		for _, choice in snapshot.choices do
+			if choice.enabled then
+				count += 1
+				actionButton(choice.label, count, function()
+					submit(choice.id)
+				end)
+			end
+		end
+	elseif isDecision and selectedConversation == "scamerino" then
+		count = 1
+		actionButton("Wróć do rozmowy z MatiBuilds", 1, function()
+			selectedConversation = "mati"
+			render(snapshot)
+		end)
+	elseif snapshot.status == "rule_card" then
+		count = 1
+		actionButton("Pokaż kartę zasad", 1, function()
+			ruleCardFrame.Visible = true
+		end)
+	elseif snapshot.status == "ending_good" or snapshot.status == "ending_bad" then
+		count = 1
+		actionButton("Spróbuj ponownie", 1, function()
+			submit("replay")
+		end)
+	end
+
+	local choicesHeight = if count > 0 then count * 34 + (count - 1) * 6 else 0
+	choices.Position = UDim2.new(0, 12, 1, -12 - choicesHeight)
+	choices.Size = UDim2.new(1, -24, 0, choicesHeight)
+	status.Position = UDim2.new(0, 12, 1, -choicesHeight - 34)
+	status.Size = UDim2.new(1, -24, 0, 16)
+	status.Text = if snapshot.status == "presenting" or snapshot.status == "responding"
+		then title.Text .. " pisze…"
+		elseif snapshot.status == "waiting_for_helper" then "Scamerino idzie na pomoc…"
+		elseif snapshot.status == "helper_quiz" then "Wybierz odpowiedź w quizie:"
+		elseif snapshot.status == "rule_card" then "Zapoznaj się z zasadami bezpieczeństwa:"
+		elseif isDecision then "Wybierz odpowiedź:"
+		else ""
+	scroll.Position = UDim2.fromOffset(12, top)
+	scroll.Size = UDim2.new(1, -24, 1, -top - choicesHeight - 42)
+	local sequence = snapshot.sequence
+	task.defer(function()
+		if latestSequence ~= sequence then
+			return
+		end
+		if nearBottom then
+			scroll.CanvasPosition = Vector2.new(0, math.max(0, scroll.AbsoluteCanvasSize.Y - scroll.AbsoluteSize.Y))
+		else
+			scroll.CanvasPosition = oldPosition
+		end
+	end)
+end
+
+for index, conversation in { "mati", "scamerino" } do
+	local button = Instance.new("TextButton")
+	button.Name = conversation
+	button.Size = UDim2.new(0.5, -3, 1, 0)
+	button.Position = UDim2.new((index - 1) * 0.5, if index == 1 then 0 else 3, 0, 0)
+	button.BackgroundColor3 = Color3.fromRGB(55, 57, 63)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.Gotham
+	button.TextSize = 12
+	button.TextColor3 = Color3.fromRGB(235, 235, 238)
+	button.Text = if conversation == "mati" then "MatiBuilds" else "Scamerino"
+	button.Parent = tabs
+	button.Activated:Connect(function()
+		selectedConversation = conversation
+		if latest then
+			render(latest)
+		end
+	end)
+end
+
+rcCloseBtn.Activated:Connect(function()
+	if not latest then
+		return
+	end
+	ruleCardFrame.Visible = false
+	request:FireServer("close_rule_card", latest.revision)
+end)
+
+close.Activated:Connect(function()
+	if not latest then
+		return
+	end
+	panel.Visible = false
+	ruleCardFrame.Visible = false
+	request:FireServer("close", latest.revision)
+end)
+
+update.OnClientEvent:Connect(function(snapshot: any)
+	if
+		typeof(snapshot) ~= "table"
+		or typeof(snapshot.revision) ~= "number"
+		or typeof(snapshot.sequence) ~= "number"
+	then
+		return
+	end
+	if snapshot.revision < latestRevision or snapshot.sequence <= latestSequence then
+		return
+	end
+	if
+		not latest
+		or snapshot.activeConversation ~= latest.activeConversation
+		or snapshot.revision ~= latestRevision
+	then
+		selectedConversation = if snapshot.activeConversation == "scamerino" then "scamerino" else "mati"
+	end
+	latestSequence = snapshot.sequence
+	latestRevision = snapshot.revision
+	latest = snapshot :: MissionContent.MissionSnapshot
+	pendingAction = false
+	render(snapshot)
+end)
+
+publicBubble.OnClientEvent:Connect(function(adornee: any, text: any)
+	if typeof(adornee) ~= "Instance" or not adornee:IsDescendantOf(workspace) or typeof(text) ~= "string" then
+		return
+	end
+	TextChatService:DisplayBubble(adornee, text)
+end)
+
+-- Subscribe before requesting a snapshot; an early approach must not lose the opening.
+request:FireServer("ready")
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Workspace" referent="12">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="Model" referent="13">
+      <Properties>
+        <string name="Name">MarketplaceLobby</string>
+        <bool name="NeedsPivotMigration">false</bool>
+      </Properties>
+      <Item class="Part" referent="14">
+        <Properties>
+          <string name="Name">CobblePath</string>
+          <bool name="Anchored">true</bool>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0.25</Y>
+            <Z>12</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">true</bool>
+          <Color3uint8 name="Color3uint8">9868955</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>10</X>
+            <Y>0.5</Y>
+            <Z>36</Z>
+          </Vector3>
+          <float name="Transparency">0</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="15">
+        <Properties>
+          <string name="Name">MarketPlaza</string>
+          <bool name="Anchored">true</bool>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0.25</Y>
+            <Z>-6</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">true</bool>
+          <Color3uint8 name="Color3uint8">9211025</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>34</X>
+            <Y>0.5</Y>
+            <Z>24</Z>
+          </Vector3>
+          <float name="Transparency">0</float>
+        </Properties>
+      </Item>
+      <Item class="Model" referent="16">
+        <Properties>
+          <string name="Name">ScammerNPC</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="17">
+          <Properties>
+            <string name="Name">Head</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>4.6</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">16764057</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1.2</X>
+              <Y>1.2</Y>
+              <Z>1.2</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Humanoid" referent="18">
+          <Properties>
+            <string name="Name">Humanoid</string>
+            <string name="DisplayName">FreeRobux_Giver</string>
+            <float name="MaxHealth">100</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="19">
+          <Properties>
+            <string name="Name">HumanoidRootPart</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">false</bool>
+            <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>2</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">1</float>
+          </Properties>
+          <Item class="ProximityPrompt" referent="20">
+            <Properties>
+              <string name="Name">ProximityPrompt</string>
+              <string name="ActionText">Porozmawiaj</string>
+              <float name="HoldDuration">0.5</float>
+              <token name="KeyboardKeyCode">101</token>
+              <float name="MaxActivationDistance">12</float>
+              <string name="ObjectText">FreeRobux_Giver</string>
+              <bool name="RequiresLineOfSight">false</bool>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Part" referent="21">
+          <Properties>
+            <string name="Name">Left Arm</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-1.5</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="22">
+          <Properties>
+            <string name="Name">Left Leg</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-0.5</X>
+              <Y>1</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">2636890</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="23">
+          <Properties>
+            <string name="Name">Right Arm</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>1.5</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="24">
+          <Properties>
+            <string name="Name">Right Leg</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0.5</X>
+              <Y>1</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">2636890</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="25">
+          <Properties>
+            <string name="Name">Torso</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>2</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Model" referent="26">
+        <Properties>
+          <string name="Name">Stall_Trade1</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="27">
+          <Properties>
+            <string name="Name">Canopy</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-10</X>
+              <Y>7.9</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">13120050</Color3uint8>
+            <token name="Material">1312</token>
+            <Vector3 name="size">
+              <X>9</X>
+              <Y>0.8</Y>
+              <Z>5</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="28">
+          <Properties>
+            <string name="Name">Counter</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-10</X>
+              <Y>2</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">9132587</Color3uint8>
+            <token name="Material">528</token>
+            <Vector3 name="size">
+              <X>8</X>
+              <Y>3</Y>
+              <Z>3</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Model" referent="29">
+        <Properties>
+          <string name="Name">Stall_Trade2</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="30">
+          <Properties>
+            <string name="Name">Canopy</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>10</X>
+              <Y>7.9</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">3302600</Color3uint8>
+            <token name="Material">1312</token>
+            <Vector3 name="size">
+              <X>9</X>
+              <Y>0.8</Y>
+              <Z>5</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="31">
+          <Properties>
+            <string name="Name">Counter</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>10</X>
+              <Y>2</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">9132587</Color3uint8>
+            <token name="Material">528</token>
+            <Vector3 name="size">
+              <X>8</X>
+              <Y>3</Y>
+              <Z>3</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+    </Item>
+    <Item class="SpawnLocation" referent="32">
+      <Properties>
+        <string name="Name">MissionStart</string>
+        <bool name="Anchored">true</bool>
+        <Color3uint8 name="Color3uint8">5273760</Color3uint8>
+        <bool name="Enabled">true</bool>
+        <bool name="Neutral">true</bool>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>0.5</Y>
+          <Z>30</Z>
+        </Vector3>
+        <Vector3 name="size">
+          <X>12</X>
+          <Y>1</Y>
+          <Z>12</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

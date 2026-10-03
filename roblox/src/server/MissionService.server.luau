@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
 local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+local ScamerinoNPCManager = require(script.Parent:WaitForChild("ScamerinoNPCManager") :: ModuleScript)
 local arbiter = NPCNavigation.getDefaultArbiter()
 
 local folder = ReplicatedStorage:FindFirstChild("MissionRemotes")
@@ -37,6 +38,7 @@ type State = {
 	lastActionTime: number,
 	refusalCount: number,
 	helpReceived: boolean,
+	quizAttempts: number,
 }
 local states: { [Player]: State } = {}
 local function stateFor(player: Player): State
@@ -53,6 +55,7 @@ local function stateFor(player: Player): State
 		lastActionTime = 0,
 		refusalCount = 0,
 		helpReceived = false,
+		quizAttempts = 0,
 	}
 	states[player] = state
 	return state
@@ -67,6 +70,7 @@ local function send(player: Player, state: State)
 		or state.stage == "refusal_pressure"
 		or state.stage == "decision_after_check"
 		or state.stage == "decision_after_help"
+		or state.stage == "helper_quiz"
 	local choices = if isDecisionStage then MissionContent.getChoicesForStage(state.stage) else {}
 	local snapshot: MissionContent.MissionSnapshot = {
 		revision = state.revision,
@@ -108,6 +112,7 @@ local function cancel(player: Player)
 		send(player, state)
 	end
 	arbiter.releaseOwner(player)
+	ScamerinoNPCManager.cancelPlayer(player)
 end
 
 local function getMatiHead(): BasePart?
@@ -143,6 +148,7 @@ beginEvent.Event:Connect(function(player: Player)
 	state.histories = { mati = {}, scamerino = {} }
 	state.refusalCount = 0
 	state.helpReceived = false
+	state.quizAttempts = 0
 	setStage(player, state, "presenting")
 	send(player, state)
 	task.spawn(function()
@@ -215,7 +221,9 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 		state.activeConversation = "none"
 		state.refusalCount = 0
 		state.helpReceived = false
+		state.quizAttempts = 0
 		arbiter.cancelPlayer(player)
+		ScamerinoNPCManager.resetForPlayer(player, state.revision)
 		setStage(player, state, "start")
 		local spawn = workspace:FindFirstChild("MissionStart")
 		if spawn and spawn:IsA("BasePart") and player.Character then
@@ -229,6 +237,7 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 		or state.stage == "refusal_pressure"
 		or state.stage == "decision_after_check"
 		or state.stage == "decision_after_help"
+		or state.stage == "helper_quiz"
 	if not isDecisionStage or not arbiter.isOwner(player) then
 		return
 	end
@@ -239,6 +248,70 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 	end
 
 	local capturedRevision = state.revision
+
+	-- Obsługa etapu quizu pomocnika
+	if state.stage == "helper_quiz" then
+		appendScamerino(state, "Ty", choice.label)
+		setStage(player, state, "responding")
+		send(player, state)
+
+		task.spawn(function()
+			task.wait(0.85)
+			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+				return
+			end
+
+			if choice.id == "quiz_correct" then
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Brawo! Dokładnie tak. Oszuści obiecują darmowe nagrody i stosują presję czasu, aby wyłudzić hasło. Nigdy go nie podawaj!"
+				)
+				send(player, state)
+				task.wait(1.0)
+				if not current(player, state, capturedRevision) then
+					return
+				end
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Wróć teraz do rozmowy z MatiBuilds i podejmij bezpieczną decyzję!"
+				)
+				setStage(player, state, "decision_after_help")
+				send(player, state)
+			else
+				state.quizAttempts += 1
+				if state.quizAttempts == 1 then
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Nie do końca! Zastanów się: do przesłania Robuxów wystarczy sam nick. Po co mu Twoje hasło?"
+					)
+					setStage(player, state, "helper_quiz")
+					send(player, state)
+				else
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Pamiętaj: NIKT uczciwy nie potrzebuje Twojego hasła do przelania Robuxów. Każda taka prośba to próba kradzieży konta!"
+					)
+					send(player, state)
+					task.wait(1.0)
+					if not current(player, state, capturedRevision) then
+						return
+					end
+					appendScamerino(
+						state,
+						"Scamerino",
+						"Wróć teraz do rozmowy z MatiBuilds i podejmij bezpieczną decyzję!"
+					)
+					setStage(player, state, "decision_after_help")
+					send(player, state)
+				end
+			end
+		end)
+		return
+	end
 
 	if action == "refuse" then
 		-- Pierwsza odmowa -> presja czasu
@@ -273,6 +346,14 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 				return
 			end
 			appendMati(state, "System", MissionContent.texts.ending_good)
+			if state.helpReceived then
+				ScamerinoNPCManager.setOutcome(player, "safe")
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Świetnie! Hasło zostało u Ciebie, a konto jest bezpieczne. Dobra robota! 🦈🛡️"
+				)
+			end
 			setStage(player, state, "ending_good")
 			arbiter.releaseOwner(player)
 			send(player, state)
@@ -298,9 +379,9 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 			send(player, state)
 		end)
 	elseif action == "ask_for_help" then
-		-- Wezwanie pomocy -> Scamerino interweniuje, dymek scammera, odblokowanie Scamerino
+		-- Wezwanie pomocy -> Scamerino podchodzi fizycznie, dymek scammera, otwarcie helper_quiz
 		appendMati(state, "Ty", choice.label)
-		setStage(player, state, "responding")
+		setStage(player, state, "waiting_for_helper")
 		send(player, state)
 
 		local head = getMatiHead()
@@ -308,23 +389,35 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 			publicBubble:FireAllClients(head, MissionContent.texts.help_undermine_npc)
 		end
 
-		task.spawn(function()
-			task.wait(0.85)
-			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
+		appendMati(state, "MatiBuilds", MissionContent.texts.help_undermine_npc)
+		send(player, state)
+
+		ScamerinoNPCManager.requestHelp(player, state.revision, function(res)
+			if not current(player, state, capturedRevision) then
 				return
 			end
-			appendMati(state, "MatiBuilds", MissionContent.texts.help_undermine_npc)
-			send(player, state)
-			task.wait(0.75)
-			if not current(player, state, capturedRevision) or state.stage ~= "responding" then
-				return
+
+			if res == "arrived" then
+				state.helpReceived = true
+				state.activeConversation = "scamerino"
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Widzę, że ktoś próbuje wyłudzić Twoje hasło! 🦈🛡️ Zastanów się: do przekazania Robuxów nie potrzeba hasła. Dlaczego on o nie prosi?"
+				)
+				setStage(player, state, "helper_quiz")
+				send(player, state)
+			else
+				-- no_path lub timeout
+				state.helpReceived = false
+				appendMati(
+					state,
+					"System",
+					"Scamerino nie mógł dotrzeć na czas. Pamiętaj: nigdy nie podawaj nikomu hasła ani kodów!"
+				)
+				setStage(player, state, "decision_after_check")
+				send(player, state)
 			end
-			appendScamerino(state, "Scamerino", MissionContent.texts.scamerino_advice)
-			appendScamerino(state, "System", MissionContent.texts.scamerino_hint)
-			state.helpReceived = true
-			state.activeConversation = "scamerino"
-			setStage(player, state, "decision_after_help")
-			send(player, state)
 		end)
 	elseif action == "share_fake_password" then
 		-- Fikcyjne podanie hasła -> zła decyzja i symulacja przejęcia konta
@@ -343,6 +436,14 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 				return
 			end
 			appendMati(state, "System", MissionContent.texts.ending_bad)
+			if state.helpReceived then
+				ScamerinoNPCManager.setOutcome(player, "alarm")
+				appendScamerino(
+					state,
+					"Scamerino",
+					"Stop! Hasło daje pełny dostęp do konta. To było ćwiczenie — spróbuj jeszcze raz!"
+				)
+			end
 			setStage(player, state, "ending_bad")
 			arbiter.releaseOwner(player)
 			send(player, state)
@@ -361,5 +462,6 @@ for _, player in Players:GetPlayers() do
 end
 Players.PlayerRemoving:Connect(function(player)
 	arbiter.cancelPlayer(player)
+	ScamerinoNPCManager.cancelPlayer(player)
 	states[player] = nil
 end)

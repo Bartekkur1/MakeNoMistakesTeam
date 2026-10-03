@@ -321,8 +321,12 @@ render = function(snapshot)
 		or snapshot.status == "refusal_pressure"
 		or snapshot.status == "decision_after_check"
 		or snapshot.status == "decision_after_help"
+		or snapshot.status == "helper_quiz"
 
-	if isDecision and selectedConversation == "mati" then
+	local showChoices = (snapshot.status == "helper_quiz" and selectedConversation == "scamerino")
+		or (isDecision and selectedConversation == "mati")
+
+	if showChoices then
 		for _, choice in snapshot.choices do
 			if choice.enabled then
 				count += 1
@@ -356,6 +360,8 @@ render = function(snapshot)
 	status.Size = UDim2.new(1, -24, 0, 16)
 	status.Text = if snapshot.status == "presenting" or snapshot.status == "responding"
 		then title.Text .. " pisze…"
+		elseif snapshot.status == "waiting_for_helper" then "Scamerino idzie na pomoc…"
+		elseif snapshot.status == "helper_quiz" then "Wybierz odpowiedź w quizie:"
 		elseif snapshot.status == "rule_card" then "Zapoznaj się z zasadami bezpieczeństwa:"
 		elseif isDecision then "Wybierz odpowiedź:"
 		else ""

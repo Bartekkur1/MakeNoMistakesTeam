@@ -183,6 +183,27 @@ MissionContent.afterHelpChoices = {
 	},
 } :: { ChoiceRecord }
 
+MissionContent.quizChoices = {
+	{
+		id = "quiz_correct",
+		label = "Chce przejąć moje konto i cenne itemy!",
+		nextStage = "decision_after_help",
+		enabled = true,
+	},
+	{
+		id = "quiz_wrong_1",
+		label = "Bo system wymaga hasła do wysyłki",
+		nextStage = "helper_quiz",
+		enabled = true,
+	},
+	{
+		id = "quiz_wrong_2",
+		label = "Żeby sprawdzić czy mam miejsce na Robuxy",
+		nextStage = "helper_quiz",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
 MissionContent.choices = MissionContent.initialChoices
 
 function MissionContent.getChoicesForStage(stage: string): { ChoiceRecord }
@@ -192,6 +213,8 @@ function MissionContent.getChoicesForStage(stage: string): { ChoiceRecord }
 		return MissionContent.afterCheckChoices
 	elseif stage == "decision_after_help" then
 		return MissionContent.afterHelpChoices
+	elseif stage == "helper_quiz" then
+		return MissionContent.quizChoices
 	elseif stage == "decision" then
 		return MissionContent.initialChoices
 	end
@@ -213,6 +236,7 @@ function MissionContent.getChoice(choiceId: string, stage: string?): ChoiceRecor
 		MissionContent.refusalChoices,
 		MissionContent.afterCheckChoices,
 		MissionContent.afterHelpChoices,
+		MissionContent.quizChoices,
 	}) do
 		for _, choice in ipairs(list) do
 			if choice.id == choiceId then

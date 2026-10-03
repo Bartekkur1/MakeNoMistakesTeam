@@ -7,7 +7,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 ## Phases
 
 - [x] **Phase 1: Studio, publikacja i szkielet levelu** - ryzyko publikacji zbadane, mały level z NPC
-- [ ] **Phase 2: Wybory, konsekwencje i pomocnik** - decyzje, wyjaśnienia, spójny Scamerino 3D, ruch NPC i ponowna próba
+- [x] **Phase 2: Wybory, konsekwencje i pomocnik** - decyzje, wyjaśnienia, spójny Scamerino 3D, ruch NPC i ponowna próba
 - [ ] **Phase 3: Wynik, nagroda i przekazanie** - punkty, odznaka, eksport zgodny z kontraktem
 
 ## Phase Details
@@ -47,13 +47,13 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 
 **Plans**: TBD
 **Wave 1**
-- [ ] 02-01-PLAN.md
+- [x] 02-01-PLAN.md — audyt, eksport i rigowanie modelu Scamerino R15 z syreną
 
-**Wave 2** *(blocked on Wave 1 completion)*
+**Wave 2**
 - [x] 02-02-PLAN.md — ruch scammera, podejście z omijaniem przeszkód, symulowany czat i arbitraż
 
-**Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-03-PLAN.md
+**Wave 3**
+- [x] 02-03-PLAN.md — 4 ścieżki decyzyjne, Scamerino quiz, selektywny alarm i atomowy restart
 
 **Zarys kolejności prac:** poprawa i przygotowanie modelu Scamerino do chodzenia → ruch scammera → cztery ścieżki dialogu i wezwanie Scamerino → sprawdzenie całości w Play na komputerze. Ustalenia użytkownika i kryteria odbioru: `phases/02-wybory-konsekwencje-i-pomocnik/02-SCOPE.md`.
 
