@@ -13,7 +13,9 @@ replay: UNVERIFIED
 duration_seconds: 120
 public_link_status: NO-GO_STUDIO_FALLBACK
 fallback_mode: STUDIO_PLAY_SOLO
-recording_status: UNVERIFIED
+recording_status: LOCAL_ONLY
+recording_local_path: /Users/robert/Desktop/Nagranie z ekranu 2026-10-3 o 20.17.43.mov
+recording_duration_seconds: 30.128333
 presentation_handoff: UNVERIFIED
 tester: Robert / MakeNoMistakesTeam
 timestamp: 2026-10-03T17:25:00+02:00
@@ -51,5 +53,14 @@ Dokumentacja weryfikacji i testów rozgrywki misji oszustwa w Roblox Studio.
 | Ścieżka uległości (złe zakończenie) | D-19 | `bad_ending: UNVERIFIED` | Wybór `Podaj kod` daje `Dałeś się oszukać` bez zbierania danych |
 | Reset i teleportacja | D-21 | `replay: UNVERIFIED` | `Zagraj ponownie` resetuje stan na serwerze i przenosi na `MissionStart` |
 | Czas przejścia | D-12 | `duration_seconds: 120` | Przejście misji mieści się w przedziale 2–3 minut |
-| Wideo przejścia | D-10 | `recording_status: UNVERIFIED` | Krótkie nagranie z Play Solo do przekazania zespołowi |
+| Wideo przejścia | D-10 | `recording_status: LOCAL_ONLY` | Nagranie testu przekazane przez Roberta; plik pozostaje lokalnie na jego Pulpicie |
 | Przekazanie prezentacji | D-10 | `presentation_handoff: UNVERIFIED` | Przekazanie nagrania i wyników do workstreamu `presentation` |
+
+## 4. Nagranie testu przekazane przez użytkownika
+
+- Lokalny plik źródłowy: `/Users/robert/Desktop/Nagranie z ekranu 2026-10-3 o 20.17.43.mov`. Nagranie wykluczono z repo na prośbę użytkownika ze względu na rozmiar.
+- Oryginalna nazwa: `Nagranie z ekranu 2026-10-3 o 20.17.43.mov`.
+- Długość pliku: 30,13 s; obraz H.264, 1058 × 752 px; rozmiar: 33 302 517 B.
+- SHA-256 pliku źródłowego: `d16a45d283e17435410bc8e63544823015c62d62b81884d4b932c7c8553e47db`.
+- Robert potwierdził w rozmowie, że Play działa, można wybrać obie opcje i rozpocząć misję od nowa. Treść filmu nie została niezależnie zweryfikowana w tym kroku.
+- Długość nagrania nie jest pomiarem czasu pełnego przejścia misji. Przekazanie nagrania workstreamowi `presentation` pozostaje niezweryfikowane.
