@@ -72,6 +72,72 @@ test('unchanged normalized reapproval ignores timestamp and resumes the exact ol
  expect(s.get().check).toBe(old); expect(s.get().draft).toBeNull();
 });
 
+for (const closed of [false, true]) test(`invalid current approval unlocks its candidate and preserves the old check, closed=${closed}`, () => {
+ const s = completedStore(); const old = s.get().check; s.editCheckContent();
+ s.edit({ text: 'Changed fictional candidate' }); const candidate = s.get().draft;
+ const c = buildCase(candidate); const token = s.beginSubmit();
+ if (closed) s.close();
+ expect(s.approved(token, { ...c, content: '' })).toBe(false);
+ expect(s.get()).toMatchObject({ submitting: false, error: 'submit', view: closed ? 'closed' : 'preview' });
+ expect(s.get().check).toBe(old); expect(s.get().draft).toBe(candidate);
+ const retry = s.beginSubmit(); expect(retry).toBeGreaterThan(token);
+ expect(s.approved(retry, c)).toBe(true);
+});
+
+test('invalid stale approval cannot unlock a newer pending submission', () => {
+ const s = draft(); const first = s.beginSubmit(); s.submitFailed(first);
+ const current = s.beginSubmit(); const before = s.get();
+ expect(s.approved(first, {})).toBe(false); expect(s.get()).toBe(before);
+ expect(s.get().submitting).toBe(true);
+ expect(s.approved(current, buildCase(s.get().draft))).toBe(true);
+});
+
+for (const normalized of [false, true]) test(`unchanged edit approval resumes the old result without sending another case, normalized=${normalized}`, async () => {
+ vi.resetModules();
+ const draftModule = await import('../../src/core/draft.js');
+ const s = draftModule.createDraftStore(); vi.spyOn(draftModule, 'createDraftStore').mockReturnValue(s);
+ const send = vi.fn().mockResolvedValue({ ok: true });
+ vi.stubGlobal('chrome', { runtime: { id: 'test-ext', sendMessage: send, onMessage: { addListener: vi.fn() } } });
+ vi.spyOn(document, 'getSelection').mockReturnValue({ toString: () => 'Fictional' });
+ await import('../../src/content/main.js');
+ const root = document.querySelector('bezpieczna-aura-widget').shadowRoot;
+ const click = text => { const b = [...root.querySelectorAll('button')].find(b => b.textContent === text); expect(b).toBeDefined(); b.click(); };
+ root.querySelector('.avatar').click(); click(STRINGS.approve);
+ await vi.waitFor(() => expect(root.textContent).toContain(STRINGS.safetyNotice));
+ click(STRINGS.next);
+ for (const id of ['known_person', 'ordinary', 'independent_channel']) {
+  root.querySelector(`input[value="${id}"]`).click(); click(STRINGS.next);
+ }
+ const old = s.get().check; const rendered = root.querySelector('h2').textContent;
+ click(STRINGS.editCheckContent);
+ if (normalized) {
+  const text = root.querySelector('textarea'); text.value = ' \u00a0Fictional\u00a0 '; text.dispatchEvent(new Event('input'));
+  const link = root.querySelector('input'); link.value = '  '; link.dispatchEvent(new Event('input'));
+ }
+ click(STRINGS.approve);
+ await vi.waitFor(() => expect(root.querySelector('h2').textContent).toBe(rendered));
+ expect(send).toHaveBeenCalledTimes(1);
+ expect(s.get().check).toBe(old);
+ expect(s.get()).toMatchObject({ view: 'result', draft: null, candidateKind: null, submitting: false, error: null });
+});
+
+test('controller releases submission when approved rejects the current case', async () => {
+ vi.resetModules();
+ const draftModule = await import('../../src/core/draft.js');
+ const s = draftModule.createDraftStore(); vi.spyOn(draftModule, 'createDraftStore').mockReturnValue(s);
+ vi.spyOn(s, 'approved').mockReturnValue(false);
+ vi.stubGlobal('chrome', { runtime: { id: 'test-ext', sendMessage: vi.fn().mockResolvedValue({ ok: true }), onMessage: { addListener: vi.fn() } } });
+ vi.spyOn(document, 'getSelection').mockReturnValue({ toString: () => 'Fictional' });
+ await import('../../src/content/main.js');
+ const root = document.querySelector('bezpieczna-aura-widget').shadowRoot;
+ const approve = () => [...root.querySelectorAll('button')].find(b => b.textContent === STRINGS.approve);
+ root.querySelector('.avatar').click(); approve().click();
+ await vi.waitFor(() => expect(s.approved).toHaveBeenCalledOnce());
+ expect(s.get()).toMatchObject({ submitting: false, error: 'submit', view: 'preview', draft: { text: 'Fictional' } });
+ expect(root.textContent).toContain(STRINGS.submitError);
+ expect(root.querySelector('textarea').readOnly).toBe(false); expect(approve().disabled).toBe(false);
+});
+
 for (const field of ['text', 'link']) test(`successful ${field} edit alone clears every old answer and result`, () => {
  const s = completedStore(); const old = s.get().check; s.editCheckContent();
  s.edit({ [field]: field === 'text' ? 'New fictional content' : 'https://new.example/' });

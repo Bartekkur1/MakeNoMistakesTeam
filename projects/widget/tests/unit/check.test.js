@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { detectHints, evaluate } from '../../src/core/check.js';
+import { QUESTIONS, detectHints, evaluate } from '../../src/core/check.js';
 import { buildCase, capCodePoints, MAX_CONTENT } from '../../src/core/case.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 
@@ -7,6 +7,11 @@ const honest = { sender: ['known_person'], request: ['ordinary'], verify: ['inde
 const unknown = { sender: ['unknown'], request: ['unknown'], verify: ['unknown'] };
 const result = (summaryKey, signals, unknowns, stepId, mismatches = []) => ({
   summaryKey, signals, unknowns, step: { id: stepId, explanationKey: stepId + '_how' }, mismatches,
+});
+test('the working content pack matches the shared immutable answer-option IDs', () => {
+  expect(STRINGS.checkQuestions.map(q => [q.id, q.options.map(o => o.id)])).toEqual(Object.entries(QUESTIONS));
+  expect(Object.isFrozen(QUESTIONS)).toBe(true);
+  for (const options of Object.values(QUESTIONS)) expect(Object.isFrozen(options)).toBe(true);
 });
 const fixtures = [
   ['account code', 'Podaj kod do konta, aby odebrać nagrodę', '',
@@ -62,6 +67,53 @@ const reports = [
   'Oszust napisał: "podaj kod do konta"',
   "Oszust napisał: 'podaj hasło do konta'",
 ];
+for (const [text, id] of [
+  ['Podaj login i hasło do konta', 'password'],
+  ['Podaj mi hasło', 'password'],
+  ['Wpisz kod z SMS', 'code'],
+  ['Podaj mi swoje hasło', 'password'],
+  ['Podaj swój login i hasło', 'password'],
+  ['Wpisz login i hasło', 'password'],
+  ['Napisz nam hasło', 'password'],
+  ['Prześlij mi kod do logowania', 'code'],
+  ['Wpisz swój kod SMS', 'code'],
+  ['Napisz mi kod z SMS', 'code'],
+]) test(`common narrow credential demand retains a warning despite an ordinary answer: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual([id]);
+  const out = evaluate(honest, hints);
+  expect(out.summaryKey).toBe('conflicting_answers');
+  expect(out.signals).toEqual(['credential_' + id]);
+  expect(out.mismatches).toEqual([{ questionId: 'request', answerId: id, messageKey: 'credential_' + id }]);
+  expect(out.step.id).toBe('protect_credentials');
+});
+
+for (const text of [
+  'Podaj mi kod pocztowy', 'Wpisz kod źródłowy', 'Napisz mi nazwę gry',
+  'Podaj login, ale nie hasło', 'Podaj wskazówkę do hasła',
+  'Podaj login i nazwę gry, hasła nie wysyłaj', 'Nie podaj mi hasła', 'Nie wpisz kodu z SMS',
+  'Zgłaszam wiadomość: podaj hasło, to oszustwo',
+  'Zgłaszam wiadomość: „podaj login i hasło, inaczej zablokujemy konto”',
+]) test(`expanded credential rules do not warn on honest wording: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual([]);
+  expect(evaluate(honest, hints)).toEqual(result('no_signals', [], [], 'independent_check'));
+});
+
+for (const [text, requests] of [
+  ['Zgłaszam wiadomość: podaj hasło, inaczej zablokujemy konto', ['password', 'urgency']],
+  ['Zgłaszam wiadomość: podaj hasło, wyślij mi kod z SMS', ['code']],
+  ['Oszust napisał: podaj kod do konta, wpisz login i hasło', ['password']],
+  ['Zgłaszam wiadomość: „podaj hasło”. Wpisz kod z SMS', ['code']],
+]) test(`a report prefix cannot hide a later direct demand or attached threat: ${text}`, () => {
+  const hints = detectHints({ text });
+  expect(hints.request).toEqual(requests);
+  const out = evaluate(honest, hints);
+  expect(out.summaryKey).toBe('conflicting_answers');
+  expect(out.signals).toContain('credential_' + requests[0]);
+  expect(out.step.id).toBe('protect_credentials');
+});
+
 for (const text of reports) {
   test(`reported request does not accuse its honest reporter: ${text}`, () => {
     const hints = detectHints({ text });
@@ -92,7 +144,19 @@ for (const text of ['Zapłać teraz', 'Zrób przelew, to ostatnia szansa', 'Zap�
   });
 }
 test('a standalone payment answer calls for verification without an accusation', () => {
-  expect(evaluate({ ...honest, request: ['payment'] }, null)).toEqual(result('caution', [], [], 'verify_payment'));
+  expect(evaluate({ ...honest, request: ['payment'] }, null)).toEqual(result('caution', ['payment'], [], 'verify_payment'));
+});
+for (const verify of ['independent_channel', 'no_channel']) test(`a child-reported prize without a link remains visible: ${verify}`, () => {
+  expect(evaluate({ ...honest, request: ['prize'], verify: [verify] }, detectHints({ text: 'Zobacz to' })))
+    .toEqual(result('caution', ['prize'], verify === 'no_channel' ? ['official_channel'] : [], 'verify_prize'));
+});
+for (const [text, signals, unknowns, step] of [
+  ['Kliknij, tylko dziś', ['urgency'], ['request'], 'pause_and_verify'],
+  ['Podaj kod do konta', ['credential_code'], ['urgency'], 'protect_credentials'],
+  ['Prześlij hasło do konta natychmiast', ['credential_password', 'urgency'], [], 'protect_credentials'],
+]) test(`unknown request does not contradict recognized evidence: ${text}`, () => {
+  expect(evaluate({ ...honest, request: ['unknown'] }, detectHints({ text })))
+    .toEqual(result('caution', signals, unknowns, step));
 });
 test('urgency phrases select a pause rather than a bare-date alarm', () => {
   for (const text of ['Kliknij, tylko dziś', 'Zadziałaj natychmiast', 'Ostatnia szansa, odpowiedz']) {
