@@ -12,6 +12,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke-api.mjs",
     "seed:build": "node scripts/build-seed.mjs",
     "seed:check": "node scripts/build-seed.mjs --check"
   },
