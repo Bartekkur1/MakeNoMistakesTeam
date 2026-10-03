@@ -46,10 +46,12 @@ export function createPanel({ root, strings, handlers }) {
       link.spellcheck = false;
       const approve = node('button', strings.approve, 'btn-primary');
       approve.type = 'button';
-      approve.disabled = !normalizeText(textarea.value);
+      textarea.readOnly = Boolean(state.submitting);
+      link.readOnly = Boolean(state.submitting);
+      approve.disabled = state.submitting || !normalizeText(textarea.value);
       textarea.addEventListener('input', () => {
         handlers.onEdit({ text: textarea.value });
-        approve.disabled = !normalizeText(textarea.value);
+        approve.disabled = state.submitting || !normalizeText(textarea.value);
       });
       link.addEventListener('input', () => handlers.onEdit({ link: link.value }));
       approve.addEventListener('click', () => handlers.onApprove());

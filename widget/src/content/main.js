@@ -17,8 +17,11 @@ function boot() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
       catch { return; }
-      try { await submitCase(c); store.approved(); }
-      catch { store.submitFailed(); }
+      const token = store.beginSubmit();
+      if (token === null) return;
+      render();
+      try { await submitCase(c); store.approved(token); }
+      catch { store.submitFailed(token); }
       render();
     },
   } });

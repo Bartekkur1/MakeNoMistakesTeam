@@ -34,3 +34,13 @@ test('known capture-phase focus stealing limit', async ({ page, netlog }) => {
   await expect(page.locator('#composer')).toHaveValue('');
   await expect(preview(page)).toHaveValue(/test$/);
 });
+test('double approval creates exactly one case', async ({ page, serviceWorker, netlog }) => {
+  await page.goto('http://127.0.0.1:4173/chat-like.html');
+  await page.locator('#msg').selectText(); await avatar(page).click();
+  await page.getByRole('button', { name: 'Zatwierdzam', exact: true }).dblclick();
+  await expect.poll(() => serviceWorker.evaluate(() => self.__aura.cases.length)).toBeGreaterThanOrEqual(1);
+  await page.waitForTimeout(500);
+  expect(await serviceWorker.evaluate(() => self.__aura.cases.length)).toBe(1);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  await assertOnlyLocal(netlog);
+});
