@@ -60,7 +60,7 @@ export const HERO = {
     "Pomocnik w przeglądarce dla dzieci w wieku 10-13 lat. Dziecko wkleja podejrzaną wiadomość z gry, Discorda, SMS-a albo maila, a Scamerino pokazuje sygnały ostrzegawcze i podpowiada, co zrobić. Jeśli trzeba, dziecko jednym kliknięciem przekazuje sprawę Tobie.",
   primaryLabel: "Zainstaluj w Chrome",
   secondaryLabel: "Zobacz, jak to działa",
-  imageAlt: "Scamerino, niebieski rekin z pomarańczowym kogutem alarmowym",
+  imageAlt: "Scamerino Alertinio, niebieski rekin w zbroi z kłódką, z kogutem alarmowym i lupą",
 };
 
 export interface StatItem {

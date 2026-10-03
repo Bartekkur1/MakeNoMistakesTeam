@@ -32,10 +32,10 @@ export function Hero() {
         </div>
         <div className="flex justify-center md:justify-end">
           <Image
-            src="/scamerino-head.png"
+            src="/landing/scamerino-alertinio.png"
             alt={HERO.imageAlt}
-            width={1024}
-            height={1024}
+            width={456}
+            height={547}
             priority
             sizes="(min-width: 768px) 360px, 220px"
             className="h-auto w-56 md:w-[360px]"
