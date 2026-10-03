@@ -9,36 +9,31 @@ export type ChoiceRecord = {
 local MissionContent = {}
 
 MissionContent.texts = {
-	offer_intro = "Hej! Mam dla Ciebie niesamowitą okazję. Podaj mi hasło do swojego konta, a dodam Ci 10 000 darmowych Robuxów!",
-	decision = "Co robisz? Oszust czeka na Twoją odpowiedź.",
-	ending_good = "Dobrze! Brawo! Nigdy nie podawaj nikomu swoich haseł, tokenów ani kodów SMS. Prawdziwy Roblox nigdy nie prosi o kody zabezpieczające!",
-	ending_bad = "Dałeś się oszukać! Podanie hasła pozwoliłoby oszustowi przejąć Twoje konto. To tylko ćwiczenie: kliknięcie symuluje decyzję — nigdy nie wpisuj tutaj prawdziwego hasła.",
+	offer_intro = "MatiBuilds: Siemka! Masz super skin, widać że znasz się na grze :)\n"
+		.. "MatiBuilds: Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!\n"
+		.. "MatiBuilds: Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.\n"
+		.. "MatiBuilds: Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+	decision = "Co odpowiadasz?",
+	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
+		.. "Oszuści w Robloxie często obiecują darmowe Robuxy i twierdzą, że „muszą się zalogować, żeby je przelać”. Zapamiętaj: nikt uczciwy (nawet administrator ani twórca gry) nie potrzebuje Twojego hasła.\n\n"
+		.. "W prawdziwej grze w takiej sytuacji: nie podawaj żadnych danych, zgłoś gracza przez menu Roblox [Report Abuse] i powiedz o rozmowie zaufanemu dorosłemu.",
+	ending_bad = "Uważaj! Twoje konto i wirtualne przedmioty zostały przejęte!\n\n"
+		.. "Gdy podasz hasło obcej osobie, oszust natychmiast zmienia dane logowania, kradnie Twoje rzadkie skiny i odcina Cię od konta. W Robloxie transfer Robuxów nigdy nie wymaga logowania się na konto odbiorcy.\n\n"
+		.. "To było tylko bezpieczne ćwiczenie. Jeśli podobna sytuacja przydarzy Ci się naprawdę: natychmiast powiedz rodzicom lub zaufanemu dorosłemu, aby pomogli Ci odzyskać konto przez pomoc techniczną Roblox.",
 }
 
 MissionContent.choices = {
 	{
 		id = "share_fake_password",
-		label = "Podaj hasło",
+		label = "Jasne, podam hasło – doładuj mi Robuxy!",
 		nextStage = "ending_bad",
 		enabled = true,
 	},
 	{
 		id = "refuse",
-		label = "Odmów",
+		label = "Nie ma opcji, nikomu nie podaję hasła do konta.",
 		nextStage = "ending_good",
 		enabled = true,
-	},
-	{
-		id = "check_offer",
-		label = "Sprawdź ofertę",
-		nextStage = "check",
-		enabled = false,
-	},
-	{
-		id = "ask_for_help",
-		label = "Poproś o pomoc",
-		nextStage = "help",
-		enabled = false,
 	},
 } :: { ChoiceRecord }
 

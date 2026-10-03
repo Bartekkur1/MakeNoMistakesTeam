@@ -20,7 +20,7 @@ screenGui.Parent = playerGui
 -- Main container frame (lower-third dialogue bar, avatar-safe)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "DialogueFrame"
-mainFrame.Size = UDim2.fromScale(0.92, 0.28)
+mainFrame.Size = UDim2.fromScale(0.92, 0.38)
 mainFrame.Position = UDim2.new(0.5, 0, 1, -20)
 mainFrame.AnchorPoint = Vector2.new(0.5, 1)
 mainFrame.BackgroundColor3 = Color3.fromRGB(14, 20, 32)
@@ -30,8 +30,8 @@ mainFrame.Visible = false
 mainFrame.Parent = screenGui
 
 local sizeConstraint = Instance.new("UISizeConstraint")
-sizeConstraint.MaxSize = Vector2.new(820, 220)
-sizeConstraint.MinSize = Vector2.new(320, 160)
+sizeConstraint.MaxSize = Vector2.new(820, 300)
+sizeConstraint.MinSize = Vector2.new(320, 200)
 sizeConstraint.Parent = mainFrame
 
 local uiCorner = Instance.new("UICorner")
@@ -70,7 +70,7 @@ portraitLabel.Name = "PortraitName"
 portraitLabel.Size = UDim2.new(1, 0, 0, 24)
 portraitLabel.Position = UDim2.new(0, 0, 1, -24)
 portraitLabel.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-portraitLabel.Text = "SCAMERINO"
+portraitLabel.Text = "MatiBuilds"
 portraitLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 portraitLabel.Font = Enum.Font.FredokaOne
 portraitLabel.TextSize = 13
@@ -99,7 +99,7 @@ titleLabel.TextSize = 18
 titleLabel.TextColor3 = Color3.fromRGB(255, 220, 50)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.TextWrapped = true
-titleLabel.Text = "FreeRobux_Giver"
+titleLabel.Text = "MatiBuilds"
 titleLabel.Parent = contentFrame
 
 local bodyLabel = Instance.new("TextLabel")
@@ -108,7 +108,7 @@ bodyLabel.Size = UDim2.new(1, 0, 1, -80)
 bodyLabel.Position = UDim2.fromOffset(0, 26)
 bodyLabel.BackgroundTransparency = 1
 bodyLabel.Font = Enum.Font.GothamMedium
-bodyLabel.TextSize = 14
+bodyLabel.TextSize = 12
 bodyLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 bodyLabel.TextXAlignment = Enum.TextXAlignment.Left
 bodyLabel.TextYAlignment = Enum.TextYAlignment.Top
@@ -176,38 +176,40 @@ local function renderStage(stage: string)
 	clearChoices()
 
 	if stage == "decision" then
-		titleLabel.Text = "FreeRobux_Giver: Podejrzana Oferta!"
+		titleLabel.Text = "MatiBuilds"
 		titleLabel.TextColor3 = Color3.fromRGB(255, 220, 50)
 		bodyLabel.Text = MissionContent.texts.offer_intro .. "\n\n" .. MissionContent.texts.decision
 
-		-- Render the two enabled choices for Phase 1
+		-- Render the two enabled choices with neutral styling so as not to suggest the solution
 		for _, choice in ipairs(MissionContent.choices) do
 			if choice.enabled then
-				local color = if choice.id == "refuse"
-					then Color3.fromRGB(46, 204, 113) -- green
-					else Color3.fromRGB(231, 76, 60) -- red
+				local color = Color3.fromRGB(36, 82, 138) -- Neutral slate-blue
 
-				createChoiceButton(choice.label, color, function()
+				local btn = createChoiceButton(choice.label, color, function()
 					requestActionRemote:FireServer(choice.id)
 				end)
+				btn.Size = UDim2.fromOffset(270, 44)
+				btn.TextSize = 13
 			end
 		end
 	elseif stage == "ending_good" then
-		titleLabel.Text = "Dobrze!"
+		titleLabel.Text = "Świetna decyzja!"
 		titleLabel.TextColor3 = Color3.fromRGB(46, 204, 113)
 		bodyLabel.Text = MissionContent.texts.ending_good
 
-		createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
+		local btn = createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
 			requestActionRemote:FireServer("replay")
 		end)
+		btn.Size = UDim2.fromOffset(180, 44)
 	elseif stage == "ending_bad" then
-		titleLabel.Text = "Dałeś się oszukać"
+		titleLabel.Text = "Konto przejęte!"
 		titleLabel.TextColor3 = Color3.fromRGB(231, 76, 60)
 		bodyLabel.Text = MissionContent.texts.ending_bad
 
-		createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
+		local btn = createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
 			requestActionRemote:FireServer("replay")
 		end)
+		btn.Size = UDim2.fromOffset(180, 44)
 	end
 end
 

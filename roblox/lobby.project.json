@@ -73,7 +73,7 @@
       "Humanoid": {
         "$className": "Humanoid",
         "$properties": {
-          "DisplayName": "FreeRobux_Giver",
+          "DisplayName": "MatiBuilds",
           "MaxHealth": 100,
           "Health": 100
         }
@@ -91,7 +91,7 @@
           "$className": "ProximityPrompt",
           "$properties": {
             "ActionText": "Porozmawiaj",
-            "ObjectText": "FreeRobux_Giver",
+            "ObjectText": "MatiBuilds",
             "KeyboardKeyCode": "E",
             "MaxActivationDistance": 12,
             "RequiresLineOfSight": false,

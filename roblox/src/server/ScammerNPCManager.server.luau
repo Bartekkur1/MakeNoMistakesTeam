@@ -18,18 +18,28 @@ if not hrp or not upperTorso or not head or not lowerTorso then
 	return
 end
 
+local humanoid = npc:FindFirstChildOfClass("Humanoid")
+if humanoid then
+	humanoid.DisplayName = "MatiBuilds"
+end
+
+local prompt = hrp:FindFirstChildOfClass("ProximityPrompt")
+if prompt then
+	prompt.ObjectText = "MatiBuilds"
+end
+
 local neck = (head:FindFirstChild("Neck") or upperTorso:FindFirstChild("Neck")) :: Motor6D?
 local waist = (upperTorso:FindFirstChild("Waist") or lowerTorso:FindFirstChild("Waist")) :: Motor6D?
 
 local baseNeckC0 = if neck then neck.C0 else CFrame.new()
 local baseWaistC0 = if waist then waist.C0 else CFrame.new()
 
--- Idle chat shouts
+-- Friendly openers; the suspicious offer is revealed only after interacting.
 local shouts = {
-	"💎 Darmowe Robuxy dla każdego! Podejdź!",
-	"🔥 Masz tylko 60 sekund na odebranie 10 000 Robuxów!",
-	"⭐ Wygrałeś konkurs! Wciśnij [E] i odbierz nagrodę!",
-	"🚀 Wielka promocja Roblox 2026! Darmowe 10k Robux!",
+	"Hej, fajny avatar! Też grasz w Brookhaven?",
+	"Cześć! Szukasz ludzi do wspólnej gry?",
+	"Hej, często tu grasz? Znasz jakieś fajne gry?",
+	"Fajny strój! Sam go składałeś?",
 }
 
 task.spawn(function()
