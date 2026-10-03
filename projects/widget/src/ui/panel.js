@@ -103,7 +103,8 @@ export function createPanel({ root, strings, handlers }) {
           label.htmlFor = input.id;
           label.append(input, node('span', option.label));
           row.append(label);
-          if (state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
+          // A message link is evidence about the text, not the child's independent channels.
+          if (question.id !== 'verify' && state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
           group.append(row);
         }
         const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext(false));

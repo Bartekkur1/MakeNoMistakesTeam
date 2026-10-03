@@ -205,7 +205,7 @@ for (const change of ['text', 'link-only']) {
       await expect(edit).toBeVisible();
       if (title === 'Czego chce nadawca i czy pogania?') await expect(dialog.locator('.hint-badge')).toHaveCount(0);
       if (title === 'Jak możesz sprawdzić poza tą wiadomością?') {
-        await expect(dialog.locator('.hint-badge')).toHaveCount(change === 'link-only' ? 1 : 0);
+        await expect(dialog.locator('.hint-badge')).toHaveCount(0);
       }
       await dialog.getByLabel('Nie wiem', { exact: true }).check();
       await next.click();
