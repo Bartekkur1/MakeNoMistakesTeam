@@ -50,7 +50,7 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 - [ ] 02-01-PLAN.md
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02-PLAN.md
+- [x] 02-02-PLAN.md — ruch scammera, podejście z omijaniem przeszkód, symulowany czat i arbitraż
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-03-PLAN.md

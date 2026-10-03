@@ -6,7 +6,45 @@ export type ChoiceRecord = {
 	enabled: boolean,
 }
 
+export type ChatMessage = {
+	sender: string,
+	text: string,
+	time: number?,
+}
+
+export type MissionSnapshot = {
+	revision: number,
+	activeConversation: string, -- "mati" | "scamerino" | "none"
+	histories: {
+		mati: { ChatMessage },
+		scamerino: { ChatMessage },
+	},
+	choices: { ChoiceRecord },
+	status: string, -- "start" | "decision" | "ending_good" | "ending_bad" | "closed"
+	title: string?,
+	interlocutorName: string?,
+}
+
 local MissionContent = {}
+
+MissionContent.initialMatiMessages = {
+	{
+		sender = "MatiBuilds",
+		text = "Siemka! Masz super skin, widać że znasz się na grze :)",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+	},
+} :: { ChatMessage }
 
 MissionContent.texts = {
 	offer_intro = "MatiBuilds: Siemka! Masz super skin, widać że znasz się na grze :)\n"
@@ -14,6 +52,7 @@ MissionContent.texts = {
 		.. "MatiBuilds: Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.\n"
 		.. "MatiBuilds: Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
 	decision = "Co odpowiadasz?",
+	pressure_shout = "Zostało ostatnie miejsce w giveawayu Robuxów, zaraz przepada!",
 	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
 		.. "Oszuści w Robloxie często obiecują darmowe Robuxy i twierdzą, że „muszą się zalogować, żeby je przelać”. Zapamiętaj: nikt uczciwy (nawet administrator ani twórca gry) nie potrzebuje Twojego hasła.\n\n"
 		.. "W prawdziwej grze w takiej sytuacji: nie podawaj żadnych danych, zgłoś gracza przez menu Roblox [Report Abuse] i powiedz o rozmowie zaufanemu dorosłemu.",

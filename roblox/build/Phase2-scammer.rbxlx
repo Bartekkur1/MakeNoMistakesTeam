@@ -1,0 +1,2039 @@
+<roblox version="4">
+  <Item class="ReplicatedStorage" referent="0">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="ModuleScript" referent="1">
+      <Properties>
+        <string name="Name">MissionContent</string>
+        <string name="Source"><![CDATA[--!strict
+export type ChoiceRecord = {
+	id: string,
+	label: string,
+	nextStage: string,
+	enabled: boolean,
+}
+
+export type ChatMessage = {
+	sender: string,
+	text: string,
+	time: number?,
+}
+
+export type MissionSnapshot = {
+	revision: number,
+	activeConversation: string, -- "mati" | "scamerino" | "none"
+	histories: {
+		mati: { ChatMessage },
+		scamerino: { ChatMessage },
+	},
+	choices: { ChoiceRecord },
+	status: string, -- "start" | "decision" | "ending_good" | "ending_bad" | "closed"
+	title: string?,
+	interlocutorName: string?,
+}
+
+local MissionContent = {}
+
+MissionContent.initialMatiMessages = {
+	{
+		sender = "MatiBuilds",
+		text = "Siemka! Masz super skin, widać że znasz się na grze :)",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.",
+	},
+	{
+		sender = "MatiBuilds",
+		text = "Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+	},
+} :: { ChatMessage }
+
+MissionContent.texts = {
+	offer_intro = "MatiBuilds: Siemka! Masz super skin, widać że znasz się na grze :)\n"
+		.. "MatiBuilds: Słuchaj, moja grupa robi dzisiaj rozdanie 1500 Robuxów dla aktywnych graczy i wylosowałem ciebie!\n"
+		.. "MatiBuilds: Żeby przelać Robuxy przez system wypłat grupy, muszę się na chwilę zalogować na twoje konto i zatwierdzić transfer.\n"
+		.. "MatiBuilds: Spokojnie, nic nie zmienię, a hasło zmienisz sobie od razu jak skończę. Podasz mi szybko login i hasło?",
+	decision = "Co odpowiadasz?",
+	pressure_shout = "Zostało ostatnie miejsce w giveawayu Robuxów, zaraz przepada!",
+	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
+		.. "Oszuści w Robloxie często obiecują darmowe Robuxy i twierdzą, że „muszą się zalogować, żeby je przelać”. Zapamiętaj: nikt uczciwy (nawet administrator ani twórca gry) nie potrzebuje Twojego hasła.\n\n"
+		.. "W prawdziwej grze w takiej sytuacji: nie podawaj żadnych danych, zgłoś gracza przez menu Roblox [Report Abuse] i powiedz o rozmowie zaufanemu dorosłemu.",
+	ending_bad = "Uważaj! Twoje konto i wirtualne przedmioty zostały przejęte!\n\n"
+		.. "Gdy podasz hasło obcej osobie, oszust natychmiast zmienia dane logowania, kradnie Twoje rzadkie skiny i odcina Cię od konta. W Robloxie transfer Robuxów nigdy nie wymaga logowania się na konto odbiorcy.\n\n"
+		.. "To było tylko bezpieczne ćwiczenie. Jeśli podobna sytuacja przydarzy Ci się naprawdę: natychmiast powiedz rodzicom lub zaufanemu dorosłemu, aby pomogli Ci odzyskać konto przez pomoc techniczną Roblox.",
+}
+
+MissionContent.choices = {
+	{
+		id = "share_fake_password",
+		label = "Jasne, podam hasło – doładuj mi Robuxy!",
+		nextStage = "ending_bad",
+		enabled = true,
+	},
+	{
+		id = "refuse",
+		label = "Nie ma opcji, nikomu nie podaję hasła do konta.",
+		nextStage = "ending_good",
+		enabled = true,
+	},
+} :: { ChoiceRecord }
+
+function MissionContent.getChoice(choiceId: string): ChoiceRecord?
+	for _, choice in ipairs(MissionContent.choices) do
+		if choice.id == choiceId then
+			return choice
+		end
+	end
+	return nil
+end
+
+return MissionContent
+]]></string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="2">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="3">
+      <Properties>
+        <string name="Name">MissionService</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
+local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+
+-- Ensure MissionRemotes folder and RemoteEvents exist
+local remotesFolder = ReplicatedStorage:FindFirstChild("MissionRemotes")
+if not remotesFolder then
+	remotesFolder = Instance.new("Folder")
+	remotesFolder.Name = "MissionRemotes"
+	remotesFolder.Parent = ReplicatedStorage
+end
+
+local requestActionRemote = remotesFolder:FindFirstChild("RequestAction")
+if not requestActionRemote then
+	requestActionRemote = Instance.new("RemoteEvent")
+	requestActionRemote.Name = "RequestAction"
+	requestActionRemote.Parent = remotesFolder
+end
+
+local missionUpdateRemote = remotesFolder:FindFirstChild("MissionUpdate")
+if not missionUpdateRemote then
+	missionUpdateRemote = Instance.new("RemoteEvent")
+	missionUpdateRemote.Name = "MissionUpdate"
+	missionUpdateRemote.Parent = remotesFolder
+end
+
+type PlayerState = {
+	stage: string,
+	revision: number,
+	ownerStatus: string,
+	histories: {
+		mati: { MissionContent.ChatMessage },
+		scamerino: { MissionContent.ChatMessage },
+	},
+	lastActionTime: number,
+	activeConversation: string,
+}
+
+local playerStates: { [Player]: PlayerState } = {}
+
+local function getOrCreateState(player: Player): PlayerState
+	local state = playerStates[player]
+	if not state then
+		state = {
+			stage = "start",
+			revision = 1,
+			ownerStatus = "none",
+			histories = {
+				mati = {},
+				scamerino = {},
+			},
+			lastActionTime = 0,
+			activeConversation = "none",
+		}
+		playerStates[player] = state
+	end
+	return state
+end
+
+local function sendSnapshot(player: Player, state: PlayerState)
+	local snapshot: MissionContent.MissionSnapshot = {
+		revision = state.revision,
+		activeConversation = state.activeConversation,
+		histories = state.histories,
+		choices = MissionContent.choices,
+		status = state.stage,
+		title = if state.activeConversation == "mati"
+			then "MatiBuilds"
+			elseif state.activeConversation == "scamerino" then "Scamerino Alertinio"
+			else nil,
+		interlocutorName = if state.activeConversation == "mati"
+			then "MatiBuilds"
+			elseif state.activeConversation == "scamerino" then "Scamerino"
+			else nil,
+	}
+	(missionUpdateRemote :: RemoteEvent):FireClient(player, snapshot)
+end
+
+-- Teleport character to MissionStart SpawnLocation
+local function teleportToStart(player: Player)
+	local character = player.Character
+	if not character then
+		return
+	end
+	local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local missionStart = Workspace:FindFirstChild("MissionStart") :: BasePart?
+	if rootPart and missionStart then
+		rootPart.CFrame = missionStart.CFrame + Vector3.new(0, 3, 0)
+	end
+end
+
+local function beginEncounter(player: Player, revision: number?)
+	local state = getOrCreateState(player)
+	if revision and revision > state.revision then
+		state.revision = revision
+	end
+
+	state.ownerStatus = "active"
+	state.activeConversation = "mati"
+	state.stage = "decision"
+
+	-- Populate initial short messages from MatiBuilds per D-14, D-17
+	state.histories.mati = {}
+	for _, msg in ipairs(MissionContent.initialMatiMessages) do
+		table.insert(state.histories.mati, {
+			sender = msg.sender,
+			text = msg.text,
+			time = os.clock(),
+		})
+	end
+
+	sendSnapshot(player, state)
+end
+
+local function cancelEncounter(player: Player)
+	local state = playerStates[player]
+	if not state then
+		return
+	end
+
+	state.revision += 1
+	state.stage = "closed"
+	state.activeConversation = "none"
+	state.ownerStatus = "none"
+	sendSnapshot(player, state)
+end
+
+-- Register BindableEvents for cross-script server communication
+local beginEncounterEvent = remotesFolder:FindFirstChild("BeginEncounterEvent")
+if not beginEncounterEvent then
+	beginEncounterEvent = Instance.new("BindableEvent")
+	beginEncounterEvent.Name = "BeginEncounterEvent"
+	beginEncounterEvent.Parent = remotesFolder
+end
+(beginEncounterEvent :: BindableEvent).Event:Connect(function(player: Player, revision: number?)
+	beginEncounter(player, revision)
+end)
+
+local cancelEncounterEvent = remotesFolder:FindFirstChild("CancelEncounterEvent")
+if not cancelEncounterEvent then
+	cancelEncounterEvent = Instance.new("BindableEvent")
+	cancelEncounterEvent.Name = "CancelEncounterEvent"
+	cancelEncounterEvent.Parent = remotesFolder
+end
+(cancelEncounterEvent :: BindableEvent).Event:Connect(function(player: Player)
+	cancelEncounter(player)
+end)
+
+-- Handle player actions from client
+local actionRemote = requestActionRemote :: RemoteEvent
+actionRemote.OnServerEvent:Connect(function(player: Player, actionId: any)
+	if typeof(actionId) ~= "string" then
+		return
+	end
+
+	local now = os.clock()
+	local state = getOrCreateState(player)
+
+	-- Rate limiting: ignore rapid requests within 0.25s
+	if now - state.lastActionTime < 0.25 then
+		return
+	end
+	state.lastActionTime = now
+
+	if actionId == "replay" then
+		state.revision += 1
+		state.stage = "start"
+		state.activeConversation = "none"
+		state.ownerStatus = "none"
+		state.histories.mati = {}
+		state.histories.scamerino = {}
+		NPCNavigation.releaseOwner(player)
+		teleportToStart(player)
+		sendSnapshot(player, state)
+		return
+	end
+
+	if actionId == "close" then
+		state.revision += 1
+		state.stage = "closed"
+		state.activeConversation = "none"
+		state.ownerStatus = "none"
+		NPCNavigation.releaseOwner(player)
+		sendSnapshot(player, state)
+		return
+	end
+
+	-- Only allow choices when player is in 'decision' stage
+	if state.stage ~= "decision" then
+		return
+	end
+
+	local choice = MissionContent.getChoice(actionId)
+	if not choice or not choice.enabled then
+		return
+	end
+
+	-- Per D-14: append player's selected choice to history as their message
+	table.insert(state.histories.mati, {
+		sender = "Ty",
+		text = choice.label,
+		time = now,
+	})
+
+	-- Set next stage
+	state.stage = choice.nextStage
+
+	if choice.nextStage == "ending_bad" then
+		table.insert(state.histories.mati, {
+			sender = "MatiBuilds",
+			text = "Dzięki za hasło! Zaraz się loguję i doładuję Robuxy...",
+			time = now + 0.1,
+		})
+		table.insert(state.histories.mati, {
+			sender = "System",
+			text = MissionContent.texts.ending_bad,
+			time = now + 0.2,
+		})
+	elseif choice.nextStage == "ending_good" then
+		table.insert(state.histories.mati, {
+			sender = "MatiBuilds",
+			text = "Ehh, to jak nie chcesz darmowych Robuxów, to twoja sprawa...",
+			time = now + 0.1,
+		})
+		table.insert(state.histories.mati, {
+			sender = "System",
+			text = MissionContent.texts.ending_good,
+			time = now + 0.2,
+		})
+	end
+
+	sendSnapshot(player, state)
+end)
+
+Players.PlayerRemoving:Connect(function(player: Player)
+	NPCNavigation.releaseOwner(player)
+	playerStates[player] = nil
+end)
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="4">
+      <Properties>
+        <string name="Name">NPCNavigation</string>
+        <string name="Source"><![CDATA[--!strict
+local PathfindingService = game:GetService("PathfindingService")
+
+local NPCNavigation = {}
+
+-- Named configuration constants per D-08, D-10, D-11
+NPCNavigation.NOTICE_DISTANCE = 28
+NPCNavigation.STOP_DISTANCE = 7
+NPCNavigation.BREAK_DISTANCE = 32
+NPCNavigation.FOLLOW_GRACE = 5
+NPCNavigation.PATH_TIMEOUT = 8
+
+export type NavigationResult = "arrived" | "cancelled" | "no_path" | "timeout" | "lost_player"
+
+export type NavigationToken = {
+	isCancelled: boolean,
+	revision: number,
+	cancel: () -> (),
+}
+
+export type ArbiterConfig = {
+	noticeDistance: number?,
+	stopDistance: number?,
+	breakDistance: number?,
+	followGrace: number?,
+	pathTimeout: number?,
+}
+
+export type Arbiter = {
+	getOwner: () -> Player?,
+	tryClaim: (player: Player, revision: number?) -> boolean,
+	enqueue: (player: Player) -> (),
+	advanceQueue: () -> Player?,
+	releaseOwner: (player: Player) -> Player?,
+	cancelPlayer: (player: Player) -> (),
+	isOwner: (player: Player) -> boolean,
+	getToken: (player: Player) -> NavigationToken?,
+	createToken: (player: Player, revision: number) -> NavigationToken,
+	getQueueLength: () -> number,
+}
+
+function NPCNavigation.createToken(revision: number?): NavigationToken
+	local token = {
+		isCancelled = false,
+		revision = revision or 1,
+	}
+	token.cancel = function()
+		token.isCancelled = true
+	end
+	return token
+end
+
+function NPCNavigation.newArbiter(_config: ArbiterConfig?): Arbiter
+	local currentOwner: Player? = nil
+	local ownerTokens: { [Player]: NavigationToken } = {}
+	local queue: { Player } = {}
+	local queueTimes: { [Player]: number } = {}
+
+	local arbiter: Arbiter = {} :: Arbiter
+
+	function arbiter.getOwner(): Player?
+		return currentOwner
+	end
+
+	function arbiter.isOwner(player: Player): boolean
+		return currentOwner == player
+	end
+
+	function arbiter.getToken(player: Player): NavigationToken?
+		return ownerTokens[player]
+	end
+
+	function arbiter.getQueueLength(): number
+		return #queue
+	end
+
+	function arbiter.createToken(player: Player, revision: number): NavigationToken
+		local prevToken = ownerTokens[player]
+		if prevToken then
+			prevToken.cancel()
+		end
+
+		local token = NPCNavigation.createToken(revision)
+		ownerTokens[player] = token
+		return token
+	end
+
+	function arbiter.enqueue(player: Player)
+		if currentOwner == player then
+			return
+		end
+		for _, p in ipairs(queue) do
+			if p == player then
+				return
+			end
+		end
+		table.insert(queue, player)
+		queueTimes[player] = os.clock()
+
+		-- Sort FIFO by enqueue time, tie-break by UserId per D-24
+		table.sort(queue, function(a, b)
+			local tA = queueTimes[a] or 0
+			local tB = queueTimes[b] or 0
+			if tA == tB then
+				return a.UserId < b.UserId
+			end
+			return tA < tB
+		end)
+	end
+
+	function arbiter.tryClaim(player: Player, revision: number?): boolean
+		if currentOwner == nil then
+			currentOwner = player
+			arbiter.createToken(player, revision or 1)
+			return true
+		end
+		return currentOwner == player
+	end
+
+	function arbiter.advanceQueue(): Player?
+		while #queue > 0 do
+			local nextPlayer = table.remove(queue, 1)
+			queueTimes[nextPlayer] = nil
+			if nextPlayer and nextPlayer.Parent and nextPlayer.Character then
+				currentOwner = nextPlayer
+				arbiter.createToken(nextPlayer, 1)
+				return nextPlayer
+			end
+		end
+		return nil
+	end
+
+	function arbiter.releaseOwner(player: Player): Player?
+		if currentOwner == player then
+			local token = ownerTokens[player]
+			if token then
+				token.cancel()
+				ownerTokens[player] = nil
+			end
+			currentOwner = nil
+		end
+		return arbiter.advanceQueue()
+	end
+
+	function arbiter.cancelPlayer(player: Player)
+		for i, p in ipairs(queue) do
+			if p == player then
+				table.remove(queue, i)
+				queueTimes[player] = nil
+				break
+			end
+		end
+		local token = ownerTokens[player]
+		if token then
+			token.cancel()
+			ownerTokens[player] = nil
+		end
+		if currentOwner == player then
+			currentOwner = nil
+		end
+	end
+
+	return arbiter
+end
+
+-- Default shared arbiter for MatiBuilds
+local defaultArbiter = NPCNavigation.newArbiter()
+
+function NPCNavigation.getDefaultArbiter(): Arbiter
+	return defaultArbiter
+end
+
+function NPCNavigation.cancelPlayer(player: Player)
+	defaultArbiter.cancelPlayer(player)
+end
+
+function NPCNavigation.releaseOwner(player: Player): Player?
+	return defaultArbiter.releaseOwner(player)
+end
+
+function NPCNavigation.walkToPlayer(
+	character: Model,
+	targetPlayer: Player,
+	options: { stopDistance: number?, timeout: number? }?,
+	token: NavigationToken?
+): NavigationResult
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not rootPart then
+		return "no_path"
+	end
+
+	local targetChar = targetPlayer.Character
+	if not targetChar then
+		return "lost_player"
+	end
+	local targetRoot = targetChar:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not targetRoot then
+		return "lost_player"
+	end
+
+	local stopDistance = if options and options.stopDistance then options.stopDistance else NPCNavigation.STOP_DISTANCE
+	local timeout = if options and options.timeout then options.timeout else NPCNavigation.PATH_TIMEOUT
+
+	-- Immediate proximity check
+	local initialDist = (rootPart.Position - targetRoot.Position).Magnitude
+	if initialDist <= stopDistance then
+		humanoid:MoveTo(rootPart.Position)
+		return "arrived"
+	end
+
+	local startTime = os.clock()
+
+	-- Path calculation
+	local path = PathfindingService:CreatePath({
+		AgentRadius = 2.5,
+		AgentHeight = 5.0,
+		AgentCanJump = false,
+		WaypointSpacing = 4.0,
+	})
+
+	local computeSuccess, _ = pcall(function()
+		path:ComputeAsync(rootPart.Position, targetRoot.Position)
+	end)
+
+	if not computeSuccess or path.Status ~= Enum.PathStatus.Success then
+		-- Fallback to direct MoveTo if path computation is blocked or failed
+		humanoid:MoveTo(targetRoot.Position)
+		local moveFinished = false
+		local conn = humanoid.MoveToFinished:Connect(function()
+			moveFinished = true
+		end)
+
+		while not moveFinished do
+			if token and token.isCancelled then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "cancelled"
+			end
+			if os.clock() - startTime > timeout then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "timeout"
+			end
+			if not targetChar.Parent or not targetRoot.Parent then
+				conn:Disconnect()
+				return "lost_player"
+			end
+			if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "arrived"
+			end
+			task.wait(0.1)
+		end
+		conn:Disconnect()
+
+		if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance + 2 then
+			humanoid:MoveTo(rootPart.Position)
+			return "arrived"
+		end
+		return "no_path"
+	end
+
+	local waypoints = path:GetWaypoints()
+	for _, waypoint in ipairs(waypoints) do
+		if token and token.isCancelled then
+			humanoid:MoveTo(rootPart.Position)
+			return "cancelled"
+		end
+
+		if os.clock() - startTime > timeout then
+			humanoid:MoveTo(rootPart.Position)
+			return "timeout"
+		end
+
+		if not targetChar.Parent or not targetRoot.Parent then
+			humanoid:MoveTo(rootPart.Position)
+			return "lost_player"
+		end
+
+		local currentDist = (rootPart.Position - targetRoot.Position).Magnitude
+		if currentDist <= stopDistance then
+			humanoid:MoveTo(rootPart.Position)
+			return "arrived"
+		end
+
+		humanoid:MoveTo(waypoint.Position)
+
+		local reachedWaypoint = false
+		local conn = humanoid.MoveToFinished:Connect(function()
+			reachedWaypoint = true
+		end)
+
+		local waypointWait = 0
+		while not reachedWaypoint and waypointWait < 1.5 do
+			if token and token.isCancelled then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "cancelled"
+			end
+			if (rootPart.Position - targetRoot.Position).Magnitude <= stopDistance then
+				conn:Disconnect()
+				humanoid:MoveTo(rootPart.Position)
+				return "arrived"
+			end
+			task.wait(0.05)
+			waypointWait += 0.05
+		end
+		conn:Disconnect()
+	end
+
+	local finalDist = (rootPart.Position - targetRoot.Position).Magnitude
+	if finalDist <= stopDistance + 2 then
+		humanoid:MoveTo(rootPart.Position)
+		return "arrived"
+	end
+
+	return "arrived"
+end
+
+return NPCNavigation
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="5">
+      <Properties>
+        <string name="Name">ScammerNPCManager</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[--!strict
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Chat = game:GetService("Chat")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
+
+local lobby = workspace:WaitForChild("MarketplaceLobby", 10) :: Instance?
+local npc = lobby and (lobby:WaitForChild("ScammerNPC", 10) :: Model?)
+if not npc then
+	return
+end
+
+local hrp = npc:WaitForChild("HumanoidRootPart", 5) :: BasePart?
+local upperTorso = npc:WaitForChild("UpperTorso", 5) :: BasePart?
+local head = npc:WaitForChild("Head", 5) :: BasePart?
+local lowerTorso = npc:WaitForChild("LowerTorso", 5) :: BasePart?
+local humanoid = npc:FindFirstChildOfClass("Humanoid")
+
+if not hrp or not upperTorso or not head or not lowerTorso or not humanoid then
+	return
+end
+
+humanoid.DisplayName = "MatiBuilds"
+
+-- Per D-03: Disable ProximityPrompt so interaction is triggered by proximity approach, not [E]
+local prompt = hrp:FindFirstChildOfClass("ProximityPrompt")
+if prompt then
+	prompt.Enabled = false
+end
+
+local neck = (head:FindFirstChild("Neck") or upperTorso:FindFirstChild("Neck")) :: Motor6D?
+local waist = (upperTorso:FindFirstChild("Waist") or lowerTorso:FindFirstChild("Waist")) :: Motor6D?
+
+local baseNeckC0 = if neck then neck.C0 else CFrame.new()
+local baseWaistC0 = if waist then waist.C0 else CFrame.new()
+
+local arbiter = NPCNavigation.getDefaultArbiter()
+
+-- Breathing & Head tracking
+local currentTargetPlayer: Player? = nil
+local clock = 0
+
+RunService.Heartbeat:Connect(function(dt: number)
+	clock += dt
+
+	-- Gentle breathing
+	local breath = math.sin(clock * 2.2) * 0.02
+	local sway = math.cos(clock * 1.5) * 0.015
+
+	if waist and baseWaistC0 then
+		waist.C0 = baseWaistC0 * CFrame.Angles(breath * 0.5, sway, 0)
+	end
+
+	-- Head tracking towards current target player or nearest player
+	local targetChar = if currentTargetPlayer then currentTargetPlayer.Character else nil
+	if not targetChar then
+		local nearestDist = NPCNavigation.NOTICE_DISTANCE
+		for _, player in ipairs(Players:GetPlayers()) do
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") then
+				local charHrp = char.HumanoidRootPart :: BasePart
+				local dist = (charHrp.Position - hrp.Position).Magnitude
+				if dist < nearestDist then
+					nearestDist = dist
+					targetChar = char
+				end
+			end
+		end
+	end
+
+	if targetChar and neck and baseNeckC0 then
+		local targetHead = targetChar:FindFirstChild("Head") :: BasePart?
+		if targetHead then
+			local localPos = upperTorso.CFrame:PointToObjectSpace(targetHead.Position)
+			local yaw = math.clamp(-math.atan2(localPos.X, localPos.Z) - math.pi, -math.rad(60), math.rad(60))
+			local pitch = math.clamp(math.atan2(localPos.Y, -localPos.Z), -math.rad(25), math.rad(25))
+			neck.C0 = baseNeckC0 * CFrame.Angles(pitch, yaw, 0)
+		end
+	elseif neck and baseNeckC0 then
+		neck.C0 = baseNeckC0 * CFrame.Angles(breath * 0.5, 0, 0)
+	end
+end)
+
+local function triggerBeginEncounter(player: Player, revision: number)
+	local remotes = ReplicatedStorage:FindFirstChild("MissionRemotes")
+	local bEvent = remotes and remotes:FindFirstChild("BeginEncounterEvent") :: BindableEvent?
+	if bEvent then
+		bEvent:Fire(player, revision)
+	end
+end
+
+local function triggerCancelEncounter(player: Player)
+	local remotes = ReplicatedStorage:FindFirstChild("MissionRemotes")
+	local cEvent = remotes and remotes:FindFirstChild("CancelEncounterEvent") :: BindableEvent?
+	if cEvent then
+		cEvent:Fire(player)
+	end
+end
+
+-- Patrol waypoints
+local basePos = hrp.Position
+local patrolPoints = {
+	basePos + Vector3.new(0, 0, 0),
+	basePos + Vector3.new(6, 0, -5),
+	basePos + Vector3.new(-6, 0, -4),
+	basePos + Vector3.new(0, 0, 6),
+}
+local currentPatrolIdx = 1
+
+local isNavigating = false
+
+task.spawn(function()
+	while npc and npc.Parent do
+		task.wait(0.5)
+
+		-- Check for nearby candidate players within notice distance (28 studs)
+		local bestCandidate: Player? = nil
+		local bestDist = NPCNavigation.NOTICE_DISTANCE
+
+		for _, player in ipairs(Players:GetPlayers()) do
+			local char = player.Character
+			local charHrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if char and charHrp and charHrp.Parent then
+				local dist = (charHrp.Position - hrp.Position).Magnitude
+				if dist <= bestDist then
+					bestDist = dist
+					bestCandidate = player
+				end
+			end
+		end
+
+		if bestCandidate and not isNavigating then
+			local claimSuccess = arbiter.tryClaim(bestCandidate)
+			if claimSuccess then
+				isNavigating = true
+				currentTargetPlayer = bestCandidate
+				local token = arbiter.getToken(bestCandidate)
+
+				-- Walk to player with obstacle avoidance
+				local navResult = NPCNavigation.walkToPlayer(
+					npc,
+					bestCandidate,
+					{ stopDistance = NPCNavigation.STOP_DISTANCE, timeout = NPCNavigation.PATH_TIMEOUT },
+					token
+				)
+
+				if navResult == "arrived" and not (token and token.isCancelled) then
+					-- Turn to face player
+					local targetChar = bestCandidate.Character
+					local targetHrp = targetChar and targetChar:FindFirstChild("HumanoidRootPart") :: BasePart?
+					if targetHrp then
+						hrp.CFrame = CFrame.lookAt(
+							hrp.Position,
+							Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
+						)
+					end
+
+					-- Emit single public shout bubble per D-09
+					pcall(function()
+						Chat:Chat(
+							head,
+							"Siemka! Masz super skin, widać że znasz się na grze :)",
+							Enum.ChatColor.Green
+						)
+					end)
+
+					-- Start simulated private chat encounter
+					local revision = if token then token.revision else 1
+					triggerBeginEncounter(bestCandidate, revision)
+
+					-- Monitor distance and interaction state
+					local interactionStartTime = os.clock()
+					local gavePressureShout = false
+
+					while bestCandidate and bestCandidate.Parent and arbiter.isOwner(bestCandidate) do
+						task.wait(0.2)
+						local char = bestCandidate.Character
+						local cHrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+
+						if not char or not cHrp or not cHrp.Parent then
+							break
+						end
+
+						local currentDist = (cHrp.Position - hrp.Position).Magnitude
+						-- Distance break per D-11
+						if currentDist > NPCNavigation.BREAK_DISTANCE then
+							triggerCancelEncounter(bestCandidate)
+							arbiter.releaseOwner(bestCandidate)
+							break
+						end
+
+						-- Pressure shout if no response after FOLLOW_GRACE (5s) per D-10
+						if
+							not gavePressureShout and (os.clock() - interactionStartTime > NPCNavigation.FOLLOW_GRACE)
+						then
+							gavePressureShout = true
+							pcall(function()
+								Chat:Chat(
+									head,
+									"Zostało ostatnie miejsce w giveawayu Robuxów, zaraz przepada!",
+									Enum.ChatColor.Green
+								)
+							end)
+						end
+					end
+				else
+					-- Path blocked or timeout
+					arbiter.releaseOwner(bestCandidate)
+				end
+
+				currentTargetPlayer = nil
+				isNavigating = false
+			end
+		elseif not isNavigating then
+			-- Idle patrol
+			local targetPoint = patrolPoints[currentPatrolIdx]
+			humanoid:MoveTo(targetPoint)
+			local reached = false
+			local conn = humanoid.MoveToFinished:Connect(function()
+				reached = true
+			end)
+
+			local waitTime = 0
+			while not reached and waitTime < 4 do
+				task.wait(0.2)
+				waitTime += 0.2
+			end
+			conn:Disconnect()
+
+			currentPatrolIdx = (currentPatrolIdx % #patrolPoints) + 1
+			task.wait(math.random(2, 4))
+		end
+	end
+end)
+]]></string>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="6">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="7">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="8">
+        <Properties>
+          <string name="Name">MissionController</string>
+          <string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
+
+local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
+local remotesFolder = ReplicatedStorage:WaitForChild("MissionRemotes")
+local requestActionRemote = remotesFolder:WaitForChild("RequestAction") :: RemoteEvent
+local missionUpdateRemote = remotesFolder:WaitForChild("MissionUpdate") :: RemoteEvent
+
+-- Create custom ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MissionGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = playerGui
+
+-- Simulated Private Chat Panel per D-14, D-18
+local chatFrame = Instance.new("Frame")
+chatFrame.Name = "SimulatedChatFrame"
+chatFrame.Size = UDim2.fromScale(0.32, 0.48)
+chatFrame.Position = UDim2.fromScale(0.04, 0.95)
+chatFrame.AnchorPoint = Vector2.new(0, 1)
+chatFrame.BackgroundColor3 = Color3.fromRGB(15, 22, 34)
+chatFrame.BackgroundTransparency = 0.05
+chatFrame.BorderSizePixel = 0
+chatFrame.Visible = false
+chatFrame.Parent = screenGui
+
+local sizeConstraint = Instance.new("UISizeConstraint")
+sizeConstraint.MaxSize = Vector2.new(440, 420)
+sizeConstraint.MinSize = Vector2.new(280, 260)
+sizeConstraint.Parent = chatFrame
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = chatFrame
+
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Color = Color3.fromRGB(0, 160, 240)
+frameStroke.Thickness = 2
+frameStroke.Parent = chatFrame
+
+-- Header Bar (38px)
+local headerBar = Instance.new("Frame")
+headerBar.Name = "HeaderBar"
+headerBar.Size = UDim2.new(1, 0, 0, 38)
+headerBar.Position = UDim2.fromOffset(0, 0)
+headerBar.BackgroundColor3 = Color3.fromRGB(22, 32, 48)
+headerBar.BorderSizePixel = 0
+headerBar.Parent = chatFrame
+
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0, 12)
+headerCorner.Parent = headerBar
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, -70, 0, 20)
+titleLabel.Position = UDim2.fromOffset(12, 4)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.FredokaOne
+titleLabel.TextSize = 14
+titleLabel.TextColor3 = Color3.fromRGB(255, 220, 50)
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Text = "MatiBuilds"
+titleLabel.Parent = headerBar
+
+local subTitleLabel = Instance.new("TextLabel")
+subTitleLabel.Name = "SubTitleLabel"
+subTitleLabel.Size = UDim2.new(1, -70, 0, 14)
+subTitleLabel.Position = UDim2.fromOffset(12, 22)
+subTitleLabel.BackgroundTransparency = 1
+subTitleLabel.Font = Enum.Font.Gotham
+subTitleLabel.TextSize = 10
+subTitleLabel.TextColor3 = Color3.fromRGB(130, 200, 255)
+subTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+subTitleLabel.Text = "Wiadomość prywatna (symulacja)"
+subTitleLabel.Parent = headerBar
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "CloseButton"
+closeBtn.Size = UDim2.fromOffset(28, 28)
+closeBtn.Position = UDim2.new(1, -34, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+closeBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.Text = "✕"
+closeBtn.Parent = headerBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+closeBtn.Activated:Connect(function()
+	requestActionRemote:FireServer("close")
+end)
+
+-- Messages History (ScrollingFrame)
+local messageScroll = Instance.new("ScrollingFrame")
+messageScroll.Name = "MessageScroll"
+messageScroll.Size = UDim2.new(1, -16, 1, -145)
+messageScroll.Position = UDim2.fromOffset(8, 44)
+messageScroll.BackgroundTransparency = 1
+messageScroll.BorderSizePixel = 0
+messageScroll.ScrollBarThickness = 4
+messageScroll.ScrollBarImageColor3 = Color3.fromRGB(60, 100, 150)
+messageScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+messageScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+messageScroll.Parent = chatFrame
+
+local messageLayout = Instance.new("UIListLayout")
+messageLayout.FillDirection = Enum.FillDirection.Vertical
+messageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+messageLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+messageLayout.Padding = UDim.new(0, 8)
+messageLayout.Parent = messageScroll
+
+-- Choices Container at bottom
+local choicesContainer = Instance.new("Frame")
+choicesContainer.Name = "ChoicesContainer"
+choicesContainer.Size = UDim2.new(1, -16, 0, 92)
+choicesContainer.Position = UDim2.new(0, 8, 1, -96)
+choicesContainer.BackgroundTransparency = 1
+choicesContainer.Parent = chatFrame
+
+local choicesLayout = Instance.new("UIListLayout")
+choicesLayout.FillDirection = Enum.FillDirection.Vertical
+choicesLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+choicesLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+choicesLayout.Padding = UDim.new(0, 6)
+choicesLayout.Parent = choicesContainer
+
+local function clearContainer(container: Instance)
+	for _, child in ipairs(container:GetChildren()) do
+		if not child:IsA("UIListLayout") and not child:IsA("UIPadding") and not child:IsA("UICorner") then
+			child:Destroy()
+		end
+	end
+end
+
+local function renderMessageBubble(msg: MissionContent.ChatMessage)
+	local isPlayer = (msg.sender == "Ty")
+	local isSystem = (msg.sender == "System")
+
+	local bubbleContainer = Instance.new("Frame")
+	bubbleContainer.Size = UDim2.fromScale(1, 0)
+	bubbleContainer.AutomaticSize = Enum.AutomaticSize.Y
+	bubbleContainer.BackgroundTransparency = 1
+
+	local bubble = Instance.new("Frame")
+	bubble.AutomaticSize = Enum.AutomaticSize.XY
+	bubble.BorderSizePixel = 0
+
+	local bubbleCorner = Instance.new("UICorner")
+	bubbleCorner.CornerRadius = UDim.new(0, 8)
+	bubbleCorner.Parent = bubble
+
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Font = Enum.Font.GothamMedium
+	textLabel.TextSize = 12
+	textLabel.TextWrapped = true
+	textLabel.AutomaticSize = Enum.AutomaticSize.XY
+	textLabel.BackgroundTransparency = 1
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft = UDim.new(0, 8)
+	pad.PaddingRight = UDim.new(0, 8)
+	pad.PaddingTop = UDim.new(0, 6)
+	pad.PaddingBottom = UDim.new(0, 6)
+	pad.Parent = textLabel
+
+	if isSystem then
+		bubble.BackgroundColor3 = Color3.fromRGB(35, 45, 65)
+		bubble.AnchorPoint = Vector2.new(0.5, 0)
+		bubble.Position = UDim2.fromScale(0.5, 0)
+		textLabel.TextColor3 = Color3.fromRGB(240, 220, 100)
+		textLabel.Text = msg.text
+	elseif isPlayer then
+		bubble.BackgroundColor3 = Color3.fromRGB(36, 110, 185) -- Player blue
+		bubble.AnchorPoint = Vector2.new(1, 0)
+		bubble.Position = UDim2.fromScale(1, 0)
+		textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		textLabel.Text = msg.text
+	else
+		bubble.BackgroundColor3 = Color3.fromRGB(28, 38, 56) -- NPC dark slate
+		bubble.AnchorPoint = Vector2.new(0, 0)
+		bubble.Position = UDim2.fromOffset(0, 0)
+		textLabel.TextColor3 = Color3.fromRGB(230, 235, 245)
+		textLabel.Text = msg.text
+	end
+
+	textLabel.Parent = bubble
+	bubble.Parent = bubbleContainer
+	bubbleContainer.Parent = messageScroll
+end
+
+local function createChoiceButton(label: string, color: Color3, callback: () -> ()): TextButton
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.BackgroundColor3 = color
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.FredokaOne
+	btn.TextSize = 13
+	btn.TextWrapped = true
+	btn.Text = label
+	btn.AutoButtonColor = true
+
+	local btnCorner = Instance.new("UICorner")
+	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.Parent = btn
+
+	local btnStroke = Instance.new("UIStroke")
+	btnStroke.Color = Color3.fromRGB(255, 255, 255)
+	btnStroke.Thickness = 1
+	btnStroke.Transparency = 0.7
+	btnStroke.Parent = btn
+
+	btn.Activated:Connect(callback)
+	btn.Parent = choicesContainer
+	return btn
+end
+
+local function renderSnapshot(snapshot: MissionContent.MissionSnapshot)
+	if snapshot.status == "start" or snapshot.status == "closed" or snapshot.activeConversation == "none" then
+		chatFrame.Visible = false
+		return
+	end
+
+	chatFrame.Visible = true
+	titleLabel.Text = snapshot.title or "MatiBuilds"
+
+	-- Clear and rebuild message history
+	clearContainer(messageScroll)
+	local messages = if snapshot.activeConversation == "scamerino"
+		then (snapshot.histories and snapshot.histories.scamerino or {})
+		else (snapshot.histories and snapshot.histories.mati or {})
+
+	for _, msg in ipairs(messages) do
+		renderMessageBubble(msg)
+	end
+
+	-- Auto scroll to bottom
+	task.defer(function()
+		messageScroll.CanvasPosition = Vector2.new(0, 99999)
+	end)
+
+	-- Render choices
+	clearContainer(choicesContainer)
+
+	if snapshot.status == "decision" then
+		for _, choice in ipairs(snapshot.choices) do
+			if choice.enabled then
+				-- Neutral slate-blue for both choices per D-14
+				createChoiceButton(choice.label, Color3.fromRGB(36, 82, 138), function()
+					requestActionRemote:FireServer(choice.id)
+				end)
+			end
+		end
+	elseif snapshot.status == "ending_good" or snapshot.status == "ending_bad" then
+		createChoiceButton("Zagraj ponownie", Color3.fromRGB(52, 152, 219), function()
+			requestActionRemote:FireServer("replay")
+		end)
+	end
+end
+
+missionUpdateRemote.OnClientEvent:Connect(function(data: any)
+	if typeof(data) == "table" and data.revision ~= nil then
+		renderSnapshot(data :: MissionContent.MissionSnapshot)
+	elseif typeof(data) == "string" then
+		-- Fallback compatibility for simple stage strings
+		if data == "closed" or data == "start" then
+			chatFrame.Visible = false
+		end
+	end
+end)
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="9">
+        <Properties>
+          <string name="Name">ScamerinoDialogueController</string>
+          <string name="Source"><![CDATA[--!strict
+--[=[
+    ScamerinoDialogueController
+    Obsługa okna dialogowego Scamerino Alertinio zgodnie z wytycznymi Roblox UX/UI:
+    - Lower-Third layout (dolna 1/3 ekranu, nie zasłania postaci gracza i NPC)
+    - Responsywne kotwiczenie: AnchorPoint = (0.5, 1), Position = (0.5, 0, 1, -20)
+    - Ograniczenie rozmiaru (UISizeConstraint): max 840x240px
+    - Touch Targets: min 44px wysokości na przyciskach dla urządzeń dotykowych
+    - Płynne animacje wysuwania TweenService
+]=]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui") :: PlayerGui
+local dialogueEvent = ReplicatedStorage:WaitForChild("ScamerinoDialogueEvent") :: RemoteEvent
+
+-- Utwórz lub pobierz ScreenGui
+local screenGui = playerGui:FindFirstChild("ScamerinoDialogueGui") :: ScreenGui?
+if not screenGui then
+	screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "ScamerinoDialogueGui"
+	screenGui.ResetOnSpawn = false
+	screenGui.IgnoreGuiInset = true
+	screenGui.Parent = playerGui
+else
+	-- Usuń ewentualne stare elementy interfejsu
+	local oldMain = screenGui:FindFirstChild("MainFrame")
+	if oldMain then
+		oldMain:Destroy()
+	end
+end
+
+-- Główny kontener dialogowy (Lower-Third Bar)
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.fromScale(0.92, 0.30)
+mainFrame.Position = UDim2.fromScale(0.5, 1.4) -- Pozycja początkowa (ukryta pod dolną krawędzią)
+mainFrame.AnchorPoint = Vector2.new(0.5, 1)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 42)
+mainFrame.BackgroundTransparency = 0.06
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local sizeConstraint = Instance.new("UISizeConstraint")
+sizeConstraint.MaxSize = Vector2.new(840, 240)
+sizeConstraint.MinSize = Vector2.new(340, 180)
+sizeConstraint.Parent = mainFrame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = mainFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 195, 30)
+stroke.Thickness = 2.5
+stroke.Parent = mainFrame
+
+local grad = Instance.new("UIGradient")
+grad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(14, 30, 68)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 16, 36)),
+})
+grad.Rotation = 45
+grad.Parent = mainFrame
+
+-- Pasek nagłówka (Header)
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 36)
+header.BackgroundColor3 = Color3.fromRGB(8, 18, 40)
+header.BorderSizePixel = 0
+header.Parent = mainFrame
+
+local hCorner = Instance.new("UICorner")
+hCorner.CornerRadius = UDim.new(0, 16)
+hCorner.Parent = header
+
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, -50, 1, 0)
+title.Position = UDim2.fromOffset(14, 0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.FredokaOne
+title.Text = "🦈 SCAMERINO ALERTINIO | CYBER-POMOCNIK"
+title.TextColor3 = Color3.fromRGB(255, 220, 60)
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "CloseBtn"
+closeBtn.Size = UDim2.fromOffset(28, 28)
+closeBtn.Position = UDim2.new(1, -34, 0.5, -14)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 45, 55)
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.FredokaOne
+closeBtn.TextSize = 16
+closeBtn.AutoButtonColor = true
+closeBtn.Parent = header
+
+local cBtnCorner = Instance.new("UICorner")
+cBtnCorner.CornerRadius = UDim.new(0, 8)
+cBtnCorner.Parent = closeBtn
+
+-- Lewy panel (Avatar i status)
+local leftArea = Instance.new("Frame")
+leftArea.Name = "LeftArea"
+leftArea.Size = UDim2.new(0, 120, 1, -44)
+leftArea.Position = UDim2.fromOffset(10, 38)
+leftArea.BackgroundColor3 = Color3.fromRGB(15, 32, 70)
+leftArea.BackgroundTransparency = 0.4
+leftArea.BorderSizePixel = 0
+leftArea.Parent = mainFrame
+
+local lCorner = Instance.new("UICorner")
+lCorner.CornerRadius = UDim.new(0, 12)
+lCorner.Parent = leftArea
+
+local avatarIcon = Instance.new("TextLabel")
+avatarIcon.Size = UDim2.new(1, 0, 0, 60)
+avatarIcon.Position = UDim2.fromOffset(0, 8)
+avatarIcon.BackgroundTransparency = 1
+avatarIcon.Font = Enum.Font.FredokaOne
+avatarIcon.Text = "🦈"
+avatarIcon.TextSize = 48
+avatarIcon.Parent = leftArea
+
+local badgeLabel = Instance.new("TextLabel")
+badgeLabel.Name = "BadgeLabel"
+badgeLabel.Size = UDim2.new(0.9, 0, 0, 36)
+badgeLabel.Position = UDim2.new(0.05, 0, 1, -42)
+badgeLabel.BackgroundColor3 = Color3.fromRGB(255, 180, 20)
+badgeLabel.Font = Enum.Font.FredokaOne
+badgeLabel.Text = "STATUS: CZUWA\n🛡️ BEZPIECZNY"
+badgeLabel.TextColor3 = Color3.fromRGB(10, 20, 45)
+badgeLabel.TextSize = 10
+badgeLabel.Parent = leftArea
+
+local bCorner = Instance.new("UICorner")
+bCorner.CornerRadius = UDim.new(0, 8)
+bCorner.Parent = badgeLabel
+
+-- Prawy panel (Tekst wypowiedzi i przyciski)
+local rightArea = Instance.new("Frame")
+rightArea.Name = "RightArea"
+rightArea.Size = UDim2.new(1, -145, 1, -44)
+rightArea.Position = UDim2.fromOffset(136, 38)
+rightArea.BackgroundTransparency = 1
+rightArea.Parent = mainFrame
+
+local dialogBox = Instance.new("TextLabel")
+dialogBox.Name = "DialogBox"
+dialogBox.Size = UDim2.new(1, 0, 1, -54)
+dialogBox.Position = UDim2.new(0, 0, 0, 0)
+dialogBox.BackgroundColor3 = Color3.fromRGB(15, 30, 65)
+dialogBox.BackgroundTransparency = 0.3
+dialogBox.TextColor3 = Color3.fromRGB(240, 245, 255)
+dialogBox.Font = Enum.Font.GothamMedium
+dialogBox.TextSize = 13
+dialogBox.TextWrapped = true
+dialogBox.TextXAlignment = Enum.TextXAlignment.Left
+dialogBox.TextYAlignment = Enum.TextYAlignment.Top
+dialogBox.Parent = rightArea
+
+local dCorner = Instance.new("UICorner")
+dCorner.CornerRadius = UDim.new(0, 10)
+dCorner.Parent = dialogBox
+
+local dPadding = Instance.new("UIPadding")
+dPadding.PaddingLeft = UDim.new(0, 12)
+dPadding.PaddingRight = UDim.new(0, 12)
+dPadding.PaddingTop = UDim.new(0, 8)
+dPadding.PaddingBottom = UDim.new(0, 8)
+dPadding.Parent = dialogBox
+
+local buttonContainer = Instance.new("Frame")
+buttonContainer.Name = "ButtonContainer"
+buttonContainer.Size = UDim2.new(1, 0, 0, 46)
+buttonContainer.Position = UDim2.new(0, 0, 1, -48)
+buttonContainer.BackgroundTransparency = 1
+buttonContainer.Parent = rightArea
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.FillDirection = Enum.FillDirection.Horizontal
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+listLayout.Padding = UDim.new(0, 8)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = buttonContainer
+
+-- Helper do tworzenia przycisków wyboru (min 44px touch target)
+local function createChoiceBtn(order: number, text: string, callback: () -> (), color: Color3?): TextButton
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.fromOffset(155, 44) -- ergonomiczny cel dotykowy
+	btn.BackgroundColor3 = color or Color3.fromRGB(22, 58, 128)
+	btn.Font = Enum.Font.FredokaOne
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 12
+	btn.TextWrapped = true
+	btn.LayoutOrder = order
+	btn.AutoButtonColor = true
+	btn.Parent = buttonContainer
+
+	local btnCorner = Instance.new("UICorner")
+	btnCorner.CornerRadius = UDim.new(0, 8)
+	btnCorner.Parent = btn
+
+	local btnStroke = Instance.new("UIStroke")
+	btnStroke.Color = Color3.fromRGB(255, 255, 255)
+	btnStroke.Thickness = 1
+	btnStroke.Transparency = 0.7
+	btnStroke.Parent = btn
+
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+local function clearButtons()
+	for _, c in ipairs(buttonContainer:GetChildren()) do
+		if c:IsA("TextButton") then
+			c:Destroy()
+		end
+	end
+end
+
+-- Animacja Otwórz/Zamknij
+local function openUI()
+	mainFrame.Visible = true
+	mainFrame.Position = UDim2.fromScale(0.5, 1.4)
+	local tw = TweenService:Create(
+		mainFrame,
+		TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Position = UDim2.new(0.5, 0, 1, -20) }
+	)
+	tw:Play()
+end
+
+local function closeUI()
+	local tw = TweenService:Create(
+		mainFrame,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{ Position = UDim2.fromScale(0.5, 1.4) }
+	)
+	tw:Play()
+	tw.Completed:Connect(function()
+		mainFrame.Visible = false
+	end)
+end
+
+closeBtn.MouseButton1Click:Connect(closeUI)
+
+-- Dialogi
+local showMainMenu: () -> ()
+local showPhishingInfo: () -> ()
+local showScamSigns: () -> ()
+local showRules: () -> ()
+local showReportAdvice: () -> ()
+
+showMainMenu = function()
+	clearButtons()
+	badgeLabel.Text = "STATUS: CZUWA\n🛡️ BEZPIECZNY"
+	badgeLabel.BackgroundColor3 = Color3.fromRGB(255, 180, 20)
+
+	dialogBox.Text =
+		"Cześć! Jestem Scamerino Alertinio – Twój Cyber-Pomocnik! 🦈🛡️\nPilnuję, aby nikt w Roblox nie wyłudził Twojego hasła, konta ani Robuxów.\nO czym chcesz dowiedzieć się więcej?"
+
+	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
+		showPhishingInfo()
+	end, Color3.fromRGB(30, 100, 200))
+
+	createChoiceBtn(2, "⚠️ Czerwone flagi oszusta", function()
+		showScamSigns()
+	end, Color3.fromRGB(180, 110, 20))
+
+	createChoiceBtn(3, "🛡️ 3 Złote Zasady", function()
+		showRules()
+	end)
+
+	createChoiceBtn(4, "🚨 Podejrzany gracz w lobby!", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(5, "👋 Do widzenia", function()
+		closeUI()
+	end, Color3.fromRGB(60, 70, 90))
+end
+
+showPhishingInfo = function()
+	clearButtons()
+	dialogBox.Text =
+		"🎣 CZYM JEST PHISHING? To zarzucenie 'przynęty' (np. darmowe Robuxy, rzadki pet, fałszywy link). Gdy ktoś obiecuje Robuxy w zamian za hasło lub kod SMS, chce przejąć konto! Nigdy nie wpisuj hasła w odpowiedzi na taką ofertę."
+
+	createChoiceBtn(1, "⚠️ Jak rozpoznać oszusta?", function()
+		showScamSigns()
+	end, Color3.fromRGB(180, 110, 20))
+
+	createChoiceBtn(2, "🛡️ Złote zasady", function()
+		showRules()
+	end)
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+showScamSigns = function()
+	clearButtons()
+	dialogBox.Text =
+		"⚠️ 3 CZERWONE FLAGI OSZUSTWA:\n1. 🎁 Zbyt piękne, by było prawdziwe ('Darmowe 10 000 Robuxów!')\n2. ⏱️ Presja czasu ('Tylko 60 sekund!')\n3. 🔑 Prośba o hasło lub kod SMS. Prawdziwy pracownik Roblox NIGDY o to nie pyta!"
+
+	createChoiceBtn(1, "🚨 Ktoś na placu rozdaje Robuxy!", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(2, "🛡️ Złote zasady", function()
+		showRules()
+	end)
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+showRules = function()
+	clearButtons()
+	dialogBox.Text =
+		"🛡️ 3 ZŁOTE ZASADY BEZPIECZEŃSTWA:\n1. 🔑 NIGDY nie podawaj nikomu hasła ani kodów SMS.\n2. 👮 Roblox NIGDY nie prosi o hasło na czacie.\n3. ⏱️ Gdy ktoś każe działać 'szybko' – zwolnij i zapytaj rodzica lub opiekuna!"
+
+	createChoiceBtn(1, "🔍 Czym jest Phishing?", function()
+		showPhishingInfo()
+	end, Color3.fromRGB(30, 100, 200))
+
+	createChoiceBtn(2, "🚨 Podejrzany gracz w lobby", function()
+		showReportAdvice()
+	end, Color3.fromRGB(200, 60, 60))
+
+	createChoiceBtn(3, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+showReportAdvice = function()
+	clearButtons()
+	dialogBox.Text =
+		"👀 ZAUWAŻYŁEŚ GRACZA 'FreeRobux_Giver'? To klasyczny podstęp! Podejdź do niego [E] i sprawdź, czy rozpoznasz jego manipulacje. Pamiętaj: pod żadnym pozorem nie podawaj kodu – odrzuć ofertę!"
+
+	createChoiceBtn(1, "🚶 Idę sprawdzić oszusta!", function()
+		closeUI()
+	end, Color3.fromRGB(40, 160, 60))
+
+	createChoiceBtn(2, "🔙 Wróć do menu", function()
+		showMainMenu()
+	end)
+end
+
+-- Nasłuchuj zdarzenia otwarcia od serwera
+dialogueEvent.OnClientEvent:Connect(function(action: string)
+	if action == "open" then
+		showMainMenu()
+		openUI()
+	end
+end)
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Workspace" referent="10">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+    <Item class="Model" referent="11">
+      <Properties>
+        <string name="Name">MarketplaceLobby</string>
+        <bool name="NeedsPivotMigration">false</bool>
+      </Properties>
+      <Item class="Part" referent="12">
+        <Properties>
+          <string name="Name">CobblePath</string>
+          <bool name="Anchored">true</bool>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0.25</Y>
+            <Z>12</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">true</bool>
+          <Color3uint8 name="Color3uint8">9868955</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>10</X>
+            <Y>0.5</Y>
+            <Z>36</Z>
+          </Vector3>
+          <float name="Transparency">0</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="13">
+        <Properties>
+          <string name="Name">MarketPlaza</string>
+          <bool name="Anchored">true</bool>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0.25</Y>
+            <Z>-6</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">true</bool>
+          <Color3uint8 name="Color3uint8">9211025</Color3uint8>
+          <token name="Material">880</token>
+          <Vector3 name="size">
+            <X>34</X>
+            <Y>0.5</Y>
+            <Z>24</Z>
+          </Vector3>
+          <float name="Transparency">0</float>
+        </Properties>
+      </Item>
+      <Item class="Model" referent="14">
+        <Properties>
+          <string name="Name">ScammerNPC</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="15">
+          <Properties>
+            <string name="Name">Head</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>4.6</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">16764057</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1.2</X>
+              <Y>1.2</Y>
+              <Z>1.2</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Humanoid" referent="16">
+          <Properties>
+            <string name="Name">Humanoid</string>
+            <string name="DisplayName">FreeRobux_Giver</string>
+            <float name="MaxHealth">100</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="17">
+          <Properties>
+            <string name="Name">HumanoidRootPart</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">false</bool>
+            <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>2</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">1</float>
+          </Properties>
+          <Item class="ProximityPrompt" referent="18">
+            <Properties>
+              <string name="Name">ProximityPrompt</string>
+              <string name="ActionText">Porozmawiaj</string>
+              <float name="HoldDuration">0.5</float>
+              <token name="KeyboardKeyCode">101</token>
+              <float name="MaxActivationDistance">12</float>
+              <string name="ObjectText">FreeRobux_Giver</string>
+              <bool name="RequiresLineOfSight">false</bool>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Part" referent="19">
+          <Properties>
+            <string name="Name">Left Arm</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-1.5</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="20">
+          <Properties>
+            <string name="Name">Left Leg</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-0.5</X>
+              <Y>1</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">2636890</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="21">
+          <Properties>
+            <string name="Name">Right Arm</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>1.5</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="22">
+          <Properties>
+            <string name="Name">Right Leg</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0.5</X>
+              <Y>1</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">2636890</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>1</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="23">
+          <Properties>
+            <string name="Name">Torso</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>3</Y>
+              <Z>0</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">1710618</Color3uint8>
+            <token name="Material">256</token>
+            <Vector3 name="size">
+              <X>2</X>
+              <Y>2</Y>
+              <Z>1</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Model" referent="24">
+        <Properties>
+          <string name="Name">Stall_Trade1</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="25">
+          <Properties>
+            <string name="Name">Canopy</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-10</X>
+              <Y>7.9</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">13120050</Color3uint8>
+            <token name="Material">1312</token>
+            <Vector3 name="size">
+              <X>9</X>
+              <Y>0.8</Y>
+              <Z>5</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="26">
+          <Properties>
+            <string name="Name">Counter</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>-10</X>
+              <Y>2</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">9132587</Color3uint8>
+            <token name="Material">528</token>
+            <Vector3 name="size">
+              <X>8</X>
+              <Y>3</Y>
+              <Z>3</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+      <Item class="Model" referent="27">
+        <Properties>
+          <string name="Name">Stall_Trade2</string>
+          <bool name="NeedsPivotMigration">false</bool>
+        </Properties>
+        <Item class="Part" referent="28">
+          <Properties>
+            <string name="Name">Canopy</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>10</X>
+              <Y>7.9</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">3302600</Color3uint8>
+            <token name="Material">1312</token>
+            <Vector3 name="size">
+              <X>9</X>
+              <Y>0.8</Y>
+              <Z>5</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="29">
+          <Properties>
+            <string name="Name">Counter</string>
+            <bool name="Anchored">true</bool>
+            <CoordinateFrame name="CFrame">
+              <X>10</X>
+              <Y>2</Y>
+              <Z>-4</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <bool name="CanCollide">true</bool>
+            <Color3uint8 name="Color3uint8">9132587</Color3uint8>
+            <token name="Material">528</token>
+            <Vector3 name="size">
+              <X>8</X>
+              <Y>3</Y>
+              <Z>3</Z>
+            </Vector3>
+            <float name="Transparency">0</float>
+          </Properties>
+        </Item>
+      </Item>
+    </Item>
+    <Item class="SpawnLocation" referent="30">
+      <Properties>
+        <string name="Name">MissionStart</string>
+        <bool name="Anchored">true</bool>
+        <Color3uint8 name="Color3uint8">5273760</Color3uint8>
+        <bool name="Enabled">true</bool>
+        <bool name="Neutral">true</bool>
+        <Vector3 name="Position">
+          <X>0</X>
+          <Y>0.5</Y>
+          <Z>30</Z>
+        </Vector3>
+        <Vector3 name="size">
+          <X>12</X>
+          <Y>1</Y>
+          <Z>12</Z>
+        </Vector3>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
