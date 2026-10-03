@@ -100,6 +100,7 @@ export function createPanel({ root, strings, handlers }) {
       body.append(node('h2', strings.previewHeading), node('p', strings.sourcePrefix + ' ' + ctx.host, 'source'),
         textarea, link, node('p', strings.previewHint, 'hint'), node('p', strings.guardianNotice, 'notice'));
       if (state.error === 'submit') body.append(node('p', strings.submitError, 'error'));
+      if (state.draft.truncated) body.append(node('p', strings.truncatedNotice, 'hint'));
       body.append(approve);
       textarea.focus();
     },
