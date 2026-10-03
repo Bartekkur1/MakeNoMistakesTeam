@@ -1,0 +1,55 @@
+---
+plan: 01-02
+status: in-progress
+tracer_gate: PASS
+tracer_tester: Robert / MakeNoMistakesTeam
+tracer_timestamp: 2026-10-03T17:25:00+02:00
+workspace_sync: UNVERIFIED
+desktop_prompt: UNVERIFIED
+touch_prompt: UNVERIFIED
+good_ending: UNVERIFIED
+bad_ending: UNVERIFIED
+replay: UNVERIFIED
+duration_seconds: 120
+public_link_status: NO-GO_STUDIO_FALLBACK
+fallback_mode: STUDIO_PLAY_SOLO
+recording_status: UNVERIFIED
+presentation_handoff: UNVERIFIED
+tester: Robert / MakeNoMistakesTeam
+timestamp: 2026-10-03T17:25:00+02:00
+---
+
+# Phase 1: Playtest i weryfikacja misji (MIS-01, RBX-01)
+
+Dokumentacja weryfikacji i testów rozgrywki misji oszustwa w Roblox Studio.
+
+## 1. Stan tracera (Task 1)
+- `tracer_gate: PASS`
+- `tracer_tester: Robert / MakeNoMistakesTeam`
+- `tracer_timestamp: 2026-10-03T17:25:00+02:00`
+- Przetestowano autoratywną ścieżkę misji:
+  `Workspace.MissionStart` → podejście do `Workspace.MarketplaceLobby.ScammerNPC` → aktywacja `ProximityPrompt` (`FreeRobux_Giver`) → wyświetlenie oferty w `MissionGui` → wybór `Odmów` → server transition do `ending_good` (`Dobrze!`) → kliknięcie `Zagraj ponownie` → teleportacja na `Workspace.MissionStart`.
+
+## 2. Architektura GUI i responsywność (Task 2)
+- Kontroler klienta: `roblox/src/client/MissionController.client.luau` tworzy `MissionGui` z zachowaniem `UIListLayout`, `TextWrapped` i celów dotykowych minimum 44 px wysokości.
+- Responsywność sprawdzona pod szerokość ekranu mobilnego (375 px) z marginesami procentowymi (`UDim2.fromScale`).
+- Portret Scamerino (`ImageLabel`) posiada lokalny fallback do portretu z wizualnym oznaczeniem `SCAMERINO` zgodnie z `D-14` i `D-16`.
+- Wybory: 4 gniazda schematu danych w `MissionContent.luau`, z czego aktywne w Fazie 1 są wyłącznie `Podaj kod` i `Odmów`.
+- Treści i komunikaty:
+  - Dobre zakończenie: `Dobrze!`
+  - Złe zakończenie: `Dałeś się oszukać`
+  - Kontrolka resetu: `Zagraj ponownie`
+
+## 3. Matryca testowa kompleksowej weryfikacji Studio (Task 3)
+
+| Test | Wymaganie | Stan | Dowód / Obserwacje |
+|---|---|---|---|
+| Bezpieczeństwo live-sync | D-05 | `workspace_sync: UNVERIFIED` | `sync.project.json` nie posiada klucza Workspace; chroni geometrię Studio |
+| ProximityPrompt na Desktop | D-17 | `desktop_prompt: UNVERIFIED` | Klawisz [E] z odległości do 12 studów otwiera `DialogueFrame` |
+| ProximityPrompt na Mobile | D-17 | `touch_prompt: UNVERIFIED` | Dotknięcie promptu na ekranie dotykowym otwiera dialog |
+| Ścieżka odmowy (dobre zakończenie) | D-19 | `good_ending: UNVERIFIED` | Wybór `Odmów` daje `Dobrze!` z wyjaśnieniem |
+| Ścieżka uległości (złe zakończenie) | D-19 | `bad_ending: UNVERIFIED` | Wybór `Podaj kod` daje `Dałeś się oszukać` bez zbierania danych |
+| Reset i teleportacja | D-21 | `replay: UNVERIFIED` | `Zagraj ponownie` resetuje stan na serwerze i przenosi na `MissionStart` |
+| Czas przejścia | D-12 | `duration_seconds: 120` | Przejście misji mieści się w przedziale 2–3 minut |
+| Wideo przejścia | D-10 | `recording_status: UNVERIFIED` | Krótkie nagranie z Play Solo do przekazania zespołowi |
+| Przekazanie prezentacji | D-10 | `presentation_handoff: UNVERIFIED` | Przekazanie nagrania i wyników do workstreamu `presentation` |
