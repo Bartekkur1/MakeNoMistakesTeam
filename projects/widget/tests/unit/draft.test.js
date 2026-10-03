@@ -83,6 +83,7 @@ for (const step of ['safety', 'sender', 'request', 'verify', 'result']) {
   const s = storeAt(step); const old = s.get().check;
   s.onAvatarClick({ text: 'First replacement', truncated: false });
   expect(s.get().check).toBe(old); expect(s.get().draft).toBeNull();
+  const captured = s.get(); s.insertPendingSelection(); expect(s.get()).toBe(captured);
   expect(s.get().view).toBe(['safety', 'result'].includes(step) ? step : 'question');
   s.onAvatarClick({ text: 'Second replacement https://new.example/', truncated: true });
   expect(s.get().pendingSelection).toEqual({ text: 'Second replacement https://new.example/', truncated: true });

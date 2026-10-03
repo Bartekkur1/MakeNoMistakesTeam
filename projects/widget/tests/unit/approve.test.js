@@ -114,7 +114,9 @@ for (const outcome of ['success', 'failure', 'reset-success', 'reset-failure']) 
  root.querySelector('[aria-label="Zamknij okno"]').click();
  if (outcome.startsWith('reset')) window.dispatchEvent(new Event('pagehide'));
  resolve({ ok: outcome.endsWith('success') });
- await vi.waitFor(() => expect(root.querySelector('.panel').hidden).toBe(true));
+ // Let both submission awaits settle before asserting that a late reply stays closed.
+ await new Promise(r => setTimeout(r, 0));
+ expect(root.querySelector('.panel').hidden).toBe(true);
  captured = ''; root.querySelector('.avatar').click();
  await vi.waitFor(() => {
   if (outcome.startsWith('reset')) expect(root.textContent).toContain(STRINGS.menuIntro);

@@ -18,13 +18,16 @@ export function createDraftStore() {
     get: () => state,
     onAvatarClick({ text, truncated }) {
       text = normalizeText(text);
-      if (state.draft) state = { ...state, view: 'preview', error: null,
+      if (state.draft && state.candidateKind) state = { ...state, view: 'preview', pendingSelection: null };
+      else if (state.draft) state = { ...state, view: 'preview', error: null,
         pendingSelection: text && text !== normalizeText(state.draft.text) ? { text, truncated: Boolean(truncated) } : null };
+      else if (state.check) state = { ...state, view: checkView(state.check.resumeStep), error: null,
+        pendingSelection: text && text !== normalizeText(state.check.case.content) ? { text, truncated: Boolean(truncated) } : null };
       else if (text) state = { ...state, view: 'preview', draft: { text, link: extractFirstLink(text), origin: 'selection', truncated: Boolean(truncated) } };
       else state = { ...state, view: normalizeText(state.paste.text) || normalizeText(state.paste.link) ? 'paste' : 'menu' };
     },
     insertPendingSelection() {
-      if (!state.pendingSelection || state.submitting) return;
+      if (!state.pendingSelection || state.submitting || state.check) return;
       const p = state.pendingSelection;
       state = { ...state, view: 'preview', error: null, draft: { ...p, link: extractFirstLink(p.text), origin: 'selection' }, pendingSelection: null };
     },
@@ -60,14 +63,14 @@ export function createDraftStore() {
         draft: null, candidateKind: null, pendingSelection: null, error: null };
     },
     checkNewSelection() {
-      if (!state.check || state.draft || !state.pendingSelection || state.submitting) return;
+      if (!state.check || state.draft || !normalizeText(state.pendingSelection?.text) || state.submitting) return;
       const p = state.pendingSelection;
       state = { ...state, view: 'preview', candidateKind: 'replacement', error: null,
         draft: { ...p, link: extractFirstLink(p.text), origin: 'selection' }, pendingSelection: null };
     },
     close() { state = { ...state, view: 'closed', pendingSelection: null }; },
     beginSubmit() {
-      if (state.submitting || !state.draft) return null;
+      if (state.submitting || !state.draft || !normalizeText(state.draft.text)) return null;
       state = { ...state, gen: state.gen + 1, submitting: true, error: null };
       return state.gen;
     },
