@@ -45,4 +45,4 @@ current_phase_name: Studio, publikacja i szkielet levelu
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Zmień dialog Scamerino: prośba o hasło do konta w zamian za darmowe Robuxy zamiast kodu SMS | 2026-10-03 | dde53cf | [261003-qsc-zmie-dialog-scamerino-oszust-ma-prosi-o-](./quick/261003-qsc-zmie-dialog-scamerino-oszust-ma-prosi-o-/) |
-| 2 | Realistyczny dialog ze scammerem na bazie research.md bez sugerowania rozwiązania | 2026-10-03 | pending | [.planning/quick/261003-scam-dialogue-research/](../../quick/261003-scam-dialogue-research/) |
+| 2 | Realistyczny dialog ze scammerem na bazie research.md bez sugerowania rozwiązania | 2026-10-03 | 7dbae77 | [.planning/quick/261003-scam-dialogue-research/](../../quick/261003-scam-dialogue-research/) |
