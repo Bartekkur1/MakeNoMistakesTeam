@@ -87,3 +87,13 @@ Play wypisał błędy istniejącego samochodu A-Chassis Tune.Initialize (nil na 
 - [PluginManager](https://create.roblox.com/docs/reference/engine/classes/PluginManager) — utworzenie tymczasowego obiektu Plugin do dialogu, niszczonego po zapisie; nie instalowano pluginu.
 - [AssetService.CreateMeshPartAsync](https://create.roblox.com/docs/reference/engine/classes/AssetService) i [MeshPart](https://create.roblox.com/docs/reference/engine/classes/MeshPart) — przywrócenie istniejącej siatki przez ApplyMesh.
 - [Motor6D](https://create.roblox.com/docs/reference/engine/classes/Motor6D) — C0/C1 i różnica względem niereplikowanego Transform.
+
+## Korekta po zmianie proporcji przez Roberta
+
+Robert zmienił rozmiary i ułożenie części w Studio po tracer checkpoint. Zachowano te zmiany. Bieżący tors ma rozmiar 3.683333×3.25×2.6, nogi około 2.18 studa wysokości. Eksport `ScamerinoAlertinio-phase2.rbxm` z Task 1 poprzedza te zmiany; trzeba odświeżyć go po odbiorze.
+
+OBSERVED: `HipHeight=0.1` nie pasował do nowego rozstawienia nóg. W R6 wysokość korzenia to `LeftLeg.Size.Y + RootPart.Size.Y/2 + HipHeight`. Wysokość obliczono z dolnych narożników nóg w pozycji neutralnej, bez zmiany rozmiarów, CFrame i Motor6D użytkownika. Nowe `HipHeight=-0.6547549963`; poprzednie zachowano w atrybucie `HipHeightBeforeGroundFix` modelu.
+
+Actual desktop Play po korekcie: podłoże Cobblestone Y=0.600000024; spód lewej nogi Y=0.600002050, prawej Y=0.600001931; odstęp około 0.000002 studa. Health=100. Studio wróciło do Edit. Jest to kontrola neutralnej pozycji po korekcie, a nie ponowne zaliczenie chodu zmodyfikowanej sylwetki. Odbiór wizualny oraz aktualizacja eksportu nadal PENDING.
+
+Źródło wzoru: https://create.roblox.com/docs/reference/engine/classes/Humanoid/HipHeight
