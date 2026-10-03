@@ -1,4 +1,5 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
+import { STRINGS } from '../../src/ui/strings.pl.js';
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const avatar = p => p.getByRole('button', {name:'Scamerinio',exact:true});
 const formText = p => p.getByRole('textbox', {name:'Wiadomość',exact:true});
@@ -44,9 +45,9 @@ for (const close of ['button', 'Escape']) test(`form preserves anchor and draft 
   await formButton(page,'Zamknij okno').click(); await formButton(page,'Schowaj pomocnika').click();
   await expect(page.locator('bezpieczna-aura-widget')).toBeHidden(); await assertOnlyLocal(netlog);
 });
-test('selected preview keeps avatar visible through confirmation', async ({page,netlog}) => {
+test('selected preview keeps avatar visible through safety', async ({page,netlog}) => {
   await page.goto(url); await page.locator('#msg').selectText(); await avatar(page).click(); await checkForm(page);
-  await formButton(page,'Zatwierdzam').click(); await expect(page.getByRole('heading',{name:'Gotowe!',exact:true})).toBeVisible();
+  await formButton(page,'Zatwierdzam').click(); await expect(page.getByText(STRINGS.safetyNotice,{exact:true})).toBeVisible();
   await expect(avatar(page)).toBeVisible(); await expect(page.locator('.hide')).toBeVisible();
   await expect(page.locator('.avatar-wrap')).toHaveJSProperty('inert',false); await assertOnlyLocal(netlog);
 });
@@ -58,12 +59,12 @@ async function openView(page, view) {
   await page.goto(url);
   await avatar(page).click();
   if (view === 'howto') await formButton(page, 'Jak to działa').click();
-  if (['paste', 'preview', 'confirmation'].includes(view)) {
+  if (['paste', 'preview', 'safety'].includes(view)) {
     await formButton(page, 'Sprawdź wiadomość').click();
     await formText(page).fill('Fikcyjny szkic do przeciągania');
     await page.getByRole('textbox', { name: 'Link (jeśli jest)', exact: true }).fill('https://example.test/wiadomosc');
     if (view !== 'paste') await formButton(page, 'Dalej').click();
-    if (view === 'confirmation') await formButton(page, 'Zatwierdzam').click();
+    if (view === 'safety') await formButton(page, 'Zatwierdzam').click();
   }
 }
 async function expectBounded(page) {
@@ -79,10 +80,14 @@ async function expectBounded(page) {
   expect(await avatar(page).evaluate((el, point) => el.getRootNode().elementFromPoint(point.x, point.y) === el,
     { x: r.x + r.width / 2, y: r.y + r.height / 2 })).toBe(true);
 }
-for (const view of ['menu', 'howto', 'paste', 'preview', 'confirmation']) {
+for (const view of ['menu', 'howto', 'paste', 'preview', 'safety']) {
   test(`open ${view} follows avatar throughout drag without rebuilding or submitting`, async ({page, serviceWorker, netlog}) => {
     await page.setViewportSize({ width: 1400, height: 1000 });
     await openView(page, view);
+    if (view === 'safety') {
+      await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
+      expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+    }
     const editing = ['paste', 'preview'].includes(view);
     if (editing) {
       await formText(page).focus();
