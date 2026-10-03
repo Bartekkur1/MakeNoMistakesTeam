@@ -29,3 +29,6 @@ test('paste buffer survives close and back but clears on reload',async({page,ser
 test('iframe selection offers manual paste',async({page,serviceWorker,netlog})=>{
  const fixture='http://127.0.0.1:4173/fields.html';await page.goto(fixture);await page.frameLocator('#ramka').locator('#msg-in-frame').selectText();await avatar(page).click();await expect(page.locator('.menu')).toBeVisible();await button(page,STRINGS.menuCheck).click();await text(page).fill('Wiadomość w ramce: darmowe Nitro');await button(page,STRINGS.next).click();await expect(text(page)).toHaveValue('Wiadomość w ramce: darmowe Nitro');expect(await serviceWorker.evaluate(()=>self.__aura.messages.length)).toBe(0);await assertOnlyLocal(netlog,{mustInclude:fixture});
 });
+test('panel fits a narrow resized viewport',async({page,netlog})=>{
+ await open(page);await page.setViewportSize({width:280,height:500});const r=await page.getByRole('dialog').boundingBox();expect(r.x).toBeGreaterThanOrEqual(8);expect(r.x+r.width).toBeLessThanOrEqual(272);await assertOnlyLocal(netlog);
+});

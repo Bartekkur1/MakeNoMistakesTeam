@@ -38,3 +38,7 @@ for(const late of [false,true])test(`integration failure and late answer, pagehi
  if(late){window.dispatchEvent(new Event('pagehide'));resolve({ok:true});await new Promise(r=>setTimeout(r,10));expect(root.querySelector('.panel').hidden).toBe(true);expect(root.textContent).not.toContain(STRINGS.confirmationHeading);}
  else{await vi.waitFor(()=>expect(root.textContent).toContain(STRINGS.submitError));expect(root.querySelector('textarea').value).toBe('Fictional');expect(root.textContent).not.toContain(STRINGS.confirmationHeading);}
 });
+test('active iframe never reads a stale top-document selection',()=>{
+ const selection=vi.fn(()=>({toString:()=> 'Stale top-page selection'}));
+ expect(captureSelection({activeElement:{tagName:'IFRAME'},getSelection:selection})).toEqual({text:'',truncated:false});expect(selection).not.toHaveBeenCalled();
+});
