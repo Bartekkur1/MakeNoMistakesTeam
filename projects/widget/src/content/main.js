@@ -46,6 +46,10 @@ function boot() {
     onReportSourceChange(value) { if (store.setReportSource(value)) render(); },
     onSendBack() { if (store.backFromSendPreview()) render(); },
     onOpenLogin() { void openLogin(); },
+    // D-15: local guidance only — no runtime message, recapture or network request.
+    onPlatformHowTo() { if (store.openPlatformHowTo()) render(); },
+    onPlatformSourceChange(value) { if (store.setPlatformSource(value)) render(); },
+    onPlatformBack() { if (store.backFromPlatformHowTo()) render(); },
     onMyReports() { if (store.showMyReports()) render(); },
     async onSendReport() {
       // Lock immediately, before the local account read, to prevent double clicks.

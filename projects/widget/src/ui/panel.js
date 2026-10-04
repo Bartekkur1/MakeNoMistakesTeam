@@ -42,6 +42,23 @@ export function createPanel({ root, strings, handlers }) {
     replace.disabled = Boolean(state.submitting);
     body.append(replace);
   };
+  // Only fixed, trusted destinations from strings become anchors; supplied links stay text.
+  const trustedLink = ({ text, href }) => {
+    const a = node('a', text);
+    a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.style.color = 'var(--color-shark-blue-dark)'; a.style.textDecoration = 'underline'; a.style.fontSize = '15px';
+    return a;
+  };
+  const sourceSelect = (id, value, disabled, handler) => {
+    const select = node('select'); select.id = id; select.disabled = disabled;
+    for (const source of REPORT_SOURCES) {
+      const option = node('option', capitalized(REPORT_SOURCE_LABELS_PL[source]));
+      option.value = source; select.append(option);
+    }
+    select.value = value;
+    select.addEventListener('change', () => handler(select.value));
+    return select;
+  };
   const noAccountNotice = () => {
     const notice = node('div', undefined, 'notice');
     notice.append(node('p', strings.noAccount), button(strings.openLogin, 'btn-secondary', () => handlers.onOpenLogin()));
@@ -64,13 +81,15 @@ export function createPanel({ root, strings, handlers }) {
   return {
     el,
     render(state, ctx) {
-      const focusedId = ['question', 'sendPreview'].includes(state.view) ? root.activeElement?.id : undefined;
+      const focusedId = ['question', 'sendPreview', 'platformHowTo'].includes(state.view) ? root.activeElement?.id : undefined;
       body.replaceChildren();
-      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports', 'platformHowTo'].includes(state.view);
       if (el.hidden) return;
       if (state.view === 'menu') {
         const menu = node('div', undefined, 'menu');
-        menu.append(button(strings.menuCheck, 'btn-primary', () => handlers.onCheck()), button(strings.menuHowTo, 'btn-secondary', () => handlers.onHowTo()));
+        menu.append(button(strings.menuCheck, 'btn-primary', () => handlers.onCheck()),
+          button(strings.menuReports, 'btn-secondary', () => handlers.onMyReports()),
+          button(strings.menuHowTo, 'btn-secondary', () => handlers.onHowTo()));
         body.append(node('p', strings.menuIntro, 'intro'), menu);
         menu.querySelector('button').focus();
         return;
@@ -143,14 +162,7 @@ export function createPanel({ root, strings, handlers }) {
         const sourceBlock = node('div', undefined, 'review-block');
         const sourceLabel = node('label', strings.reportSourceLabel, 'field-label');
         sourceLabel.htmlFor = 'report-source';
-        const source = node('select'); source.id = 'report-source';
-        source.disabled = Boolean(state.submitting);
-        for (const value of REPORT_SOURCES) {
-          const option = node('option', capitalized(REPORT_SOURCE_LABELS_PL[value]));
-          option.value = value; source.append(option);
-        }
-        source.value = preview.source;
-        source.addEventListener('change', () => handlers.onReportSourceChange(source.value));
+        const source = sourceSelect('report-source', preview.source, Boolean(state.submitting), value => handlers.onReportSourceChange(value));
         sourceBlock.append(sourceLabel, source);
         review.append(attacks, actions, sourceBlock, node('p', strings.sendPrivacy, 'notice review-block'));
         if (!state.submitting && (state.sessionStatus.status === 'none' || state.sendOutcome?.kind === 'no-account')) review.append(noAccountNotice());
@@ -183,6 +195,36 @@ export function createPanel({ root, strings, handlers }) {
         body.append(review);
         const focused = focusedId ? [...review.querySelectorAll('input, select')].find(control => control.id === focusedId) : null;
         (state.submitting ? close : focused ?? (kind ? retry && !retry.disabled ? retry : review.querySelector('button:not(:disabled)') : content) ?? content).focus();
+        return;
+      }
+      if (state.view === 'platformHowTo') {
+        // D-15: fixed local copy only; no handler here reaches the network or sends a report.
+        const value = REPORT_SOURCES.includes(state.reportSource) ? state.reportSource : 'other';
+        const sourceBlock = node('div', undefined, 'review-block');
+        const label = node('label', strings.reportSourceLabel, 'field-label');
+        label.htmlFor = 'platform-source';
+        const select = sourceSelect('platform-source', value, false, next => handlers.onPlatformSourceChange(next));
+        sourceBlock.append(label, select);
+        const steps = node('ol', undefined, 'steps');
+        for (const text of strings.platformSteps[value]) steps.append(node('li', text));
+        body.append(node('h2', strings.platformHeading), node('p', strings.platformNotice, 'notice'), sourceBlock, steps);
+        if (value === 'game') { const p = node('p'); p.append(trustedLink(strings.platformRoblox)); body.append(p); }
+        const elsewhere = node('section', undefined, 'result-section');
+        const title = node('h3', strings.platformElsewhere);
+        title.id = 'platform-elsewhere';
+        elsewhere.setAttribute('aria-labelledby', title.id);
+        const list = node('ul');
+        for (const destination of strings.platformLinks) {
+          const item = node('li');
+          item.append(trustedLink(destination), doc.createTextNode(' — ' + destination.use));
+          list.append(item);
+        }
+        elsewhere.append(title, list);
+        const back = button(strings.platformBack, 'btn-secondary', () => handlers.onPlatformBack());
+        const row = node('div', undefined, 'row');
+        row.append(back);
+        body.append(elsewhere, node('p', strings.platformSafety), row);
+        (focusedId === 'platform-source' ? select : back).focus();
         return;
       }
       if (state.view === 'safety') {
@@ -260,6 +302,8 @@ export function createPanel({ root, strings, handlers }) {
           request.disabled = state.sessionStatus?.status !== 'connected';
           handoff.append(request);
         }
+        // HND-02: independent of the parent connection; opens local guidance only.
+        handoff.append(button(strings.platformHowTo, 'btn-secondary', () => handlers.onPlatformHowTo()));
         body.append(step, handoff, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
           button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
         appendReplacement(state);

@@ -6,8 +6,8 @@ import { ATTACK_TYPES, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_FIELDS } f
 
 const ORDER = Object.keys(QUESTIONS);
 const freezeAnswers = answers => Object.freeze(Object.fromEntries(Object.entries(answers).map(([id, values]) => [id, Object.freeze(values)])));
-const checkView = step => ['safety', 'result', 'confirmation', 'sendPreview', 'myReports'].includes(step) ? step : 'question';
-const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, case_id: null, request_id: null, sendGeneration: 0, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, sessionStatus: Object.freeze({ status: 'unknown', account: null, revision: null }), reportsReturnView: 'menu', paste: { text: '', link: '' } });
+const checkView = step => ['safety', 'result', 'confirmation', 'sendPreview', 'myReports', 'platformHowTo'].includes(step) ? step : 'question';
+const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, case_id: null, request_id: null, sendGeneration: 0, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, reportSource: null, sessionStatus: Object.freeze({ status: 'unknown', account: null, revision: null }), reportsReturnView: 'menu', paste: { text: '', link: '' } });
 
 export function createDraftStore() {
   let state = initial();
@@ -112,7 +112,7 @@ export function createDraftStore() {
         answers: freezeAnswers({ sender: [], request: [], verify: [] }), hints: detectHints(approvedCase), result: null,
         keptAnswers: Object.freeze({}), discrepancy: null });
       const reportState = unchanged ? {} : { case_id: globalThis.crypto.randomUUID(), request_id: null,
-        sendGeneration: state.sendGeneration + 1, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null };
+        sendGeneration: state.sendGeneration + 1, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, reportSource: null };
       state = { ...state, ...reportState, view: state.view === 'closed' ? 'closed' : checkView(check.resumeStep), check,
         draft: null, candidateKind: null, pendingSelection: null, error: null, submitting: false, submissionKind: null };
       return true;
@@ -143,11 +143,35 @@ export function createDraftStore() {
         const proposal = proposeAttackType(state.check.answers, state.check.result);
         try {
           sendPreview = Object.freeze({ ...buildReportPayload(state.check.case,
-            { attack_type: proposal, taken_actions: [], source: sourceFromCase(state.check.case) }),
+            { attack_type: proposal, taken_actions: [], source: state.reportSource ?? sourceFromCase(state.check.case) }),
             proposal, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
         } catch { return false; }
       } else sendPreview = Object.freeze({ ...sendPreview, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
-      state = { ...state, view: 'sendPreview', sendPreview, check: setResume('sendPreview'), pendingSelection: null };
+      state = { ...state, view: 'sendPreview', sendPreview, reportSource: sendPreview.source, check: setResume('sendPreview'), pendingSelection: null };
+      return true;
+    },
+    // D-15: local platform guidance. It shares the case-bound source with the send preview,
+    // never sends anything and never changes the current check.
+    openPlatformHowTo() {
+      if (state.view !== 'result' || !state.check?.result || state.draft || state.submitting || state.sentReport
+        || !isValidCase(state.check.case)) return false;
+      const reportSource = state.sendPreview?.source ?? state.reportSource ?? sourceFromCase(state.check.case);
+      state = { ...state, view: 'platformHowTo', reportSource, check: setResume('platformHowTo'), pendingSelection: null };
+      return true;
+    },
+    setPlatformSource(value) {
+      if (state.view !== 'platformHowTo' || !REPORT_SOURCES.includes(value) || state.submitting || !state.check) return false;
+      let sendPreview = state.sendPreview;
+      if (sendPreview && !state.sentReport) {
+        try { sendPreview = Object.freeze({ ...sendPreview, ...buildReportPayload(state.check.case, { ...sendPreview, source: value }) }); }
+        catch { return false; }
+      }
+      state = { ...state, reportSource: value, sendPreview };
+      return true;
+    },
+    backFromPlatformHowTo() {
+      if (state.view !== 'platformHowTo' || !state.check?.result || state.submitting) return false;
+      state = { ...state, view: 'result', check: setResume('result') };
       return true;
     },
     setSendAttackType(value) {
@@ -160,7 +184,11 @@ export function createDraftStore() {
       const selected = state.sendPreview.taken_actions;
       return replaceSelection({ taken_actions: selected.includes(value) ? selected.filter(action => action !== value) : [...selected, value] });
     },
-    setReportSource(value) { return REPORT_SOURCES.includes(value) && replaceSelection({ source: value }); },
+    setReportSource(value) {
+      if (!REPORT_SOURCES.includes(value) || !replaceSelection({ source: value })) return false;
+      state = { ...state, reportSource: value };
+      return true;
+    },
     backFromSendPreview() {
       if (state.submitting || !state.check || !['sendPreview', 'myReports'].includes(state.view)) return false;
       const view = state.view === 'myReports' ? state.reportsReturnView : state.sentReport ? 'confirmation' : 'result';
