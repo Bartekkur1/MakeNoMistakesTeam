@@ -162,8 +162,34 @@ export const DIALOG = {
   },
   escalate: {
     title: "Eskalować zgłoszenie?",
-    body: "Zapisz, do kogo przekazujesz sprawę, na przykład CERT Polska (NASK) albo moderatorzy gry. Aplikacja niczego nie wysyła automatycznie.",
+    body: "Zgłoś sprawę w jednym z miejsc poniżej, a potem zapisz, do kogo ją przekazujesz. Aplikacja niczego nie wysyła automatycznie.",
   },
+  // Where a teacher can report an incident; the dialog lists these as links opening in a new tab.
+  escalateWhereTitle: "Gdzie zgłosić",
+  escalateWhereEmergency: "Gdy dziecku grozi niebezpieczeństwo, dzwoń pod ",
+  emergencyNumber: "112",
+  escalateWhere: [
+    {
+      name: "Dyżurnet.pl (NASK)",
+      href: "https://dyzurnet.pl/formularz-zgloszeniowy",
+      use: "Treści szkodliwe dla dzieci: wykorzystywanie seksualne, grooming, przemoc, cyberprzemoc.",
+    },
+    {
+      name: "CERT Polska (NASK)",
+      href: "https://incydent.cert.pl/",
+      use: "Oszustwa i phishing: fałszywe strony, linki, wyłudzanie kont lub danych.",
+    },
+    {
+      name: "Zgłoszenie w Roblox",
+      href: "https://about.roblox.com/reporting-and-blocking",
+      use: "Naruszenie zasad przez gracza lub grę. Sprawę sprawdzą moderatorzy Roblox.",
+    },
+    {
+      name: "800 100 100 (FDDS)",
+      href: "tel:800100100",
+      use: "Bezpłatna porada dla nauczycieli i rodziców, jak pomóc dziecku.",
+    },
+  ],
   close: {
     title: "Zamknąć zgłoszenie?",
     body: "Zgłoszenie zostanie oznaczone jako zamknięte. Można je później wznowić.",

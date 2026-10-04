@@ -136,6 +136,14 @@ describe("action helpers", () => {
     expect(dialogCopy("reopen", "rejected").body).toBe("Zgłoszenie wróci do stanu „czeka na rodzica”.");
   });
 
+  it("points the teacher to where an incident can be reported", () => {
+    const hrefs = DIALOG.escalateWhere.map((place) => place.href);
+    expect(hrefs).toContain("https://dyzurnet.pl/formularz-zgloszeniowy");
+    expect(hrefs).toContain("https://incydent.cert.pl/");
+    for (const href of hrefs) expect(/^(https:\/\/|tel:)/.test(href)).toBe(true);
+    expect(hrefs).toContain("tel:800100100");
+  });
+
   it("requires a note only for escalation", () => {
     const escalate = dialogCopy("escalate", "with_teacher");
     expect(escalate.noteLabel).toBe("Do kogo eskalowano (wymagane)");
