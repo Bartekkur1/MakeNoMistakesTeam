@@ -1,5 +1,5 @@
 import { normalizeText } from '../core/case.js';
-import { ATTACK_TYPE_LABELS_PL, TAKEN_ACTION_LABELS_PL, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
+import { ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, TAKEN_ACTIONS, TAKEN_ACTION_LABELS_PL, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
 
 const capitalized = text => text[0].toLocaleUpperCase('pl-PL') + text.slice(1);
 
@@ -64,7 +64,7 @@ export function createPanel({ root, strings, handlers }) {
   return {
     el,
     render(state, ctx) {
-      const focusedId = state.view === 'question' ? root.activeElement?.id : undefined;
+      const focusedId = ['question', 'sendPreview'].includes(state.view) ? root.activeElement?.id : undefined;
       body.replaceChildren();
       el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports'].includes(state.view);
       if (el.hidden) return;
@@ -111,16 +111,49 @@ export function createPanel({ root, strings, handlers }) {
         const content = node('div', preview.content, 'sent-content');
         content.tabIndex = 0;
         content.setAttribute('aria-label', strings.reportContentLabel);
+        review.className = 'send-review';
         review.append(node('h2', strings.sendPreviewHeading), node('p', strings.recipientPrefix, 'source'),
-          node('p', preview.recipient.display_name, 'recipient'), node('p', strings.messageLabel), content,
-          node('p', strings.sendEditHint, 'hint'), node('h3', strings.attackLegend),
-          node('p', capitalized(ATTACK_TYPE_LABELS_PL[preview.attack_type])), node('h3', strings.actionsLegend));
-        const actions = node('ul');
-        for (const action of preview.taken_actions) actions.append(node('li', capitalized(TAKEN_ACTION_LABELS_PL[action])));
-        if (!preview.taken_actions.length) actions.append(node('li', strings.noActions));
-        review.append(actions, node('h3', strings.reportSourceLabel), node('p', capitalized(REPORT_SOURCE_LABELS_PL[preview.source])),
-          node('p', strings.sendPrivacy, 'notice'));
-        if (state.sessionStatus.status === 'none' || state.sendOutcome?.kind === 'no-account') review.append(noAccountNotice());
+          node('p', preview.recipient.display_name, 'recipient'), node('p', strings.messageLabel, 'field-label'), content,
+          node('p', strings.sendEditHint, 'hint'));
+        const attacks = node('fieldset', undefined, 'question-options review-block');
+        attacks.append(node('legend', strings.attackLegend));
+        const choices = (group, values, labels, type, selected, handler) => {
+          for (const value of values) {
+            const option = node('div', undefined, 'question-option');
+            const input = node('input');
+            input.type = type;
+            input.id = 'report-' + type + '-' + value;
+            input.name = type === 'radio' ? 'report-attack' : 'report-actions';
+            input.value = value;
+            input.checked = selected.includes(value);
+            input.disabled = Boolean(state.submitting);
+            input.addEventListener('change', () => handler(value));
+            const label = node('label'); label.htmlFor = input.id;
+            label.append(input, node('span', capitalized(labels[value])));
+            option.append(label);
+            if (type === 'radio' && value === preview.proposal) option.append(node('span', strings.proposalBadge, 'hint-badge'));
+            group.append(option);
+          }
+        };
+        choices(attacks, ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, 'radio', [preview.attack_type], value => handlers.onReportAttackChange(value));
+        const actions = node('fieldset', undefined, 'question-options review-block');
+        actions.append(node('legend', strings.actionsLegend), node('p', strings.actionsHint, 'hint'));
+        choices(actions, TAKEN_ACTIONS.filter(action => ACTIONS_BY_ATTACK_TYPE[preview.attack_type].includes(action)),
+          TAKEN_ACTION_LABELS_PL, 'checkbox', preview.taken_actions, value => handlers.onReportActionChange(value));
+        const sourceBlock = node('div', undefined, 'review-block');
+        const sourceLabel = node('label', strings.reportSourceLabel, 'field-label');
+        sourceLabel.htmlFor = 'report-source';
+        const source = node('select'); source.id = 'report-source';
+        source.disabled = Boolean(state.submitting);
+        for (const value of REPORT_SOURCES) {
+          const option = node('option', capitalized(REPORT_SOURCE_LABELS_PL[value]));
+          option.value = value; source.append(option);
+        }
+        source.value = preview.source;
+        source.addEventListener('change', () => handlers.onReportSourceChange(source.value));
+        sourceBlock.append(sourceLabel, source);
+        review.append(attacks, actions, sourceBlock, node('p', strings.sendPrivacy, 'notice review-block'));
+        if (!state.submitting && (state.sessionStatus.status === 'none' || state.sendOutcome?.kind === 'no-account')) review.append(noAccountNotice());
         else if (state.sendOutcome) {
           const copy = strings.sendOutcomes[state.sendOutcome.kind] ?? strings.sendOutcomes.http;
           const alert = node('div', undefined, state.sendOutcome.kind === 'unknown' ? 'alert-warning' : 'alert-error');
@@ -130,13 +163,26 @@ export function createPanel({ root, strings, handlers }) {
         }
         const row = node('div', undefined, 'row');
         const back = button(strings.back, 'btn-secondary', () => handlers.onSendBack());
-        const send = button(state.submitting ? strings.sending : strings.send, 'btn-primary', () => handlers.onSendReport());
         back.disabled = Boolean(state.submitting);
-        send.disabled = Boolean(state.submitting) || state.sessionStatus.status !== 'connected';
-        row.append(back, send);
+        const kind = state.sendOutcome?.kind;
+        const noAccount = !state.submitting && (state.sessionStatus.status === 'none' || kind === 'no-account');
+        let retry;
+        if (kind === 'unknown') row.append(button(strings.myReports, 'btn-secondary', () => handlers.onMyReports()));
+        else row.append(back);
+        if (!noAccount && kind !== 'context') {
+          const label = state.submitting ? strings.sending : kind === 'unknown' ? strings.sendAgain : kind ? strings.sendRetry : strings.send;
+          retry = button(label, 'btn-primary', () => handlers.onSendReport());
+          retry.disabled = Boolean(state.submitting) || state.sessionStatus.status !== 'connected';
+          row.append(retry);
+        }
         review.append(row);
+        if (state.submitting) {
+          for (const control of review.querySelectorAll('button, input, select')) control.disabled = true;
+          content.tabIndex = -1;
+        }
         body.append(review);
-        (state.submitting ? close : content).focus();
+        const focused = focusedId ? [...review.querySelectorAll('input, select')].find(control => control.id === focusedId) : null;
+        (state.submitting ? close : focused ?? (kind ? retry && !retry.disabled ? retry : review.querySelector('button:not(:disabled)') : content) ?? content).focus();
         return;
       }
       if (state.view === 'safety') {
