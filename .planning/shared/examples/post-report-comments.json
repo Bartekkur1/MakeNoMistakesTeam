@@ -1,0 +1,24 @@
+{
+  "description": "Wychowawczyni 5a dodaje komentarz do zgłoszenia Kuby R4. Wątek widzą tylko rodzic i nauczyciel — nigdy wtyczka dziecka. Komentarz nie zmienia stanu zgłoszenia; nie da się go edytować ani usunąć.",
+  "method": "POST",
+  "route": "/api/reports/{id}/comments",
+  "path": "/api/reports/00000000-0000-4000-8000-0000000d0004/comments",
+  "auth": {
+    "email": "nauczyciel.5a@bezpiecznaaura.example",
+    "scope": "panel"
+  },
+  "request": {
+    "body": "Porozmawiam z Kubą po lekcjach, bez wskazywania go przy klasie."
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-0000000f0041",
+      "report_id": "00000000-0000-4000-8000-0000000d0004",
+      "author_id": "00000000-0000-4000-8000-0000000b0001",
+      "author_role": "teacher",
+      "body": "Porozmawiam z Kubą po lekcjach, bez wskazywania go przy klasie.",
+      "created_at": "2026-10-03T12:05:00.000Z"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "description": "Mama Oli listuje zgłoszenia swojego dziecka po 2 na stronę (najnowsze pierwsze). Są trzy (R1, R2, R3), więc pierwsza strona ma R3 i R2, a next_cursor wskazuje na następną stronę: GET /api/reports?limit=2&cursor=<next_cursor> zwróci R1 i next_cursor null.",
+  "method": "GET",
+  "route": "/api/reports",
+  "path": "/api/reports?limit=2",
+  "auth": {
+    "email": "rodzic.ola@bezpiecznaaura.example",
+    "scope": "panel"
+  },
+  "request": null,
+  "response": {
+    "status": 200,
+    "body": {
+      "reports": [
+        {
+          "id": "00000000-0000-4000-8000-0000000d0003",
+          "child_id": "00000000-0000-4000-8000-0000000c0001",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "attack_type": "purchase_trap",
+          "taken_actions": [],
+          "source": "sms",
+          "content": "SMS: Twoja paczka czeka w sortowni. Dopłać 1,99 zł za doręczenie, inaczej wróci do nadawcy: https://doplata-paczka.example/zaplac",
+          "state": "rejected",
+          "created_at": "2026-10-03T09:15:00.000Z",
+          "updated_at": "2026-10-03T09:30:00.000Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-0000000d0002",
+          "child_id": "00000000-0000-4000-8000-0000000c0001",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "attack_type": "phishing",
+          "taken_actions": [
+            "clicked_link"
+          ],
+          "source": "email",
+          "content": "Temat: Twoje konto szkolne zostanie zablokowane dziś o 18:00! Aby tego uniknąć, zaloguj się w ciągu godziny: https://dziennik-szkolny-weryfikacja.example/logowanie",
+          "state": "closed",
+          "created_at": "2026-10-03T08:40:00.000Z",
+          "updated_at": "2026-10-03T09:40:00.000Z"
+        }
+      ],
+      "next_cursor": "eyJjIjoiMjAyNi0xMC0wM1QwODo0MDowMC4wMDBaIiwiaSI6IjAwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDBkMDAwMiJ9"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "description": "Panel sprawdza, kto jest zalogowany: wychowawczyni 5a (zakres „panel”). Odpowiedź zawiera czas wygaśnięcia tokenu, konto i dzieci z jej klasy (Ola i Kuba).",
+  "method": "GET",
+  "route": "/api/auth/me",
+  "path": "/api/auth/me",
+  "auth": {
+    "email": "nauczyciel.5a@bezpiecznaaura.example",
+    "scope": "panel"
+  },
+  "request": null,
+  "response": {
+    "status": 200,
+    "body": {
+      "expires_at": "2026-10-04T00:00:00.000Z",
+      "scope": "panel",
+      "account": {
+        "id": "00000000-0000-4000-8000-0000000b0001",
+        "email": "nauczyciel.5a@bezpiecznaaura.example",
+        "role": "teacher",
+        "display_name": "Wychowawczyni 5a (demo)"
+      },
+      "children": [
+        {
+          "id": "00000000-0000-4000-8000-0000000c0001",
+          "display_name": "Ola (demo)",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "class_id": "class-5a"
+        },
+        {
+          "id": "00000000-0000-4000-8000-0000000c0002",
+          "display_name": "Kuba (demo)",
+          "parent_id": "00000000-0000-4000-8000-0000000a0002",
+          "class_id": "class-5a"
+        }
+      ]
+    }
+  }
+}

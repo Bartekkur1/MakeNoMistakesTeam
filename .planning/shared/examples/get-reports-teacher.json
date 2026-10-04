@@ -1,0 +1,48 @@
+{
+  "description": "Wychowawczyni 5a listuje zgłoszenia dzieci ze swojej klasy. Widzi tylko te zatwierdzone przez rodzica (stany with_teacher, escalated, closed): R4 Kuby i R2 Oli. R1 i R6 czekają na rodzica, a R3 rodzic odrzucił, więc są dla niej niewidoczne. Zgłoszenie Zosi (R5) należy do klasy 6b.",
+  "method": "GET",
+  "route": "/api/reports",
+  "path": "/api/reports",
+  "auth": {
+    "email": "nauczyciel.5a@bezpiecznaaura.example",
+    "scope": "panel"
+  },
+  "request": null,
+  "response": {
+    "status": 200,
+    "body": {
+      "reports": [
+        {
+          "id": "00000000-0000-4000-8000-0000000d0004",
+          "child_id": "00000000-0000-4000-8000-0000000c0002",
+          "parent_id": "00000000-0000-4000-8000-0000000a0002",
+          "attack_type": "fake_prize",
+          "taken_actions": [
+            "clicked_link",
+            "shared_personal_data"
+          ],
+          "source": "discord",
+          "content": "Wiadomość od bota „GiveawayKing”: Gratulacje! Wygrałeś roczne konto premium za darmo! Odbierz nagrodę w ciągu 10 minut: https://nagrody-premium.example/odbierz",
+          "state": "with_teacher",
+          "created_at": "2026-10-03T10:30:00.000Z",
+          "updated_at": "2026-10-03T10:41:00.000Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-0000000d0002",
+          "child_id": "00000000-0000-4000-8000-0000000c0001",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "attack_type": "phishing",
+          "taken_actions": [
+            "clicked_link"
+          ],
+          "source": "email",
+          "content": "Temat: Twoje konto szkolne zostanie zablokowane dziś o 18:00! Aby tego uniknąć, zaloguj się w ciągu godziny: https://dziennik-szkolny-weryfikacja.example/logowanie",
+          "state": "closed",
+          "created_at": "2026-10-03T08:40:00.000Z",
+          "updated_at": "2026-10-03T09:40:00.000Z"
+        }
+      ],
+      "next_cursor": null
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "description": "Przykładowe odpowiedzi błędów API: jeden wpis na każdy kod błędu. Każda taka odpowiedź oznacza, że nic nie zostało zapisane ani potwierdzone.",
+  "errors": [
+    {
+      "status": 400,
+      "code": "invalid_json",
+      "when": "POST /api/reports z treścią, która nie jest obiektem JSON (np. ucięty tekst {\"attack_type\": ).",
+      "body": {
+        "error": {
+          "code": "invalid_json",
+          "message": "Treść żądania nie jest poprawnym obiektem JSON."
+        }
+      }
+    },
+    {
+      "status": 400,
+      "code": "validation_error",
+      "when": "POST /api/reports z polem content złożonym z samych spacji.",
+      "body": {
+        "error": {
+          "code": "validation_error",
+          "message": "Niepoprawne dane — szczegóły w polu details.",
+          "details": [
+            {
+              "field": "content",
+              "message": "Treść nie może być pusta."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": 401,
+      "code": "invalid_credentials",
+      "when": "POST /api/auth/login z kodem innym niż 0000 albo z e-mailem, który nie jest kontem demo (ten sam błąd w obu przypadkach).",
+      "body": {
+        "error": {
+          "code": "invalid_credentials",
+          "message": "Nieprawidłowy e-mail lub kod."
+        }
+      }
+    },
+    {
+      "status": 401,
+      "code": "unauthorized",
+      "when": "GET /api/reports bez nagłówka Authorization albo z wygasłym lub uszkodzonym tokenem.",
+      "body": {
+        "error": {
+          "code": "unauthorized",
+          "message": "Brak ważnego logowania — zaloguj się ponownie."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "forbidden",
+      "when": "Nauczyciel wysyła POST /api/reports/{id}/transitions z akcją approve dla zgłoszenia, które widzi (np. w stanie with_teacher) — zatwierdzać może tylko rodzic. Tę samą odpowiedź dostaje token wtyczki przy GET /api/reports/{id}.",
+      "body": {
+        "error": {
+          "code": "forbidden",
+          "message": "To konto nie może wykonać tej operacji."
+        }
+      }
+    },
+    {
+      "status": 404,
+      "code": "report_not_found",
+      "when": "GET /api/reports/00000000-0000-4000-8000-0000000d0099 — zgłoszenie nie istnieje albo nie jest widoczne dla tego konta.",
+      "body": {
+        "error": {
+          "code": "report_not_found",
+          "message": "Nie znaleziono zgłoszenia."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "code": "invalid_transition",
+      "when": "Rodzic wysyła approve dla zgłoszenia w stanie closed — ta zmiana nie jest możliwa z obecnego stanu.",
+      "body": {
+        "error": {
+          "code": "invalid_transition",
+          "message": "Tej zmiany nie można wykonać w obecnym stanie zgłoszenia."
+        }
+      }
+    },
+    {
+      "status": 413,
+      "code": "payload_too_large",
+      "when": "POST /api/reports z treścią żądania większą niż 32 KB.",
+      "body": {
+        "error": {
+          "code": "payload_too_large",
+          "message": "Żądanie jest za duże (limit 32 KB)."
+        }
+      }
+    },
+    {
+      "status": 503,
+      "code": "storage_unavailable",
+      "when": "POST /api/reports, gdy baza danych nie odpowiada — zgłoszenie nie zostało zapisane.",
+      "body": {
+        "error": {
+          "code": "storage_unavailable",
+          "message": "Nie udało się zapisać ani odczytać danych — baza jest niedostępna. Nic nie zostało potwierdzone, spróbuj ponownie."
+        }
+      }
+    },
+    {
+      "status": 500,
+      "code": "internal_error",
+      "when": "POST /api/reports/{id}/comments, gdy serwer napotka nieoczekiwany błąd.",
+      "body": {
+        "error": {
+          "code": "internal_error",
+          "message": "Wystąpił nieoczekiwany błąd serwera."
+        }
+      }
+    }
+  ]
+}

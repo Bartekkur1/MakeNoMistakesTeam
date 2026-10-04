@@ -1,0 +1,33 @@
+{
+  "description": "Logowanie demo do panelu: rodzic (Mama Oli) podaje swój e-mail i kod 0000. Bez pola scope serwer nadaje zakres „panel”. Token jest ważny 12 h (wydany 2026-10-03T12:00:00.000Z). Pokazany token to tylko przykładowy tekst — prawdziwy token wydaje serwer.",
+  "method": "POST",
+  "route": "/api/auth/login",
+  "path": "/api/auth/login",
+  "auth": null,
+  "request": {
+    "email": "rodzic.ola@bezpiecznaaura.example",
+    "code": "0000"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "token": "przyklad.tokenu-demo-nie-do-uzycia",
+      "expires_at": "2026-10-04T00:00:00.000Z",
+      "scope": "panel",
+      "account": {
+        "id": "00000000-0000-4000-8000-0000000a0001",
+        "email": "rodzic.ola@bezpiecznaaura.example",
+        "role": "parent",
+        "display_name": "Mama Oli (demo)"
+      },
+      "children": [
+        {
+          "id": "00000000-0000-4000-8000-0000000c0001",
+          "display_name": "Ola (demo)",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "class_id": "class-5a"
+        }
+      ]
+    }
+  }
+}

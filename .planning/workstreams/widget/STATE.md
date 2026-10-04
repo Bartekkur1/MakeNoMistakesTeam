@@ -67,3 +67,8 @@ Kod rozszerzenia: `projects/widget/`. Build z repo: `npm --prefix projects/widge
 
 - [Phase 02]: Workstream widget: deleguj do Codexa (codex exec) jak najwiecej pracy Claude - implementacje planow, tresci/assety, przeglady techniczne; Claude orkiestruje i niezaleznie weryfikuje (testy, code review, verifier). — Stala regula uzytkownika (2026-10-03): oszczednosc tokenow Claude; Codex jako druga reka, bez dublowania zadan.
 - [Phase 02]: Workstream widget: bez nowych testow automatycznych - od razu implementuj kod; cala weryfikacje robi uzytkownik recznie. Istniejace testy uruchamiac/aktualizowac tylko gdy zmiana dotyka konkretnego testu. Wyniki planow zostaja na osobnej galezi, merge do master dopiero po recznej akceptacji. — Stala regula uzytkownika (2026-10-04).
+
+## Notes from web-app
+
+- 2026-10-03 — Kontrakt API wersja 2 (zatwierdzony przez osobę 2): .planning/shared/CONTRACT.md i .planning/shared/examples/ (13 plików, w tym demo-dataset.json). Zastępuje v1: zgłoszenie = rodzaj ataku + podjęte działania; wtyczka loguje się mailem rodzica (scope extension) i nie widzi historii ani komentarzy; nie ma odpowiedzi do dziecka (HND-03 do przeglądu). Bazowy URL demo dopisze plan 01-06.
+- 2026-10-03 - Backend demo działa: https://bezpieczna-aura.pl (bazowy URL z .planning/shared/CONTRACT.md); konta demo i kod 0000 w sekcji Logowanie demo; konta *.test są tylko do testu dymnego.

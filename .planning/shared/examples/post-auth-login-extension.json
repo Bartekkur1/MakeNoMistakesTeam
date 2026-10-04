@@ -1,0 +1,34 @@
+{
+  "description": "Logowanie wtyczki: rodzic (Mama Oli) instaluje wtyczkę na urządzeniu dziecka i loguje się swoim e-mailem, kodem 0000 i zakresem „extension”. Ten token pozwala tylko tworzyć i listować zgłoszenia — nigdy nie daje dostępu do szczegółów, historii ani komentarzy.",
+  "method": "POST",
+  "route": "/api/auth/login",
+  "path": "/api/auth/login",
+  "auth": null,
+  "request": {
+    "email": "rodzic.ola@bezpiecznaaura.example",
+    "code": "0000",
+    "scope": "extension"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "token": "przyklad.tokenu-demo-nie-do-uzycia",
+      "expires_at": "2026-10-04T00:00:00.000Z",
+      "scope": "extension",
+      "account": {
+        "id": "00000000-0000-4000-8000-0000000a0001",
+        "email": "rodzic.ola@bezpiecznaaura.example",
+        "role": "parent",
+        "display_name": "Mama Oli (demo)"
+      },
+      "children": [
+        {
+          "id": "00000000-0000-4000-8000-0000000c0001",
+          "display_name": "Ola (demo)",
+          "parent_id": "00000000-0000-4000-8000-0000000a0001",
+          "class_id": "class-5a"
+        }
+      ]
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 **Defined:** 2026-10-03
 **Core Value:** Dziecko przekazuje podejrzaną treść, przechodzi krótkie pytania, dostaje wskazówki i świadomie wysyła sprawę opiekunowi.
-**Scope:** rozszerzenie przeglądarkowe + mobilna strona do wklejenia treści (osoba 3, W2–W7). Backend należy do `api-ui`; kontrakt: `.planning/shared/CONTRACT.md`. Reguły i treści: `.planning/shared/content/`.
+**Scope:** rozszerzenie przeglądarkowe + mobilna strona do wklejenia treści (osoba 3, W2–W7). Backend należy do `web-app`; kontrakt: `.planning/shared/CONTRACT.md`. Reguły i treści: `.planning/shared/content/`.
 
 ## v1 Requirements
 
