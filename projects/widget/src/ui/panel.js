@@ -76,6 +76,10 @@ export function createPanel({ root, strings, handlers }) {
         done.type = 'button';
         done.addEventListener('click', () => handlers.onClose());
         body.append(node('h2', strings.confirmationHeading), node('p', strings.confirmationBody), done);
+        body.append(button(strings.confirmationBackToMenu, 'btn-secondary', () => handlers.onFinishCheck()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
+        done.focus();
         return;
       }
       if (state.view === 'safety') {
@@ -148,7 +152,16 @@ export function createPanel({ root, strings, handlers }) {
         body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
           button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
         appendReplacement(state);
-        body.querySelector('button').focus();
+        const request = button(strings.requestGuardianVerification, 'btn-primary', () => handlers.onRequestGuardianVerification());
+        body.append(request);
+        for (const action of body.querySelectorAll('button')) action.disabled = Boolean(state.submitting);
+        if (['guardianRequest', 'guardianRequestContextInvalidated'].includes(state.error)) {
+          const error = node('p', state.error === 'guardianRequestContextInvalidated'
+            ? strings.guardianRequestContextInvalidated : strings.guardianRequestError, 'error');
+          error.setAttribute('role', 'alert');
+          body.append(error);
+        }
+        (state.submitting ? close : body.querySelector('button')).focus();
         return;
       }
       if (state.pendingSelection && !state.candidateKind) {

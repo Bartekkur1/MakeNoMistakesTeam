@@ -5,7 +5,7 @@ import { STRINGS } from '../ui/strings.pl.js';
 import { createDraftStore } from '../core/draft.js';
 import { buildCase, normalizeText, normalizeLink } from '../core/case.js';
 import { MSG_SHOW } from '../core/messages.js';
-import { submitCase } from '../core/integration.js';
+import { submitCase, requestGuardianVerification } from '../core/integration.js';
 
 function boot() {
   const runtime = chrome.runtime;
@@ -22,6 +22,7 @@ function boot() {
     onCheck() { store.showPaste(); render(); },
     onHowTo() { store.showHowTo(); render(); },
     onBack() { store.back(); render(); },
+    onFinishCheck() { store.finishCheck(); render(); },
     onPasteNext(values) { store.submitPaste(values); render(); },
     onPasteEdit(patch) { store.editPaste(patch); },
     onEdit(patch) { store.edit(patch); },
@@ -34,6 +35,15 @@ function boot() {
     onEditCheckContent() { store.editCheckContent(); render(); },
     onCancelCheckEdit() { store.cancelCheckEdit(); render(); },
     onCheckNewSelection() { store.checkNewSelection(); render(); },
+    async onRequestGuardianVerification() {
+      const check = store.get().check;
+      const token = store.beginGuardianRequest();
+      if (token === null) return;
+      render();
+      try { await requestGuardianVerification(check.case, check.result); store.guardianRequested(token); }
+      catch (error) { store.guardianRequestFailed(token, !isLive() || /extension context invalidated/i.test(error?.message ?? '')); }
+      render();
+    },
     async onApprove() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
