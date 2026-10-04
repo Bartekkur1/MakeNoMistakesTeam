@@ -9,7 +9,6 @@ import {
   LOGIN_SCOPES,
   REPORT_SOURCES,
   REPORT_STATES,
-  ROBLOX_MAX_HINTS,
   ROBLOX_MAX_SCORE,
   ROBLOX_OUTCOMES,
   ROBLOX_USERNAME_PATTERN,
@@ -346,7 +345,9 @@ export function parseRobloxAccount(body: Record<string, unknown>): ValidationRes
 export const ROBLOX_INGEST_CONTENT_MAX_CHARS = 4500;
 
 export interface RobloxIngestInput {
+  attemptId: string;
   robloxUsername: string;
+  robloxUserId: number | null;
   attackType: AttackType;
   takenActions: TakenAction[];
   content: string;
@@ -374,11 +375,13 @@ function optionalIntInRange(
   return value;
 }
 
-// Unlike POST /api/reports, taken_actions are not limited to ACTIONS_BY_ATTACK_TYPE: the game
-// decides what the simulation counts as. outcome "compromised_password" always records
-// entered_password, so the parent sees the risk marker even if the game left the list empty.
+// Exercise outcomes describe fictional choices, never inferred real credential entry.
+// Explicit actions remain supported for other callers; the phase-3 exercise sends [].
 export function parseRobloxIngest(body: Record<string, unknown>): ValidationResult<RobloxIngestInput> {
   const errors: FieldError[] = [];
+
+  const attemptId = isUuid(body.attempt_id) ? body.attempt_id.toLowerCase() : null;
+  if (attemptId === null) errors.push({ field: "attempt_id", message: "Podaj identyfikator próby UUID." });
 
   const username = typeof body.roblox_username === "string" ? body.roblox_username.trim() : "";
   if (!ROBLOX_USERNAME_PATTERN.test(username)) {
@@ -421,11 +424,7 @@ export function parseRobloxIngest(body: Record<string, unknown>): ValidationResu
       errors.push({ field: "outcome", message: "Nieznany wynik szkolenia." });
     }
   }
-  if (outcome === "compromised_password" && !takenActions.includes("entered_password")) {
-    takenActions.push("entered_password");
-  }
-
-  const hintsUsed = optionalIntInRange(body, "hints_used", ROBLOX_MAX_HINTS, errors);
+  const hintsUsed = optionalIntInRange(body, "hints_used", 1, errors);
   const score = optionalIntInRange(body, "score", ROBLOX_MAX_SCORE, errors);
 
   const content = typeof body.content === "string" ? body.content.trim() : "";
@@ -437,11 +436,13 @@ export function parseRobloxIngest(body: Record<string, unknown>): ValidationResu
     errors.push({ field: "content", message: UNSTORABLE_CHARS_MESSAGE });
   }
 
-  if (errors.length > 0 || attackType === null) return { ok: false, errors };
+  if (errors.length > 0 || attackType === null || attemptId === null) return { ok: false, errors };
   return {
     ok: true,
     value: {
+      attemptId,
       robloxUsername: username,
+      robloxUserId: typeof userId === "number" ? userId : null,
       attackType,
       takenActions: takenActions.sort(canonicalActionOrder),
       content,
