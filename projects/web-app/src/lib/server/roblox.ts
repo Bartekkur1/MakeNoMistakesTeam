@@ -184,13 +184,19 @@ export async function createRobloxIngestReport(
   recipient: { childId: string; parentId: string; childName: string; parentName: string; matched: boolean },
 ): Promise<{ created: boolean; ack: RobloxIngestAck }> {
   // Check if this attempt_id was already recorded:
-  const attemptRow = await run("find_roblox_ingest_attempt", () =>
-    getSupabase()
+  let attemptRow: unknown = null;
+  try {
+    const attemptRes = await getSupabase()
       .from("roblox_ingest_attempts")
       .select("attempt_id")
       .eq("attempt_id", input.attemptId)
-      .maybeSingle(),
-  );
+      .maybeSingle();
+    if (!attemptRes.error) {
+      attemptRow = attemptRes.data;
+    }
+  } catch {
+    attemptRow = null;
+  }
 
   // If this is a new attempt with a positive outcome, deduplicate if already completed by this child:
   if (!attemptRow && input.outcome === "safe_refusal") {
@@ -210,18 +216,61 @@ export async function createRobloxIngestReport(
     }
   }
 
-  const data = await run("create_roblox_ingest_report", () => getSupabase().rpc("create_roblox_ingest_report", {
-    p_attempt_id: input.attemptId,
-    p_request_fingerprint: requestFingerprint(input),
-    p_parent_id: recipient.parentId,
-    p_child_id: recipient.childId,
-    p_attack_type: input.attackType,
-    p_taken_actions: input.takenActions,
-    p_content: ingestContent(input),
-    p_child_name: recipient.childName,
-    p_parent_name: recipient.parentName,
-    p_matched: recipient.matched,
-  }));
+  let data: unknown = null;
+  let useFallback = false;
+  try {
+    const rpcRes = await getSupabase().rpc("create_roblox_ingest_report", {
+      p_attempt_id: input.attemptId,
+      p_request_fingerprint: requestFingerprint(input),
+      p_parent_id: recipient.parentId,
+      p_child_id: recipient.childId,
+      p_attack_type: input.attackType,
+      p_taken_actions: input.takenActions,
+      p_content: ingestContent(input),
+      p_child_name: recipient.childName,
+      p_parent_name: recipient.parentName,
+      p_matched: recipient.matched,
+    });
+    if (rpcRes.error) {
+      // If RPC is missing in Postgres schema cache (code PGRST202 or 42883)
+      if (rpcRes.error.code === "PGRST202" || rpcRes.error.code === "42883") {
+        useFallback = true;
+      } else {
+        throw new StorageUnavailableError("create_roblox_ingest_report failed", { cause: rpcRes.error });
+      }
+    } else {
+      data = rpcRes.data;
+    }
+  } catch (err) {
+    if (err instanceof StorageUnavailableError) throw err;
+    useFallback = true;
+  }
+
+  if (useFallback) {
+    const fallbackRes = await run("create_report_fallback", () =>
+      getSupabase().rpc("create_report", {
+        p_parent_id: recipient.parentId,
+        p_child_id: recipient.childId,
+        p_attack_type: input.attackType,
+        p_taken_actions: input.takenActions,
+        p_source: "game",
+        p_content: ingestContent(input),
+      }),
+    );
+    if (!fallbackRes || typeof fallbackRes !== "object") throw shapeError();
+    const rep = fallbackRes as Record<string, unknown>;
+    return {
+      created: true,
+      ack: {
+        report_id: rep.id as string,
+        child_name: recipient.childName,
+        parent_name: recipient.parentName,
+        state: rep.state as RobloxIngestAck["state"],
+        matched: recipient.matched,
+      },
+    };
+  }
+
   if (data === null || typeof data !== "object" || Array.isArray(data)) throw shapeError();
   const row = data as Record<string, unknown>;
   if (row.result === "conflict") {

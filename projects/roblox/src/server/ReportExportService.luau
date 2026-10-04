@@ -51,12 +51,15 @@ local function sendOnce(
 	end)
 
 	if not httpOk then
+		warn("[ReportExportService] Transport error: " .. tostring(response))
+		warn("[ReportExportService] Tip: Check if 'Allow HTTP Requests' is enabled in Game Settings -> Security")
 		-- Transport / network error: retryable
 		return false, nil, true
 	end
 
 	local statusCode = response.StatusCode
 	if statusCode >= 500 and statusCode <= 599 then
+		warn("[ReportExportService] Server error " .. tostring(statusCode) .. ": " .. tostring(response.Body))
 		-- Server 5xx error: retryable
 		return false, nil, true
 	end
@@ -83,8 +86,18 @@ local function sendOnce(
 				state = decoded.state,
 				matched = decoded.matched,
 			}
+			print(
+				"[ReportExportService] Ingest succeeded! Report ID: "
+					.. ack.report_id
+					.. ", recipient: "
+					.. ack.parent_name
+			)
 			return true, ack, false
+		else
+			warn("[ReportExportService] Decode error or unexpected JSON shape: " .. tostring(response.Body))
 		end
+	else
+		warn("[ReportExportService] HTTP error " .. tostring(statusCode) .. ": " .. tostring(response.Body))
 	end
 
 	-- 4xx or decode error: non-retryable
