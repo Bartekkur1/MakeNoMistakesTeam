@@ -14,13 +14,13 @@ import {
   type RobloxIngestResponse,
 } from "@/lib/contract/types";
 import { handleRouteError, json, readJsonBody } from "@/lib/server/http";
-import { createReport } from "@/lib/server/reports";
 import {
+  createRobloxIngestReport,
   findChildIdByRobloxUsername,
   getIngestSecret,
-  ingestContent,
   ingestSecretMatches,
   ROBLOX_FALLBACK_CHILD_ID,
+  RobloxIngestIdempotencyConflictError,
 } from "@/lib/server/roblox";
 import { parseRobloxIngest } from "@/lib/server/validate";
 
@@ -62,25 +62,21 @@ export async function POST(request: Request): Promise<Response> {
       throw new Error("no demo child for roblox ingest");
     }
 
-    const report = await createReport({
-      parent_id: parent.id,
-      child_id: child.id,
-      attack_type: input.attackType,
-      taken_actions: input.takenActions,
-      source: "game",
-      content: ingestContent(input),
+    const result = await createRobloxIngestReport(input, {
+      parentId: parent.id,
+      childId: child.id,
+      childName: child.display_name,
+      parentName: parent.display_name,
+      matched: linkedChildId !== null && child.id === linkedChildId,
     });
 
     const response: RobloxIngestResponse = {
       ok: true,
-      report_id: report.id,
-      child_name: child.display_name,
-      parent_name: parent.display_name,
-      state: report.state,
-      matched: linkedChildId !== null && child.id === linkedChildId,
+      ...result.ack,
     };
-    return json(response, 201);
+    return json(response, result.created ? 201 : 200);
   } catch (err) {
+    if (err instanceof RobloxIngestIdempotencyConflictError) return ingestError("idempotency_conflict", 409);
     const fallback = handleRouteError(err);
     return ingestError(fallback.status === 503 ? "storage_unavailable" : "internal_error", fallback.status);
   }

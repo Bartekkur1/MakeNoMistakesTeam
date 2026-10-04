@@ -7,7 +7,7 @@ Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na re
 ## Phases
 
 - [x] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości (completed 2026-10-03)
-- [ ] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok
+- [x] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok (completed 2026-10-04)
 - [ ] **Phase 3: Przekazanie opiekunowi i błędy** - podgląd, wysyłka, odpowiedź, obsługa awarii
 - [ ] **Phase 4: Wersja mobilna** - ta sama ścieżka jako strona w przeglądarce telefonu
 
@@ -57,6 +57,11 @@ Plans:
   3. Uczciwa fikcyjna wiadomość nie dostaje fałszywego alarmu; przy braku pewności pomocnik to mówi
 
 **Plans**: TBD
+- [x] 02-04-PLAN.md
+- [x] 02-01-PLAN.md
+- [x] 02-02-PLAN.md
+- [x] 02-03-PLAN.md
+
 **UI hint**: yes
 
 ### Phase 3: Przekazanie opiekunowi i błędy

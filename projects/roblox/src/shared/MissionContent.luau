@@ -20,6 +20,9 @@ export type RuleCardInfo = {
 	sourceVerifiedAt: string,
 }
 
+export type ResultStatus = "none" | "passed" | "failed"
+export type DeliveryStatus = "idle" | "sending" | "sent" | "failed"
+
 export type MissionSnapshot = {
 	revision: number,
 	sequence: number,
@@ -33,6 +36,13 @@ export type MissionSnapshot = {
 	title: string?,
 	interlocutorName: string?,
 	ruleCard: RuleCardInfo?,
+	resultStatus: ResultStatus,
+	rewardEarned: boolean,
+	rewardJustEarned: boolean,
+	deliveryStatus: DeliveryStatus?,
+	deliveryRecipientName: string?,
+	deliveryRecipientIsDemo: boolean?,
+	deliveryAttemptId: string?,
 }
 
 local MissionContent = {}
@@ -85,12 +95,8 @@ MissionContent.texts = {
 	scamerino_hint = "Wskazówka: Oszuści stosują presję czasu i obiecują darmowe nagrody, aby uśpić Twoją czujność.",
 	fake_password_user = "OK, moje hasło to: **********",
 	fake_password_npc = "Haha, dzięki za darmowe konto i rzadkie itemy! Nara frajerze!",
-	ending_good = "Brawo! Twoje konto i przedmioty są całkowicie bezpieczne.\n\n"
-		.. "Oszuści w Robloxie często obiecują darmowe Robuxy i twierdzą, że „muszą się zalogować, żeby je przelać”. Zapamiętaj: nikt uczciwy (nawet administrator ani twórca gry) nie potrzebuje Twojego hasła.\n\n"
-		.. "W prawdziwej grze w takiej sytuacji: nie podawaj żadnych danych, zgłoś gracza przez menu Roblox [Report Abuse] i powiedz o rozmowie zaufanemu dorosłemu.",
-	ending_bad = "Uważaj! Twoje konto i wirtualne przedmioty zostały przejęte!\n\n"
-		.. "Gdy podasz hasło obcej osobie, oszust natychmiast zmienia dane logowania, kradnie Twoje rzadkie skiny i odcina Cię od konta. W Robloxie transfer Robuxów nigdy nie wymaga logowania się na konto odbiorcy.\n\n"
-		.. "To było tylko bezpieczne ćwiczenie. Jeśli podobna sytuacja przydarzy Ci się naprawdę: natychmiast powiedz rodzicom lub zaufanemu dorosłemu, aby pomogli Ci odzyskać konto przez pomoc techniczną Roblox.",
+	ending_good = "Dobra decyzja! Twoje hasło zostaje u Ciebie",
+	ending_bad = "To było ćwiczenie. Hasło daje dostęp do konta — spróbuj jeszcze raz",
 }
 
 MissionContent.initialChoices = {

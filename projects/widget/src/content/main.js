@@ -3,9 +3,9 @@ import { createAvatar } from './avatar.js';
 import { createPanel } from '../ui/panel.js';
 import { STRINGS } from '../ui/strings.pl.js';
 import { createDraftStore } from '../core/draft.js';
-import { buildCase } from '../core/case.js';
+import { buildCase, normalizeText, normalizeLink } from '../core/case.js';
 import { MSG_SHOW } from '../core/messages.js';
-import { submitCase } from '../core/integration.js';
+import { submitCase, requestGuardianVerification } from '../core/integration.js';
 
 function boot() {
   const runtime = chrome.runtime;
@@ -22,18 +22,41 @@ function boot() {
     onCheck() { store.showPaste(); render(); },
     onHowTo() { store.showHowTo(); render(); },
     onBack() { store.back(); render(); },
+    onFinishCheck() { store.finishCheck(); render(); },
     onPasteNext(values) { store.submitPaste(values); render(); },
     onPasteEdit(patch) { store.editPaste(patch); },
     onEdit(patch) { store.edit(patch); },
     onClose() { store.close(); render(); },
+    onSafetyNext() { store.startQuestions(); render(); },
+    onAnswer(questionId, answerId) { store.answer(questionId, answerId); render(); },
+    onQuestionNext(keep = false) { store.nextQuestion(keep); render(); },
+    onQuestionBack() { store.previousQuestion(); render(); },
+    onFixAnswers() { store.fixAnswers(); render(); },
+    onEditCheckContent() { store.editCheckContent(); render(); },
+    onCancelCheckEdit() { store.cancelCheckEdit(); render(); },
+    onCheckNewSelection() { store.checkNewSelection(); render(); },
+    async onRequestGuardianVerification() {
+      const check = store.get().check;
+      const token = store.beginGuardianRequest();
+      if (token === null) return;
+      render();
+      try { await requestGuardianVerification(check.case, check.result); store.guardianRequested(token); }
+      catch (error) { store.guardianRequestFailed(token, !isLive() || /extension context invalidated/i.test(error?.message ?? '')); }
+      render();
+    },
     async onApprove() {
       let c;
       try { c = buildCase({ ...store.get().draft }, new Date(), location); }
       catch { return; }
+      const state = store.get();
+      if (state.candidateKind && state.check && normalizeText(state.check.case.content) === c.content
+          && normalizeLink(state.check.case.link) === c.link) {
+        store.cancelCheckEdit(); render(); return;
+      }
       const token = store.beginSubmit();
       if (token === null) return;
       render();
-      try { await submitCase(c); store.approved(token); }
+      try { await submitCase(c); if (!store.approved(token, c)) store.submitFailed(token); }
       catch { store.submitFailed(token); }
       render();
     },

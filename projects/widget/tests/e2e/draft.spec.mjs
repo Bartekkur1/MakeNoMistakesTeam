@@ -25,6 +25,25 @@ test.describe('real bfcache',()=>{
   await expect.poll(()=>page.evaluate(()=>window.__restores)).toContain(true);
   await expect(avatar(page)).toBeVisible();await clear(page);await avatar(page).click();await expect(page.locator('.menu')).toBeVisible();await assertOnlyLocal(netlog);
  });
+ for (const step of ['question', 'result with edit']) test(`Back clears an approved ${step} session in a genuinely cached document`, async ({ page, serviceWorker, netlog }) => {
+  await draft(page); await button(page, 'Zatwierdzam').click();
+  await expect(page.getByText('Zanim sprawdzimy: nie podawaj hasła ani kodu i nie klikaj nieznanego linku.', { exact: true })).toBeVisible();
+  await button(page, 'Dalej').click(); await page.getByLabel('Osoba, którą znam', { exact: true }).check(); await button(page, 'Dalej').click();
+  await page.getByLabel('Podania kodu do konta', { exact: true }).check();
+  if (step === 'result with edit') {
+   await button(page, 'Dalej').click(); await page.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true }).check(); await button(page, 'Dalej').click();
+   await expect(page.locator('.result-section')).toHaveCount(3); await button(page, 'Edytuj wiadomość').click(); await text(page).fill('Unfinished cached edit');
+  }
+  await page.evaluate(() => { window.__checkRestores = []; window.addEventListener('pageshow', event => window.__checkRestores.push(event.persisted)); });
+  await page.goto(other); await avatar(page).click(); await expect(page.locator('.menu')).toBeVisible();
+  await page.goBack({ waitUntil: 'commit' });
+  await expect.poll(() => page.evaluate(() => window.__checkRestores)).toContain(true);
+  await expect(avatar(page)).toBeVisible(); await expect(page.getByRole('dialog')).toBeHidden();
+  await clear(page); await avatar(page).click(); await expect(page.locator('.menu')).toBeVisible();
+  await expect(page.locator('input:checked')).toHaveCount(0); await expect(page.locator('.result-section')).toHaveCount(0);
+  await expect(button(page, 'Wróć do sprawdzania')).toHaveCount(0); await button(page, 'Sprawdź wiadomość').click(); await expect(text(page)).toHaveValue('');
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1); await assertOnlyLocal(netlog);
+ });
 });
 test('same document SPA channel keeps edited draft',async({page,netlog})=>{await draft(page);await page.evaluate(()=>history.pushState({},'','/chat-like.html?kanal=2'));await button(page,'Zamknij okno').click();await clear(page);await avatar(page).click();await expect(text(page)).toHaveValue('Darmowe Nitro! Kliknij link');await assertOnlyLocal(netlog);});
 test('draft uses no page storage or extension storage',async({page,serviceWorker,netlog})=>{await draft(page);expect(await page.evaluate(()=>[localStorage.length,sessionStorage.length])).toEqual([0,0]);expect(await serviceWorker.evaluate(()=>typeof chrome.storage)).toBe('undefined');expect(await serviceWorker.evaluate(()=>self.__aura.messages.length)).toBe(0);await assertOnlyLocal(netlog);});
