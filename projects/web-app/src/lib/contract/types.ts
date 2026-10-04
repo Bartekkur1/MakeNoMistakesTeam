@@ -3,7 +3,7 @@
 // Human-readable spec: .planning/shared/CONTRACT.md
 //
 // Erasable TypeScript only (no enum, namespace, parameter properties or imports):
-// web-app/scripts/check-contract-examples.mjs loads this file through Node type stripping.
+// projects/web-app/scripts/check-contract-examples.mjs loads this file through Node type stripping.
 
 // ---------------------------------------------------------------------------
 // Report states (D-08, D-15)

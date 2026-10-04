@@ -20,7 +20,7 @@ export interface DemoDataset {
   comments: Row[];
 }
 
-const EXAMPLES_DIR = new URL("../../../.planning/shared/examples/", import.meta.url);
+const EXAMPLES_DIR = new URL("../../../../.planning/shared/examples/", import.meta.url);
 
 export function loadExample<T = ExampleFile>(name: string): T {
   return JSON.parse(readFileSync(new URL(name, EXAMPLES_DIR), "utf8")) as T;

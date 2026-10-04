@@ -1,4 +1,4 @@
-// Locks the SQL schema in web-app/supabase/migrations to the contract constants in types.ts.
+// Locks the SQL schema in projects/web-app/supabase/migrations to the contract constants in types.ts.
 // When an assertion here fails, fix the migration (with a new migration once applied), never
 // this test or the contract.
 

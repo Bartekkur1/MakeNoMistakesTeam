@@ -31,7 +31,7 @@ interface ExampleFile {
 }
 
 const POST_EXAMPLE = JSON.parse(
-  readFileSync(new URL("../../../.planning/shared/examples/post-reports.json", import.meta.url), "utf8"),
+  readFileSync(new URL("../../../../.planning/shared/examples/post-reports.json", import.meta.url), "utf8"),
 ) as ExampleFile;
 
 interface ErrorBody {

@@ -1,9 +1,9 @@
 -- Demo seed for BezpiecznaAura (contract v2).
 --
--- GENERATED from .planning/shared/examples/demo-dataset.json by web-app/scripts/build-seed.mjs.
+-- GENERATED from .planning/shared/examples/demo-dataset.json by projects/web-app/scripts/build-seed.mjs.
 -- Do not edit by hand: change the dataset, then run `npm run seed:build` in web-app.
 --
--- Run after all migrations in web-app/supabase/migrations, by a human only (D-06).
+-- Run after all migrations in projects/web-app/supabase/migrations, by a human only (D-06).
 -- Re-runnable demo reset: it deletes and re-inserts only the dataset reports listed below;
 -- their history entries and comments go with them (on delete cascade). Other reports stay.
 -- History and comments are inserted one statement per row, so seq follows the dataset order.

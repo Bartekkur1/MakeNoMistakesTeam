@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generates web-app/supabase/seed.sql from the canonical demo dataset
+// Generates projects/web-app/supabase/seed.sql from the canonical demo dataset
 // (.planning/shared/examples/demo-dataset.json), so the data a human loads into Supabase is the
 // same data the contract examples and the panel/widget offline work rely on (D-05).
 //
@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const DATASET_PATH = fileURLToPath(new URL("../../.planning/shared/examples/demo-dataset.json", import.meta.url));
+const DATASET_PATH = fileURLToPath(new URL("../../../.planning/shared/examples/demo-dataset.json", import.meta.url));
 const SEED_PATH = fileURLToPath(new URL("../supabase/seed.sql", import.meta.url));
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -107,10 +107,10 @@ function renderSeed(dataset) {
   const lines = [
     "-- Demo seed for BezpiecznaAura (contract v2).",
     "--",
-    "-- GENERATED from .planning/shared/examples/demo-dataset.json by web-app/scripts/build-seed.mjs.",
+    "-- GENERATED from .planning/shared/examples/demo-dataset.json by projects/web-app/scripts/build-seed.mjs.",
     "-- Do not edit by hand: change the dataset, then run `npm run seed:build` in web-app.",
     "--",
-    "-- Run after all migrations in web-app/supabase/migrations, by a human only (D-06).",
+    "-- Run after all migrations in projects/web-app/supabase/migrations, by a human only (D-06).",
     "-- Re-runnable demo reset: it deletes and re-inserts only the dataset reports listed below;",
     "-- their history entries and comments go with them (on delete cascade). Other reports stay.",
     "-- History and comments are inserted one statement per row, so seq follows the dataset order.",

@@ -4,7 +4,7 @@
 // constants in src/lib/contract/types.ts, the demo accounts in src/lib/contract/demo-accounts.ts
 // and (for routes that read stored data) the canonical demo dataset in demo-dataset.json.
 //
-// Usage:  node web-app/scripts/check-contract-examples.mjs
+// Usage:  node projects/web-app/scripts/check-contract-examples.mjs
 // Env:    CONTRACT_EXAMPLES_DIR overrides the examples directory.
 // Output: "OK <file>" / "FAIL <file>: <reason>" per file, then
 //         "contract examples: N files OK" or "contract examples: K of N files FAILED" (exit 1).
@@ -61,7 +61,7 @@ import {
   teacherTeachesChild,
 } from "../src/lib/contract/demo-accounts.ts";
 
-const DEFAULT_DIR = fileURLToPath(new URL("../../.planning/shared/examples/", import.meta.url));
+const DEFAULT_DIR = fileURLToPath(new URL("../../../.planning/shared/examples/", import.meta.url));
 const dir = process.env.CONTRACT_EXAMPLES_DIR || DEFAULT_DIR;
 
 const DATASET_FILE = "demo-dataset.json";

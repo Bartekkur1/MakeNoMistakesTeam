@@ -36,7 +36,7 @@ const ROUTES: Record<string, Record<string, Handler>> = {
   "/api/reports/{id}/comments": { POST: comments.POST },
 };
 
-const EXAMPLES_DIR = new URL("../../../.planning/shared/examples/", import.meta.url);
+const EXAMPLES_DIR = new URL("../../../../.planning/shared/examples/", import.meta.url);
 const ROUTE_EXAMPLES = readdirSync(EXAMPLES_DIR)
   .filter((name) => name.endsWith(".json") && name !== "demo-dataset.json" && name !== "errors.json")
   .sort();

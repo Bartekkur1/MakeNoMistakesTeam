@@ -1,6 +1,6 @@
 // Shared HTTP helpers for every route handler: CORS, JSON responses, the contract error
 // envelope, body reading with the size cap, and the mapping of infrastructure errors.
-// The console calls below are the only ones in web-app/src. They print an error code or an
+// The console calls below are the only ones in projects/web-app/src. They print an error code or an
 // error name, never request bodies, e-mails, tokens, report content, env values or cause messages.
 
 import {

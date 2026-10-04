@@ -4,7 +4,7 @@
 // and are never used in the presentation.
 //
 // Erasable TypeScript only, and only `import type` from "./types":
-// web-app/scripts/check-contract-examples.mjs loads this file through Node type stripping.
+// projects/web-app/scripts/check-contract-examples.mjs loads this file through Node type stripping.
 
 import type { AccountInfo, AccountRole, ChildInfo } from "./types";
 

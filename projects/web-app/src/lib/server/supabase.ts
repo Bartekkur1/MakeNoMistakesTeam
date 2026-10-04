@@ -1,4 +1,4 @@
-// The only module in web-app/src that imports @supabase/supabase-js (D-02, D-03).
+// The only module in projects/web-app/src that imports @supabase/supabase-js (D-02, D-03).
 // Server-side only: it reads SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which must never carry
 // a browser-exposed prefix and are never logged. The client is created lazily on the first
 // request, so `next build` never touches storage.

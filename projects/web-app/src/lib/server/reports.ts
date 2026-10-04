@@ -1,6 +1,6 @@
 // All report data access (D-02, D-05). Every call goes through getSupabase(); the SDK itself is
 // imported only in supabase.ts. Writes go through the Postgres functions in
-// web-app/supabase/migrations, so a report and its history entry are stored together or not at all.
+// projects/web-app/supabase/migrations, so a report and its history entry are stored together or not at all.
 //
 // No false confirmations (widget ERR-01): a storage error, a thrown call, a missing row or a row
 // that does not match the contract becomes StorageUnavailableError (503), never a 2xx.

@@ -7,7 +7,7 @@ Właściciel: osoba 3. Osoba 2 potwierdza przed implementacją. Źródło: `idea
 
 Wersja 1 (sprawy i odpowiedzi opiekuna, bez logowania) nie została zatwierdzona i jest wycofana; zastępuje ją model zgłoszeń z decyzji CONTEXT D-08…D-18 opisany poniżej.
 
-Typy i stałe w kodzie: `web-app/src/lib/contract/types.ts` (jedno źródło prawdy dla backendu, panelu i checkera), konta demo: `web-app/src/lib/contract/demo-accounts.ts`. Zgodność przykładów sprawdza `node web-app/scripts/check-contract-examples.mjs` — to wykonywalny model referencyjny tego kontraktu.
+Typy i stałe w kodzie: `projects/web-app/src/lib/contract/types.ts` (jedno źródło prawdy dla backendu, panelu i checkera), konta demo: `projects/web-app/src/lib/contract/demo-accounts.ts`. Zgodność przykładów sprawdza `node projects/web-app/scripts/check-contract-examples.mjs` — to wykonywalny model referencyjny tego kontraktu.
 
 ## Bazowy URL
 
@@ -27,7 +27,7 @@ Każdy klient (wtyczka i strona mobilna widgetu, panel rodzica i nauczyciela, se
 - **Potwierdzenie zapisu:** tylko odpowiedź 2xx ze zwróconym zapisanym obiektem oznacza, że dane zostały zapisane. Każdy inny status albo błąd sieci oznacza „nie zapisano” — klient nie może wtedy pokazać „wysłano” (widget ERR-01).
 - **`POST /api/reports` nie jest idempotentny (D-17):** ponowienie żądania po utraconej odpowiedzi może utworzyć duplikat zgłoszenia. Dlatego widget oferuje tylko ręczne „spróbuj ponownie”, bez automatycznych powtórzeń.
 - Klienci rozmawiają tylko z `/api/...`, nigdy nie łączą się z Supabase i nigdy nie dostają klucza Supabase (D-03).
-- API to route handlers Next.js w projekcie `web-app/` (D-01), z trwałym zapisem w Supabase (Postgres) (D-02).
+- API to route handlers Next.js w projekcie `projects/web-app/` (D-01), z trwałym zapisem w Supabase (Postgres) (D-02).
 
 ## Logowanie demo
 
@@ -424,7 +424,7 @@ Przykłady wszystkich kodów: `shared/examples/errors.json`.
 
 ## Limity
 
-Te same wartości są w `LIMITS` w `web-app/src/lib/contract/types.ts`.
+Te same wartości są w `LIMITS` w `projects/web-app/src/lib/contract/types.ts`.
 
 | Limit (`LIMITS`) | Wartość | Przekroczenie |
 |---|---|---|
@@ -476,7 +476,7 @@ Przykłady żądań zapisujących (`post-reports.json`, przejścia, komentarze) 
 
 ## Przykłady
 
-Katalog `.planning/shared/examples/` (zgodność sprawdza `node web-app/scripts/check-contract-examples.mjs`). Każdy plik przykładu ma pola `description`, `method`, `route`, `path`, `auth`, `request`, `response`. Pole `auth` to `null` (bez logowania) albo `{ "email", "scope" }` konta demo, które wysyła żądanie — prawdziwy token nigdy nie trafia do przykładów.
+Katalog `.planning/shared/examples/` (zgodność sprawdza `node projects/web-app/scripts/check-contract-examples.mjs`). Każdy plik przykładu ma pola `description`, `method`, `route`, `path`, `auth`, `request`, `response`. Pole `auth` to `null` (bez logowania) albo `{ "email", "scope" }` konta demo, które wysyła żądanie — prawdziwy token nigdy nie trafia do przykładów.
 
 | Plik | Znaczenie |
 |---|---|

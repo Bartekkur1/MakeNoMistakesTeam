@@ -3,7 +3,7 @@
 Aplikacja Next.js z backendem zgłoszeń (wtyczka, strona mobilna, panel rodzica i nauczyciela, serwer Roblox) oraz logowaniem demo (e-mail + kod `0000`).
 
 - Kontrakt API: `.planning/shared/CONTRACT.md` (endpointy, pola, błędy, konta demo, bazowy URL).
-- Zgodność przykładów z kontraktem sprawdza `node web-app/scripts/check-contract-examples.mjs`.
+- Zgodność przykładów z kontraktem sprawdza `node projects/web-app/scripts/check-contract-examples.mjs`.
 
 ## Wymagania
 
@@ -20,7 +20,7 @@ Serwer potrzebuje trzech zmiennych, wyłącznie po stronie serwera:
 | `SUPABASE_SERVICE_ROLE_KEY` | klucz serwisowy (service_role / secret), nigdy klucz publiczny anon |
 | `DEMO_AUTH_SECRET` | sekret do podpisywania tokenów demo, co najmniej 32 znaki, np. `openssl rand -hex 32` |
 
-- Lokalnie: ustawia je człowiek w pliku `web-app/.env.local` (plik jest ignorowany przez git, wzorzec `.env*`).
+- Lokalnie: ustawia je człowiek w pliku `projects/web-app/.env.local` (plik jest ignorowany przez git, wzorzec `.env*`).
 - Na Heroku: jako Config Vars aplikacji.
 - Nigdy nie trafiają do klienta (wtyczka, strona, panel) ani do zmiennych z prefiksem widocznym w przeglądarce. Nie commitujemy ich i nie wklejamy do dokumentacji.
 
@@ -64,7 +64,7 @@ Testy działają bez bazy danych - używają atrapy klienta supabase-js.
 
 ## Wdrożenie (Heroku)
 
-1. Wdrażamy tylko katalog `web-app/`: `git subtree push --prefix web-app heroku main` albo buildpack monorepo z `APP_BASE=web-app`.
+1. Wdrażamy tylko katalog `projects/web-app/`: `git subtree push --prefix projects/web-app heroku main` albo buildpack monorepo z `APP_BASE=projects/web-app`.
 2. Ustaw Config Vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_AUTH_SECRET`.
 3. Heroku bierze wersję Node z `engines`, a `Procfile` uruchamia `npm start` (`next start -p $PORT`).
 4. Sprawdź wdrożenie: `SMOKE_BASE_URL=https://<aplikacja>.herokuapp.com npm run smoke`.

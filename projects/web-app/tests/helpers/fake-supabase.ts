@@ -8,7 +8,7 @@
 //
 // report_history and report_comments carry a `seq` counter like the SQL identity column
 // (canonical order, never exposed by the API). The fake RPCs at the bottom mirror the
-// Postgres functions in web-app/supabase/migrations.
+// Postgres functions in projects/web-app/supabase/migrations.
 
 import {
   ATTACK_TYPES,
@@ -451,7 +451,7 @@ export class FakeSupabase {
 export const fakeSupabase = new FakeSupabase();
 
 // ---------------------------------------------------------------------------
-// Fake Postgres functions (mirror web-app/supabase/migrations/20261003170000_reports.sql)
+// Fake Postgres functions (mirror projects/web-app/supabase/migrations/20261003170000_reports.sql)
 // ---------------------------------------------------------------------------
 
 function checkViolation(constraint: string): FakeResult {
@@ -570,7 +570,7 @@ fakeSupabase.rpcHandlers.list_reports = (args, fake) => {
 };
 
 // ---------------------------------------------------------------------------
-// Fake public.transition_report (mirrors web-app/supabase/migrations/20261003170100_report_transitions.sql)
+// Fake public.transition_report (mirrors projects/web-app/supabase/migrations/20261003170100_report_transitions.sql)
 // ---------------------------------------------------------------------------
 
 // The (action, from, to, role) tuples report_history_transition_check allows for transitions.
