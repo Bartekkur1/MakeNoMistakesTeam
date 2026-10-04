@@ -14,6 +14,8 @@ import {
   type ReportDetail,
   type ReportListResponse,
   type ReportState,
+  type RobloxAccount,
+  type RobloxAccountListResponse,
   type TransitionAction,
   type TransitionResponse,
 } from "@/lib/contract/types";
@@ -183,3 +185,17 @@ export function isUnauthorized(result: ApiResult<unknown>): boolean {
   return !result.ok && result.kind === "http" && result.code === "unauthorized";
 }
 
+
+// The Roblox nicks the parent linked to their children (parent accounts only).
+export function fetchRobloxAccounts(token: string): Promise<ApiResult<RobloxAccountListResponse>> {
+  return apiCall<RobloxAccountListResponse>("/api/roblox-accounts", { method: "GET", token });
+}
+
+// Links (or relinks) a nick to a child. Idempotent: saving the same nick twice changes nothing.
+export function saveRobloxAccount(token: string, childId: string, robloxUsername: string): Promise<ApiResult<RobloxAccount>> {
+  return apiCall<RobloxAccount>("/api/roblox-accounts", {
+    method: "POST",
+    token,
+    body: { child_id: childId, roblox_username: robloxUsername },
+  });
+}

@@ -141,9 +141,9 @@ describe("migrations keep history and comments append-only and closed to API key
     expect(SQL).toContain("if not exists (select 1 from public.reports where id = old.report_id) then");
   });
 
-  it("enables row level security on the three tables without any policy", () => {
-    expect(count("enable row level security")).toBe(3);
-    for (const table of ["reports", "report_history", "report_comments"]) {
+  it("enables row level security on every table without any policy", () => {
+    expect(count("enable row level security")).toBe(4);
+    for (const table of ["reports", "report_history", "report_comments", "child_roblox_accounts"]) {
       expect(SQL).toContain(`alter table public.${table} enable row level security;`);
     }
     expect(SQL.toLowerCase()).not.toContain("create policy");
@@ -151,7 +151,7 @@ describe("migrations keep history and comments append-only and closed to API key
 
   it("revokes execute from public, anon and authenticated on every function and grants it to service_role", () => {
     const names = [...SQL.matchAll(/create (?:or replace )?function public\.([a-z_]+)\s*\(/g)].map((m) => m[1]);
-    expect(names).toEqual(expect.arrayContaining(["create_report", "list_reports", "forbid_update", "forbid_delete"]));
+    expect(names).toEqual(expect.arrayContaining(["create_report", "list_reports", "forbid_update", "forbid_delete", "set_child_roblox_account"]));
     const lines = SQL.split("\n");
     for (const name of names) {
       const revoke = lines.find((line) => line.startsWith(`revoke execute on function public.${name}(`));

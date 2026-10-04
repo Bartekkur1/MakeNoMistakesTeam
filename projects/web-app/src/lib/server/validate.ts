@@ -9,6 +9,10 @@ import {
   LOGIN_SCOPES,
   REPORT_SOURCES,
   REPORT_STATES,
+  ROBLOX_MAX_HINTS,
+  ROBLOX_MAX_SCORE,
+  ROBLOX_OUTCOMES,
+  ROBLOX_USERNAME_PATTERN,
   TAKEN_ACTIONS,
   TRANSITION_ACTIONS,
   TRANSITION_COMMENT_REQUIRED,
@@ -18,6 +22,7 @@ import {
   type NewReportInput,
   type ReportSource,
   type ReportState,
+  type RobloxOutcome,
   type TakenAction,
   type TransitionAction,
 } from "@/lib/contract/types";
@@ -299,4 +304,150 @@ export function parseComment(body: Record<string, unknown>): ValidationResult<Co
     return { ok: false, errors: [{ field: "body", message: UNSTORABLE_CHARS_MESSAGE }] };
   }
   return { ok: true, value: { body: text } };
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/roblox-accounts (contract "Konto Roblox dziecka")
+// ---------------------------------------------------------------------------
+
+export interface RobloxAccountInput {
+  childId: string;
+  robloxUsername: string;
+}
+
+const ROBLOX_USERNAME_MESSAGE = "Nick Roblox ma od 3 do 20 znaków: litery, cyfry lub podkreślnik.";
+
+// Only child_id and roblox_username are read. The nick keeps the spelling the parent typed.
+export function parseRobloxAccount(body: Record<string, unknown>): ValidationResult<RobloxAccountInput> {
+  const errors: FieldError[] = [];
+
+  const childId = isUuid(body.child_id) ? body.child_id.toLowerCase() : null;
+  if (childId === null) {
+    errors.push({ field: "child_id", message: "Wybierz dziecko." });
+  }
+
+  const username = typeof body.roblox_username === "string" ? body.roblox_username.trim() : "";
+  if (username === "") {
+    errors.push({ field: "roblox_username", message: "Wpisz nick Roblox." });
+  } else if (!ROBLOX_USERNAME_PATTERN.test(username)) {
+    errors.push({ field: "roblox_username", message: ROBLOX_USERNAME_MESSAGE });
+  }
+
+  if (errors.length > 0 || childId === null) return { ok: false, errors };
+  return { ok: true, value: { childId, robloxUsername: username } };
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/reports/ingest (Roblox game server)
+// ---------------------------------------------------------------------------
+
+// The stored content is a header line plus the game's summary; this leaves room for the header
+// within LIMITS.contentMaxChars.
+export const ROBLOX_INGEST_CONTENT_MAX_CHARS = 4500;
+
+export interface RobloxIngestInput {
+  robloxUsername: string;
+  attackType: AttackType;
+  takenActions: TakenAction[];
+  content: string;
+  hintsUsed: number | null;
+  score: number | null;
+  outcome: RobloxOutcome | null;
+}
+
+function isRobloxOutcome(value: unknown): value is RobloxOutcome {
+  return typeof value === "string" && (ROBLOX_OUTCOMES as readonly string[]).includes(value);
+}
+
+function optionalIntInRange(
+  body: Record<string, unknown>,
+  field: string,
+  max: number,
+  errors: FieldError[],
+): number | null {
+  const value = body[field];
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > max) {
+    errors.push({ field, message: `Pole ${field} musi być liczbą całkowitą od 0 do ${max}.` });
+    return null;
+  }
+  return value;
+}
+
+// Unlike POST /api/reports, taken_actions are not limited to ACTIONS_BY_ATTACK_TYPE: the game
+// decides what the simulation counts as. outcome "compromised_password" always records
+// entered_password, so the parent sees the risk marker even if the game left the list empty.
+export function parseRobloxIngest(body: Record<string, unknown>): ValidationResult<RobloxIngestInput> {
+  const errors: FieldError[] = [];
+
+  const username = typeof body.roblox_username === "string" ? body.roblox_username.trim() : "";
+  if (!ROBLOX_USERNAME_PATTERN.test(username)) {
+    errors.push({ field: "roblox_username", message: ROBLOX_USERNAME_MESSAGE });
+  }
+
+  const userId = body.roblox_user_id;
+  if (userId !== undefined && userId !== null && (typeof userId !== "number" || !Number.isSafeInteger(userId) || userId <= 0)) {
+    errors.push({ field: "roblox_user_id", message: "Pole roblox_user_id musi być dodatnią liczbą całkowitą." });
+  }
+
+  const attackType = isAttackType(body.attack_type) ? body.attack_type : null;
+  if (attackType === null) {
+    errors.push({ field: "attack_type", message: "Nieznany rodzaj ataku." });
+  }
+
+  if (body.source !== undefined && body.source !== "game") {
+    errors.push({ field: "source", message: "Źródło zgłoszenia z Roblox to zawsze game." });
+  }
+
+  const takenActions: TakenAction[] = [];
+  const rawActions = body.taken_actions === undefined || body.taken_actions === null ? [] : body.taken_actions;
+  if (!Array.isArray(rawActions)) {
+    errors.push({ field: "taken_actions", message: "Pole taken_actions musi być listą." });
+  } else {
+    rawActions.forEach((action: unknown, index: number) => {
+      if (!isTakenAction(action)) {
+        errors.push({ field: `taken_actions[${index}]`, message: "Nieznane działanie." });
+      } else if (!takenActions.includes(action)) {
+        takenActions.push(action);
+      }
+    });
+  }
+
+  let outcome: RobloxOutcome | null = null;
+  if (body.outcome !== undefined && body.outcome !== null) {
+    if (isRobloxOutcome(body.outcome)) {
+      outcome = body.outcome;
+    } else {
+      errors.push({ field: "outcome", message: "Nieznany wynik szkolenia." });
+    }
+  }
+  if (outcome === "compromised_password" && !takenActions.includes("entered_password")) {
+    takenActions.push("entered_password");
+  }
+
+  const hintsUsed = optionalIntInRange(body, "hints_used", ROBLOX_MAX_HINTS, errors);
+  const score = optionalIntInRange(body, "score", ROBLOX_MAX_SCORE, errors);
+
+  const content = typeof body.content === "string" ? body.content.trim() : "";
+  if (content === "") {
+    errors.push({ field: "content", message: "Treść nie może być pusta." });
+  } else if (charLength(content) > ROBLOX_INGEST_CONTENT_MAX_CHARS) {
+    errors.push({ field: "content", message: `Treść jest za długa (maks. ${ROBLOX_INGEST_CONTENT_MAX_CHARS} znaków).` });
+  } else if (hasUnstorableChars(content)) {
+    errors.push({ field: "content", message: UNSTORABLE_CHARS_MESSAGE });
+  }
+
+  if (errors.length > 0 || attackType === null) return { ok: false, errors };
+  return {
+    ok: true,
+    value: {
+      robloxUsername: username,
+      attackType,
+      takenActions: takenActions.sort(canonicalActionOrder),
+      content,
+      hintsUsed,
+      score,
+      outcome,
+    },
+  };
 }

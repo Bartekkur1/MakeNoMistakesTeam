@@ -398,6 +398,68 @@ export interface FieldError {
   message: string;
 }
 
+// ---------------------------------------------------------------------------
+// Roblox: the child's nick and the game's training results
+// ---------------------------------------------------------------------------
+
+// Roblox usernames: 3 to 20 letters, digits or underscores. Matched case-insensitively.
+export const ROBLOX_USERNAME_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
+export const ROBLOX_USERNAME_MAX_CHARS = 20;
+
+export const ROBLOX_ACCOUNT_FIELDS = ["child_id", "roblox_username", "updated_at"] as const;
+
+// GET /api/roblox-accounts lists one per linked child; POST sets one.
+export interface RobloxAccount {
+  child_id: string;
+  roblox_username: string;
+  updated_at: string;
+}
+
+export interface RobloxAccountListResponse {
+  accounts: RobloxAccount[];
+}
+
+export interface SetRobloxAccountRequest {
+  child_id: string;
+  roblox_username: string;
+}
+
+export const ROBLOX_OUTCOMES = ["safe_refusal", "compromised_password"] as const;
+export type RobloxOutcome = (typeof ROBLOX_OUTCOMES)[number];
+
+export const ROBLOX_MAX_HINTS = 2;
+export const ROBLOX_MAX_SCORE = 3;
+
+// Wire body of POST /api/reports/ingest (sent by the Roblox game server, header x-ingest-secret).
+export interface RobloxIngestRequest {
+  roblox_username: string;
+  roblox_user_id?: number;
+  attack_type: AttackType;
+  source?: "game";
+  taken_actions?: TakenAction[];
+  content: string;
+  hints_used?: number;
+  score?: number;
+  outcome?: RobloxOutcome;
+}
+
+// The ingest endpoint answers in its own envelope, agreed with the Roblox workstream.
+export interface RobloxIngestResponse {
+  ok: true;
+  report_id: string;
+  child_name: string;
+  parent_name: string;
+  state: ReportState;
+  // false when the nick is not linked to any child and the report went to the demo fallback child.
+  matched: boolean;
+}
+
+export interface RobloxIngestErrorBody {
+  ok: false;
+  error: string;
+  details?: FieldError[];
+}
+
 export interface ApiErrorBody {
   error: {
     code: ApiErrorCode;

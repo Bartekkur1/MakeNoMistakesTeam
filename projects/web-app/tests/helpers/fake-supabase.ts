@@ -20,7 +20,7 @@ import {
   type TransitionAction,
 } from "@/lib/contract/types";
 
-export type TableName = "reports" | "report_history" | "report_comments";
+export type TableName = "reports" | "report_history" | "report_comments" | "child_roblox_accounts";
 export type Row = Record<string, unknown>;
 
 export interface FakeError {
@@ -50,7 +50,7 @@ export interface FakeCall {
 export type RpcHandler = (args: Record<string, unknown>, fake: FakeSupabase) => FakeResult;
 export type BeforeCallCallback = (fake: FakeSupabase) => void;
 
-const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments"];
+const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments", "child_roblox_accounts"];
 
 // Tables with a `seq bigint generated always as identity` column.
 type SeqTable = "report_history" | "report_comments";
@@ -65,6 +65,7 @@ const TIMESTAMP_DEFAULTS: Record<TableName, readonly string[]> = {
   reports: ["created_at", "updated_at"],
   report_history: ["created_at"],
   report_comments: ["created_at"],
+  child_roblox_accounts: ["updated_at"],
 };
 
 const DEFAULT_CLOCK = "2026-10-03T12:00:00.000Z";
@@ -289,7 +290,7 @@ export class FakeRpcCall implements PromiseLike<FakeResult> {
 }
 
 export class FakeSupabase {
-  tables: Record<TableName, Row[]> = { reports: [], report_history: [], report_comments: [] };
+  tables: Record<TableName, Row[]> = { reports: [], report_history: [], report_comments: [], child_roblox_accounts: [] };
   callCount = 0;
   calls: FakeCall[] = [];
   // Registry name -> handler. reset() leaves it alone; a test that registers a handler
@@ -317,6 +318,9 @@ export class FakeSupabase {
       reports: (initial.reports ?? []).map(storeRow),
       report_history: this.withSeq("report_history", (initial.report_history ?? []).map(storeRow)),
       report_comments: this.withSeq("report_comments", (initial.report_comments ?? []).map(storeRow)),
+      child_roblox_accounts: (initial.child_roblox_accounts ?? []).map((row) =>
+        storeRow({ ...row, roblox_username_key: String(row.roblox_username).toLowerCase() }),
+      ),
     };
     this.callCount = 0;
     this.calls = [];
@@ -637,4 +641,32 @@ fakeSupabase.rpcHandlers.transition_report = (args, fake) => {
   };
   fake.tables.report_history.push(entry);
   return { data: { report: clone(report), entry: clone(entry) }, error: null };
+};
+
+// public.set_child_roblox_account (20261004120000_child_roblox_accounts.sql): null when the nick
+// (case-insensitive) belongs to another child, else upserts by child_id and returns the row.
+fakeSupabase.rpcHandlers.set_child_roblox_account = (args, fake) => {
+  const username = args.p_roblox_username;
+  if (typeof username !== "string" || !/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+    return {
+      data: null,
+      error: { code: "23514", message: 'violates check constraint "child_roblox_accounts_username_check"' },
+    };
+  }
+  const key = username.toLowerCase();
+  const rows = fake.tables.child_roblox_accounts;
+  if (rows.some((row) => row.roblox_username_key === key && row.child_id !== args.p_child_id)) {
+    return { data: null, error: null };
+  }
+  const row: Row = {
+    child_id: args.p_child_id,
+    parent_id: args.p_parent_id,
+    roblox_username: username,
+    roblox_username_key: key,
+    updated_at: fake.now(),
+  };
+  const index = rows.findIndex((existing) => existing.child_id === args.p_child_id);
+  if (index >= 0) rows[index] = row;
+  else rows.push(row);
+  return { data: clone(row), error: null };
 };
