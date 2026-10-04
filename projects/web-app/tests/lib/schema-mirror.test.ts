@@ -121,7 +121,7 @@ describe("migrations mirror the limits and timestamps", () => {
   });
 });
 
-describe("migrations keep history and comments append-only and closed to API keys", () => {
+describe("migrations keep history append-only, comments edit-proof and both closed to API keys", () => {
   it("blocks updates of history and comments", () => {
     expect(SQL).toContain("before update on public.report_history");
     expect(SQL).toContain("before update on public.report_comments");
@@ -132,6 +132,13 @@ describe("migrations keep history and comments append-only and closed to API key
       expect(SQL).toContain(`before delete on public.${table}\n  for each row execute function public.forbid_delete();`);
       expect(SQL).toContain(`before truncate on public.${table}\n  for each statement execute function public.forbid_delete();`);
     }
+  });
+
+  it("lets the author delete a comment again, but never a history entry", () => {
+    expect(SQL).toContain("drop trigger report_comments_no_delete on public.report_comments;");
+    expect(SQL).not.toContain("drop trigger report_history_no_delete");
+    expect(SQL).not.toContain("drop trigger report_comments_no_update");
+    expect(SQL).not.toContain("drop trigger report_comments_no_truncate");
   });
 
   it("still lets a report delete cascade to its history and comments (seed.sql demo reset)", () => {

@@ -3,7 +3,7 @@
 Właściciel: osoba 3. Osoba 2 potwierdza przed implementacją. Źródło: `ideas/defence/taski.md` oraz decyzje D-08…D-18 w `.planning/workstreams/web-app/phases/01-kontrakt-i-backend-spraw/01-CONTEXT.md`.
 
 **Status:** wersja 2 — zatwierdzona przez osobę 2 (2026-10-03); backend demo wdrożony i sprawdzony testem dymnym (2026-10-03)
-**Wersja:** 2 (2026-10-03)
+**Wersja:** 2 (2026-10-03); zmiana 2026-10-04: autor może usunąć swój komentarz (`DELETE /api/reports/{id}/comments/{commentId}`, D-11 zmienione)
 
 Wersja 1 (sprawy i odpowiedzi opiekuna, bez logowania) nie została zatwierdzona i jest wycofana; zastępuje ją model zgłoszeń z decyzji CONTEXT D-08…D-18 opisany poniżej.
 
@@ -193,7 +193,7 @@ Szczegóły zgłoszenia zwracają historię w kolejności chronologicznej (najst
 
 ### Komentarz
 
-Zgłoszenie ma wątek komentarzy dla **rodzica i nauczyciela** (D-11). Wątek jest **niewidoczny dla dziecka**: token wtyczki (zakres `extension`) nigdy go nie dostaje. Komentarze są tylko do dopisywania — nie da się ich edytować ani usuwać. To nie jest odpowiedź do dziecka.
+Zgłoszenie ma wątek komentarzy dla **rodzica i nauczyciela** (D-11). Wątek jest **niewidoczny dla dziecka**: token wtyczki (zakres `extension`) nigdy go nie dostaje. Komentarzy nie da się edytować. Autor może usunąć **swój** komentarz (usunięcie trwałe, znika dla obu stron); cudzego komentarza nie usunie nikt. To nie jest odpowiedź do dziecka.
 
 | Pole | Typ | Reguły |
 |---|---|---|
@@ -301,6 +301,7 @@ Kto co widzi (D-11, D-15):
 | `GET /api/reports/{id}` | Bearer, rodzic lub nauczyciel, tylko `panel` | 200, Zgłoszenie + `history` + `comments` | `unauthorized` 401, `forbidden` 403, `report_not_found` 404, `storage_unavailable` 503, `internal_error` 500 |
 | `POST /api/reports/{id}/transitions` | Bearer, rodzic lub nauczyciel, tylko `panel` | 201, `{ report, entry }` | `invalid_json` 400, `validation_error` 400, `unauthorized` 401, `forbidden` 403, `report_not_found` 404, `invalid_transition` 409, `payload_too_large` 413, `storage_unavailable` 503, `internal_error` 500 |
 | `POST /api/reports/{id}/comments` | Bearer, rodzic lub nauczyciel, tylko `panel` | 201, Komentarz | `invalid_json` 400, `validation_error` 400, `unauthorized` 401, `forbidden` 403, `report_not_found` 404, `payload_too_large` 413, `storage_unavailable` 503, `internal_error` 500 |
+| `DELETE /api/reports/{id}/comments/{commentId}` | Bearer, autor komentarza, tylko `panel` | 204, bez treści | `unauthorized` 401, `forbidden` 403, `report_not_found` 404, `storage_unavailable` 503, `internal_error` 500 |
 | `GET /api/health` | brak | 200, `{ "status": "ok" }` | `storage_unavailable` 503 |
 
 ### POST /api/auth/login
@@ -372,10 +373,19 @@ Dodaje komentarz do wątku rodzica i nauczyciela.
 - Wymaga `Authorization: Bearer <token>` z zakresem `panel` (rodzic albo nauczyciel, który widzi zgłoszenie). Token wtyczki: 403 `forbidden`.
 - Treść: `{ "body": "..." }` — po przycięciu spacji niepusta, maks. 2000 znaków. Serwer zapisuje wersję przyciętą.
 - Odpowiedź 201: zapisany Komentarz. Komentarz nie zmienia stanu zgłoszenia.
-- Komentarze są **tylko do dopisywania**: nie ma edycji ani usuwania. Nigdy nie są widoczne w zakresie `extension` (dziecko ich nie widzi).
+- Komentarzy nie da się edytować; autor może je usunąć (`DELETE`, niżej). Nigdy nie są widoczne w zakresie `extension` (dziecko ich nie widzi).
 - Endpoint **nie jest idempotentny**: ponowienie po utraconej odpowiedzi może dodać komentarz dwa razy, więc klient ponawia tylko ręcznie.
 - Zgłoszenie nieistniejące albo niewidoczne dla konta: 404 `report_not_found`.
 - Przykład: `shared/examples/post-report-comments.json`.
+
+### DELETE /api/reports/{id}/comments/{commentId}
+
+Usuwa komentarz z wątku rodzica i nauczyciela. Usunięcie jest trwałe: komentarz znika z odpowiedzi `GET /api/reports/{id}` dla obu stron i nie zostawia śladu w historii.
+
+- Wymaga `Authorization: Bearer <token>` z zakresem `panel`. Token wtyczki: 403 `forbidden`. Bez treści żądania.
+- Usunąć może tylko **autor** komentarza (`author_id` = zalogowane konto). Komentarz innego konta: 403 `forbidden`.
+- Odpowiedź 204 bez treści. Endpoint **jest idempotentny**: komentarz, którego już nie ma (albo `commentId`, które nie wskazuje komentarza tego zgłoszenia), też dostaje 204, więc ponowienie po utraconej odpowiedzi jest bezpieczne.
+- Zgłoszenie nieistniejące albo niewidoczne dla konta: 404 `report_not_found`.
 
 ### GET /api/health
 
@@ -414,11 +424,11 @@ Kolejność sprawdzania (pierwszy pasujący błąd wygrywa):
 3. 413 `payload_too_large`, potem 400 `invalid_json` — treść żądania.
 4. 400 `validation_error` — pola treści i parametry zapytania.
 5. 404 `report_not_found` — niepoprawne `id` albo zgłoszenie niewidoczne dla konta.
-6. 403 `forbidden` — rola nigdy nie może wykonać tej akcji przejścia.
+6. 403 `forbidden` — rola nigdy nie może wykonać tej akcji przejścia albo usuwany komentarz napisało inne konto.
 7. 409 `invalid_transition` — akcja niedozwolona z obecnego stanu.
 8. 503 `storage_unavailable` / 500 `internal_error`.
 
-Nieobsługiwana metoda HTTP (np. `DELETE`) dostaje 405 bezpośrednio od Next.js, bez treści JSON.
+Nieobsługiwana metoda HTTP (np. `PUT`) dostaje 405 bezpośrednio od Next.js, bez treści JSON.
 
 Przykłady wszystkich kodów: `shared/examples/errors.json`.
 
@@ -441,7 +451,7 @@ Te same wartości są w `LIMITS` w `projects/web-app/src/lib/contract/types.ts`.
 ## CORS
 
 - `Access-Control-Allow-Origin: *`
-- `Access-Control-Allow-Methods: GET, POST, OPTIONS`
+- `Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS`
 - `Access-Control-Allow-Headers: Content-Type, Authorization`
 - `Access-Control-Max-Age: 86400`
 - Bez credentials i bez ciasteczek: token jedzie w nagłówku `Authorization`, więc nie jest wysyłany automatycznie przez przeglądarkę.

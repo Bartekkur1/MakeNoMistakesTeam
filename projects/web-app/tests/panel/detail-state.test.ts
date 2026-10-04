@@ -220,6 +220,64 @@ describe("detailReducer: comments", () => {
     expect(state.report?.comments.map((c) => c.id)).toEqual([COMMENT_A.id]);
   });
 
+  it("comment-deleted removes the comment and announces it", () => {
+    let state = detailReducer(loaded(), { type: "comment-added", comment: COMMENT_A });
+    state = detailReducer(state, { type: "comment-deleted", commentId: COMMENT_A.id });
+
+    expect(state.report?.comments).toEqual([]);
+    expect(state.announcement).toBe("Komentarz usunięty.");
+  });
+
+  it("does not bring back a deleted comment from a refresh that started before the delete", () => {
+    const withComment = { ...REPORT, comments: [COMMENT_A] };
+    let state = detailReducer(initialDetailState, {
+      type: "load-done",
+      requestId: initialDetailState.requestId,
+      reason: "initial",
+      report: withComment,
+      clock: "10:00",
+    });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "refresh" });
+    state = detailReducer(state, { type: "comment-deleted", commentId: COMMENT_A.id });
+
+    state = detailReducer(state, { type: "load-done", requestId: 2, reason: "refresh", report: withComment, clock: "10:05" });
+
+    expect(state.report?.comments).toEqual([]);
+  });
+
+  it("drops a comment that a refresh no longer returns when this view did not add it", () => {
+    let state = detailReducer(initialDetailState, {
+      type: "load-done",
+      requestId: initialDetailState.requestId,
+      reason: "initial",
+      report: { ...REPORT, comments: [COMMENT_A] },
+      clock: "10:00",
+    });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "refresh" });
+
+    state = detailReducer(state, { type: "load-done", requestId: 2, reason: "refresh", report: REPORT, clock: "10:05" });
+
+    expect(state.report?.comments).toEqual([]);
+  });
+
+  it("stops keeping an added comment once a reload has returned it", () => {
+    let state = detailReducer(loaded(), { type: "comment-added", comment: COMMENT_A });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "refresh" });
+    state = detailReducer(state, {
+      type: "load-done",
+      requestId: 2,
+      reason: "refresh",
+      report: { ...REPORT, comments: [COMMENT_A] },
+      clock: "10:05",
+    });
+    expect(state.unloadedCommentIds).toEqual([]);
+
+    // Deleted elsewhere (another tab): the next reload no longer has it, and it is not kept.
+    state = detailReducer(state, { type: "load-start", requestId: 3, reason: "refresh" });
+    state = detailReducer(state, { type: "load-done", requestId: 3, reason: "refresh", report: REPORT, clock: "10:06" });
+    expect(state.report?.comments).toEqual([]);
+  });
+
   it("does not carry comments over to another report", () => {
     let state = detailReducer(loaded(), { type: "comment-added", comment: COMMENT_A });
     state = detailReducer(state, { type: "load-start", requestId: 2, reason: "refresh" });

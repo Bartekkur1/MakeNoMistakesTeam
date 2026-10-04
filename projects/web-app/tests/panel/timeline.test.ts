@@ -150,6 +150,20 @@ describe("Timeline", () => {
     expect(html).not.toContain("Mama Oli (Ty)");
   });
 
+  it("offers comment actions only on the logged-in account's own comments", () => {
+    const { history, comments } = timelineOf(R2);
+    const commentActions = (c: ReportComment) => createElement("button", { "data-action": c.id }, "Usuń");
+
+    const html = renderToStaticMarkup(
+      createElement(Timeline, { items: mergeTimeline(history, comments), sessionChildren: [], ownAccountId: P1_ID, commentActions }),
+    );
+
+    const own = comments.filter((c) => c.author_id === P1_ID);
+    expect(own.length).toBeGreaterThan(0);
+    expect(html.split("data-action=")).toHaveLength(own.length + 1);
+    for (const c of own) expect(html).toContain(`data-action="${c.id}"`);
+  });
+
   it("renders a report with only the submit entry as one item without a note", () => {
     const { history, comments } = timelineOf(R1);
 

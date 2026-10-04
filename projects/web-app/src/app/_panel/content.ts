@@ -128,7 +128,7 @@ export const TIMELINE = {
 export const COMMENT = {
   label: "Nowy komentarz",
   helper:
-    "Komentarze widzą rodzic i nauczyciel prowadzący zgłoszenie. Dziecko ich nie widzi. Komentarza nie można później edytować ani usunąć.",
+    "Komentarze widzą rodzic i nauczyciel prowadzący zgłoszenie. Dziecko ich nie widzi. Komentarza nie można później edytować, ale możesz usunąć swój.",
   empty: "Wpisz treść komentarza.",
   counter: "{n}/{max}",
   submit: "Dodaj komentarz",
@@ -136,6 +136,20 @@ export const COMMENT = {
   added: "Komentarz dodany.",
   networkError:
     "Nie udało się potwierdzić zapisu komentarza. Odśwież zgłoszenie i sprawdź historię, zanim wyślesz komentarz ponownie.",
+};
+
+// Deleting one's own comment under the timeline. Two steps, no browser dialog: "Usuń" asks inline,
+// "Tak, usuń" sends. Deleting is idempotent on the server, so a failed attempt can simply be repeated.
+export const COMMENT_DELETE = {
+  delete: "Usuń",
+  deleteLabel: "Usuń komentarz",
+  confirm: "Usunąć ten komentarz? Zniknie też u drugiej strony.",
+  confirmYes: "Tak, usuń",
+  cancel: "Anuluj",
+  pending: "Usuwanie…",
+  deleted: "Komentarz usunięty.",
+  forbidden: "Możesz usunąć tylko swój komentarz.",
+  networkError: "Nie udało się usunąć komentarza. Spróbuj ponownie.",
 };
 
 // The "Zmień stan" card on the detail page (D-12). A state is shown only after the server's 201.

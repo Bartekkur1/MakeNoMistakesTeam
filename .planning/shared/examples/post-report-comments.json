@@ -1,5 +1,5 @@
 {
-  "description": "Wychowawczyni 5a dodaje komentarz do zgłoszenia Kuby R4. Wątek widzą tylko rodzic i nauczyciel — nigdy wtyczka dziecka. Komentarz nie zmienia stanu zgłoszenia; nie da się go edytować ani usunąć.",
+  "description": "Wychowawczyni 5a dodaje komentarz do zgłoszenia Kuby R4. Wątek widzą tylko rodzic i nauczyciel — nigdy wtyczka dziecka. Komentarz nie zmienia stanu zgłoszenia; nie da się go edytować, a usunąć może go tylko autor.",
   "method": "POST",
   "route": "/api/reports/{id}/comments",
   "path": "/api/reports/00000000-0000-4000-8000-0000000d0004/comments",

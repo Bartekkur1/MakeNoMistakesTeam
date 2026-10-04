@@ -154,7 +154,7 @@ describe("POST /api/auth/login", () => {
     expect(await res.text()).toBe("");
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
     expect(res.headers.get("access-control-allow-headers")).toContain("Authorization");
-    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, OPTIONS");
+    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, DELETE, OPTIONS");
   });
 });
 
@@ -246,6 +246,6 @@ describe("GET /api/auth/me", () => {
     expect(await res.text()).toBe("");
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
     expect(res.headers.get("access-control-allow-headers")).toContain("Authorization");
-    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, OPTIONS");
+    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, DELETE, OPTIONS");
   });
 });

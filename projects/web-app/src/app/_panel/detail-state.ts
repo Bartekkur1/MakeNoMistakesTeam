@@ -12,7 +12,7 @@ import {
   type TransitionResponse,
 } from "@/lib/contract/types";
 import type { ApiFailure } from "./api";
-import { ACTIONS_CARD, COMMENT, DETAIL } from "./content";
+import { ACTIONS_CARD, COMMENT, COMMENT_DELETE, DETAIL } from "./content";
 import { fillTemplate } from "./format";
 
 export type DetailLoadReason = "initial" | "retry" | "refresh" | "sync";
@@ -27,6 +27,10 @@ export interface DetailState {
   announcement: string;
   success: ReportState | null;
   conflict: { noteMoved: boolean } | null;
+  // Comments this view added that no reload has returned yet (see keepShownComments).
+  unloadedCommentIds: readonly string[];
+  // Comments this view deleted; a reload that started before the delete must not bring them back.
+  deletedCommentIds: readonly string[];
 }
 
 export const initialDetailState: DetailState = {
@@ -39,6 +43,8 @@ export const initialDetailState: DetailState = {
   announcement: "",
   success: null,
   conflict: null,
+  unloadedCommentIds: [],
+  deletedCommentIds: [],
 };
 
 export type DetailAction =
@@ -48,6 +54,7 @@ export type DetailAction =
   | { type: "load-failed"; requestId: number; failure: ApiFailure }
   | { type: "comment-start" }
   | { type: "comment-added"; comment: ReportComment }
+  | { type: "comment-deleted"; commentId: string }
   | { type: "transition-done"; response: TransitionResponse }
   | { type: "transition-confirmed"; state: ReportState }
   | { type: "conflict"; noteMoved: boolean };
@@ -75,10 +82,14 @@ export function detailReducer(state: DetailState, action: DetailAction): DetailS
       if (action.requestId !== state.requestId) return state;
       const refreshed = action.reason === "refresh";
       const quiet = action.reason === "sync";
+      const report = keepShownComments(state, action.report);
+      const loadedIds = new Set(action.report.comments.map((comment) => comment.id));
       return {
         ...state,
         status: "ready",
-        report: keepShownComments(state.report, action.report),
+        report,
+        unloadedCommentIds: report.id === state.report?.id ? state.unloadedCommentIds.filter((id) => !loadedIds.has(id)) : [],
+        deletedCommentIds: report.id === state.report?.id ? state.deletedCommentIds : [],
         pending: null,
         failure: null,
         refreshedAt: refreshed ? action.clock : state.refreshedAt,
@@ -112,7 +123,21 @@ export function detailReducer(state: DetailState, action: DetailAction): DetailS
       return {
         ...state,
         report: { ...report, comments: [...report.comments, action.comment] },
+        unloadedCommentIds: [...state.unloadedCommentIds, action.comment.id],
         announcement: COMMENT.added,
+      };
+    }
+
+    // The server confirmed the delete (204): the comment leaves the timeline and stays gone.
+    case "comment-deleted": {
+      const { report } = state;
+      if (report === null) return state;
+      return {
+        ...state,
+        report: { ...report, comments: report.comments.filter((comment) => comment.id !== action.commentId) },
+        unloadedCommentIds: state.unloadedCommentIds.filter((id) => id !== action.commentId),
+        deletedCommentIds: [...state.deletedCommentIds, action.commentId],
+        announcement: COMMENT_DELETE.deleted,
       };
     }
 
@@ -155,12 +180,19 @@ export function detailReducer(state: DetailState, action: DetailAction): DetailS
   }
 }
 
-// Comments are append-only, so a comment the view already showed still exists. A reload that
-// started before that comment was saved does not contain it yet; it is kept instead of vanishing
-// (which would invite sending it again).
-function keepShownComments(previous: ReportDetail | null, next: ReportDetail): ReportDetail {
+// A reload that started before this view's comment was saved does not contain it yet; that comment
+// is kept instead of vanishing (which would invite sending it again). Only comments this view added
+// and no reload has returned yet are kept: any other comment missing from a reload was deleted by
+// its author. A reload that started before this view's delete may still contain the deleted comment;
+// it is dropped.
+function keepShownComments(state: DetailState, next: ReportDetail): ReportDetail {
+  const previous = state.report;
   if (previous === null || previous.id !== next.id) return next;
+  const deleted = new Set(state.deletedCommentIds);
+  const unloaded = new Set(state.unloadedCommentIds);
   const known = new Set(next.comments.map((comment) => comment.id));
-  const missing = previous.comments.filter((comment) => !known.has(comment.id));
-  return missing.length === 0 ? next : { ...next, comments: [...next.comments, ...missing] };
+  const kept = next.comments.filter((comment) => !deleted.has(comment.id));
+  const missing = previous.comments.filter((comment) => !known.has(comment.id) && unloaded.has(comment.id));
+  if (missing.length === 0 && kept.length === next.comments.length) return next;
+  return { ...next, comments: [...kept, ...missing] };
 }

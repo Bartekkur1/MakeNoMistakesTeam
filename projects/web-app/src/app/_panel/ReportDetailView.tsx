@@ -9,7 +9,8 @@
 // explains that the report changed and an unsent note moves into the comment field. An id that is
 // not a UUID shows the not-found view without any request (T-02-12); a 404 shows it too (the
 // report is gone or no longer visible). A 401 ends the session with the session-expired banner
-// (D-07); any other failure shows the contract message with "Spróbuj ponownie". The state lives in
+// (D-07). The author of a comment can delete it from the timeline (D-11, amended 2026-10-04); it
+// leaves the timeline after the server's 204. Any other failure shows the contract message with "Spróbuj ponownie". The state lives in
 // detailReducer (detail-state.ts); every request carries a request id so a superseded response is
 // ignored.
 
@@ -25,6 +26,7 @@ import {
 import { errorMessage, fetchReport, isUnauthorized, type ApiResult } from "./api";
 import { RiskBadge, StateBadge } from "./badges";
 import { CommentForm } from "./CommentForm";
+import { DeleteCommentButton } from "./DeleteCommentButton";
 import { ACTIONS_CARD, DETAIL, ERRORS, PANEL_HREF } from "./content";
 import { detailReducer, initialDetailState, type DetailAction, type DetailLoadReason } from "./detail-state";
 import {
@@ -290,7 +292,20 @@ function ReportDetailPage({ id, session }: { id: string; session: PanelSession }
                   onConflict={transitionConflict}
                   onNotFound={() => dispatch({ type: "load-not-found", requestId: lastRequestId.current })}
                 />
-                <TimelineCard report={report} sessionChildren={session.children} ownAccountId={session.account.id}>
+                <TimelineCard
+                  report={report}
+                  sessionChildren={session.children}
+                  ownAccountId={session.account.id}
+                  commentActions={(comment) => (
+                    <DeleteCommentButton
+                      reportId={report.id}
+                      commentId={comment.id}
+                      token={session.token}
+                      onDeleted={(commentId) => dispatch({ type: "comment-deleted", commentId })}
+                      onNotFound={() => dispatch({ type: "load-not-found", requestId: lastRequestId.current })}
+                    />
+                  )}
+                >
                   <CommentForm
                     reportId={report.id}
                     token={session.token}

@@ -307,9 +307,9 @@ export interface AddCommentInput {
   body: string;
 }
 
-// Appends one comment to the parent+teacher thread (D-11). Comments are append-only (D-10):
-// no update or delete function exists anywhere, and the database blocks UPDATE, DELETE and
-// TRUNCATE by trigger. A comment goes away only together with its report (on delete cascade).
+// Appends one comment to the parent+teacher thread (D-11). Comments cannot be edited: the
+// database blocks UPDATE and TRUNCATE by trigger. Only the author deletes one (deleteComment);
+// otherwise a comment goes away only together with its report (on delete cascade).
 // Only the row Supabase returned is confirmed; an error, a throw or no row is a 503.
 export async function addComment(input: AddCommentInput): Promise<ReportComment> {
   const data = await run("add_comment", () =>
@@ -328,4 +328,40 @@ export async function addComment(input: AddCommentInput): Promise<ReportComment>
     throw new StorageUnavailableError("add_comment returned no row");
   }
   return mapComment(data);
+}
+
+export interface DeleteCommentInput {
+  reportId: string;
+  commentId: string;
+  authorId: string;
+}
+
+export type DeleteCommentOutcome = "deleted" | "missing" | "not_author";
+
+// Deletes one comment of the report, only when authorId wrote it (D-11, amended 2026-10-04). The
+// author filter is part of the DELETE itself, so another account's comment is never removed.
+// When nothing was deleted, a second read tells a foreign comment from one that does not exist
+// (already deleted, or never in this report).
+export async function deleteComment(input: DeleteCommentInput): Promise<DeleteCommentOutcome> {
+  const deleted = await run("delete_comment", () =>
+    getSupabase()
+      .from("report_comments")
+      .delete()
+      .eq("id", input.commentId)
+      .eq("report_id", input.reportId)
+      .eq("author_id", input.authorId)
+      .select("id"),
+  );
+  if (!Array.isArray(deleted)) throw shapeError();
+  if (deleted.length > 0) return "deleted";
+
+  const existing = await run("find_comment", () =>
+    getSupabase()
+      .from("report_comments")
+      .select("id")
+      .eq("id", input.commentId)
+      .eq("report_id", input.reportId)
+      .maybeSingle(),
+  );
+  return existing === null || existing === undefined ? "missing" : "not_author";
 }
