@@ -10,11 +10,15 @@ import {
   ATTACK_TYPES,
   HISTORY_ACTIONS,
   LIMITS,
+  ROBLOX_MAX_HINTS,
+  type RobloxIngestRequest,
   REPORT_SOURCES,
   REPORT_STATES,
   TAKEN_ACTIONS,
   TRANSITIONS,
 } from "@/lib/contract/types";
+import { parseRobloxIngest } from "@/lib/server/validate";
+import { fakeSupabase } from "../helpers/fake-supabase";
 
 const MIGRATIONS_DIR = new URL("../../supabase/migrations/", import.meta.url);
 
@@ -149,8 +153,8 @@ describe("migrations keep history append-only, comments edit-proof and both clos
   });
 
   it("enables row level security on every table without any policy", () => {
-    expect(count("enable row level security")).toBe(4);
-    for (const table of ["reports", "report_history", "report_comments", "child_roblox_accounts"]) {
+    expect(count("enable row level security")).toBe(5);
+    for (const table of ["reports", "report_history", "report_comments", "child_roblox_accounts", "roblox_ingest_attempts"]) {
       expect(SQL).toContain(`alter table public.${table} enable row level security;`);
     }
     expect(SQL.toLowerCase()).not.toContain("create policy");
@@ -170,5 +174,79 @@ describe("migrations keep history append-only, comments edit-proof and both clos
       expect(grant, `grant line for ${name}`).toBeDefined();
       expect(grant?.trimEnd().endsWith("to service_role;")).toBe(true);
     }
+  });
+});
+
+describe("Roblox ingest contract and atomic schema", () => {
+  it("keeps the public help flag and runtime validator at exactly 0 or 1 without requiring score", () => {
+    expect(ROBLOX_MAX_HINTS).toBe(1);
+    const input: RobloxIngestRequest = {
+      attempt_id: "a0000000-0000-4000-8000-000000000003",
+      roblox_username: "ExercisePlayer",
+      attack_type: "data_request", source: "game", taken_actions: [],
+      content: "To było ćwiczenie.", outcome: "compromised_password", hints_used: 0,
+    };
+    expect("score" in input).toBe(false);
+    expect(parseRobloxIngest({ ...input }).ok).toBe(true);
+    expect(parseRobloxIngest({ ...input, hints_used: 1 }).ok).toBe(true);
+    expect(parseRobloxIngest({ ...input, hints_used: 2 }).ok).toBe(false);
+    expect(parseRobloxIngest({ ...input, score: 3 }).ok).toBe(true);
+  });
+
+  it("claims one unique attempt before creating report and history, with a deferred foreign key", () => {
+    const rpc = SQL.slice(SQL.indexOf("create function public.create_roblox_ingest_report("));
+    expect(SQL).toContain("attempt_id uuid primary key");
+    expect(SQL).toContain("report_id uuid not null unique references public.reports(id) deferrable initially deferred");
+    expect(rpc).toContain("on conflict (attempt_id) do nothing");
+    expect(rpc.indexOf("insert into public.roblox_ingest_attempts")).toBeLessThan(rpc.indexOf("insert into public.reports"));
+    expect(rpc).toContain("select * into strict v_attempt");
+    expect(rpc).toContain("v_attempt.request_fingerprint <> p_request_fingerprint");
+    expect(rpc).toContain("jsonb_build_object('result', 'conflict')");
+    expect(rpc).toContain("insert into public.report_history");
+    expect(rpc).toContain("'submit', null, 'pending_parent'");
+    expect(rpc).toContain("'created' else 'replayed'");
+    expect(rpc).toContain("security invoker");
+    expect(rpc.toLowerCase()).not.toContain("security definer");
+    expect(rpc.toLowerCase()).not.toMatch(/\b(commit|rollback)\s*;/);
+  });
+
+  it("stores every acknowledgement field and blocks mutation or public access", () => {
+    for (const field of ["request_fingerprint", "report_id", "ack_child_name", "ack_parent_name", "ack_state", "ack_matched"]) {
+      expect(SQL).toMatch(new RegExp(`${field} (text|uuid|boolean) not null`));
+    }
+    for (const op of ["update", "delete", "truncate"]) expect(SQL).toContain(`before ${op} on public.roblox_ingest_attempts`);
+    expect(SQL).toContain("revoke all on table public.roblox_ingest_attempts from public, anon, authenticated, service_role;");
+    expect(SQL).toContain("grant select, insert on table public.roblox_ingest_attempts to service_role;");
+  });
+
+  it("fake RPC converges concurrent calls, replays the snapshot and hides conflicting acknowledgements", async () => {
+    fakeSupabase.reset();
+    const args = {
+      p_attempt_id: "a0000000-0000-4000-8000-000000000004", p_request_fingerprint: "a".repeat(64),
+      p_child_id: "00000000-0000-4000-8000-0000000c0001", p_parent_id: "00000000-0000-4000-8000-0000000a0001",
+      p_attack_type: "data_request", p_taken_actions: [], p_content: "Ćwiczenie Roblox",
+      p_child_name: "Ola (demo)", p_parent_name: "Mama Oli (demo)", p_matched: false,
+    };
+    const results = await Promise.all(Array.from({ length: 4 }, () => fakeSupabase.client.rpc("create_roblox_ingest_report", args)));
+    expect(results.every((r) => r.error === null)).toBe(true);
+    expect(results.filter((r) => (r.data as { result: string }).result === "created")).toHaveLength(1);
+    expect(fakeSupabase.tables.roblox_ingest_attempts).toHaveLength(1);
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+    expect(fakeSupabase.tables.report_history).toHaveLength(1);
+    fakeSupabase.tables.reports[0].state = "closed";
+    const replay = await fakeSupabase.client.rpc("create_roblox_ingest_report", { ...args, p_parent_name: "Changed", p_matched: true });
+    expect(replay.data).toMatchObject({ result: "replayed", parent_name: "Mama Oli (demo)", matched: false, state: "pending_parent" });
+    const conflict = await fakeSupabase.client.rpc("create_roblox_ingest_report", { ...args, p_request_fingerprint: "b".repeat(64) });
+    expect(conflict).toEqual({ data: { result: "conflict" }, error: null });
+  });
+
+  it("fake RPC leaves no attempt, report or submit entry when report validation fails", async () => {
+    fakeSupabase.reset();
+    const result = await fakeSupabase.client.rpc("create_roblox_ingest_report", {
+      p_attempt_id: "a0000000-0000-4000-8000-000000000005", p_request_fingerprint: "a".repeat(64),
+      p_child_name: "Child", p_parent_name: "Parent", p_matched: false, p_attack_type: "invalid",
+    });
+    expect(result.error?.code).toBe("23514");
+    for (const table of ["roblox_ingest_attempts", "reports", "report_history"] as const) expect(fakeSupabase.tables[table]).toHaveLength(0);
   });
 });
