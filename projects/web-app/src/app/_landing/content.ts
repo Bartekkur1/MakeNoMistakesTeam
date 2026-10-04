@@ -203,8 +203,8 @@ export const PLUGIN_SCREENSHOT = {
 export const MISSION_VIDEO = {
   src: "/landing/roblox-mission.mp4",
   poster: "/landing/roblox-mission-poster.jpg",
-  width: 1058,
-  height: 752,
+  width: 1280,
+  height: 812,
   title: "Misja w Roblox",
   caption:
     "Gracz obiecuje 1500 Robuxów i prosi o login i hasło. Dziecko samo wybiera odpowiedź, a Scamerino jest obok, gdy potrzebna jest pomoc.",

@@ -19,6 +19,7 @@ const OLA = DEMO_CHILDREN[0];
 const KUBA = DEMO_CHILDREN[1];
 
 const GAME_BODY = {
+  attempt_id: "a0000000-0000-4000-8000-000000000001",
   roblox_username: "Robloxianu5a9m1s7a",
   roblox_user_id: 10371703006,
   attack_type: "data_request",
@@ -26,7 +27,6 @@ const GAME_BODY = {
   taken_actions: [],
   content: "Gracz MatiBuilds oferował darmowe Robuxy w zamian za hasło. Uczeń odmówił.",
   hints_used: 1,
-  score: 3,
   outcome: "safe_refusal",
 };
 
@@ -82,7 +82,7 @@ describe("POST /api/reports/ingest", () => {
     expect(report.source).toBe("game");
     expect(report.taken_actions).toEqual([]);
     expect(report.content).toBe(
-      `Gra Roblox, gracz Robloxianu5a9m1s7a. Wynik szkolenia: 3/3 pkt. Użyte wskazówki: 1.\n\n${GAME_BODY.content}`,
+      `Szkolenie: Przeciwdziałanie wyłudzaniu hasła [password_phishing]. Ćwiczenie Roblox, gracz Robloxianu5a9m1s7a. Wynik ćwiczenia: bezpieczna odmowa (zaliczone). Użyte wskazówki: 1.\n\n${GAME_BODY.content}`,
     );
   });
 
@@ -95,10 +95,130 @@ describe("POST /api/reports/ingest", () => {
     expect(fakeSupabase.tables.reports[0].parent_id).toBe(DEMO_ACCOUNTS[1].id);
   });
 
-  it("records entered_password for a compromised_password outcome", async () => {
+  it("keeps compromised_password fictional without entered_password", async () => {
     const res = await postIngest({ ...GAME_BODY, attack_type: "fake_prize", outcome: "compromised_password", score: 0 });
     expect(res.status).toBe(201);
-    expect(fakeSupabase.tables.reports[0].taken_actions).toEqual(["entered_password"]);
+    expect(fakeSupabase.tables.reports[0].taken_actions).toEqual([]);
+    expect(fakeSupabase.tables.reports[0].content).toContain("fikcyjne przekazanie hasła");
+  });
+
+  it("replays one attempt with the immutable acknowledgement after routing and state change", async () => {
+    const first = await postIngest(GAME_BODY);
+    expect(first.status).toBe(201);
+    const ack = await first.json();
+    fakeSupabase.tables.reports[0].state = "closed";
+    await postAccount(P2, { child_id: KUBA.id, roblox_username: GAME_BODY.roblox_username });
+    const repeat = await postIngest(GAME_BODY);
+    expect(repeat.status).toBe(200);
+    expect(await repeat.json()).toEqual(ack);
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+    expect(fakeSupabase.tables.report_history).toHaveLength(1);
+  });
+
+  it("converges concurrent identical attempts into one report and submit entry", async () => {
+    const replies = await Promise.all(Array.from({ length: 8 }, () => postIngest(GAME_BODY)));
+    expect(replies.filter((r) => r.status === 201)).toHaveLength(1);
+    expect(replies.filter((r) => r.status === 200)).toHaveLength(7);
+    const acks = await Promise.all(replies.map((r) => r.json()));
+    for (const ack of acks) expect(ack).toEqual(acks[0]);
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+    expect(fakeSupabase.tables.report_history).toHaveLength(1);
+  });
+
+  it("rejects a different validated payload on the same attempt without exposing the acknowledgement", async () => {
+    await postIngest(GAME_BODY);
+    for (const change of [{ outcome: "compromised_password" }, { hints_used: 0 }, { roblox_user_id: 99 }, { content: "Inne ćwiczenie" }]) {
+      const reply = await postIngest({ ...GAME_BODY, ...change });
+      expect(reply.status).toBe(409);
+      expect(await reply.json()).toEqual({ ok: false, error: "idempotency_conflict" });
+    }
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+  });
+
+  it("fingerprints normalized fields and ignores unvalidated extras", async () => {
+    const first = await postIngest(GAME_BODY);
+    const again = await postIngest({ ...GAME_BODY, content: ` ${GAME_BODY.content} `, ignored: "extra", attempt_id: GAME_BODY.attempt_id.toUpperCase() });
+    expect(again.status).toBe(200);
+    expect(await again.json()).toEqual(await first.json());
+  });
+
+  it("deduplicates subsequent positive completions for the same training and child", async () => {
+    const first = await postIngest(GAME_BODY);
+    expect(first.status).toBe(201);
+    const firstData = await first.json();
+
+    // Second positive attempt for the same training: deduplicated, does not insert a new report
+    const second = await postIngest({ ...GAME_BODY, attempt_id: "a0000000-0000-4000-8000-000000000002" });
+    expect(second.status).toBe(200);
+    expect(await second.json()).toMatchObject({
+      ok: true,
+      report_id: firstData.report_id,
+      already_completed: true,
+    });
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+
+    // Another training for the same child creates a new report
+    const differentTraining = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000003",
+      training_id: "discord_fake_link",
+      training_name: "Podejrzane linki na Discordzie",
+    });
+    expect(differentTraining.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(2);
+  });
+
+  it("stores a failed attempt and then a positive completion, deduplicating only subsequent passes", async () => {
+    // Attempt 1: Failed training (compromised_password)
+    const failRes = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000010",
+      outcome: "compromised_password",
+    });
+    expect(failRes.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+
+    // Attempt 2: Passed training (safe_refusal) -> stored because not yet passed!
+    const passRes = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000011",
+      outcome: "safe_refusal",
+    });
+    expect(passRes.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(2);
+
+    // Attempt 3: Another pass -> deduplicated!
+    const passRes2 = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000012",
+      outcome: "safe_refusal",
+    });
+    expect(passRes2.status).toBe(200);
+    expect(await passRes2.json()).toMatchObject({ already_completed: true });
+    expect(fakeSupabase.tables.reports).toHaveLength(2);
+  });
+
+  it("rejects missing or malformed attempt IDs and help flags outside 0 or 1", async () => {
+    for (const change of [{ attempt_id: undefined }, { attempt_id: "not-a-uuid" }, { hints_used: 2 }]) {
+      expect((await postIngest({ ...GAME_BODY, ...change })).status).toBe(400);
+    }
+    expect(fakeSupabase.tables.reports).toHaveLength(0);
+  });
+
+  it("fails closed on RPC failure or malformed acknowledgement", async () => {
+    fakeSupabase.beforeNextRpc((fake) => fake.failNext({ code: "08006", message: "failure" }));
+    expect((await postIngest(GAME_BODY)).status).toBe(503);
+    expect(fakeSupabase.tables.reports).toHaveLength(0);
+    const original = fakeSupabase.rpcHandlers.create_roblox_ingest_report;
+    try {
+      fakeSupabase.rpcHandlers.create_roblox_ingest_report = () => ({ data: { created: true }, error: null });
+      const res = await postIngest(GAME_BODY);
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({ ok: false, error: "storage_unavailable" });
+    } finally {
+      if (original) fakeSupabase.rpcHandlers.create_roblox_ingest_report = original;
+      else delete fakeSupabase.rpcHandlers.create_roblox_ingest_report;
+    }
   });
 
   it("answers 400 validation_error with details for a bad payload", async () => {

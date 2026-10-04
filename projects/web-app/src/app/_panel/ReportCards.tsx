@@ -28,11 +28,19 @@ export interface ReportContentCardProps {
 }
 
 export function ReportContentCard({ report, childLabel }: ReportContentCardProps) {
+  const isTraining = report.source === "game";
   return (
     <section aria-labelledby={CONTENT_TITLE_ID} className={sectionClasses}>
-      <h2 id={CONTENT_TITLE_ID} className={titleClasses}>
-        {DETAIL.contentTitle}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id={CONTENT_TITLE_ID} className={titleClasses}>
+          {isTraining ? "Szczegóły szkolenia" : DETAIL.contentTitle}
+        </h2>
+        {isTraining ? (
+          <span className={`${badgeBase} border-shark-blue bg-sky-wash text-shark-blue-dark`}>
+            🎓 Szkolenie Roblox
+          </span>
+        ) : null}
+      </div>
       <blockquote className="mt-4 rounded-dashboard bg-sky-wash p-4 text-base whitespace-pre-wrap [overflow-wrap:anywhere]">
         {report.content}
       </blockquote>

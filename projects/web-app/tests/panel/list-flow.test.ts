@@ -10,7 +10,8 @@ import { fetchReports, isUnauthorized, loginRequest } from "@/app/_panel/api";
 import { LIST } from "@/app/_panel/content";
 import { initialListState, listReducer } from "@/app/_panel/list-state";
 import { ReportRow } from "@/app/_panel/ReportRow";
-import type { LoginResponse } from "@/lib/contract/types";
+import { TrainingRow } from "@/app/_panel/TrainingRow";
+import type { LoginResponse, Report } from "@/lib/contract/types";
 import { seedFakeWithDataset } from "../helpers/dataset";
 import { fetchLog, installPanelFetch } from "../helpers/panel-fetch";
 
@@ -203,5 +204,51 @@ describe("panel list flow", () => {
     const html = renderToStaticMarkup(createElement(ReportRow, { report: r5, sessionChildren: login.children }));
 
     expect(html).not.toContain("Ryzyko");
+  });
+
+  it("renders a passed training row with status Zaliczone and extracted training name", async () => {
+    const login = await loginAs(P1);
+    const mockTrainingReport: Report = {
+      id: "00000000-0000-4000-8000-0000000d0099",
+      child_id: login.children[0].id,
+      parent_id: login.account.id,
+      attack_type: "data_request",
+      taken_actions: [],
+      source: "game",
+      content: "Szkolenie: Przeciwdziałanie wyłudzaniu hasła [password_phishing]. Ćwiczenie Roblox, gracz Player1. Wynik ćwiczenia: bezpieczna odmowa (zaliczone).\n\nUczeń odmówił podania hasła.",
+      state: "pending_parent",
+      created_at: "2026-10-04T05:00:00.000Z",
+      updated_at: "2026-10-04T05:00:00.000Z",
+    };
+
+    const html = renderToStaticMarkup(createElement(TrainingRow, { report: mockTrainingReport, sessionChildren: login.children }));
+
+    expect(html).toContain("✓ Zaliczone");
+    expect(html).toContain("Przeciwdziałanie wyłudzaniu hasła");
+    expect(html).toContain(login.children[0].display_name.replace(/\s*\(demo\)$/, ""));
+    expect(html).toContain(`href="/panel/${mockTrainingReport.id}"`);
+    expect(html).not.toContain("Ryzyko");
+  });
+
+  it("renders a failed training row with status Wymaga powtórzenia", async () => {
+    const login = await loginAs(P1);
+    const mockTrainingReport: Report = {
+      id: "00000000-0000-4000-8000-0000000d0098",
+      child_id: login.children[0].id,
+      parent_id: login.account.id,
+      attack_type: "data_request",
+      taken_actions: [],
+      source: "game",
+      content: "Szkolenie: Przeciwdziałanie wyłudzaniu hasła [password_phishing]. Ćwiczenie Roblox, gracz Player1. Wynik ćwiczenia: fikcyjne przekazanie hasła (bez rzeczywistego wycieku — wymaga powtórzenia).\n\nUczeń podał hasło.",
+      state: "pending_parent",
+      created_at: "2026-10-04T05:00:00.000Z",
+      updated_at: "2026-10-04T05:00:00.000Z",
+    };
+
+    const html = renderToStaticMarkup(createElement(TrainingRow, { report: mockTrainingReport, sessionChildren: login.children }));
+
+    expect(html).toContain("⚠ Wymaga powtórzenia");
+    expect(html).toContain("Przeciwdziałanie wyłudzaniu hasła");
+    expect(html).not.toContain("✓ Zaliczone");
   });
 });
