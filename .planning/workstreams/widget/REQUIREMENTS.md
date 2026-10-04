@@ -20,8 +20,8 @@
 ### Przekazanie opiekunowi
 
 - [ ] **HND-01**: Dziecko widzi podgląd przekazywanych danych przed wysłaniem i potwierdza zapis
-- [ ] **HND-02**: „Pokaż opiekunowi” jest oddzielone od instrukcji zgłoszenia na platformie
-- [ ] **HND-03**: Dziecko widzi odpowiedź opiekuna
+- [ ] **HND-02**: „Pokaż opiekunowi” i instrukcja zgłoszenia na platformie to osobne przyciski na wyniku
+- [ ] **HND-03**: Dziecko widzi status zgłoszenia (decyzję opiekuna)
 
 ### Mobilna wersja i błędy
 
