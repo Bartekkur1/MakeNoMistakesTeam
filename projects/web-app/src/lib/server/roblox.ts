@@ -193,8 +193,14 @@ export async function createRobloxIngestReport(
       .maybeSingle();
     if (!attemptRes.error) {
       attemptRow = attemptRes.data;
+    } else {
+      console.warn("[api] ingest_attempt_lookup_failed", { attempt_id: input.attemptId, db_code: attemptRes.error.code });
     }
-  } catch {
+  } catch (err) {
+    console.warn("[api] ingest_attempt_lookup_failed", {
+      attempt_id: input.attemptId,
+      error_name: err instanceof Error ? err.name : typeof err,
+    });
     attemptRow = null;
   }
 
@@ -234,6 +240,7 @@ export async function createRobloxIngestReport(
     if (rpcRes.error) {
       // If RPC is missing in Postgres schema cache (code PGRST202 or 42883)
       if (rpcRes.error.code === "PGRST202" || rpcRes.error.code === "42883") {
+        console.warn("[api] ingest_rpc_fallback", { attempt_id: input.attemptId, db_code: rpcRes.error.code });
         useFallback = true;
       } else {
         throw new StorageUnavailableError("create_roblox_ingest_report failed", { cause: rpcRes.error });
@@ -243,6 +250,11 @@ export async function createRobloxIngestReport(
     }
   } catch (err) {
     if (err instanceof StorageUnavailableError) throw err;
+    console.warn("[api] ingest_rpc_fallback", {
+      attempt_id: input.attemptId,
+      error_name: err instanceof Error ? err.name : typeof err,
+      error_message: err instanceof Error ? err.message : null,
+    });
     useFallback = true;
   }
 

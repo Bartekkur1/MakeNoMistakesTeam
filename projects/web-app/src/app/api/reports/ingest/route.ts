@@ -26,6 +26,20 @@ import { parseRobloxIngest } from "@/lib/server/validate";
 
 export const dynamic = "force-dynamic";
 
+// One log line per request so a failing game call can be traced from the server logs. Never logs the
+// secret, the Roblox nick or the message content: only ids, enums and error codes.
+type IngestLogFields = Record<string, string | number | boolean | null | string[]>;
+
+function logIngest(level: "info" | "warn" | "error", event: string, fields: IngestLogFields): void {
+  console[level](`[api] ingest_${event}`, fields);
+}
+
+function errorCode(err: unknown): string | null {
+  const cause: unknown = err instanceof Error ? err.cause : null;
+  if (cause !== null && typeof cause === "object" && "code" in cause && typeof cause.code === "string") return cause.code;
+  return null;
+}
+
 function ingestError(error: string, status: number, details?: FieldError[]): Response {
   const body: RobloxIngestErrorBody = { ok: false, error };
   if (details && details.length > 0) body.details = details;
@@ -33,25 +47,45 @@ function ingestError(error: string, status: number, details?: FieldError[]): Res
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const startedAt = Date.now();
+  const ms = () => Date.now() - startedAt;
+  let attemptId: string | null = null;
   try {
     const secret = getIngestSecret();
     if (secret === null) {
-      console.error("[api] ingest_not_configured");
+      logIngest("error", "not_configured", { status: 500 });
       return ingestError("ingest_not_configured", 500);
     }
-    if (!ingestSecretMatches(request.headers.get("x-ingest-secret"), secret)) {
+    const sentSecret = request.headers.get("x-ingest-secret");
+    if (!ingestSecretMatches(sentSecret, secret)) {
+      logIngest("warn", "rejected", {
+        status: 401,
+        error: "invalid_ingest_secret",
+        reason: sentSecret === null ? "header_missing" : "secret_mismatch",
+      });
       return ingestError("invalid_ingest_secret", 401);
     }
 
     const body = await readJsonBody(request);
     if (!body.ok) {
       const status = body.response.status;
-      return ingestError(status === 413 ? "payload_too_large" : "invalid_json", status);
+      const error = status === 413 ? "payload_too_large" : "invalid_json";
+      logIngest("warn", "rejected", { status, error });
+      return ingestError(error, status);
     }
 
     const parsed = parseRobloxIngest(body.value);
-    if (!parsed.ok) return ingestError("validation_error", 400, parsed.errors);
+    if (!parsed.ok) {
+      logIngest("warn", "rejected", {
+        status: 400,
+        error: "validation_error",
+        fields: parsed.errors.map((e) => e.field),
+        attempt_id: typeof body.value.attempt_id === "string" ? body.value.attempt_id : null,
+      });
+      return ingestError("validation_error", 400, parsed.errors);
+    }
     const input = parsed.value;
+    attemptId = input.attemptId;
 
     const linkedChildId = await findChildIdByRobloxUsername(input.robloxUsername);
     const child =
@@ -74,10 +108,37 @@ export async function POST(request: Request): Promise<Response> {
       ok: true,
       ...result.ack,
     };
-    return json(response, result.created ? 201 : 200);
+    const status = result.created ? 201 : 200;
+    logIngest("info", "ok", {
+      status,
+      attempt_id: input.attemptId,
+      report_id: result.ack.report_id,
+      created: result.created,
+      already_completed: result.ack.already_completed === true,
+      matched: result.ack.matched,
+      child_id: child.id,
+      training_id: input.trainingId,
+      attack_type: input.attackType,
+      outcome: input.outcome,
+      ms: ms(),
+    });
+    return json(response, status);
   } catch (err) {
-    if (err instanceof RobloxIngestIdempotencyConflictError) return ingestError("idempotency_conflict", 409);
+    if (err instanceof RobloxIngestIdempotencyConflictError) {
+      logIngest("warn", "rejected", { status: 409, error: "idempotency_conflict", attempt_id: attemptId, ms: ms() });
+      return ingestError("idempotency_conflict", 409);
+    }
     const fallback = handleRouteError(err);
-    return ingestError(fallback.status === 503 ? "storage_unavailable" : "internal_error", fallback.status);
+    const error = fallback.status === 503 ? "storage_unavailable" : "internal_error";
+    logIngest("error", "failed", {
+      status: fallback.status,
+      error,
+      attempt_id: attemptId,
+      error_name: err instanceof Error ? err.name : typeof err,
+      error_message: err instanceof Error ? err.message : null,
+      db_code: errorCode(err),
+      ms: ms(),
+    });
+    return ingestError(error, fallback.status);
   }
 }
