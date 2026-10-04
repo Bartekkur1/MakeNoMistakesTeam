@@ -10,7 +10,8 @@ export { DEMO_LOGIN_CODE };
 
 export const RELEASES_URL = "https://github.com/Bartekkur1/MakeNoMistakesTeam/releases";
 export const EXTENSION_DOWNLOAD_URL = `${RELEASES_URL}/latest/download/bezpiecznaaura-wtyczka.zip`;
-export const LOGIN_HREF = "/login";
+// Defined in ./links so client components can import it without this module.
+export { LOGIN_HREF } from "./links";
 // Chrome refuses to open chrome:// pages from a link, so this is shown as text to copy.
 export const CHROME_EXTENSIONS_PAGE = "chrome://extensions";
 

@@ -38,6 +38,18 @@ function isAccount(value: unknown): value is AccountInfo {
   );
 }
 
+// Every child field the panel reads must be a string: a malformed entry (an older build's shape,
+// a contract change or a tampered value) would otherwise crash rendering for the token's lifetime.
+function isChild(value: unknown): value is ChildInfo {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.display_name === "string" &&
+    typeof value.parent_id === "string" &&
+    typeof value.class_id === "string"
+  );
+}
+
 // A stored session, or null for anything that is not one (missing, not JSON, wrong shape).
 export function decodeSession(raw: string | null): PanelSession | null {
   if (!raw) return null;
@@ -50,8 +62,8 @@ export function decodeSession(raw: string | null): PanelSession | null {
   if (!isRecord(value)) return null;
   const { token, expires_at, account, children } = value;
   if (typeof token !== "string" || token === "" || typeof expires_at !== "string") return null;
-  if (!isAccount(account) || !Array.isArray(children)) return null;
-  return { token, expires_at, account, children: children as ChildInfo[] };
+  if (!isAccount(account) || !Array.isArray(children) || !children.every(isChild)) return null;
+  return { token, expires_at, account, children };
 }
 
 // Expired once expires_at is reached; an unreadable date counts as expired.
@@ -85,13 +97,28 @@ function readStoredSession(): string | null {
   }
 }
 
-export function saveSession(response: LoginResponse): void {
+// Stores the login and reports whether a live session is now readable. False when storage is
+// blocked or full, when the response is not a usable session (decodeSession), or when this
+// device's clock already counts it as expired; such an unusable entry is removed again. On false
+// the login form shows an error instead of waiting for a redirect that never comes.
+export function saveSession(response: LoginResponse): boolean {
+  let stored = true;
   try {
     window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionFromLogin(response)));
   } catch {
-    // Blocked storage: the session snapshot stays anonymous.
+    // Blocked or full storage: the session snapshot stays anonymous.
+    stored = false;
+  }
+  const live = stored && getSnapshot() !== "";
+  if (stored && !live) {
+    try {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+    } catch {
+      // Nothing more to undo.
+    }
   }
   emitChange();
+  return live;
 }
 
 // Removes the session; a non-null notice is shown once on the next /login screen.
@@ -109,6 +136,14 @@ export function clearSession(notice: SessionNotice | null): void {
     }
   }
   emitChange();
+}
+
+// A 401 for `token`: ends the session with the expired notice, but only while that token is still
+// the stored one. A request that started before a newer login (in this or another tab) can answer
+// 401 late; it must not wipe the newer session.
+export function expireSession(token: string): void {
+  if (decodeSession(readStoredSession())?.token !== token) return;
+  clearSession("expired");
 }
 
 export function hasStoredSession(): boolean {

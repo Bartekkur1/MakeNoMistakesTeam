@@ -7,20 +7,22 @@
 // idempotent, so each submit sends exactly once, nothing is resent automatically, and every error
 // keeps the typed text; after a network failure the user is told to check the timeline first.
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import { buttonLarge } from "@/app/_landing/styles";
 import { LIMITS, type ReportComment } from "@/lib/contract/types";
 import { errorMessage, isUnauthorized, postComment } from "./api";
 import { COMMENT } from "./content";
-import { fillTemplate } from "./format";
-import { clearSession } from "./session";
+import { draftAfterSent, fillTemplate } from "./format";
+import { expireSession } from "./session";
 import { alertError, fieldError as fieldErrorClasses, panelPrimaryButton, textareaBase } from "./styles";
 
 export interface CommentFormProps {
   reportId: string;
   token: string;
   draft: string;
-  onDraftChange: (draft: string) => void;
+  // A state setter: a confirmed comment updates the field from its current value, which may have
+  // gained a moved transition note while the comment was sending.
+  onDraftChange: Dispatch<SetStateAction<string>>;
   onAdded: (comment: ReportComment) => void;
   onNotFound: () => void;
   // Called once when a request starts (the page clears its last announcement).
@@ -49,6 +51,8 @@ export function CommentForm({ reportId, token, draft, onDraftChange, onAdded, on
       return;
     }
 
+    // The field as submitted: on success only this text is cleared (WR-04).
+    const sent = draft;
     setPending(true);
     setFieldMessage(null);
     setAlert(null);
@@ -56,13 +60,13 @@ export function CommentForm({ reportId, token, draft, onDraftChange, onAdded, on
     postComment(token, reportId, body).then((result) => {
       setPending(false);
       if (result.ok) {
-        onDraftChange("");
+        onDraftChange((current) => draftAfterSent(current, sent));
         onAdded(result.value);
         return;
       }
       if (isUnauthorized(result)) {
         // The shell sees the cleared session and sends the visitor to /login with the banner.
-        clearSession("expired");
+        expireSession(token);
         return;
       }
       if (result.kind === "http" && result.code === "report_not_found") {

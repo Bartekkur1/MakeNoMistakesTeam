@@ -3,7 +3,8 @@
 // The guarded panel shell (D-08): until the session snapshot is known only the loading text
 // renders, an anonymous visitor is sent to /login, and a logged-in account gets the header with
 // its name, role and logout. Every API caller inside the shell handles a 401 with
-// clearSession("expired"), which flips the snapshot to anonymous and lands here.
+// expireSession(token), which clears the session (only while that token is still the stored one),
+// flips the snapshot to anonymous and lands here.
 // No role switcher and no change-account control (D-01), no footer and nothing marking a
 // presentation build (D-02).
 
@@ -11,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, type ReactNode } from "react";
-import { LOGIN_HREF } from "@/app/_landing/content";
+import { LOGIN_HREF } from "@/app/_landing/links";
 import { buttonSmall } from "@/app/_landing/styles";
 import { ACCOUNT_ROLE_LABELS_PL, type AccountInfo } from "@/lib/contract/types";
 import { PANEL_HREF, SHELL } from "./content";

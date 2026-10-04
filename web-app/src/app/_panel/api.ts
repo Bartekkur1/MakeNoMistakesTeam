@@ -14,6 +14,8 @@ import {
   type ReportDetail,
   type ReportListResponse,
   type ReportState,
+  type TransitionAction,
+  type TransitionResponse,
 } from "@/lib/contract/types";
 import { ERRORS } from "./content";
 
@@ -64,6 +66,18 @@ function failureFromResponse(status: number, payload: unknown): ApiFailure {
   return httpFailure(status, code, error ? envelopeDetails(error) : []);
 }
 
+// A stalled connection (mobile hand-over, a proxy) would otherwise keep a request, and the modal
+// transition dialog with it, pending for minutes. After this long the request is aborted and
+// reported as a network failure, whose copy already says the result is unconfirmed.
+export const REQUEST_TIMEOUT_MS = 20_000;
+
+// Undefined in a browser without AbortSignal.timeout: the request then simply has no timeout.
+function timeoutSignal(): AbortSignal | undefined {
+  return typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+    ? AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    : undefined;
+}
+
 export async function apiCall<T>(path: string, options: ApiCallOptions): Promise<ApiResult<T>> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (options.token) {
@@ -77,8 +91,9 @@ export async function apiCall<T>(path: string, options: ApiCallOptions): Promise
 
   let response: Response;
   try {
-    response = await fetch(path, { method: options.method, headers, body, cache: "no-store" });
+    response = await fetch(path, { method: options.method, headers, body, cache: "no-store", signal: timeoutSignal() });
   } catch {
+    // A dropped connection and a timeout look the same: the result is unknown.
     return { ok: false, kind: "network" };
   }
 
@@ -133,6 +148,23 @@ export function postComment(token: string, id: string, body: string): Promise<Ap
     method: "POST",
     token,
     body: { body },
+  });
+}
+
+// Moves the report through the workflow (D-12): { action, comment } where the comment is the
+// trimmed note or null. The server decides (403 when the role may never do it, 409 when not from
+// the current state). A repeated or concurrent transition gets 409, so a retry by the user is
+// safe, but nothing is resent automatically.
+export function postTransition(
+  token: string,
+  id: string,
+  action: TransitionAction,
+  comment: string | null,
+): Promise<ApiResult<TransitionResponse>> {
+  return apiCall<TransitionResponse>(`/api/reports/${encodeURIComponent(id)}/transitions`, {
+    method: "POST",
+    token,
+    body: { action, comment },
   });
 }
 

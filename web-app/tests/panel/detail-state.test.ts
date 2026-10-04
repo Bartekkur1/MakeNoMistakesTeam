@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import type { ApiFailure } from "@/app/_panel/api";
 import { detailReducer, initialDetailState, type DetailState } from "@/app/_panel/detail-state";
-import type { ReportComment, ReportDetail } from "@/lib/contract/types";
+import type { ReportComment, ReportDetail, TransitionResponse } from "@/lib/contract/types";
 
 const REPORT: ReportDetail = {
   id: "00000000-0000-4000-8000-0000000d0001",
@@ -228,5 +228,130 @@ describe("detailReducer: comments", () => {
     state = detailReducer(state, { type: "load-done", requestId: 2, reason: "refresh", report: other, clock: "10:05" });
 
     expect(state.report?.comments).toEqual([]);
+  });
+});
+
+const APPROVED: TransitionResponse = {
+  report: {
+    id: REPORT.id,
+    child_id: REPORT.child_id,
+    parent_id: REPORT.parent_id,
+    attack_type: REPORT.attack_type,
+    taken_actions: REPORT.taken_actions,
+    source: REPORT.source,
+    content: REPORT.content,
+    state: "with_teacher",
+    created_at: REPORT.created_at,
+    updated_at: "2026-10-03T12:00:00.000Z",
+  },
+  entry: {
+    id: "00000000-0000-4000-8000-0000000e0012",
+    report_id: REPORT.id,
+    action: "approve",
+    from_state: "pending_parent",
+    to_state: "with_teacher",
+    actor_id: "00000000-0000-4000-8000-0000000a0001",
+    actor_role: "parent",
+    comment: null,
+    created_at: "2026-10-03T12:00:00.000Z",
+  },
+};
+
+describe("detailReducer: transitions", () => {
+  it("starts with no saved state and no conflict", () => {
+    expect(initialDetailState.success).toBeNull();
+    expect(initialDetailState.conflict).toBeNull();
+  });
+
+  it("transition-done shows the new state, appends the entry and announces the saved state", () => {
+    const state = detailReducer(loaded(), { type: "transition-done", response: APPROVED });
+
+    expect(state.report?.state).toBe("with_teacher");
+    expect(state.report?.updated_at).toBe(APPROVED.entry.created_at);
+    expect(state.report?.history.map((entry) => entry.id)).toEqual([REPORT.history[0].id, APPROVED.entry.id]);
+    expect(state.report?.comments).toEqual([]);
+    expect(state.report?.content).toBe(REPORT.content);
+    expect(state.success).toBe("with_teacher");
+    expect(state.conflict).toBeNull();
+    expect(state.announcement).toBe("Zapisano. Obecny stan: u nauczyciela.");
+  });
+
+  it("appends the same history entry only once", () => {
+    let state = detailReducer(loaded(), { type: "transition-done", response: APPROVED });
+    state = detailReducer(state, { type: "transition-done", response: APPROVED });
+
+    expect(state.report?.history.map((entry) => entry.id)).toEqual([REPORT.history[0].id, APPROVED.entry.id]);
+  });
+
+  it("ignores a transition when no report is shown", () => {
+    expect(detailReducer(initialDetailState, { type: "transition-done", response: APPROVED })).toBe(initialDetailState);
+  });
+
+  it("a sync refetch keeps the saved state, the announcement and the refresh time", () => {
+    let state = detailReducer(loaded(), { type: "transition-done", response: APPROVED });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "sync" });
+
+    expect(state.success).toBe("with_teacher");
+    expect(state.announcement).toBe("Zapisano. Obecny stan: u nauczyciela.");
+    expect(state.status).toBe("ready");
+
+    const synced = { ...REPORT, state: "with_teacher" as const, history: [...REPORT.history, APPROVED.entry] };
+    state = detailReducer(state, { type: "load-done", requestId: 2, reason: "sync", report: synced, clock: "12:01" });
+
+    expect(state.report?.state).toBe("with_teacher");
+    expect(state.success).toBe("with_teacher");
+    expect(state.refreshedAt).toBeNull();
+    expect(state.announcement).toBe("Zapisano. Obecny stan: u nauczyciela.");
+    expect(state.pending).toBeNull();
+  });
+
+  it("a refresh or a retry clears the saved confirmation", () => {
+    const done = detailReducer(loaded(), { type: "transition-done", response: APPROVED });
+
+    expect(detailReducer(done, { type: "load-start", requestId: 2, reason: "refresh" }).success).toBeNull();
+    expect(detailReducer(done, { type: "load-start", requestId: 2, reason: "retry" }).success).toBeNull();
+  });
+});
+
+describe("detailReducer: conflicts (D-15)", () => {
+  it("conflict shows the banner and clears the saved confirmation", () => {
+    let state = detailReducer(loaded(), { type: "transition-done", response: APPROVED });
+    state = detailReducer(state, { type: "conflict", noteMoved: true });
+
+    expect(state.conflict).toEqual({ noteMoved: true });
+    expect(state.success).toBeNull();
+    expect(state.announcement).toBe("");
+  });
+
+  it("a sync refetch keeps the conflict banner", () => {
+    let state = detailReducer(loaded(), { type: "conflict", noteMoved: false });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "sync" });
+
+    expect(state.conflict).toEqual({ noteMoved: false });
+  });
+
+  it("a refresh clears the conflict banner and the saved confirmation", () => {
+    let state = detailReducer(loaded(), { type: "conflict", noteMoved: true });
+    state = detailReducer(state, { type: "load-start", requestId: 2, reason: "refresh" });
+
+    expect(state.conflict).toBeNull();
+    expect(state.success).toBeNull();
+  });
+
+  it("transition-confirmed shows a saved retry as saved, not as a conflict (WR-02)", () => {
+    let state = detailReducer(loaded(), { type: "conflict", noteMoved: false });
+    state = detailReducer(state, { type: "transition-confirmed", state: "with_teacher" });
+
+    expect(state.conflict).toBeNull();
+    expect(state.success).toBe("with_teacher");
+    expect(state.announcement).toBe("Zapisano. Obecny stan: u nauczyciela.");
+  });
+
+  it("a transition confirmed after a conflict clears the banner", () => {
+    let state = detailReducer(loaded(), { type: "conflict", noteMoved: true });
+    state = detailReducer(state, { type: "transition-done", response: APPROVED });
+
+    expect(state.conflict).toBeNull();
+    expect(state.success).toBe("with_teacher");
   });
 });

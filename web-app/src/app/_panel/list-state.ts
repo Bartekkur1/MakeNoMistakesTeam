@@ -95,14 +95,22 @@ export function listReducer(state: ListState, action: ListAction): ListState {
     }
 
     // Without rows the page shows the error; with rows they stay and the alert sits above them.
-    case "load-failed":
+    // A failed filter change is the exception: the shown rows and the cursor belong to the previous
+    // filter while the select already shows the new one, so they are dropped and "Spróbuj ponownie"
+    // retries the chosen filter. Otherwise "Pokaż więcej zgłoszeń" would mix two filters.
+    case "load-failed": {
       if (action.requestId !== state.requestId) return state;
+      const filterFailed = state.pending === "filter";
+      const reports = filterFailed ? [] : state.reports;
       return {
         ...state,
+        reports,
+        nextCursor: filterFailed ? null : state.nextCursor,
         pending: null,
         failure: action.failure,
-        status: state.reports.length === 0 ? "error" : "ready",
+        status: reports.length === 0 ? "error" : "ready",
       };
+    }
 
     // The announcement is cleared so the same message after the next page is announced again.
     case "more-start":

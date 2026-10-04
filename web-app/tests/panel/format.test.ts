@@ -9,7 +9,9 @@ import { describe, expect, it } from "vitest";
 import { RiskBadge } from "@/app/_panel/badges";
 import { reportHref } from "@/app/_panel/content";
 import {
+  actorName,
   childName,
+  displayName,
   excerpt,
   fillTemplate,
   formatClock,
@@ -19,6 +21,8 @@ import {
   riskLabel,
   rowMeta,
 } from "@/app/_panel/format";
+import { CHILD_NAMES, PERSON_NAMES } from "@/app/_panel/names";
+import { DEMO_ACCOUNTS, DEMO_CHILDREN } from "@/lib/contract/demo-accounts";
 import type { ChildInfo, Report, TakenAction } from "@/lib/contract/types";
 import { loadDemoDataset } from "../helpers/dataset";
 
@@ -62,6 +66,18 @@ describe("panel row formatting", () => {
     expect(childName(sessionChild.id, [sessionChild])).toBe("Nowe");
     expect(childName("00000000-0000-4000-8000-0000000c0fff", [])).toBe("Dziecko");
     expect(rowMeta(report(4), [])).toBe("Kuba · Discord · fałszywa nagroda lub konkurs");
+  });
+
+  it("keeps the client-safe name map in step with the demo accounts and children (CR-01)", () => {
+    expect([...PERSON_NAMES]).toEqual(DEMO_ACCOUNTS.map((account) => [account.id, displayName(account.display_name)]));
+    expect([...CHILD_NAMES]).toEqual(DEMO_CHILDREN.map((child) => [child.id, displayName(child.display_name)]));
+    const names = [...PERSON_NAMES.values(), ...CHILD_NAMES.values()];
+    expect(names.filter((name) => name.includes("@") || /\((demo|smoke)\)/.test(name))).toEqual([]);
+  });
+
+  it("never resolves an inherited object key as a name", () => {
+    expect(childName("constructor", [])).toBe("Dziecko");
+    expect(actorName("__proto__", "teacher", [])).toBe("Nauczyciel");
   });
 
   it("fills {key} templates and encodes the report id in the detail link", () => {

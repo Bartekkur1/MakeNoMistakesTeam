@@ -2,7 +2,8 @@
 // Copy rules: no em dashes, no " - " joining clauses, and nothing that marks the app as a
 // presentation build (D-02). Contract labels and API error messages are imported from
 // @/lib/contract/types where they are shown and are never copied into this file.
-// LOGIN_HREF is not redefined here: import it from "@/app/_landing/content".
+// LOGIN_HREF is not redefined here: import it from "@/app/_landing/links" (never from
+// "@/app/_landing/content", which lists the demo accounts and would ship them to the browser).
 
 export const PANEL_HREF = "/panel";
 
@@ -30,6 +31,10 @@ export const LOGIN = {
   codeEmpty: "Wpisz kod logowania.",
   submit: "Zaloguj się",
   pending: "Logowanie…",
+  // The server accepted the login but this browser could not keep the session (blocked or full
+  // storage, or a device clock far ahead of the server's).
+  sessionNotSaved:
+    "Nie udało się zapisać logowania w tej przeglądarce. Zezwól stronie na zapisywanie danych, sprawdź datę w urządzeniu i spróbuj ponownie.",
   changeEmail: "Zmień adres e-mail",
   backHome: "Wróć na stronę główną",
 };
@@ -118,6 +123,57 @@ export const COMMENT = {
   added: "Komentarz dodany.",
   networkError:
     "Nie udało się potwierdzić zapisu komentarza. Odśwież zgłoszenie i sprawdź historię, zanim wyślesz komentarz ponownie.",
+};
+
+// The "Zmień stan" card on the detail page (D-12). A state is shown only after the server's 201.
+export const ACTIONS_CARD = {
+  title: "Zmień stan",
+  current: "Obecny stan:",
+  none: "Na tym etapie nie możesz zmienić stanu zgłoszenia. Możesz dodać komentarz.",
+  success: "Zapisano. Obecny stan: {state}.",
+  conflict: "Sprawa zmieniła się w międzyczasie. Pokazujemy aktualny stan zgłoszenia.",
+  conflictNoteMoved: "Twoja notatka jest w polu nowego komentarza. Nie została wysłana.",
+  buttonSuffix: " zgłoszenie",
+};
+
+// The transition confirmation dialog (D-12): one title and consequence per action, with the reject
+// and reopen variants chosen by the current state.
+export const DIALOG = {
+  dismiss: "Zostaw bez zmian",
+  pending: "Zapisywanie…",
+  counter: "{n}/{max}",
+  noteOptional: "Komentarz (opcjonalnie)",
+  noteRequired: "Do kogo eskalowano (wymagane)",
+  escalateEmpty: "Wpisz, do kogo eskalowano zgłoszenie.",
+  networkError: "Nie udało się potwierdzić zmiany. Spróbuj ponownie.",
+  approve: {
+    title: "Zatwierdzić zgłoszenie?",
+    body: "Zgłoszenie trafi do wychowawcy klasy dziecka. Nauczyciel zobaczy treść, historię i komentarze.",
+  },
+  rejectPending: {
+    title: "Odrzucić zgłoszenie?",
+    body: "Zgłoszenie nie trafi do nauczyciela. Możesz je później zatwierdzić albo wznowić.",
+  },
+  rejectTeacher: {
+    title: "Odrzucić zgłoszenie?",
+    body: "Nauczyciel straci dostęp do zgłoszenia, także do historii i komentarzy. Możesz je później zatwierdzić ponownie.",
+  },
+  escalate: {
+    title: "Eskalować zgłoszenie?",
+    body: "Zapisz, do kogo przekazujesz sprawę, na przykład CERT Polska (NASK) albo moderatorzy gry. Aplikacja niczego nie wysyła automatycznie.",
+  },
+  close: {
+    title: "Zamknąć zgłoszenie?",
+    body: "Zgłoszenie zostanie oznaczone jako zamknięte. Można je później wznowić.",
+  },
+  reopenClosed: {
+    title: "Wznowić zgłoszenie?",
+    body: "Zgłoszenie wróci do nauczyciela w stanie „u nauczyciela”.",
+  },
+  reopenRejected: {
+    title: "Wznowić zgłoszenie?",
+    body: "Zgłoszenie wróci do stanu „czeka na rodzica”.",
+  },
 };
 
 export const ERRORS = {

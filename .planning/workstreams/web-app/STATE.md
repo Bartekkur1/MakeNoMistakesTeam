@@ -1,48 +1,48 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 02
-current_plan: 5
-status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-10-03T22:09:26.855Z"
-last_activity: 2026-10-03
-last_activity_desc: Phase 02 execution started
-state_head: b1800ce395032086efde3c2bbd307933cd37a7a4
+current_phase: 03
+current_plan: N/A
+status: ready_to_plan
+stopped_at: Phase 02 complete (manual close); next is Phase 03
+last_updated: "2026-10-04T02:20:00.000Z"
+last_activity: 2026-10-04
+last_activity_desc: Phase 02 closed by hand after user UAT
+state_head: a5f4f1519583d5bc66cbe79cd349cb16678816d1
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 25
+  completed_plans: 11
+  percent: 50
 workstream: web-app
 created: 2026-10-03
-current_phase_name: Panel opiekuna
+current_phase_name: Test przed–po i wyniki
 ---
 
 # Project State
 
 ## Current Position
 
-Current Plan: 5
-Total Plans in Phase: 5
+Current Plan: N/A
+Total Plans in Phase: 0
 
-**Status:** Ready to execute
-**Current Phase:** 02
-**Last Activity:** 2026-10-03 — Phase 02 execution started
-**Last Activity Description:** Phase 02 execution started
+**Status:** Ready to plan
+**Current Phase:** 03
+**Last Activity:** 2026-10-04 — Phase 02 closed by hand after user UAT
+**Last Activity Description:** Phase 02 closed by hand after user UAT
 
 ## Progress
 
-Progress: [███░░░░░░░] 25%
+Progress: [█████░░░░░] 50%
 
-**Phases Complete:** 0
-**Current Plan:** 5
+**Phases Complete:** 2
+**Current Plan:** N/A
 
 ## Session Continuity
 
-**Last session:** 2026-10-03T22:09:26.834Z
+**Last session:** 2026-10-04T02:20:00.000Z
 
-**Stopped At:** Completed 02-04-PLAN.md
+**Stopped At:** Phase 02 complete (manual close); next is Phase 03
 **Resume File:** None
 
 ## Performance Metrics
@@ -59,8 +59,11 @@ Progress: [███░░░░░░░] 25%
 | Phase 02 P02 | 5min | 2 tasks | 9 files |
 | Phase 02 P03 | 6min | 3 tasks | 9 files |
 | Phase 02 P04 | 10min | 3 tasks | 12 files |
+| Phase 02 P05 | 9min | 2 tasks | 9 files |
 
 ## Decisions
+
+- [Phase 02]: Phase 2 marked complete by hand on 2026-10-04 at the user's request: UAT done by the user (6 passed, 2 waived), 02-VERIFICATION.md is stale after the one-line dialog centering fix (m-auto in TransitionDialog.tsx) and was deliberately not re-run to save tokens.
 
 - [Phase 01]: 01-01: extension scope (parent only) creates and lists reports and reads /api/auth/me; detail, transitions and comments need panel scope
 - [Phase 01]: 01-01: error check order 401, endpoint 403, 413/400, 400 validation, 404 (missing or invisible), action-role 403, 409, 503/500
@@ -91,3 +94,7 @@ Progress: [███░░░░░░░] 25%
 - [Phase 02]: 02-04: the comment draft lives in ReportDetailPage (useState) and CommentForm is controlled; a comment-start action clears the live region so every 'Komentarz dodany.' is announced
 - [Phase 02]: 02-04: comments are append-only, so detailReducer load-done keeps comments already shown for the same report id; a confirmed comment never vanishes on an earlier refresh
 - [Phase 02]: 02-04: CommentForm sends postComment exactly once per submit with no retry; 401 clearSession('expired'), 404 load-not-found, 400 field message, network the check-the-timeline text
+- [Phase 02]: 02-05: the transition dialog maps every response through the pure transitionOutcome(); only an ok result is done, so no failure reaches the saved confirmation (prohibition P2)
+- [Phase 02]: 02-05: a quiet 'sync' load reason refetches after a transition and keeps success, conflict and the announcement; refresh and retry clear success and conflict
+- [Phase 02]: 02-05: the dialog focuses the note explicitly after showModal() in the mount effect (React autoFocus runs before the dialog is open)
+- [Phase 02]: 02-05: the D-15 conflict banner lives in an always-mounted role=status wrapper between the back link and the h1

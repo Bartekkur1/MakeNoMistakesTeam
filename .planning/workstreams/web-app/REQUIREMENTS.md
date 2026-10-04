@@ -19,7 +19,7 @@
 
 - [x] **PAN-01**: Opiekun widzi listę nowych i zakończonych spraw fikcyjnego dziecka (data, źródło, krótki opis)
 - [x] **PAN-02**: Opiekun widzi szczegóły sprawy: treść, sygnały, działanie dziecka i odpowiedź na „Czy już kliknąłeś, podałeś dane lub zapłaciłeś?”
-- [ ] **PAN-03**: Opiekun wysyła odpowiedź i zmienia status; odpowiedź pojawia się u dziecka
+- [x] **PAN-03**: Opiekun wysyła odpowiedź i zmienia status; odpowiedź pojawia się u dziecka
 - [x] **PAN-04**: Demo ma fikcyjne profile dziecka i opiekuna z oznaczonym, demonstracyjnym przełączaniem ról
 
 ### Test i wyniki
@@ -57,7 +57,7 @@
 | API-05 | Phase 3 | Pending |
 | PAN-01 | Phase 2 | Complete |
 | PAN-02 | Phase 2 | Complete |
-| PAN-03 | Phase 2 | Pending |
+| PAN-03 | Phase 2 | Complete |
 | PAN-04 | Phase 2 | Complete |
 | TST-01 | Phase 3 | Pending |
 | TST-02 | Phase 3 | Pending |

@@ -2,14 +2,16 @@
 // - server-secret boundary: panel code ships to every visitor, so it never imports server
 //   modules or the Supabase SDK, never renders raw HTML, never logs, never sets cookies, and
 //   only api.ts talks to the network and only session.ts touches browser storage (T-02-01..03);
+// - D-02, D-06: no chain of runtime imports reaches the demo account list (e-mails and the login
+//   code), directly or through the landing copy; tests/panel/bundle.test.ts checks the build output;
 // - D-02: nothing in the panel copy marks the app as a presentation build, hints at the login
 //   code or lists accounts;
 // - D-03: there is no child-facing route; the only pages are the landing, /login, /panel and
 //   /panel/[id].
 // Sources are scanned with comments stripped, so explanatory comments never trip a rule.
 
-import { readFileSync, readdirSync } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { dirname, join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 import * as panelContent from "@/app/_panel/content";
 
@@ -51,6 +53,43 @@ function importSpecifiers(code: string): string[] {
   return patterns.flatMap((pattern) => [...code.matchAll(pattern)].map((match) => match[1]));
 }
 
+// Modules that hold the demo e-mails or the login code and so must never reach a client bundle.
+const FORBIDDEN_IN_CLIENT = ["src/lib/contract/demo-accounts.ts", "src/app/_landing/content.ts"];
+
+// Specifiers of imports that survive compilation: `import type` and `export type` are erased.
+function runtimeImportSpecifiers(code: string): string[] {
+  const withoutTypeOnly = code.replace(/\b(?:import|export)\s+type\s[^;]*?\bfrom\s*["'][^"']+["']/g, "");
+  return importSpecifiers(withoutTypeOnly);
+}
+
+// The source file an "@/..." or relative specifier names, or null for a package import.
+function resolveSpecifier(fromFile: string, specifier: string): string | null {
+  let base: string;
+  if (specifier.startsWith("@/")) base = join(process.cwd(), "src", specifier.slice(2));
+  else if (specifier.startsWith("./") || specifier.startsWith("../")) base = join(dirname(fromFile), specifier);
+  else return null;
+  const candidates = [base, `${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")];
+  return candidates.find((path) => existsSync(path) && statSync(path).isFile()) ?? null;
+}
+
+// The first import chain from `start` to a forbidden module, or null when none is reachable.
+function chainTo(start: string, forbidden: ReadonlySet<string>): string[] | null {
+  const seen = new Set<string>([start]);
+  const queue: string[][] = [[start]];
+  while (queue.length > 0) {
+    const chain = queue.shift() as string[];
+    const file = chain[chain.length - 1];
+    if (forbidden.has(file)) return chain;
+    for (const specifier of runtimeImportSpecifiers(stripComments(readFileSync(file, "utf8")))) {
+      const next = resolveSpecifier(file, specifier);
+      if (next === null || seen.has(next)) continue;
+      seen.add(next);
+      queue.push([...chain, next]);
+    }
+  }
+  return null;
+}
+
 // Files (by repo-relative path) whose code matches the pattern.
 function offenders(pattern: RegExp, files: PanelFile[] = PANEL_FILES): string[] {
   return files.filter((file) => pattern.test(file.code)).map((file) => file.path);
@@ -80,6 +119,29 @@ describe("panel guardrails", () => {
         .filter((specifier) => forbidden.test(specifier))
         .map((specifier) => `${file.path} imports ${specifier}`),
     );
+
+    expect(bad).toEqual([]);
+  });
+
+  it("(a) never imports the demo account list or the landing copy that re-exports it", () => {
+    const forbidden = /(^|\/)contract\/demo-accounts$|(^|\/)_landing\/content$/;
+    const bad = PANEL_FILES.flatMap((file) =>
+      importSpecifiers(file.code)
+        .filter((specifier) => forbidden.test(specifier))
+        .map((specifier) => `${file.path} imports ${specifier}`),
+    );
+
+    expect(bad).toEqual([]);
+  });
+
+  it("(a) never reaches the demo account list through any chain of runtime imports", () => {
+    // Panel code ships to every visitor. The bundler keeps a whole imported module in the client
+    // chunk, so a module that is reachable at all leaks every e-mail and the login code (D-02, D-06).
+    const forbidden = new Set(FORBIDDEN_IN_CLIENT.map((path) => join(process.cwd(), path)));
+    const bad = PANEL_FILES.flatMap((file) => {
+      const chain = chainTo(join(process.cwd(), file.path), forbidden);
+      return chain ? [chain.map(rel).join(" -> ")] : [];
+    });
 
     expect(bad).toEqual([]);
   });

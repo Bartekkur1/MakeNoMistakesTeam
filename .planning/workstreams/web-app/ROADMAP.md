@@ -7,7 +7,7 @@ Od kontraktu i backendu, przez panel opiekuna na danych przykładowych, po test 
 ## Phases
 
 - [x] **Phase 1: Kontrakt i backend spraw** - API spraw i odpowiedzi z trwałym zapisem, dane przykładowe (completed 2026-10-03)
-- [ ] **Phase 2: Panel opiekuna** - lista, szczegóły, odpowiedź i status na danych przykładowych
+- [x] **Phase 2: Panel opiekuna** - lista, szczegóły, odpowiedź i status na danych przykładowych (completed 2026-10-04)
 - [ ] **Phase 3: Test przed–po i wyniki** - ekran testu, wyliczanie wyniku po stronie backendu, panel klasy
 - [ ] **Phase 4: Integracja na prawdziwych zapisach** - panel i testy na backendzie, błędy i pełna pętla
 
@@ -56,7 +56,9 @@ Plans:
   3. Odpowiedź i zmiana statusu są widoczne po stronie dziecka
   4. Przełączanie ról jest oznaczone jako demonstracyjne
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
+
+> Phase 2 marked complete by hand on 2026-10-04 at the user's request: UAT done by the user (6 passed, 2 waived), 02-VERIFICATION.md is stale after the one-line dialog centering fix (m-auto in TransitionDialog.tsx) and was deliberately not re-run to save tokens.
 
 Plans:
 **Wave 1**
@@ -72,7 +74,7 @@ Plans:
 - [x] 02-04-PLAN.md — Szczegóły zgłoszenia: treść, „Co dziecko już zrobiło”, oś czasu historii i komentarzy, „Odśwież zgłoszenie”, nowy komentarz (PAN-02, PAN-03)
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 02-05-PLAN.md — Zmiana stanu w okienku potwierdzenia: tylko dozwolone akcje, wymagana notatka eskalacji, obsługa 409/404/błędów, widoczność dla drugiej strony (PAN-03)
+- [x] 02-05-PLAN.md — Zmiana stanu w okienku potwierdzenia: tylko dozwolone akcje, wymagana notatka eskalacji, obsługa 409/404/błędów, widoczność dla drugiej strony (PAN-03)
 
 **UI hint**: yes
 

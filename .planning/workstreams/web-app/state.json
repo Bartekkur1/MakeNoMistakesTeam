@@ -11,7 +11,7 @@
     {
       "number": "2",
       "name": "Panel opiekuna",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "3",
@@ -25,9 +25,9 @@
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 02 of 4 · 25% · executing"
+    "command": "/gsd-discuss-phase 3 --ws web-app",
+    "label": "Discuss Phase 3",
+    "reason": "Phase 02 complete (manual close) · 50%"
   },
-  "updated_at": "2026-10-03T22:09:20.479Z"
+  "updated_at": "2026-10-04T02:20:00.000Z"
 }

@@ -17,7 +17,7 @@ import { capitalize, fillTemplate, formatClock } from "./format";
 import { filterStatesFor, initialListState, listReducer, type ListLoadReason } from "./list-state";
 import { useCurrentSession } from "./PanelShell";
 import { ReportRow } from "./ReportRow";
-import { clearSession, type PanelSession } from "./session";
+import { expireSession, type PanelSession } from "./session";
 import { alertError, card, secondaryButton, selectBase, skeletonBlock } from "./styles";
 
 const SKELETON_ROWS = [0, 1, 2];
@@ -45,7 +45,7 @@ function ReportList({ session }: { session: PanelSession }) {
       if (ignore) return;
       if (isUnauthorized(result)) {
         // The shell sees the cleared session and sends the visitor to /login with the banner.
-        clearSession("expired");
+        expireSession(session.token);
         return;
       }
       if (!result.ok) {
@@ -73,7 +73,7 @@ function ReportList({ session }: { session: PanelSession }) {
     dispatch({ type: "load-start", requestId, reason, filter });
     fetchReports(session.token, { limit: LIMITS.pageDefault, state: filter }).then((result) => {
       if (isUnauthorized(result)) {
-        clearSession("expired");
+        expireSession(session.token);
         return;
       }
       if (!result.ok) {
@@ -90,7 +90,7 @@ function ReportList({ session }: { session: PanelSession }) {
     fetchReports(session.token, { limit: LIMITS.pageDefault, cursor: state.nextCursor, state: state.filter }).then(
       (result) => {
         if (isUnauthorized(result)) {
-          clearSession("expired");
+          expireSession(session.token);
           return;
         }
         if (!result.ok) {

@@ -260,6 +260,19 @@ describe("listReducer: filter, refresh, retry and failures", () => {
     expect(state.pending).toBeNull();
   });
 
+  it("a failed filter change drops the old filter's rows and cursor, so two filters never mix (WR-01)", () => {
+    const started = listReducer(readyWithTwo(), { type: "load-start", requestId: 2, reason: "filter", filter: "closed" });
+
+    const state = listReducer(started, { type: "load-failed", requestId: 2, failure: unavailable });
+
+    expect(state.filter).toBe("closed");
+    expect(state.reports).toEqual([]);
+    expect(state.nextCursor).toBeNull();
+    expect(state.status).toBe("error");
+    expect(state.failure).toBe(unavailable);
+    expect(state.pending).toBeNull();
+  });
+
   it("offers a parent all states and a teacher only the teacher-visible ones", () => {
     expect(filterStatesFor("parent")).toEqual(REPORT_STATES);
     expect(filterStatesFor("teacher")).toEqual(TEACHER_VISIBLE_STATES);

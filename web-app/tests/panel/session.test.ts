@@ -3,7 +3,7 @@
 // and its Polish message, and where the session-end notice for /login is kept.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiCall, errorMessage, loginRequest, type ApiFailure } from "@/app/_panel/api";
+import { REQUEST_TIMEOUT_MS, apiCall, errorMessage, loginRequest, type ApiFailure } from "@/app/_panel/api";
 import { ERRORS } from "@/app/_panel/content";
 import {
   NOTICE_STORAGE_KEY,
@@ -11,6 +11,7 @@ import {
   clearNotice,
   clearSession,
   decodeSession,
+  expireSession,
   hasStoredSession,
   isSessionExpired,
   readNotice,
@@ -95,6 +96,18 @@ describe("decodeSession", () => {
     expect(decodeSession(sessionJson({ token: "" }, base))).toBeNull();
     expect(decodeSession(sessionJson({ account: { ...base.account, role: "child" } }, base))).toBeNull();
     expect(decodeSession(sessionJson({ children: "C1" }, base))).toBeNull();
+  });
+
+  it("rejects a stored session whose children are not all child records (WR-08)", async () => {
+    const base = sessionFromLogin(await realLogin());
+    const child = base.children[0];
+
+    expect(child).toBeDefined();
+    expect(decodeSession(sessionJson({ children: [{ ...child, display_name: 7 }] }, base))).toBeNull();
+    expect(decodeSession(sessionJson({ children: [{ id: child.id }] }, base))).toBeNull();
+    expect(decodeSession(sessionJson({ children: [child, null] }, base))).toBeNull();
+    expect(decodeSession(sessionJson({ children: ["C1"] }, base))).toBeNull();
+    expect(decodeSession(sessionJson({ children: [] }, base))).toEqual({ ...base, children: [] });
   });
 
   it("accepts the stored form of a real login response", async () => {
@@ -189,6 +202,21 @@ describe("apiCall error mapping", () => {
     expect(failure).toMatchObject({ kind: "http", code: "validation_error", details });
   });
 
+  it("gives every request a timeout signal and maps the timeout to a network failure (WR-07)", async () => {
+    const signals: (AbortSignal | null | undefined)[] = [];
+    vi.stubGlobal("fetch", async (_input: unknown, init?: RequestInit): Promise<Response> => {
+      signals.push(init?.signal);
+      throw new DOMException("The operation timed out.", "TimeoutError");
+    });
+
+    const failure = await failureOf(apiCall("/api/reports", { method: "GET", token: "t" }));
+
+    expect(signals).toHaveLength(1);
+    expect(signals[0]).toBeInstanceOf(AbortSignal);
+    expect(REQUEST_TIMEOUT_MS).toBe(20_000);
+    expect(failure).toEqual({ ok: false, kind: "network" });
+  });
+
   it("reports a dropped connection as a network failure", async () => {
     failFetch();
 
@@ -251,6 +279,59 @@ describe("session storage", () => {
     clearSession(null);
     expect(readNotice()).toBeNull();
     expect(events).toHaveLength(3);
+  });
+
+  it("saveSession reports whether a live session is now readable (WR-05)", async () => {
+    const login = await realLogin();
+    const { local } = installFakeWindow();
+
+    expect(saveSession(login)).toBe(true);
+
+    // A response the panel cannot use (unknown role) or one that is already expired by this
+    // device's clock is not a live session; the unusable entry is not left behind.
+    expect(saveSession({ ...login, account: { ...login.account, role: "child" as never } })).toBe(false);
+    expect(local.has(SESSION_STORAGE_KEY)).toBe(false);
+    expect(saveSession({ ...login, expires_at: "2000-01-01T00:00:00.000Z" })).toBe(false);
+    expect(local.has(SESSION_STORAGE_KEY)).toBe(false);
+  });
+
+  it("saveSession reports false when the browser blocks storage (WR-05)", async () => {
+    const login = await realLogin();
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("QuotaExceededError");
+        },
+        removeItem: () => {},
+      },
+      dispatchEvent: () => true,
+    });
+
+    expect(saveSession(login)).toBe(false);
+  });
+
+  it("a 401 for the stored token ends the session with the expired notice", async () => {
+    const login = await realLogin();
+    const { session } = installFakeWindow();
+    saveSession(login);
+
+    expireSession(login.token);
+
+    expect(hasStoredSession()).toBe(false);
+    expect(session.get(NOTICE_STORAGE_KEY)).toBe("expired");
+  });
+
+  it("a late 401 for an older token keeps the newer session and leaves no notice (WR-03)", async () => {
+    const login = await realLogin();
+    const { local, session } = installFakeWindow();
+    saveSession(login);
+    const stored = local.get(SESSION_STORAGE_KEY);
+
+    expireSession("an-older-token");
+
+    expect(local.get(SESSION_STORAGE_KEY)).toBe(stored);
+    expect(session.has(NOTICE_STORAGE_KEY)).toBe(false);
   });
 
   it("treats blocked storage as no session", () => {

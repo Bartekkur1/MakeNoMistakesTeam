@@ -101,8 +101,11 @@ function LoginCard() {
 
     const result = await loginRequest(email, code);
     if (result.ok) {
-      // The session snapshot flips to authenticated and LoginScreen redirects to /panel.
-      saveSession(result.value);
+      // The session snapshot flips to authenticated and LoginScreen redirects to /panel. When the
+      // browser cannot keep the session it never flips, so the form unlocks and says why.
+      if (saveSession(result.value)) return;
+      setPending(false);
+      setFormError(LOGIN.sessionNotSaved);
       return;
     }
 

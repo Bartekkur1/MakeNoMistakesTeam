@@ -2,12 +2,20 @@
 // list-state.ts: every load carries a requestId and a response for any other id is ignored.
 // D-14: "Odśwież zgłoszenie" reloads by hand and the current view stays while it runs; nothing
 // polls. A 404 replaces the page with the not-found view (the report is gone or no longer visible).
+// After a confirmed transition (D-12) a quiet "sync" refetch brings the detail up to date.
 
-import type { ReportComment, ReportDetail } from "@/lib/contract/types";
+import {
+  REPORT_STATE_LABELS_PL,
+  type ReportComment,
+  type ReportDetail,
+  type ReportState,
+  type TransitionResponse,
+} from "@/lib/contract/types";
 import type { ApiFailure } from "./api";
-import { COMMENT, DETAIL } from "./content";
+import { ACTIONS_CARD, COMMENT, DETAIL } from "./content";
+import { fillTemplate } from "./format";
 
-export type DetailLoadReason = "initial" | "retry" | "refresh";
+export type DetailLoadReason = "initial" | "retry" | "refresh" | "sync";
 
 export interface DetailState {
   requestId: number;
@@ -17,6 +25,8 @@ export interface DetailState {
   failure: ApiFailure | null;
   refreshedAt: string | null;
   announcement: string;
+  success: ReportState | null;
+  conflict: { noteMoved: boolean } | null;
 }
 
 export const initialDetailState: DetailState = {
@@ -27,6 +37,8 @@ export const initialDetailState: DetailState = {
   failure: null,
   refreshedAt: null,
   announcement: "",
+  success: null,
+  conflict: null,
 };
 
 export type DetailAction =
@@ -35,24 +47,34 @@ export type DetailAction =
   | { type: "load-not-found"; requestId: number }
   | { type: "load-failed"; requestId: number; failure: ApiFailure }
   | { type: "comment-start" }
-  | { type: "comment-added"; comment: ReportComment };
+  | { type: "comment-added"; comment: ReportComment }
+  | { type: "transition-done"; response: TransitionResponse }
+  | { type: "transition-confirmed"; state: ReportState }
+  | { type: "conflict"; noteMoved: boolean };
 
 export function detailReducer(state: DetailState, action: DetailAction): DetailState {
   switch (action.type) {
-    // A loaded report stays on screen while it reloads; without one the skeleton shows.
-    case "load-start":
+    // A loaded report stays on screen while it reloads; without one the skeleton shows. A "sync"
+    // (the quiet refetch after a transition) keeps the saved confirmation, the conflict banner and
+    // the announcement; a refresh or a retry clears them.
+    case "load-start": {
+      const quiet = action.reason === "sync";
       return {
         ...state,
         requestId: action.requestId,
         pending: action.reason,
         status: state.report === null ? "loading" : state.status,
         failure: null,
-        announcement: "",
+        announcement: quiet ? state.announcement : "",
+        success: quiet ? state.success : null,
+        conflict: quiet ? state.conflict : null,
       };
+    }
 
     case "load-done": {
       if (action.requestId !== state.requestId) return state;
       const refreshed = action.reason === "refresh";
+      const quiet = action.reason === "sync";
       return {
         ...state,
         status: "ready",
@@ -60,7 +82,7 @@ export function detailReducer(state: DetailState, action: DetailAction): DetailS
         pending: null,
         failure: null,
         refreshedAt: refreshed ? action.clock : state.refreshedAt,
-        announcement: refreshed ? DETAIL.refreshedAnnouncement : "",
+        announcement: refreshed ? DETAIL.refreshedAnnouncement : quiet ? state.announcement : "",
       };
     }
 
@@ -93,6 +115,43 @@ export function detailReducer(state: DetailState, action: DetailAction): DetailS
         announcement: COMMENT.added,
       };
     }
+
+    // The transition the server confirmed (201): its report fields replace the shown ones, its
+    // history entry joins the timeline once, and the card shows "Zapisano. Obecny stan: …".
+    case "transition-done": {
+      const { report } = state;
+      const { response } = action;
+      if (report === null || report.id !== response.report.id) return state;
+      const known = report.history.some((entry) => entry.id === response.entry.id);
+      return {
+        ...state,
+        report: {
+          ...report,
+          ...response.report,
+          history: known ? report.history : [...report.history, response.entry],
+          comments: report.comments,
+        },
+        success: response.report.state,
+        conflict: null,
+        announcement: fillTemplate(ACTIONS_CARD.success, { state: REPORT_STATE_LABELS_PL[response.report.state] }),
+      };
+    }
+
+    // A retry answered 409, but the refetched history shows the user's earlier attempt was saved
+    // and only its 201 was lost (WR-02). The sync refetch brings the report; this shows the same
+    // confirmation as a 201 would have.
+    case "transition-confirmed":
+      return {
+        ...state,
+        success: action.state,
+        conflict: null,
+        announcement: fillTemplate(ACTIONS_CARD.success, { state: REPORT_STATE_LABELS_PL[action.state] }),
+      };
+
+    // D-15: the report changed in the meantime. The banner itself is a status region, so the page
+    // announcement is cleared; a sync refetch follows so the buttons match the new state.
+    case "conflict":
+      return { ...state, conflict: { noteMoved: action.noteMoved }, success: null, announcement: "" };
   }
 }
 

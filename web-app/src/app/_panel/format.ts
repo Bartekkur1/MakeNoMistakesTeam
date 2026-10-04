@@ -2,20 +2,27 @@
 // directly: names, dates and clock times, copy templates, the list excerpt, the row meta line and
 // the risk marker.
 
-import { DEMO_CHILDREN, findDemoAccountById } from "@/lib/contract/demo-accounts";
 import {
   ACTOR_ROLE_LABELS_PL,
   ATTACK_TYPE_LABELS_PL,
   REPORT_SOURCE_LABELS_PL,
   REPORT_STATE_LABELS_PL,
+  TRANSITION_ACTION_LABELS_PL,
+  TRANSITION_COMMENT_REQUIRED,
   type ActorRole,
   type ChildInfo,
   type HistoryEntry,
   type Report,
   type ReportComment,
+  type ReportDetail,
+  type ReportState,
   type TakenAction,
+  type TransitionAction,
+  type TransitionResponse,
 } from "@/lib/contract/types";
-import { LIST, NAMES, RISK, TIMELINE } from "./content";
+import { errorMessage, isUnauthorized, type ApiResult } from "./api";
+import { ACTIONS_CARD, DIALOG, LIST, NAMES, RISK, TIMELINE } from "./content";
+import { CHILD_NAMES, PERSON_NAMES } from "./names";
 
 // The data files mark fictional names with a trailing suffix; the panel never shows it (D-02).
 const NAME_SUFFIX = /\s*\((demo|smoke)\)$/;
@@ -68,11 +75,12 @@ export function excerpt(content: string, max: number = 140): string {
   return `${text.slice(0, max).trimEnd()}…`;
 }
 
-// A child's name without the demo suffix: the demo children first, then the children the login
-// returned, else the neutral fallback. A row never shows an empty name.
+// A child's name without the demo suffix: the known children first (names.ts), then the children
+// the login returned, else the neutral fallback. A row never shows an empty name.
 export function childName(childId: string, sessionChildren: readonly ChildInfo[]): string {
-  const child = DEMO_CHILDREN.find((c) => c.id === childId) ?? sessionChildren.find((c) => c.id === childId);
-  const name = child ? displayName(child.display_name).trim() : "";
+  const known = CHILD_NAMES.get(childId);
+  const child = known === undefined ? sessionChildren.find((c) => c.id === childId) : undefined;
+  const name = (known ?? (child ? displayName(child.display_name) : "")).trim();
   return name === "" ? NAMES.childFallback : name;
 }
 
@@ -120,11 +128,10 @@ export function mergeTimeline(history: readonly HistoryEntry[], comments: readon
 }
 
 // The author of a timeline entry without the demo suffix: a child through the child lookup, a
-// parent or teacher through the demo accounts, else the capitalized role label. Never empty.
+// parent or teacher through the known names (names.ts), else the capitalized role label. Never empty.
 export function actorName(actorId: string, actorRole: ActorRole, sessionChildren: readonly ChildInfo[]): string {
   if (actorRole === "child") return childName(actorId, sessionChildren);
-  const account = findDemoAccountById(actorId);
-  const name = account ? displayName(account.display_name).trim() : "";
+  const name = (PERSON_NAMES.get(actorId) ?? "").trim();
   return name === "" ? capitalize(ACTOR_ROLE_LABELS_PL[actorRole]) : name;
 }
 
@@ -163,3 +170,158 @@ export function riskLabel(actions: readonly TakenAction[]): string | null {
   const labels = riskCategories(actions);
   return labels.length === 0 ? null : RISK.prefix + labels.join(RISK.separator);
 }
+
+// The "Zmień stan" card (D-12): approve and close are the filled, primary buttons.
+const PRIMARY_ACTIONS: readonly TransitionAction[] = ["approve", "close"];
+
+export function isPrimaryAction(action: TransitionAction): boolean {
+  return PRIMARY_ACTIONS.includes(action);
+}
+
+// The available actions with the primary ones first, otherwise in the given order. Returns a new array.
+export function orderedActions(actions: readonly TransitionAction[]): TransitionAction[] {
+  return [...actions.filter(isPrimaryAction), ...actions.filter((action) => !isPrimaryAction(action))];
+}
+
+// "Zatwierdź zgłoszenie": the contract verb with a capital letter plus the noun.
+export function actionButtonLabel(action: TransitionAction): string {
+  return capitalize(TRANSITION_ACTION_LABELS_PL[action]) + ACTIONS_CARD.buttonSuffix;
+}
+
+export interface DialogCopy {
+  title: string;
+  body: string;
+  noteLabel: string;
+  noteRequired: boolean;
+}
+
+function dialogVariant(action: TransitionAction, fromState: ReportState): { title: string; body: string } {
+  switch (action) {
+    case "approve":
+      return DIALOG.approve;
+    case "reject":
+      return fromState === "with_teacher" ? DIALOG.rejectTeacher : DIALOG.rejectPending;
+    case "escalate":
+      return DIALOG.escalate;
+    case "close":
+      return DIALOG.close;
+    case "reopen":
+      return fromState === "rejected" ? DIALOG.reopenRejected : DIALOG.reopenClosed;
+  }
+}
+
+// The dialog's title, consequence and note label for this action from this state. Escalation must
+// name its recipient (TRANSITION_COMMENT_REQUIRED); every other note is optional.
+export function dialogCopy(action: TransitionAction, fromState: ReportState): DialogCopy {
+  const noteRequired = TRANSITION_COMMENT_REQUIRED[action];
+  return {
+    ...dialogVariant(action, fromState),
+    noteLabel: noteRequired ? DIALOG.noteRequired : DIALOG.noteOptional,
+    noteRequired,
+  };
+}
+
+// What the dialog does with a transition response. Only the server's 201 is "done"; every other
+// status or a network failure means nothing was saved (CONTRACT "Potwierdzenie zapisu").
+export type TransitionOutcome =
+  | { kind: "done"; response: TransitionResponse }
+  | { kind: "expired" }
+  | { kind: "conflict" }
+  | { kind: "not-found" }
+  | { kind: "field"; message: string }
+  | { kind: "alert"; message: string };
+
+export function transitionOutcome(
+  result: ApiResult<TransitionResponse>,
+  networkMessage: string = DIALOG.networkError,
+): TransitionOutcome {
+  if (result.ok) return { kind: "done", response: result.value };
+  if (isUnauthorized(result)) return { kind: "expired" };
+  if (result.kind === "http") {
+    // D-15: the other party changed the report first (or this is a repeated click).
+    if (result.code === "invalid_transition") return { kind: "conflict" };
+    // The report is gone or no longer visible (e.g. the parent rejected it and the teacher lost access).
+    if (result.code === "report_not_found") return { kind: "not-found" };
+    if (result.code === "validation_error") {
+      const field = result.details.find((detail) => detail.field === "comment");
+      if (field) return { kind: "field", message: field.message };
+    }
+  }
+  return { kind: "alert", message: errorMessage(result, networkMessage) };
+}
+
+// A failure after which the server may still have saved the request: a dropped connection or a
+// timeout, or a server-side error. A 4xx answer means the request was refused, so nothing was saved.
+export function isUnconfirmedFailure(result: ApiResult<unknown>): boolean {
+  if (result.ok) return false;
+  return result.kind === "network" || result.status >= 500 || result.code === "internal_error";
+}
+
+// Transition attempts in one dialog whose result stayed unknown (isUnconfirmedFailure): the same
+// action from the same state, with the note (trimmed, or null) each attempt sent.
+export interface UnconfirmedAttempt {
+  action: TransitionAction;
+  fromState: ReportState;
+  comments: readonly (string | null)[];
+}
+
+export type RetriedConflict =
+  | { kind: "saved"; entry: HistoryEntry }
+  | { kind: "saved-then-changed"; entry: HistoryEntry }
+  | { kind: "conflict" };
+
+// A 409 for a retry can answer the user's own earlier attempt whose 201 was lost (WR-02). Decided
+// from the refetched detail: a history entry that was not known before the attempt, by this
+// account, with the same action from the same state and one of the notes that were sent, proves the
+// earlier attempt was saved ("saved", or "saved-then-changed" when a later entry moved the report
+// on). Anything else is a real conflict (D-15). History is oldest first (CONTRACT).
+export function retriedConflict(
+  detail: ReportDetail,
+  knownEntryIds: ReadonlySet<string>,
+  attempt: UnconfirmedAttempt,
+  accountId: string,
+): RetriedConflict {
+  const fresh = detail.history.filter((entry) => !knownEntryIds.has(entry.id));
+  const own = fresh.find(
+    (entry) =>
+      entry.actor_id === accountId &&
+      entry.action === attempt.action &&
+      entry.from_state === attempt.fromState &&
+      attempt.comments.includes(entry.comment),
+  );
+  if (own === undefined) return { kind: "conflict" };
+  const newest = detail.history.at(-1);
+  return newest?.id === own.id && detail.state === own.to_state
+    ? { kind: "saved", entry: own }
+    : { kind: "saved-then-changed", entry: own };
+}
+
+// Escalation must name its recipient (TRANSITION_COMMENT_REQUIRED): true when the note is blank
+// for such an action, so the dialog blocks it before any request. Other actions may go without one.
+export function missingRequiredNote(action: TransitionAction, note: string): boolean {
+  return TRANSITION_COMMENT_REQUIRED[action] && note.trim() === "";
+}
+
+// The note as sent: trimmed, or null when blank.
+export function transitionComment(note: string): string | null {
+  const trimmed = note.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+// After a 409 (D-15) the unsent note moves into the new-comment field: a blank note leaves the
+// draft as it is, an empty draft takes the note, otherwise the note follows after a blank line.
+export function mergeDraft(draft: string, note: string): string {
+  if (note.trim() === "") return draft;
+  if (draft.trim() === "") return note;
+  return `${draft}\n\n${note}`;
+}
+
+// The comment field after the server confirmed a comment: only the text that was sent goes away.
+// `sent` is the field as it was when the comment was submitted. A transition note that a 409 moved
+// in while the comment was sending (mergeDraft appends it) stays, as the conflict banner promised.
+export function draftAfterSent(current: string, sent: string): string {
+  if (current === sent) return "";
+  if (current.startsWith(sent)) return current.slice(sent.length).replace(/^\s+/, "");
+  return current;
+}
+
