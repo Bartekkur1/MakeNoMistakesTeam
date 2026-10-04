@@ -42,6 +42,10 @@ function storedSessionValid(value) {
     && typeof value.code === 'string' && /^\d{4}$/.test(value.code);
 }
 
+// chrome.storage returns objects with keys in its own (sorted) order, so compare by value.
+const sameSession = (a, b) => a.token === b.token && a.expires_at === b.expires_at && a.email === b.email
+  && a.code === b.code && ACCOUNT_FIELDS.every(key => a.account[key] === b.account[key]);
+
 let sessionRevision = 0;
 let sessionUnusable = false;
 let sessionQueue = Promise.resolve();
@@ -73,7 +77,7 @@ async function saveSession(session, revision) {
     try {
       await chrome.storage.local.set({ [SESSION_KEY]: session });
       const saved = (await chrome.storage.local.get(SESSION_KEY))[SESSION_KEY];
-      if (revision !== sessionRevision || !storedSessionValid(saved) || JSON.stringify(saved) !== JSON.stringify(session)) {
+      if (revision !== sessionRevision || !storedSessionValid(saved) || !sameSession(saved, session)) {
         throw new Error('session-not-saved');
       }
       sessionUnusable = false;
