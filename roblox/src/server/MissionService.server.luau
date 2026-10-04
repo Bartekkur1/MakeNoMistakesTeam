@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
 local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
 local ScamerinoNPCManager = require(script.Parent:WaitForChild("ScamerinoNPCManager") :: ModuleScript)
+local RewardManager = require(script.Parent:WaitForChild("RewardManager") :: ModuleScript)
 local arbiter = NPCNavigation.getDefaultArbiter()
 
 local folder = ReplicatedStorage:FindFirstChild("MissionRemotes")
@@ -39,6 +40,8 @@ type State = {
 	refusalCount: number,
 	helpReceived: boolean,
 	quizAttempts: number,
+	resultStatus: MissionContent.ResultStatus,
+	rewardJustEarned: boolean,
 }
 local states: { [Player]: State } = {}
 local function stateFor(player: Player): State
@@ -56,6 +59,8 @@ local function stateFor(player: Player): State
 		refusalCount = 0,
 		helpReceived = false,
 		quizAttempts = 0,
+		resultStatus = "none",
+		rewardJustEarned = false,
 	}
 	states[player] = state
 	return state
@@ -79,6 +84,9 @@ local function send(player: Player, state: State)
 		histories = state.histories,
 		choices = choices,
 		status = state.stage,
+		resultStatus = state.resultStatus,
+		rewardEarned = RewardManager.hasEarned(player),
+		rewardJustEarned = state.rewardJustEarned,
 		title = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
 		interlocutorName = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
 		ruleCard = if state.stage == "rule_card" then MissionContent.ruleCard else nil,
@@ -149,6 +157,8 @@ beginEvent.Event:Connect(function(player: Player)
 	state.refusalCount = 0
 	state.helpReceived = false
 	state.quizAttempts = 0
+	state.resultStatus = "none"
+	state.rewardJustEarned = false
 	setStage(player, state, "presenting")
 	send(player, state)
 	task.spawn(function()
@@ -222,6 +232,8 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 		state.refusalCount = 0
 		state.helpReceived = false
 		state.quizAttempts = 0
+		state.resultStatus = "none"
+		state.rewardJustEarned = false
 		arbiter.cancelPlayer(player)
 		ScamerinoNPCManager.resetForPlayer(player, state.revision)
 		setStage(player, state, "start")
@@ -244,6 +256,17 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 
 	local choice = MissionContent.getChoice(action, state.stage)
 	if not choice or not choice.enabled then
+		return
+	end
+	-- getChoice also supports a global lookup; it is not stage authorization.
+	local allowed = false
+	for _, stageChoice in MissionContent.getChoicesForStage(state.stage) do
+		if stageChoice.id == action and stageChoice.enabled then
+			allowed = true
+			break
+		end
+	end
+	if not allowed then
 		return
 	end
 
@@ -354,6 +377,8 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 					"Świetnie! Hasło zostało u Ciebie, a konto jest bezpieczne. Dobra robota! 🦈🛡️"
 				)
 			end
+			state.resultStatus = "passed"
+			state.rewardJustEarned = RewardManager.grantShield(player)
 			setStage(player, state, "ending_good")
 			arbiter.releaseOwner(player)
 			send(player, state)

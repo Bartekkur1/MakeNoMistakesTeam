@@ -218,6 +218,63 @@ local latestSequence = -1
 local latestRevision = -1
 local pendingAction = false
 
+local resultSummary = Instance.new("Frame")
+resultSummary.Name = "ResultSummaryFrame"
+resultSummary.AnchorPoint = Vector2.new(0, 1)
+resultSummary.Size = UDim2.fromOffset(272, 230)
+resultSummary.BackgroundColor3 = Color3.fromRGB(16, 20, 34)
+resultSummary.BackgroundTransparency = 0.06
+resultSummary.BorderSizePixel = 0
+resultSummary.Visible = false
+resultSummary.Parent = gui
+local resultCorner = Instance.new("UICorner")
+resultCorner.CornerRadius = UDim.new(0, 8)
+resultCorner.Parent = resultSummary
+local resultStroke = Instance.new("UIStroke")
+resultStroke.Color = Color3.fromRGB(255, 184, 0)
+resultStroke.Parent = resultSummary
+local resultText = label("OutcomeText", resultSummary, 15)
+resultText.Position = UDim2.fromOffset(12, 12)
+resultText.Size = UDim2.new(1, -24, 0, 86)
+resultText.TextWrapped = true
+resultText.Font = Enum.Font.GothamMedium
+local rewardText = label("RewardText", resultSummary, 13)
+rewardText.Position = UDim2.fromOffset(12, 102)
+rewardText.Size = UDim2.new(1, -24, 0, 40)
+rewardText.TextWrapped = true
+local deliveryText = label("DeliveryStatus", resultSummary, 12)
+deliveryText.Position = UDim2.fromOffset(12, 148)
+deliveryText.Size = UDim2.new(1, -24, 0, 32)
+deliveryText.TextWrapped = true
+deliveryText.Text = ""
+local resultReplay = Instance.new("TextButton")
+resultReplay.Name = "ReplayButton"
+resultReplay.Position = UDim2.fromOffset(12, 188)
+resultReplay.Size = UDim2.new(1, -24, 0, 30)
+resultReplay.BackgroundColor3 = Color3.fromRGB(15, 98, 219)
+resultReplay.TextColor3 = Color3.new(1, 1, 1)
+resultReplay.Font = Enum.Font.GothamMedium
+resultReplay.TextSize = 13
+resultReplay.Text = "Spróbuj ponownie"
+resultReplay.Parent = resultSummary
+resultReplay.Activated:Connect(function()
+	if pendingAction or not latest or latest.resultStatus == "none" then
+		return
+	end
+	pendingAction = true
+	request:FireServer("replay", latest.revision)
+end)
+
+local function positionSummary()
+	resultSummary.Position = UDim2.fromOffset(
+		panel.AbsolutePosition.X + panel.AbsoluteSize.X + 12,
+		panel.Position.Y.Offset + gui.AbsoluteSize.Y
+	)
+end
+panel:GetPropertyChangedSignal("AbsoluteSize"):Connect(positionSummary)
+panel:GetPropertyChangedSignal("AbsolutePosition"):Connect(positionSummary)
+positionSummary()
+
 local function clear(parent: Instance)
 	for _, child in parent:GetChildren() do
 		if child:IsA("GuiObject") then
@@ -273,9 +330,21 @@ render = function(snapshot)
 	if snapshot.status == "start" or snapshot.status == "closed" or snapshot.activeConversation == "none" then
 		panel.Visible = false
 		ruleCardFrame.Visible = false
+		resultSummary.Visible = false
 		return
 	end
 	panel.Visible = true
+	resultSummary.Visible = snapshot.resultStatus ~= "none"
+	if resultSummary.Visible then
+		resultText.Text = if snapshot.resultStatus == "passed"
+			then MissionContent.texts.ending_good
+			else MissionContent.texts.ending_bad
+		rewardText.Text = if snapshot.rewardJustEarned
+			then "Zdobywasz tarczę Scamerino!"
+			elseif snapshot.rewardEarned then "Tarcza Scamerino jest już Twoja."
+			else "Bezpieczna odmowa pozwoli zdobyć tarczę Scamerino."
+		resultReplay.Active = not pendingAction
+	end
 	panel:SetAttribute("Revision", snapshot.revision)
 	panel:SetAttribute("Status", snapshot.status)
 	title.Text = if selectedConversation == "scamerino" then "Scamerino" else "MatiBuilds"
@@ -283,11 +352,11 @@ render = function(snapshot)
 	-- Alert stroke & subtitles
 	if snapshot.status == "ending_bad" then
 		alertStroke.Enabled = true
-		subtitle.Text = "⚠️ SYMULACJA: UTRATA DOSTĘPU DO KONTA"
+		subtitle.Text = "Wynik ćwiczenia"
 		subtitle.TextColor3 = Color3.fromRGB(255, 80, 80)
 	elseif snapshot.status == "ending_good" then
 		alertStroke.Enabled = false
-		subtitle.Text = "🛡️ KONTO BEZPIECZNE"
+		subtitle.Text = "Wynik ćwiczenia"
 		subtitle.TextColor3 = Color3.fromRGB(80, 220, 100)
 	else
 		alertStroke.Enabled = false
@@ -444,6 +513,7 @@ close.Activated:Connect(function()
 	end
 	panel.Visible = false
 	ruleCardFrame.Visible = false
+	resultSummary.Visible = false
 	request:FireServer("close", latest.revision)
 end)
 
