@@ -4,8 +4,8 @@ import { createPanel } from '../ui/panel.js';
 import { STRINGS } from '../ui/strings.pl.js';
 import { createDraftStore } from '../core/draft.js';
 import { buildCase, normalizeText, normalizeLink } from '../core/case.js';
-import { MSG_SHOW } from '../core/messages.js';
-import { submitCase, readSessionStatus, openLogin, submitReport, readReportOutcome, clearReportOutcome } from '../core/integration.js';
+import { MSG_SHOW, MSG_SESSION_CHANGED } from '../core/messages.js';
+import { submitCase, readSessionStatus, openLogin, submitReport, readReportOutcome, clearReportOutcome, getReports } from '../core/integration.js';
 
 function boot() {
   const runtime = chrome.runtime;
@@ -50,7 +50,10 @@ function boot() {
     onPlatformHowTo() { if (store.openPlatformHowTo()) render(); },
     onPlatformSourceChange(value) { if (store.setPlatformSource(value)) render(); },
     onPlatformBack() { if (store.backFromPlatformHowTo()) render(); },
-    onMyReports() { if (store.showMyReports()) render(); },
+    // D-14: the list view is shown at once; render() starts exactly one fresh GET per open.
+    onMyReports() { if (store.openMyReports()) render(); },
+    onRetryReports() { void loadReports(); },
+    onReportsBack() { if (store.backFromReports()) render(); },
     async onSendReport() {
       // Lock immediately, before the local account read, to prevent double clicks.
       const token = store.beginReportSend();
@@ -126,6 +129,25 @@ function boot() {
       else if (store.reportFailed(token, { kind: 'unknown' })) render();
     } else if (store.reportFailed(token, response.ok || response.kind === 'context' ? { kind: 'unknown' } : response)) render();
   }
+  // Reads the local session first; only a connected parent leads to GET /api/reports?limit=10.
+  async function loadReports() {
+    const token = store.beginReportsLoad();
+    if (!token) return;
+    render();
+    const metadata = await readSessionStatus();
+    if (!store.reportsCurrent(token)) return;
+    if (metadata.status !== 'connected') {
+      if (metadata.status === 'none') store.setSessionStatus(metadata);
+      if (store.reportsFailed(token, { kind: metadata.status === 'none' ? 'no-account' : 'context' })) render();
+      return;
+    }
+    store.setSessionStatus(metadata);
+    const response = await getReports({ request_id: token.request_id, expected_account_id: metadata.account.id,
+      session_revision: metadata.revision });
+    if (!store.reportsCurrent(token)) return; // closed, left, reset or account changed: drop silently
+    if (response.ok ? store.reportsLoaded(token, response) : store.reportsFailed(token, response)) render();
+    else if (store.reportsFailed(token, { kind: 'context' })) render();
+  }
   function render() {
     const state = store.get();
     avatar.setHidden(state.hidden);
@@ -134,6 +156,7 @@ function boot() {
     const reopened = state.view !== visibleView || state.case_id !== visibleCase;
     visibleView = state.view;
     visibleCase = state.case_id;
+    if (reopened && state.view === 'myReports') void loadReports();
     if (reopened && ['result', 'sendPreview'].includes(state.view)) {
       void refreshSession();
       if (state.submissionKind === 'report' && dispatchedSends.has(state.sendOperation)) void reconcileSend(state.sendOperation);
@@ -148,7 +171,18 @@ function boot() {
     else { host.remove(); window.removeEventListener('resize', resize); window.removeEventListener('pagehide', pagehide); }
   });
   runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (!isLive() || sender?.id !== runtime.id || msg?.type !== MSG_SHOW) return;
+    if (!isLive() || sender?.id !== runtime.id) return;
+    if (msg?.type === MSG_SESSION_CHANGED) {
+      // Logout/login elsewhere: forget cached account metadata and rows; no page read, no API call.
+      ++sessionRead;
+      store.clearReports();
+      const { view } = store.get();
+      if (view === 'myReports') void loadReports();
+      else if (['result', 'sendPreview'].includes(view)) void refreshSession();
+      else if (!store.get().submitting) store.setSessionStatus({ status: 'unknown' });
+      return;
+    }
+    if (msg?.type !== MSG_SHOW) return;
     store.show(); render(); sendResponse({ ok: true });
   });
   render();

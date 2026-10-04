@@ -1,7 +1,12 @@
 import { normalizeText } from '../core/case.js';
-import { ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, TAKEN_ACTIONS, TAKEN_ACTION_LABELS_PL, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
+import { ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, REPORT_STATES, TAKEN_ACTIONS, TAKEN_ACTION_LABELS_PL, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
 
 const capitalized = text => text[0].toLocaleUpperCase('pl-PL') + text.slice(1);
+// Whitespace collapsed, first 60 code points (never a split surrogate pair), ellipsis only when cut.
+export function reportExcerpt(content, max = 60) {
+  const points = Array.from(String(content).replace(/\s+/g, ' ').trim());
+  return points.length > max ? points.slice(0, max).join('') + '\u2026' : points.join('');
+}
 
 export function computePanelPosition(avatarRect, panelSize, viewport, { gap = 12, margin = 8 } = {}) {
   const { width, height } = panelSize;
@@ -78,9 +83,61 @@ export function createPanel({ root, strings, handlers }) {
     appendReplacement(state);
     done.focus();
   };
+  let lastView = null;
+  const reportRow = (report, index) => {
+    // Plain text only: no detail, history, comment or link. Fixed style values, never user data.
+    const item = node('li');
+    Object.assign(item.style, { padding: '12px 0', overflowWrap: 'anywhere' });
+    if (index > 0) item.style.borderTop = '1px solid var(--color-shield-silver-border)';
+    const excerpt = node('p', reportExcerpt(report.content));
+    Object.assign(excerpt.style, { margin: '0', fontSize: '15px', fontWeight: '400' });
+    const date = new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      .format(new Date(report.created_at));
+    const meta = node('p', capitalized(ATTACK_TYPE_LABELS_PL[report.attack_type]) + ' \u00b7 ' + date, 'hint');
+    Object.assign(meta.style, { margin: '4px 0 0', fontWeight: '400' });
+    const status = node('p', REPORT_STATES.includes(report.state) ? strings.reportStates[report.state] : '');
+    Object.assign(status.style, { margin: '4px 0 0', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-primary)' });
+    item.append(excerpt, meta, status);
+    return item;
+  };
+  const myReports = state => {
+    const reports = state.reports ?? {};
+    const back = button(strings.back, 'btn-secondary', () => handlers.onReportsBack());
+    const region = node('div', undefined, 'review-block');
+    const loading = Boolean(reports.loading) || (!reports.items && !reports.error);
+    region.setAttribute('aria-busy', String(loading));
+    if (reports.error === 'no-account') region.append(noAccountNotice());
+    else if (loading) {
+      const status = node('p', strings.reportsLoading, 'hint');
+      status.setAttribute('role', 'status');
+      region.append(status);
+    } else if (reports.error) {
+      const alert = node('div', undefined, 'alert-error');
+      alert.setAttribute('role', 'alert');
+      alert.append(node('h3', strings.reportsErrorTitle), node('p', strings.reportsErrorBody));
+      const retryRow = node('div', undefined, 'row');
+      retryRow.append(button(strings.reportsRetry, 'btn-primary', () => handlers.onRetryReports()));
+      region.append(alert, retryRow);
+    } else if (reports.items.length === 0) {
+      const empty = node('h3', strings.reportsEmptyTitle);
+      Object.assign(empty.style, { fontSize: '15px', fontWeight: '600', margin: '0 0 8px' });
+      region.append(empty, node('p', strings.reportsEmptyBody, 'hint'));
+    } else {
+      const list = node('ol', undefined, 'reports');
+      Object.assign(list.style, { listStyle: 'none', margin: '0', padding: '0' });
+      reports.items.forEach((report, index) => list.append(reportRow(report, index)));
+      region.append(list);
+    }
+    const row = node('div', undefined, 'row');
+    row.append(back);
+    body.append(node('h2', strings.myReports), node('p', strings.reportsIntro, 'hint'), region, row);
+    return back;
+  };
   return {
     el,
     render(state, ctx) {
+      const previousView = lastView;
+      lastView = state.view;
       const focusedId = ['question', 'sendPreview', 'platformHowTo'].includes(state.view) ? root.activeElement?.id : undefined;
       body.replaceChildren();
       el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports', 'platformHowTo'].includes(state.view);
@@ -117,9 +174,10 @@ export function createPanel({ root, strings, handlers }) {
         return;
       }
       if (state.view === 'myReports') {
-        // Navigation contract for 03-03; list fetching/rendering belongs to that plan.
-        body.append(node('h2', strings.myReports), button(strings.back, 'btn-secondary', () => handlers.onSendBack()));
-        body.querySelector('button').focus();
+        // Focus Back on entry; a later list arrival keeps focus where the child left it.
+        const active = root.activeElement;
+        const back = myReports(state);
+        if (previousView !== 'myReports' || !active || !active.isConnected) back.focus();
         return;
       }
       if (state.view === 'sendPreview') {
