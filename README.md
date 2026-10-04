@@ -12,10 +12,11 @@ Maskotką rozwiązania jest **Scamerinio Alertinio**.
 
 ### Projekty w repozytorium
 
-Kod poszczególnych projektów znajduje się w [`projects/`](projects/README.md).
-Rozszerzenie przeglądarkowe jest w [`projects/widget/`](projects/widget/README.md).
-Pozostałe projekty mogą korzystać z sąsiednich katalogów `projects/api-ui/`,
-`projects/roblox/` i `projects/presentation/`.
+Kod poszczególnych projektów znajduje się w [`projects/`](projects/README.md):
+- Rozszerzenie przeglądarkowe: [`projects/widget/`](projects/widget/README.md)
+- Panel opiekuna i backend API: [`projects/web-app/`](projects/web-app/README.md)
+- Gra i misja szkoleniowa Roblox: [`projects/roblox/`](projects/roblox/README.md)
+- Prezentacja i materiały: [`projects/presentation/`](projects/presentation/README.md)
 
 Wspólne zasoby graficzne pozostają w `assets/`, a kontrakt, treści i planowanie
 w `.planning/`. Każdy projekt ma własne zależności i polecenia budowania.

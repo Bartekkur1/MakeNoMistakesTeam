@@ -10,7 +10,7 @@ Narzędzia developerskie są przypięte w `rokit.toml`:
 - **StyLua** 2.5.2
 
 ### Instalacja narzędzi
-Jednym poleceniem w katalogu `roblox/`:
+Jednym poleceniem w katalogu `projects/roblox/`:
 ```bash
 rokit install
 ```
@@ -51,7 +51,7 @@ Projekt `sync.project.json` mapuje wyłącznie serwisy logiczne (`ServerScriptSe
 
 ### 3. Zapis zmian na GitHub
 
-Rojo oraz Git wykonują osobne operacje. Samo Play, zapis w Studio i połączenie Rojo nie tworzą commitów ani nie wypychają gałęzi na GitHub. Kod synchronizowany przez `sync.project.json` edytuj w `roblox/src/`. Po zmianach wykonaj commit i push na bieżącej gałęzi. Rojo 7.7.1 udostępnia opcjonalne mechanizmy synchronizacji zwrotnej, lecz nie zastępują one Git; nie włączaj ich bez sprawdzenia projektu i kopii sceny.
+Rojo oraz Git wykonują osobne operacje. Samo Play, zapis w Studio i połączenie Rojo nie tworzą commitów ani nie wypychają gałęzi na GitHub. Kod synchronizowany przez `sync.project.json` edytuj w `projects/roblox/src/`. Po zmianach wykonaj commit i push na bieżącej gałęzi. Rojo 7.7.1 udostępnia opcjonalne mechanizmy synchronizacji zwrotnej, lecz nie zastępują one Git; nie włączaj ich bez sprawdzenia projektu i kopii sceny.
 
 Zmiany modelu, Workspace i skryptów osadzonych w modelu wymagają osobnego zapisu/eksportu ze Studio, ponieważ aktualny projekt synchronizacji nie mapuje Workspace ani StarterGui. Przed importem/sync porównaj źródła i zabezpiecz wersję Studio; nie zastępuj jej automatycznie starszym prefabem lub pełnym buildem.
 
@@ -69,9 +69,9 @@ Odtwarzanie: rozłącz Rojo, otwórz pełną kopię `.rbxl` przez File → Open 
 
 ## Baseline sceny i inwentarz artefaktów
 
-- **Kopia zapasowa sceny przed Rojo:** `roblox/backups/Place1-pre-rojo.rbxl`
-- **Model lobby handlowego:** `roblox/assets/MarketplaceLobby.rbxm`
-- **Zachowany model Scamerino (legacy):** `roblox/assets/ScamerinoAlertinio-legacy.rbxm` (zachowuje model 3D, lupę z artem phishingu, billboard GUI z klawiszem [E], kogut alarmowy i dźwięki `GreetSound`, `AlertSound`, `WinSound`, `SnapSound`)
+- **Kopia zapasowa sceny przed Rojo:** `projects/roblox/backups/Place1-pre-rojo.rbxl`
+- **Model lobby handlowego:** `projects/roblox/assets/MarketplaceLobby.rbxm`
+- **Zachowany model Scamerino (legacy):** `projects/roblox/assets/ScamerinoAlertinio-legacy.rbxm` (zachowuje model 3D, lupę z artem phishingu, billboard GUI z klawiszem [E], kogut alarmowy i dźwięki `GreetSound`, `AlertSound`, `WinSound`, `SnapSound`)
 - `interaction_status: UNVERIFIED` (wymaga dowodu z Playtestu)
 
 ### Ścieżki w hierarchii Workspace
