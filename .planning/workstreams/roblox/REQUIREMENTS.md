@@ -22,13 +22,12 @@
 
 ### Wynik i nagroda
 
-- [ ] **SCR-01**: Punktacja według wspólnych zasad; wynik zawiera użycie podpowiedzi
+- [ ] **SCR-01**: Jakościowy wynik bez punktów: końcowa bezpieczna odmowa zalicza ćwiczenie niezależnie od pomocy i błędów quizu, a eksport odnotowuje użycie pomocy
 - [ ] **SCR-02**: Jedna kosmetyczna nagroda za ukończenie ćwiczenia; bez nagradzania rzeczywistych zgłoszeń
-- [ ] **SCR-03**: Eksport/zapis wyniku zgodny z kontraktem; import ręczny oznaczony w demo
+- [ ] **SCR-03**: Po każdej zakończonej próbie serwer Roblox automatycznie wysyła oznaczony jako ćwiczenie wynik do backendu zgodnie z kontraktem, bez sekretu w kliencie i bez duplikatów przy ponowieniach
 
 ## v2 Requirements
 
-- **RBX-V2-01**: Automatyczne wysyłanie wyniku do backendu z serwera Roblox, bez sekretów w kliencie
 - **RBX-V2-02**: Drugi wariant pułapki lub dodatkowa nagroda kosmetyczna
 
 ## Out of Scope

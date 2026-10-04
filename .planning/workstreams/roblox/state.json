@@ -11,7 +11,7 @@
     {
       "number": "2",
       "name": "Wybory, konsekwencje i pomocnik",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "3",
@@ -21,8 +21,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 02 of 3 · 33% · executing"
+    "label": "Advance to the next step (plan phase 03)",
+    "reason": "Phase 03 of 3 — needs a plan"
   },
-  "updated_at": "2026-10-03T20:31:32.366Z"
+  "updated_at": "2026-10-04T01:44:02.281Z"
 }

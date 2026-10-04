@@ -67,7 +67,8 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   2. Zdany test przyznaje wizualną kosmetyczną nagrodę 3D: Złotą Tarczę Scamerino (Accessory 3D) ze złotymi cząsteczkami
   3. Zgłoszenie trafia do skrzynki panelu opiekuna w formacie 1:1 zgodnym z panelem rodzica (source: game, attack_type, taken_actions, content)
 
-**Plans**: 2 plans in 2 waves
+**Plans**: 0/3 plans executed in 2 waves
+- [ ] 03-03-PLAN.md
 
 **Wave 1**
 - [ ] 03-01-PLAN.md — wizualna nagroda 3D Accessory za zdany test (SCR-02), format zgłoszenia panelu i ekran podsumowania
