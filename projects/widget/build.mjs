@@ -3,10 +3,28 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const base = import.meta.dirname;
+const configuredApi = process.env.AURA_API ?? 'https://bezpieczna-aura.pl';
+if (!['https://bezpieczna-aura.pl', 'https://bezpieczna-aura.pl/', 'http://localhost:3000', 'http://localhost:3000/'].includes(configuredApi)) {
+  throw new Error('AURA_API must be the demo origin or http://localhost:3000');
+}
+const apiOrigin = new URL(configuredApi).origin;
 const dist = path.resolve(base, 'dist');
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(path.join(dist, 'icons'), { recursive: true });
 fs.copyFileSync(path.join(base, 'manifest.json'), path.join(dist, 'manifest.json'));
+fs.copyFileSync(path.resolve(base, '../../assets/scamerino_palette.css'), path.join(dist, 'palette.css'));
+fs.copyFileSync(path.resolve(base, '../../assets/widget-avatar/avatar-128.png'), path.join(dist, 'avatar-128.png'));
+fs.writeFileSync(path.join(dist, 'login.html'), `<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="palette.css">
+  <script src="login.js" defer></script>
+</head>
+<body><main id="login-root"></main></body>
+</html>
+`);
 for (const size of [16, 32, 48, 128]) {
   fs.copyFileSync(path.resolve(base, `../../assets/widget-avatar/icon-${size}.png`), path.join(dist, `icons/icon-${size}.png`));
 }
@@ -30,9 +48,10 @@ const queryPlugin = {
 };
 const options = {
   absWorkingDir: base,
-  entryPoints: { content: 'src/content/main.js', sw: 'src/background/sw.js' },
+  entryPoints: { content: 'src/content/main.js', sw: 'src/background/sw.js', login: 'src/options/login.js' },
   outdir: 'dist', bundle: true, format: 'iife', target: ['chrome120'],
   minify: false, sourcemap: false, legalComments: 'none', plugins: [queryPlugin],
+  define: { __AURA_API__: JSON.stringify(apiOrigin) },
 };
 if (process.argv.includes('--watch')) {
   const context = await esbuild.context(options);
