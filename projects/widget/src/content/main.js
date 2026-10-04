@@ -22,6 +22,7 @@ function boot() {
     onCheck() { store.showPaste(); render(); },
     onHowTo() { store.showHowTo(); render(); },
     onBack() { store.back(); render(); },
+    onFinishCheck() { store.finishCheck(); render(); },
     onPasteNext(values) { store.submitPaste(values); render(); },
     onPasteEdit(patch) { store.editPaste(patch); },
     onEdit(patch) { store.edit(patch); },
@@ -40,7 +41,7 @@ function boot() {
       if (token === null) return;
       render();
       try { await requestGuardianVerification(check.case, check.result); store.guardianRequested(token); }
-      catch { store.guardianRequestFailed(token); }
+      catch (error) { store.guardianRequestFailed(token, !isLive() || /extension context invalidated/i.test(error?.message ?? '')); }
       render();
     },
     async onApprove() {

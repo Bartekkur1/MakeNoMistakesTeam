@@ -174,9 +174,11 @@ for (const response of ['false', 'missing', 'rejected']) test(`controller preser
   if (response === 'rejected') c.pending[0].reject(new Error('Extension context invalidated.'));
   else c.pending[0].resolve(response === 'false' ? { ok: false } : {});
   await done;
-  expect(c.store.get()).toMatchObject({ view: 'result', error: 'guardianRequest', submitting: false });
+  expect(c.store.get()).toMatchObject({ view: 'result',
+    error: response === 'rejected' ? 'guardianRequestContextInvalidated' : 'guardianRequest', submitting: false });
   expect(c.store.get().check).toBe(check);
-  expect(c.root.querySelector('[role="alert"]').textContent).toBe(STRINGS.guardianRequestError);
+  expect(c.root.querySelector('[role="alert"]').textContent).toBe(response === 'rejected'
+    ? STRINGS.guardianRequestContextInvalidated : STRINGS.guardianRequestError);
   expect(c.root.textContent).not.toContain(STRINGS.confirmationHeading);
   expect(c.button(STRINGS.requestGuardianVerification).disabled).toBe(false);
   const retry = c.handlers.onRequestGuardianVerification();

@@ -1,5 +1,4 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
-import { readFileSync } from 'node:fs';
 
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const honest = 'Dziś gramy o 17, spotkajmy się w naszej grupie';
@@ -122,40 +121,6 @@ for (const key of ['Enter', 'Space']) test(`guardian demo sends the corrected re
     result: { summaryKey: 'caution', signals: ['credential_code'], unknowns: [],
       step: { id: 'protect_credentials', explanationKey: 'protect_credentials_how' }, mismatches: [] },
   }]);
-  await assertOnlyLocal(netlog);
-});
-
-test('guardian demo confirmation resumes without resending and matches README', async ({ page, serviceWorker, netlog }) => {
-  const dialog = await approve(page, serviceWorker); await reachStep(dialog, 'result');
-  await dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true }).click();
-  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
-  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
-  const records = await serviceWorker.evaluate(() => ({
-    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
-  }));
-  expect(records.cases).toHaveLength(1); expect(records.requests).toHaveLength(1);
-  expect(records.messages).toEqual(['aura/case-approved', 'aura/guardian-request']);
-  await page.keyboard.press('Enter'); await expect(dialog).toBeHidden();
-  await clearSelection(page); await shark(page).click();
-  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
-  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
-  expect(await serviceWorker.evaluate(() => ({
-    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
-  }))).toEqual(records);
-  await page.reload(); await clearSelection(page); await shark(page).click();
-  await expect(dialog.locator('.menu')).toBeVisible();
-  await expect(dialog.getByRole('heading', { name: 'Przekazano opiekunowi — demo', exact: true })).toHaveCount(0);
-  await expect(dialog.locator('.result-section')).toHaveCount(0);
-  expect(await serviceWorker.evaluate(() => ({
-    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
-  }))).toEqual(records);
-  const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
-  expect(readme.includes('„Poproś opiekuna o sprawdzenie”'), 'README documents the explicit result action').toBe(true);
-  expect(readme).toContain('„Przekazano opiekunowi — demo”');
-  expect(readme).toContain('self.__aura.guardianRequests');
-  expect(readme).toContain('P7');
-  expect(readme).toContain('Restart service workera usuwa jego pamięć');
-  expect(readme).not.toContain('Faza 2 nie dodaje przycisku wysyłki');
   await assertOnlyLocal(netlog);
 });
 

@@ -297,7 +297,7 @@ test('confirmation labels the local demo and focuses Close with the existing pri
  expect(root.querySelector('h2').textContent).toBe(STRINGS.confirmationHeading);
  expect(STRINGS.confirmationHeading).toBe('Przekazano opiekunowi — demo');
  expect(root.textContent).toContain(STRINGS.confirmationBody);
- expect(STRINGS.confirmationBody).toBe('To pokaz działania. Sprawa i wynik są zapisane tylko w pamięci rozszerzenia. Prawdziwa wysyłka do opiekuna będzie dostępna w fazie 3.');
+ expect(STRINGS.confirmationBody).toBe('To pokaz działania. Sprawa i wynik są zapisane tylko w pamięci rozszerzenia. Prawdziwa wysyłka do opiekuna pojawi się w kolejnej wersji.');
  expect(root.activeElement.textContent).toBe(STRINGS.confirmationClose); root.activeElement.click();
  expect(handlers.onClose).toHaveBeenCalledOnce(); expect(handlers.onRequestGuardianVerification).not.toHaveBeenCalled();
  expect(STRINGS.guardianNotice).toBe('Gdy zatwierdzisz, tę wiadomość i wynik sprawdzania zobaczy Twój opiekun.');

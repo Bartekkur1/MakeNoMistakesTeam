@@ -6,6 +6,13 @@ export const QUESTIONS = freezeLists({
   request: ['password', 'code', 'prize', 'payment', 'urgency', 'ordinary', 'unknown'],
   verify: ['independent_channel', 'message_link', 'no_channel', 'unknown'],
 });
+export const RESULT_KEYS = freezeLists({
+  summaries: ['conflicting_answers', 'caution', 'insufficient_information', 'no_signals'],
+  signals: ['credential_password', 'credential_code', 'payment_pressure', 'payment', 'prize_link', 'prize', 'urgency'],
+  unknowns: ['sender', 'request', 'urgency', 'official_channel', 'conflict'],
+  steps: ['protect_credentials', 'verify_payment', 'verify_prize', 'pause_and_verify', 'independent_check'],
+  mismatches: ['credential_password', 'credential_code'],
+});
 const validLists = lists => Object.fromEntries(Object.entries(QUESTIONS).map(([id, options]) =>
   [id, options.filter(option => Array.isArray(lists?.[id]) && lists[id].includes(option))]));
 const matchingText = raw => normalizeText(typeof raw === 'string' ? raw : '').normalize('NFD').toLowerCase()
