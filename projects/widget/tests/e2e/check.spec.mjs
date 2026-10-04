@@ -1,4 +1,5 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
+import { readFileSync } from 'node:fs';
 
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const honest = 'Dziś gramy o 17, spotkajmy się w naszej grupie';
@@ -88,6 +89,75 @@ async function reachStep(dialog, step) {
     await next.click();
   }
 }
+
+for (const key of ['Enter', 'Space']) test(`guardian demo sends the corrected result using ${key}`, async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker);
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
+  await next.click();
+  for (const label of ['Osoba, którą znam', 'Zwykła wiadomość, bez takich próśb', 'Przez znaną mi aplikację, stronę lub kontakt']) {
+    await dialog.getByLabel(label, { exact: true }).check(); await next.click();
+  }
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText(summary);
+  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([]);
+  const approvedCases = await serviceWorker.evaluate(() => self.__aura.cases);
+  await dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true }).click();
+  await expect(dialog.getByLabel('Osoba, którą znam', { exact: true })).toBeChecked(); await next.click();
+  await dialog.getByLabel('Podania kodu do konta', { exact: true }).check(); await next.click();
+  await expect(dialog.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true })).toBeChecked(); await next.click();
+  await expect(dialog.getByRole('heading', { level: 2 })).not.toHaveText(summary);
+  await expect(dialog).toContainText('Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.');
+  await expect(dialog.locator('.result-section')).toHaveCount(3);
+  await expect(dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true })).toBeFocused();
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
+  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([]);
+  await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true })).toBeFocused();
+  await page.keyboard.press(key);
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
+  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
+  expect(await serviceWorker.evaluate(() => self.__aura.cases)).toEqual(approvedCases);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.map(m => m.type))).toEqual(['aura/case-approved', 'aura/guardian-request']);
+  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([{
+    case: approvedCases[0],
+    result: { summaryKey: 'caution', signals: ['credential_code'], unknowns: [],
+      step: { id: 'protect_credentials', explanationKey: 'protect_credentials_how' }, mismatches: [] },
+  }]);
+  await assertOnlyLocal(netlog);
+});
+
+test('guardian demo confirmation resumes without resending and matches README', async ({ page, serviceWorker, netlog }) => {
+  const dialog = await approve(page, serviceWorker); await reachStep(dialog, 'result');
+  await dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true }).click();
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
+  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
+  const records = await serviceWorker.evaluate(() => ({
+    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
+  }));
+  expect(records.cases).toHaveLength(1); expect(records.requests).toHaveLength(1);
+  expect(records.messages).toEqual(['aura/case-approved', 'aura/guardian-request']);
+  await page.keyboard.press('Enter'); await expect(dialog).toBeHidden();
+  await clearSelection(page); await shark(page).click();
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
+  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
+  expect(await serviceWorker.evaluate(() => ({
+    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
+  }))).toEqual(records);
+  await page.reload(); await clearSelection(page); await shark(page).click();
+  await expect(dialog.locator('.menu')).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Przekazano opiekunowi — demo', exact: true })).toHaveCount(0);
+  await expect(dialog.locator('.result-section')).toHaveCount(0);
+  expect(await serviceWorker.evaluate(() => ({
+    cases: self.__aura.cases, requests: self.__aura.guardianRequests, messages: self.__aura.messages.map(m => m.type),
+  }))).toEqual(records);
+  const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
+  expect(readme.includes('„Poproś opiekuna o sprawdzenie”'), 'README documents the explicit result action').toBe(true);
+  expect(readme).toContain('„Przekazano opiekunowi — demo”');
+  expect(readme).toContain('self.__aura.guardianRequests');
+  expect(readme).toContain('P7');
+  expect(readme).toContain('Restart service workera usuwa jego pamięć');
+  expect(readme).not.toContain('Faza 2 nie dodaje przycisku wysyłki');
+  await assertOnlyLocal(netlog);
+});
 
 for (const step of ['safety', 'sender', 'request', 'verify', 'result']) test(`close and toolbar hide restore the same ${step} check in the real extension`, async ({ page, serviceWorker, netlog }) => {
   const dialog = await approve(page, serviceWorker); await reachStep(dialog, step);
