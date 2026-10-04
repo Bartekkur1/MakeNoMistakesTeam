@@ -27,7 +27,20 @@ const strings = {
   connectedHint: 'Możesz zamknąć tę kartę. Logowanie zostaje zapamiętane na tym urządzeniu.',
   logout: 'Wyloguj',
   loggedOut: 'Wylogowano. Dziecko nie wyśle zgłoszeń, dopóki ktoś nie zaloguje się kontem rodzica.',
+  demoOpen: 'Zobacz konta demo',
+  demoTitle: 'Konta demo',
+  demoIntro: 'To wersja demonstracyjna z fikcyjnymi danymi. Wtyczkę łączy się kontem rodzica — wybierz jedno z kont poniżej.',
+  demoUse: 'Użyj',
+  demoCode: 'Kod logowania dla każdego konta: 0000',
+  demoClose: 'Zamknij',
 };
+
+// Presentation parents only; source: projects/web-app/src/lib/contract/demo-accounts.ts.
+const parentDemoAccounts = [
+  { display_name: 'Mama Oli (demo)', email: 'rodzic.ola@bezpiecznaaura.example' },
+  { display_name: 'Tata Kuby (demo)', email: 'rodzic.kuba@bezpiecznaaura.example' },
+  { display_name: 'Mama Zosi (demo)', email: 'rodzic.zosia@bezpiecznaaura.example' },
+];
 
 document.title = strings.title;
 const root = document.getElementById('login-root');
@@ -188,6 +201,32 @@ async function logout() {
   } else state.formError = strings.storage;
   renderLogin();
 }
+function openDemoAccounts(dialog) {
+  if (!state.pending && !dialog.open) dialog.showModal();
+}
+function demoDialog() {
+  const dialog = node('dialog', undefined, 'demo-dialog');
+  dialog.setAttribute('aria-labelledby', 'demo-title');
+  const heading = node('h2', strings.demoTitle);
+  heading.id = 'demo-title';
+  dialog.append(heading, node('p', strings.demoIntro, 'muted'));
+  const accounts = node('ul', undefined, 'demo-accounts');
+  for (const account of parentDemoAccounts) {
+    const row = node('li');
+    const details = node('div');
+    details.append(node('p', account.display_name, 'account-name'), node('p', account.email, 'account-email'));
+    row.append(details, button(strings.demoUse, () => {
+      dialog.close();
+      Object.assign(state, { step: 'email', email: account.email, code: '', emailError: '', codeError: '', formError: '', loggedOut: false });
+      renderLogin(false);
+    }));
+    accounts.append(row);
+  }
+  dialog.append(accounts, node('p', strings.demoCode, 'notice'), button(strings.demoClose, () => dialog.close()));
+  dialog.addEventListener('close', () => document.getElementById('login-demo-open')?.focus());
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+  return dialog;
+}
 function renderLogin(moveFocus = true) {
   const column = node('div', undefined, 'login-column');
   const brand = node('div', undefined, 'brand');
@@ -248,16 +287,25 @@ function renderLogin(moveFocus = true) {
       submit.setAttribute('aria-busy', String(state.pending));
       form.append(submit);
       form.addEventListener('submit', submitCode);
-      card.append(form, button(strings.changeEmail, () => {
+      const changeEmail = button(strings.changeEmail, () => {
         Object.assign(state, { step: 'email', code: '', codeError: '', formError: '' });
         renderLogin();
-      }));
+      });
+      changeEmail.classList.add('change-email');
+      card.append(form, changeEmail);
       syncCode();
       firstField = boxes[0];
     }
     if (state.step === 'email') card.append(form);
   }
   column.append(brand, card);
+  if (!state.account) {
+    const dialog = demoDialog();
+    const open = button(strings.demoOpen, () => openDemoAccounts(dialog));
+    open.id = 'login-demo-open';
+    open.classList.add('demo-open');
+    column.append(open, dialog);
+  }
   root.replaceChildren(column);
   if (moveFocus) firstField?.focus();
 }

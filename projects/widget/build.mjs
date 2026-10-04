@@ -14,12 +14,14 @@ fs.mkdirSync(path.join(dist, 'icons'), { recursive: true });
 fs.copyFileSync(path.join(base, 'manifest.json'), path.join(dist, 'manifest.json'));
 fs.copyFileSync(path.resolve(base, '../../assets/scamerino_palette.css'), path.join(dist, 'palette.css'));
 fs.copyFileSync(path.resolve(base, '../../assets/widget-avatar/avatar-128.png'), path.join(dist, 'avatar-128.png'));
+fs.copyFileSync(path.join(base, 'src/options/login.css'), path.join(dist, 'login.css'));
 fs.writeFileSync(path.join(dist, 'login.html'), `<!doctype html>
 <html lang="pl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="palette.css">
+  <link rel="stylesheet" href="login.css">
   <script src="login.js" defer></script>
 </head>
 <body><main id="login-root"></main></body>
