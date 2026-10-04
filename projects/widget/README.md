@@ -90,7 +90,7 @@ git push origin widgetui-v0.1.0
 
 Workflow musi znajdować się w tagowanym commicie. Można też wybrać **Actions → Release WidgetUI → Run workflow**, podając istniejący tag (ręczne uruchamianie wymaga workflow na domyślnej gałęzi). Budowanie używa Node.js 22, `npm ci` i API `https://bezpieczna-aura.pl`; wystarcza wbudowany `GITHUB_TOKEN`, bez dodatkowych sekretów. Ponowne uruchomienie zastępuje ZIP istniejącego release'u.
 
-Pobierz `widgetui-vX.Y.Z.zip` z release'u, rozpakuj do osobnego folderu i załaduj go przez **Załaduj rozpakowane** w `chrome://extensions` w Trybie dewelopera. `manifest.json` znajduje się bezpośrednio w rozpakowanym folderze. ZIP zawiera wyłącznie wynik budowania, bez źródeł i `node_modules`.
+Pobierz `bezpiecznaaura-wtyczka.zip` z release'u, rozpakuj do osobnego folderu i załaduj go przez **Załaduj rozpakowane** w `chrome://extensions` w Trybie dewelopera. `manifest.json` znajduje się bezpośrednio w rozpakowanym folderze. ZIP zawiera wyłącznie wynik budowania, bez źródeł i `node_modules`.
 
 ## Uruchomienie w Google Chrome
 

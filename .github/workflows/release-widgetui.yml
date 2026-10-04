@@ -69,7 +69,7 @@ jobs:
 
       - name: Package extension
         working-directory: projects/widget/dist
-        run: zip -r "$GITHUB_WORKSPACE/$RELEASE_TAG.zip" .
+        run: zip -r "$GITHUB_WORKSPACE/bezpiecznaaura-wtyczka.zip" .
 
       - name: Publish GitHub release
         env:
@@ -77,9 +77,9 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" "$RELEASE_TAG.zip" --clobber
+            gh release upload "$RELEASE_TAG" bezpiecznaaura-wtyczka.zip --clobber
           else
-            gh release create "$RELEASE_TAG" "$RELEASE_TAG.zip" \
+            gh release create "$RELEASE_TAG" bezpiecznaaura-wtyczka.zip \
               --verify-tag --title "WidgetUI ${RELEASE_TAG#widgetui-v}" \
               --notes 'Rozpakuj ZIP i załaduj folder w chrome://extensions przez „Załaduj rozpakowane” (Tryb dewelopera).'
           fi
