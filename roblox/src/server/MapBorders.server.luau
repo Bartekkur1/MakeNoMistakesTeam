@@ -66,4 +66,19 @@ local function ensureMapBorders()
 	print("[MapBorders] Created invisible boundary walls around ground")
 end
 
+local function anchorStaticObjects()
+	local namesToAnchor = { "T-Road", "Road Curve" }
+	for _, name in ipairs(namesToAnchor) do
+		local obj = Workspace:FindFirstChild(name)
+		if obj then
+			for _, desc in ipairs(obj:GetDescendants()) do
+				if desc:IsA("BasePart") and not desc.Anchored then
+					desc.Anchored = true
+				end
+			end
+		end
+	end
+end
+
 ensureMapBorders()
+anchorStaticObjects()
