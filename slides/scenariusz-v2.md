@@ -84,7 +84,7 @@ Zasady:
 
 > Zuzia kliknęła „Pokaż opiekunowi”.
 >
-> Mama nie widzi w panelu rozmów córki ani historii przeglądania. Widzi jedną sprawę: tę wiadomość i informację, że Zuzia nie podała hasła. W razie potrzeby przekazuje sprawę wychowawczyni. Ta ma pod ręką gotową listę instytucji, którym można ją zgłosić, a gdy dziecku grozi niebezpieczeństwo, numer 112.
+> Mama nie widzi w panelu rozmów córki ani historii przeglądania. Widzi tę wiadomość i informację, czy Zuzia podała hasło. W razie potrzeby rodzic przekazuje sprawę nauczycielowi. Nauczyciel ma pod ręką gotową listę instytucji, którym można ją zgłosić, a gdy dziecku grozi niebezpieczeństwo, numer 112.
 >
 > Zuzia dostaje natomiast spokojny komunikat, na przykład: „Rodzic zobaczył, porozmawiajcie o tym”. Bez kar i bez szpiegowania.
 
