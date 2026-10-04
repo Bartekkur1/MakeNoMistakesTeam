@@ -10,7 +10,7 @@ import {
   INSTALL,
   MISSION_VIDEO,
   NAV_LINKS,
-  PLUGIN_SCREENSHOT,
+  PLUGIN_SCREENSHOTS,
   RELEASES_URL,
   SCAMS,
   SECTION_IDS,
@@ -118,13 +118,17 @@ describe("landing content", () => {
     expect(mobileAnswer?.answer).toContain("przygotowujemy");
   });
 
-  it("ships the plugin screenshot and the Roblox mission video from public/", () => {
+  it("ships the plugin screenshots and the Roblox mission video from public/", () => {
     const publicFile = (src: string) => join(process.cwd(), "public", src);
 
-    for (const src of [PLUGIN_SCREENSHOT.src, MISSION_VIDEO.src, MISSION_VIDEO.poster]) {
+    expect(PLUGIN_SCREENSHOTS.length).toBeGreaterThan(1);
+    for (const src of [...PLUGIN_SCREENSHOTS.map((shot) => shot.src), MISSION_VIDEO.src, MISSION_VIDEO.poster]) {
       expect(existsSync(publicFile(src))).toBe(true);
     }
-    expect(PLUGIN_SCREENSHOT.alt.trim()).not.toBe("");
+    for (const shot of PLUGIN_SCREENSHOTS) {
+      expect(shot.alt.trim()).not.toBe("");
+      expect(shot.caption.trim()).not.toBe("");
+    }
     expect(MISSION_VIDEO.caption.trim()).not.toBe("");
   });
 });

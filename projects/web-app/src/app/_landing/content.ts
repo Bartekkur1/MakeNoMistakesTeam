@@ -191,14 +191,38 @@ export const HOW_IT_WORKS = {
     "Ta sama postać prowadzi misję w Roblox. Tam dziecko ćwiczy reakcję na oszustwo bez prawdziwego ryzyka.",
 };
 
-export const PLUGIN_SCREENSHOT = {
-  src: "/landing/plugin-demo.png",
-  width: 1783,
-  height: 858,
-  alt: "Okno pomocnika Scamerino obok czatu na Discordzie. Pomocnik pokazuje, jaką wiadomość dziecko przekaże, i pozwala poprawić tekst przed zatwierdzeniem.",
-  caption:
-    "Pomocnik w przeglądarce. Dziecko widzi dokładnie, jaką wiadomość przekaże rodzicowi, i samo decyduje, czy ją wysłać.",
+export type PluginScreenshot = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
 };
+
+export const PLUGIN_SCREENSHOTS = [
+  {
+    src: "/landing/widget-report-1.png",
+    width: 2656,
+    height: 1852,
+    alt: "Okno pomocnika Scamerino nad czatem na Discordzie, gdzie ktoś prosi o hasło do Fortnite. Pomocnik pyta: „Kto wysłał wiadomość?” i podaje cztery odpowiedzi do wyboru.",
+    caption: "Pomocnik zadaje kilka krótkich pytań o podejrzaną wiadomość, na przykład kto ją wysłał.",
+  },
+  {
+    src: "/landing/widget-report-2.png",
+    width: 2656,
+    height: 1852,
+    alt: "Dalsza część pytań pomocnika: rodzaj oszustwa, co dziecko już zrobiło i skąd jest wiadomość. Na dole informacja, że zgłoszenie zobaczy rodzic, i przycisk „Wyślij”.",
+    caption:
+      "Dziecko zaznacza, co już zrobiło. Przed wysłaniem widzi, że zgłoszenie trafi do rodzica, a wynik sprawdzania i jego odpowiedzi zostają na komputerze.",
+  },
+  {
+    src: "/landing/widget-report-3.png",
+    width: 2656,
+    height: 1852,
+    alt: "Potwierdzenie w oknie pomocnika: wysłano do rodzica (konto demo), godzina wysłania i status „Czeka, aż rodzic zobaczy”.",
+    caption: "Zgłoszenie trafia do panelu rodzica. Dziecko widzi, kiedy je wysłało i czy rodzic już je zobaczył.",
+  },
+] satisfies PluginScreenshot[];
 
 export const MISSION_VIDEO = {
   src: "/landing/roblox-mission.mp4",

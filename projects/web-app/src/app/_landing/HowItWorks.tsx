@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { HOW_IT_WORKS, PLUGIN_SCREENSHOT, SECTION_IDS } from "./content";
+import { HOW_IT_WORKS, PLUGIN_SCREENSHOTS, SECTION_IDS } from "./content";
+import { PluginCarousel } from "./PluginCarousel";
 import { Section } from "./Section";
 
 export function HowItWorks() {
@@ -14,17 +14,7 @@ export function HowItWorks() {
           </li>
         ))}
       </ol>
-      <figure className="mt-12">
-        <Image
-          src={PLUGIN_SCREENSHOT.src}
-          alt={PLUGIN_SCREENSHOT.alt}
-          width={PLUGIN_SCREENSHOT.width}
-          height={PLUGIN_SCREENSHOT.height}
-          sizes="(min-width: 1152px) 1152px, 100vw"
-          className="h-auto w-full rounded-xl border border-titanium-border shadow-lg"
-        />
-        <figcaption className="mt-3 max-w-2xl text-sm text-muted-slate">{PLUGIN_SCREENSHOT.caption}</figcaption>
-      </figure>
+      <PluginCarousel slides={PLUGIN_SCREENSHOTS} />
       <p className="mt-10 max-w-2xl text-navy-slate">{HOW_IT_WORKS.trainingNote}</p>
     </Section>
   );
