@@ -135,3 +135,75 @@ for (const kind of ['edit', 'replacement']) test(`${kind} candidate survives int
  s.onAvatarClick({ text: '' }); expect(s.get().view).toBe('preview'); expect(s.get().error).toBe('submit');
  s.cancelCheckEdit(); expect(s.get().view).toBe('question'); expect(s.get().check).toBe(old);
 });
+
+for (const step of ['empty', 'preview', 'safety', 'sender', 'request', 'verify', 'edit', 'closed']) {
+ test(`guardian request is a no-op before a ready visible result: ${step}`, () => {
+  const s = step === 'empty' || step === 'preview' ? createDraftStore() : storeAt(['edit', 'closed'].includes(step) ? 'result' : step);
+  if (step === 'preview') s.submitPaste({ text: 'Unapproved', link: '' });
+  if (step === 'edit') s.editCheckContent();
+  if (step === 'closed') s.close();
+  const before = s.get(); expect(s.beginGuardianRequest()).toBeNull(); expect(s.get()).toBe(before);
+ });
+}
+
+test('pending guardian request blocks every check mutation and duplicate transaction', () => {
+ const s = storeAt('result'); s.onAvatarClick({ text: 'Pending candidate' });
+ const oldCheck = s.get().check; const selection = s.get().pendingSelection;
+ const token = s.beginGuardianRequest(); expect(typeof token).toBe('number');
+ expect(s.beginGuardianRequest()).toBeNull(); expect(s.beginSubmit()).toBeNull();
+ const pending = s.get();
+ for (const action of [() => s.fixAnswers(), () => s.editCheckContent(), () => s.checkNewSelection(),
+  () => s.insertPendingSelection(), () => s.edit({ text: 'Changed', link: 'https://unapproved.example/' }),
+  () => s.answer('request', 'password'), () => s.nextQuestion(), () => s.previousQuestion(), () => s.startQuestions(),
+  () => s.showPaste(), () => s.showHowTo(), () => s.back(), () => s.editPaste({ text: 'Changed' }),
+  () => s.submitPaste({ text: 'New unapproved candidate', link: '' })]) {
+  action(); expect(s.get()).toBe(pending);
+ }
+ s.onAvatarClick({ text: 'New selection during waiting' });
+ expect(s.get().check).toBe(oldCheck); expect(s.get().pendingSelection).toBe(selection);
+ expect(s.get().draft).toBeNull(); expect(s.get().view).toBe('result');
+ expect(s.submitFailed(token)).toBe(false); expect(s.approved(token, oldCheck.case)).toBe(false);
+ expect(s.get().submitting).toBe(true); expect(s.guardianRequested(token)).toBe(true);
+});
+
+test('guardian completion methods cannot complete an approval transaction', () => {
+ const s = createDraftStore(); s.submitPaste({ text: 'Unapproved', link: '' });
+ const c = caseModule.buildCase(s.get().draft); const token = s.beginSubmit(); const before = s.get();
+ expect(s.guardianRequested(token)).toBe(false); expect(s.guardianRequestFailed(token)).toBe(false);
+ expect(s.get()).toBe(before); expect(s.approved(token, c)).toBe(true);
+});
+
+test('guardian failure retains case answers and result while retry rejects the old token', () => {
+ const s = storeAt('result'); const check = s.get().check;
+ const token = s.beginGuardianRequest(); expect(s.guardianRequestFailed(token)).toBe(true);
+ expect(s.get().check).toBe(check);
+ expect(s.get()).toMatchObject({ view: 'result', error: 'guardianRequest', submitting: false });
+ const retry = s.beginGuardianRequest(); expect(retry).toBeGreaterThan(token); const pending = s.get();
+ expect(s.guardianRequested(token)).toBe(false); expect(s.guardianRequestFailed(token)).toBe(false);
+ expect(s.get()).toBe(pending); expect(s.guardianRequested(retry)).toBe(true);
+ expect(s.get().check.case).toBe(check.case); expect(s.get().check.answers).toBe(check.answers);
+ expect(s.get().check.result).toBe(check.result);
+ expect(s.get().check).toMatchObject({ step: 'confirmation', resumeStep: 'confirmation' });
+ expect(s.beginGuardianRequest()).toBeNull(); expect(s.guardianRequested(retry)).toBe(false);
+});
+
+for (const interruption of ['close', 'hide']) {
+ for (const outcome of ['guardianRequested', 'guardianRequestFailed']) test(`${interruption} during ${outcome} stays closed and resumes the right endpoint`, () => {
+  const s = storeAt('result'); const check = s.get().check; const token = s.beginGuardianRequest(); s[interruption]();
+  expect(s[outcome](token)).toBe(true); expect(s.get().view).toBe('closed');
+  expect(s.get().check.case).toBe(check.case); expect(s.get().check.answers).toBe(check.answers); expect(s.get().check.result).toBe(check.result);
+  s.show(); s.onAvatarClick({ text: '' });
+  expect(s.get().view).toBe(outcome === 'guardianRequested' ? 'confirmation' : 'result');
+  if (outcome === 'guardianRequestFailed') expect(s.get().error).toBe('guardianRequest');
+ });
+}
+
+for (const outcome of ['guardianRequested', 'guardianRequestFailed']) test(`document reset ignores stale ${outcome} even after a new approval`, () => {
+ const s = storeAt('result'); const token = s.beginGuardianRequest(); s.resetForNewDocument();
+ const reset = s.get(); expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(reset);
+ s.submitPaste({ text: 'New approved session', link: '' });
+ const current = s.beginSubmit(); expect(current).toBeGreaterThan(token);
+ const pending = s.get(); expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(pending);
+ s.approved(current, caseModule.buildCase(s.get().draft)); const newCheck = s.get();
+ expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(newCheck);
+});
