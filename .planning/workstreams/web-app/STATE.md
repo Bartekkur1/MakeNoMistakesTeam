@@ -63,6 +63,8 @@ Progress: [█████░░░░░] 50%
 
 ## Decisions
 
+- 2026-10-04 — Widget D-16: kryterium fazy 4 web-app „opiekun odpowiada, dziecko widzi odpowiedź” oznacza po stronie widgetu status zgłoszenia z `GET /api/reports`; bez odpowiedzi do dziecka, zgodnie z D-11 web-app. Kontrakt pozostaje bez zmian.
+
 - [Phase 02]: Phase 2 marked complete by hand on 2026-10-04 at the user's request: UAT done by the user (6 passed, 2 waived), 02-VERIFICATION.md is stale after the one-line dialog centering fix (m-auto in TransitionDialog.tsx) and was deliberately not re-run to save tokens.
 
 - [Phase 01]: 01-01: extension scope (parent only) creates and lists reports and reads /api/auth/me; detail, transitions and comments need panel scope
