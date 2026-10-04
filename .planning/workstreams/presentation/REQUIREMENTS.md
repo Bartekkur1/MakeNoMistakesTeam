@@ -25,6 +25,10 @@
 - [ ] **SUB-03**: Scenariusz demo, zapasowe nagranie i linki
 - [ ] **SUB-04**: Syntetyczne wyniki nigdzie nie przedstawione jako badanie dzieci
 
+### Materiały dla szkoły
+
+- [ ] **WRK-01**: Pakiet warsztatowy dla nauczyciela: osobny PDF A4 (`projects/presentation/warsztaty/warsztaty-bezpieczna-aura.pdf`) z 3 konspektami lekcji po 45 min dla klas 4-8, kartami pracy, planszami na rzutnik i kluczami odpowiedzi; każdą lekcję da się przeprowadzić bez komputerów i bez BezpiecznejAury; wszystkie przykłady są fikcyjne, a około 1/3 to uczciwe wiadomości; slajd o szkole wspomina pakiet
+
 ## v2 Requirements
 
 - **PRS-V2-01**: Potwierdzenie potrzeby i zrozumiałości z nauczycielem, opiekunami i dziećmi
@@ -50,8 +54,10 @@
 | SUB-02 | Phase 3 | Pending |
 | SUB-03 | Phase 3 | Pending |
 | SUB-04 | Phase 3 | Pending |
+| WRK-01 | Phase 4 | Pending |
 
-**Coverage:** v1: 10 total, mapped: 10, unmapped: 0 ✓
+**Coverage:** v1: 11 total, mapped: 11, unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-03*
+*Updated: 2026-10-04 (WRK-01, faza 4)*

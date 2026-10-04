@@ -1,0 +1,1808 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=block" rel="stylesheet">
+<title>Pakiet warsztatowy dla nauczyciela | BezpiecznaAura</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  :root {
+    --shark: #0F62DB;
+    --shark-dark: #0A3B8C;
+    --silver: #E2E8F0;
+    --amber: #FF8A00;
+    --gold: #FFB800;
+    --crimson: #EA3323;
+    --green: #15803D;
+    --bg: #F8FAFC;
+    --ink: #0F172A;
+    --muted: #64748B;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Nunito", "Segoe UI", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.45;
+    color: var(--ink);
+    background: #fff;
+  }
+  h1, h2, h3, h4 { color: var(--shark-dark); line-height: 1.2; margin: 0; }
+  h2 {
+    font-size: 17pt;
+    margin: 0 0 3mm;
+    padding-bottom: 2mm;
+    border-bottom: 2.5px solid var(--shark);
+  }
+  h3 { font-size: 12pt; margin: 4mm 0 1.5mm; }
+  h4 { font-size: 10.5pt; margin: 2.5mm 0 1mm; color: var(--ink); }
+  p { margin: 0 0 2mm; }
+  ul, ol { margin: 0 0 2mm; padding-left: 5mm; }
+  li { margin-bottom: 0.8mm; }
+  a { color: var(--shark); text-decoration: none; }
+  strong { color: var(--ink); }
+  .page { page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  .muted { color: var(--muted); }
+  .small { font-size: 8.6pt; }
+  .lead { font-size: 11pt; }
+
+  /* Okładka */
+  .cover {
+    height: 255mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover-top {
+    background: linear-gradient(135deg, var(--shark-dark), var(--shark));
+    color: #fff;
+    border-radius: 6mm;
+    padding: 14mm 12mm 12mm;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-top .kicker {
+    font-size: 10pt; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 4mm;
+  }
+  .cover-top h1 { color: #fff; font-size: 27pt; margin-bottom: 4mm; max-width: 108mm; }
+  .cover-top .sub { font-size: 12pt; max-width: 104mm; color: #DCE7FB; }
+  .cover-top img {
+    position: absolute; right: 4mm; bottom: 0; width: 60mm;
+  }
+  .cover-who { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 8mm; }
+  .cover-bottom { font-size: 9pt; color: var(--muted); border-top: 1px solid var(--silver); padding-top: 3mm; }
+  .rule-big {
+    margin-top: 8mm;
+    border: 2.5px dashed var(--amber);
+    border-radius: 5mm;
+    padding: 6mm;
+    text-align: center;
+  }
+  .rule-big .r { font-size: 20pt; font-weight: 800; color: var(--shark-dark); }
+  .rule-big .r span { color: var(--amber); }
+
+  /* Bloki */
+  .box {
+    border-radius: 3.5mm;
+    padding: 3.5mm 4.5mm;
+    margin: 0 0 3mm;
+    break-inside: avoid;
+  }
+  .box.blue { background: #EAF1FD; border-left: 4px solid var(--shark); }
+  .box.amber { background: #FFF4E5; border-left: 4px solid var(--amber); }
+  .box.red { background: #FDECEB; border-left: 4px solid var(--crimson); }
+  .box.green { background: #EAF6EE; border-left: 4px solid var(--green); }
+  .box.grey { background: var(--bg); border: 1px solid var(--silver); }
+  .box h4:first-child, .box h3:first-child { margin-top: 0; }
+
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps > li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 10mm;
+    margin-bottom: 2.2mm;
+    break-inside: avoid;
+  }
+  .steps > li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 0;
+    width: 6.5mm; height: 6.5mm; border-radius: 50%;
+    background: var(--shark); color: #fff; font-weight: 800;
+    font-size: 9.5pt; text-align: center; line-height: 6.5mm;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; font-size: 9.4pt; }
+  th, td { text-align: left; vertical-align: top; padding: 1.8mm 2.2mm; border-bottom: 1px solid var(--silver); }
+  th { background: var(--shark-dark); color: #fff; font-weight: 700; }
+  tr { break-inside: avoid; }
+  td.k { font-weight: 800; color: var(--shark-dark); white-space: nowrap; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .toc { columns: 2; column-gap: 8mm; padding: 0; list-style: none; }
+  .toc li { margin-bottom: 1.4mm; display: flex; justify-content: space-between; gap: 3mm; border-bottom: 1px dotted var(--silver); break-inside: avoid; }
+  .toc .pg { color: var(--shark); font-weight: 700; }
+
+  /* Scenariusze */
+  .scen { break-before: page; }
+  .scen-head {
+    display: flex; align-items: center; gap: 4mm;
+    background: var(--bg); border: 1px solid var(--silver);
+    border-radius: 3.5mm; padding: 3mm 4mm; margin-bottom: 3mm;
+  }
+  .scen-num {
+    flex: none; width: 11mm; height: 11mm; border-radius: 3mm;
+    background: var(--shark); color: #fff; font-weight: 800; font-size: 15pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scen-head h2 { border: 0; padding: 0; margin: 0; font-size: 15pt; }
+  .scen-head .tags { margin-top: 1.2mm; }
+  .scen-lead { font-size: 10.5pt; color: #334155; margin: 0 0 3.5mm; }
+  .pill {
+    display: inline-block; padding: 0.4mm 2.2mm; border-radius: 99px;
+    font-size: 8pt; font-weight: 700; margin-right: 1mm;
+  }
+  .pill.red { background: rgba(234, 51, 35, 0.13); color: #B91C1C; }
+  .pill.amber { background: rgba(255, 138, 0, 0.17); color: #9A4F00; }
+  .pill.blue { background: rgba(15, 98, 219, 0.12); color: var(--shark-dark); }
+  .msg {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #fff; border: 1px solid var(--silver); border-radius: 3mm 3mm 3mm 0;
+    padding: 2.5mm 3.5mm; font-style: italic; margin: 1mm 0 3mm; color: #334155;
+  }
+  .lbl {
+    display: block; font-size: 8.2pt; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 1mm;
+  }
+  .lbl.blue { color: var(--shark); }
+  .lbl.amber { color: #B45F00; }
+  .lbl.red { color: var(--crimson); }
+  .lbl.green { color: var(--green); }
+
+  /* Karta szybkiej reakcji */
+  .card {
+    border: 3px solid var(--shark-dark); border-radius: 6mm; padding: 7mm;
+  }
+  .card h2 { text-align: center; border: 0; font-size: 20pt; }
+  .card .cut { text-align: center; color: var(--muted); font-size: 8.5pt; margin-bottom: 4mm; }
+  .card td { vertical-align: middle; }
+  .bignum { font-size: 15pt; font-weight: 800; color: var(--shark-dark); }
+
+  .footer-note { font-size: 8.4pt; color: var(--muted); border-top: 1px solid var(--silver); padding-top: 2mm; margin-top: 4mm; }
+
+  /* ===== przyjazny wygląd ===== */
+  h2 { border-bottom: 0; padding-bottom: 0; position: relative; padding-left: 0; font-weight: 900; }
+  h2::after { content: ""; display: block; width: 22mm; height: 1.6mm; border-radius: 99px; margin-top: 2mm;
+    background: linear-gradient(90deg, var(--amber), var(--gold)); }
+  h3 { font-weight: 800; }
+  .box { border-radius: 5mm; border-left: 0 !important; }
+  .box.blue { border: 1.5px solid #C9DBF8 !important; }
+  .box.amber { border: 1.5px solid #FFD9A8 !important; }
+  .box.red { border: 1.5px solid #F8C4C0 !important; }
+  .box.green { border: 1.5px solid #BFE3CB !important; }
+  .lbl { display: flex; align-items: center; gap: 1.6mm; font-size: 8.6pt; letter-spacing: 0.04em; margin-bottom: 1.5mm; }
+  .lbl .ico { font-size: 11pt; letter-spacing: 0; }
+  .lbl .ico:empty { display: none; }
+  .scen-head { background: linear-gradient(135deg, #EAF1FD, #F8FAFC 70%); border: 1.5px solid #C9DBF8;
+    border-radius: 6mm; padding: 3mm 4mm; position: relative; }
+  .scen-num { border-radius: 50%; background: linear-gradient(135deg, var(--shark), var(--shark-dark));
+    box-shadow: 0 0 0 1.2mm #fff, 0 0 0 1.8mm var(--gold); font-weight: 900; }
+  .scen-ava { width: 15mm; height: 15mm; margin-left: auto; flex: none; }
+  .scen-head h2::after { display: none; }
+  .scen-lead { font-weight: 600; }
+  .msg { border-radius: 5mm 5mm 5mm 1mm; background: #fff; border: 1.5px solid #C9DBF8;
+    box-shadow: 0 1mm 0 #E2E8F0; font-style: normal; }
+  .steps > li::before { background: linear-gradient(135deg, var(--shark), var(--shark-dark)); font-weight: 900; }
+  table { border-collapse: separate; border-spacing: 0; border: 1.5px solid var(--silver); border-radius: 4mm; overflow: hidden; }
+  th:first-child { border-top-left-radius: 3mm; } th:last-child { border-top-right-radius: 3mm; }
+  tr:nth-child(odd) td { background: #F8FAFC; }
+  tr:last-child td { border-bottom: 0; }
+  .card table, .card tr td { background: transparent; border: 0; }
+  .card tr td { border-bottom: 1px dashed var(--silver); }
+  .pill { font-weight: 800; }
+  .cover-top { border-radius: 8mm; }
+  .rule-big { border-radius: 7mm; background: #FFFBF3; }
+  .card { border-radius: 8mm; }
+  .chk { display: inline-block; width: 4.2mm; height: 4.2mm; border: 1.8px solid var(--shark); border-radius: 1.3mm; background: #fff; margin-top: 0.4mm; }
+  code, .dom { font-family: Consolas, "Courier New", monospace; }
+  .dom { background: #FDECEB; color: #B91C1C; padding: 0 1.2mm; border-radius: 1.2mm; font-style: normal; font-size: 0.95em; }
+  .card h2::after { margin-left: auto; margin-right: auto; }
+  .card-ava { display: block; width: 20mm; margin: 0 auto 1mm; }
+
+  /* ===== pakiet warsztatowy: nowe komponenty ===== */
+  .pill.green { background: rgba(21, 128, 61, 0.13); color: var(--green); }
+  .cover-top h1 { font-size: 34pt; }
+  .cover-top .kicker { max-width: 100mm; }
+  .cover-top .sub { max-width: 100mm; }
+  .cover-top img { width: 58mm; }
+
+  /* Nagłówek lekcji (konspekt) */
+  .lesson-head { display: flex; align-items: center; gap: 4mm;
+    background: linear-gradient(135deg, #EAF1FD, #F8FAFC 70%); border: 1.5px solid #C9DBF8;
+    border-radius: 6mm; padding: 3mm 4mm; margin-bottom: 3.5mm; }
+  .lesson-num { flex: none; width: 12mm; height: 12mm; border-radius: 50%;
+    background: linear-gradient(135deg, var(--shark), var(--shark-dark)); color: #fff;
+    font-weight: 900; font-size: 17pt; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1.2mm #fff, 0 0 0 1.8mm var(--gold); }
+  .lesson-head h2 { border: 0; padding: 0; margin: 0 0 1.2mm; font-size: 15.5pt; }
+  .lesson-head h2::after { display: none; }
+  .konspekt ul, .konspekt ol { margin-bottom: 0; }
+  .konspekt .box { margin-bottom: 2.6mm; }
+  .konspekt .box p:last-child { margin-bottom: 0; }
+
+  /* Tabela przebiegu lekcji */
+  table.przebieg { font-size: 8.9pt; }
+  table.przebieg td { padding: 1.5mm 2mm; }
+  table.przebieg td.min { width: 11mm; text-align: center; font-weight: 900; font-size: 11pt; color: var(--shark-dark); white-space: nowrap; }
+  table.przebieg td.etap { width: 34mm; font-weight: 800; }
+  table.przebieg ul { margin: 0.6mm 0 0; padding-left: 4.5mm; }
+  table.przebieg li { margin-bottom: 0.3mm; }
+
+  /* Plansza na rzutnik: A4 poziomo */
+  @page plansza { size: A4 landscape; margin: 10mm; }
+  .plansza { page: plansza; height: 186mm; display: flex; flex-direction: column; gap: 5mm; }
+  .pl-head { display: flex; align-items: center; gap: 5mm;
+    background: linear-gradient(135deg, var(--shark-dark), var(--shark)); color: #fff;
+    border-radius: 7mm; padding: 3mm 6mm; }
+  .pl-title { font-size: 21pt; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+  .pl-head img { width: 15mm; margin-left: auto; }
+  .pl-grid { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 9mm; align-items: center; padding: 0 3mm; }
+  .pl-q { text-align: center; font-size: 19pt; font-weight: 900; color: var(--shark-dark);
+    border: 2.5px dashed var(--amber); border-radius: 7mm; padding: 3mm; background: #FFFBF3; }
+  .pl-q span { color: var(--amber); }
+  .plansza .mock { font-size: 19pt; }
+  .plansza .mock-tag { font-size: 9pt; }
+  .plansza .mock-ctx { font-size: 12pt; }
+  .pl-flags { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5mm; align-content: center; }
+  .flag { border-radius: 6mm; padding: 4mm 5mm; background: #FDECEB; border: 2px solid #F8C4C0; }
+  .flag .fi { font-size: 24pt; line-height: 1; }
+  .flag h3 { margin: 1.5mm 0 1mm; font-size: 17pt; color: #B91C1C; }
+  .flag p { font-size: 13pt; margin: 0; color: var(--ink); }
+  .pl-rule { display: flex; align-items: center; justify-content: center; gap: 6mm;
+    border: 3px dashed var(--amber); border-radius: 8mm; background: #FFFBF3; padding: 2mm 6mm; }
+  .pl-rule .r { font-size: 25pt; font-weight: 900; color: var(--shark-dark); }
+  .pl-rule .r span { color: var(--amber); }
+  .pl-rule img { width: 26mm; }
+
+  /* Makiety wiadomości (rysowane w CSS, bez logo) */
+  .mock { position: relative; font-size: 10pt; line-height: 1.4; border-radius: 4mm;
+    background: #fff; border: 1.5px solid var(--silver); break-inside: avoid; overflow: hidden; }
+  .mock-ctx { font-size: 8pt; font-style: italic; color: var(--muted); padding: 1.5mm 3.5mm 0; }
+  .mock-head { display: flex; align-items: center; gap: 2.2mm; padding: 2mm 3.5mm; font-weight: 800; }
+  .mock-no { flex: none; font-size: 0.68em; font-weight: 900; background: var(--gold); color: var(--ink);
+    border-radius: 99px; padding: 0.2mm 1.8mm; }
+  .ini { flex: none; width: 2em; height: 2em; border-radius: 50%; display: inline-flex; align-items: center;
+    justify-content: center; font-size: 0.72em; font-weight: 900; background: var(--amber); color: #fff; }
+  .mock-head .ch { margin-left: auto; font-size: 0.66em; font-weight: 700; opacity: 0.75; white-space: nowrap; }
+  .mock-body { padding: 0 3.5mm 2mm; }
+  .mock-tag { display: block; width: max-content; margin: 0 3.5mm 2mm auto; font-size: 6.8pt; font-weight: 700;
+    color: #475569; background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 99px; padding: 0.2mm 2mm; }
+  .mock .dom { background: transparent; color: var(--shark); text-decoration: underline; padding: 0; font-size: 0.92em; overflow-wrap: anywhere; }
+  .mock { min-width: 0; }
+  /* czat w grze: ciemne okno */
+  .mock--czat-gry { background: #1E293B; border: 2px solid #334155; color: #F8FAFC; }
+  .mock--czat-gry .mock-head { border-bottom: 1px solid #334155; margin-bottom: 1.5mm; }
+  .mock--czat-gry .nick { color: var(--gold); }
+  .mock--czat-gry .ini { background: #64748B; }
+  .mock--czat-gry .dom { color: #7DB3FF; }
+  .mock--czat-gry .mock-tag { background: #334155; color: #E2E8F0; border-color: #475569; }
+  /* komunikator: ciemny pasek, jasne tło */
+  .mock--komunikator { background: #F2F3F5; border: 1.5px solid #D4D7DC; }
+  .mock--komunikator .mock-head { background: #2B2D31; color: #F2F3F5; margin-bottom: 2mm; }
+  .mock--komunikator .ini { background: #5865F2; }
+  /* SMS: dymek */
+  .mock--sms { background: #FFFFFF; }
+  .mock--sms .mock-head { border-bottom: 1px solid var(--silver); margin-bottom: 2mm; }
+  .mock--sms .ini { background: #94A3B8; }
+  .mock--sms .bubble { display: block; background: #E9E9EB; color: #0F172A; border-radius: 5mm 5mm 5mm 1.2mm;
+    padding: 2mm 3mm; max-width: 92%; }
+  /* e-mail: nagłówek Od / Temat */
+  .mock--email .mock-head { background: #EAF1FD; border-bottom: 1px solid #C9DBF8; }
+  .mail-meta { padding: 1.8mm 3.5mm; border-bottom: 1px solid var(--silver); margin-bottom: 2mm; font-size: 0.9em; }
+  .mail-meta div { margin-bottom: 0.4mm; }
+  .mail-meta b { display: inline-block; min-width: 4.2em; color: var(--muted); font-weight: 700; }
+  /* powiadomienie w grze: baner z tarczą z CSS */
+  .mock--powiadomienie { background: linear-gradient(135deg, var(--shark-dark), var(--shark)); color: #fff; border: 2px solid var(--gold); }
+  .mock--powiadomienie .mock-head { border-bottom: 1px solid rgba(255,255,255,0.25); margin-bottom: 1.5mm; }
+  .shield { flex: none; width: 1.5em; height: 1.75em; background: var(--gold);
+    clip-path: polygon(50% 0, 100% 16%, 100% 55%, 50% 100%, 0 55%, 0 16%); }
+  .mock--powiadomienie .mock-tag { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(255,255,255,0.4); }
+
+  /* Karty pracy: czarno-białe do ksero */
+  .ws, .ws * { color: #000 !important; background: #fff !important; border-color: #000 !important; box-shadow: none !important; }
+  .ws img { filter: grayscale(1); }
+  .ws h2::after { background: #000 !important; }
+  .ws .shield { background: #000 !important; }
+  .ws .emo { filter: grayscale(1); }
+  .ws .ini { border: 1px solid #000; }
+  .ws .mock { border: 1.5px solid #000; }
+  .ws .mock-tag { border: 1px solid #000; }
+  .ws-top { display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 2.5mm; }
+  .ws-top .line { display: inline-block; border-bottom: 1px solid #000; width: 50mm; }
+  .ws-top .line.short { width: 18mm; }
+  .ws-instr { font-size: 10.5pt; font-weight: 700; margin-bottom: 3mm; }
+  .ws-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4mm 5mm; }
+  .ws-item .mock { font-size: 9pt; }
+  .ws-item .ans { font-size: 9pt; margin: 1.5mm 0 1mm; line-height: 1.6; }
+  .ws-item .flags { font-size: 9pt; border-bottom: 1px solid #000; padding-bottom: 5mm; }
+  .box-chk { font-family: "Segoe UI Symbol", "Segoe UI", sans-serif; font-size: 11pt; }
+
+  /* Karty decyzji do pocięcia */
+  .dgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: 75mm; border: 1.5px dashed #000; }
+  .dcard { border: 1.5px dashed #000; padding: 4mm 5mm; display: flex; flex-direction: column; position: relative; }
+  .dcard .dl { font-size: 13pt; font-weight: 900; }
+  .dcard .sit { font-size: 12pt; margin: 2mm 0; }
+  .dcard .cz { margin-top: auto; font-weight: 800; font-size: 10pt; }
+  .dcard .wl { border-bottom: 1px solid #000; height: 6.5mm; }
+  .scissors { font-family: "Segoe UI Symbol", "Segoe UI", sans-serif; font-size: 10pt; }
+
+  /* Quiz */
+  .q { border: 1.5px solid #000; border-radius: 4mm; padding: 4mm 5mm; margin-bottom: 6mm; break-inside: avoid; }
+  .q .qt { font-size: 12.5pt; font-weight: 800; margin-bottom: 2mm; }
+  .q ol { list-style: upper-alpha; margin: 0; padding-left: 6mm; font-size: 12pt; }
+  .q li { margin-bottom: 1.6mm; }
+  .ws--quiz.compact .q { margin-bottom: 4mm; padding: 3mm 5mm; }
+  .ws--quiz.compact .q .qt { margin-bottom: 1.5mm; }
+
+  /* Karta do domu: 2 x pół A4 */
+  .do-domu-half { height: 110mm; border: 2px solid #000; border-radius: 5mm; padding: 5mm 6mm; overflow: hidden; }
+  .do-domu-half h3 { margin-top: 0; font-size: 13pt; }
+  .do-domu-half p, .do-domu-half li { font-size: 10.8pt; }
+  .do-domu-half h3 { font-size: 14pt; }
+  .dd-rule { margin-top: 3mm; border: 2px dashed #000; border-radius: 4mm; padding: 2.5mm; text-align: center; font-size: 14pt; font-weight: 900; }
+  .cutline { text-align: center; border-top: 1.5px dashed #000; margin: 5mm 0 5mm; line-height: 0; }
+  .cutline span { background: #fff; padding: 0 3mm; font-size: 10pt; }
+
+  /* Plansze z zasadami (2.4) i drabinką pomocy (3.4) */
+  .flag.ok { background: #EAF6EE; border-color: #BFE3CB; }
+  .flag.ok h3 { color: var(--green); }
+  .pl-rule .r.long { font-size: 21pt; }
+  .pl-help { flex: 1; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 7mm; align-items: center; padding: 0 2mm; }
+  .ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4.5mm; }
+  .ladder li { display: flex; align-items: center; gap: 4mm; margin: 0; background: #EAF1FD; border: 2px solid #C9DBF8;
+    border-radius: 6mm; padding: 4mm 6mm; }
+  .ladder .st { flex: none; width: 16mm; height: 16mm; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--shark), var(--shark-dark)); color: #fff; font-weight: 900; font-size: 22pt; }
+  .ladder h3 { margin: 0 0 1mm; font-size: 21pt; }
+  .ladder p { margin: 0; font-size: 14.5pt; line-height: 1.3; }
+  .help-side { display: flex; flex-direction: column; gap: 5mm; }
+  .help-side .box { margin: 0; padding: 5mm 6mm; }
+  .help-side .big { font-size: 34pt; font-weight: 900; line-height: 1.1; color: var(--crimson); }
+  .help-side p { font-size: 16pt; line-height: 1.3; margin: 0; }
+
+  /* Scenka: karty ról do pocięcia */
+  .scenka-zasada { border: 2.5px solid #000; border-radius: 4mm; padding: 3mm 4.5mm; font-size: 11.5pt; font-weight: 800; margin-bottom: 4mm; }
+  .rola { border: 1.5px dashed #000; border-radius: 0; margin-bottom: 4mm; break-inside: avoid; }
+  .rola .rl-title { font-size: 13pt; font-weight: 900; padding: 2.5mm 5mm; border-bottom: 1.5px dashed #000; }
+  .rola .rl-sides { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .rola .rl-sides.one { grid-template-columns: minmax(0, 1fr); }
+  .rola .rl-side { padding: 3mm 5mm 4mm; }
+  .rola .rl-side + .rl-side { border-left: 1.5px dashed #000; }
+  .rola .rl-who { font-size: 9.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1.5mm; }
+  .rola .say { font-size: 12pt; margin: 0 0 1.8mm; }
+  .rola .note { font-size: 9.5pt; font-style: italic; margin: 0; }
+
+  /* Klucz odpowiedzi */
+  .klucz table { font-size: 8.6pt; }
+  .klucz td, .klucz th { padding: 1.3mm 2mm; }
+
+  /* Źródła */
+  ol.zrodla { padding-left: 6mm; }
+  ol.zrodla li { margin-bottom: 2.4mm; font-size: 9.6pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ OKŁADKA ============ -->
+<section class="page cover">
+  <div>
+    <div class="cover-top">
+      <div class="kicker">BezpiecznaAura · pakiet warsztatowy dla nauczyciela</div>
+      <h1>Oszustwo czy nie?</h1>
+      <p class="sub">3 lekcje o bezpiecznym internecie · klasy 4-8 · bez komputerów. Konspekty, karty pracy, plansze na rzutnik i klucze odpowiedzi.</p>
+      <img src="../../../assets/Scamerino_Alertinio.png" alt="Scamerinio Alertinio">
+    </div>
+
+    <div class="cover-who">
+      <div class="box blue">
+        <h4>Dla nauczyciela, wychowawcy i pedagoga</h4>
+        <p class="small">Gotowe lekcje po 45 minut: uczniowie uczą się rozpoznawać oszustwa w grach, komunikatorach, SMS-ach i e-mailach oraz mówić „nie” i prosić o pomoc.</p>
+      </div>
+      <div class="box amber">
+        <h4>Wystarczą wydruki i rzutnik</h4>
+        <p class="small">Uczniowie pracują na kartach i planszach. Wszystkie przykłady są zmyślone, a około 1/3 z nich to uczciwe wiadomości, żeby klasa uczyła się odróżniać, a nie bać.</p>
+      </div>
+    </div>
+
+    <div class="rule-big">
+      <div class="r">Darmowe + link = <span>pytam dorosłego</span></div>
+      <p class="small muted" style="margin:2mm 0 0">Zasada, której uczy Scamerinio Alertinio. Pakiet pomaga ją przećwiczyć w klasie.</p>
+    </div>
+
+    <h3 style="margin-top:8mm">Spis treści</h3>
+    <ul class="toc small">
+      <li data-find="Jak korzystać z pakietu"><span>Jak korzystać z pakietu</span><span class="pg">2</span></li>
+      <li data-find="Lekcja 1: Oszustwo czy nie?"><span>Lekcja 1: Oszustwo czy nie? (konspekt)</span><span class="pg">3</span></li>
+      <li data-find="Klucz odpowiedzi: lekcja 1"><span>Lekcja 1: klucz odpowiedzi</span><span class="pg">5</span></li>
+      <li data-find="PLANSZA 1.1"><span>Lekcja 1: plansze na rzutnik</span><span class="pg">6</span></li>
+      <li data-find="Karta pracy 1A"><span>Lekcja 1: karty pracy</span><span class="pg">10</span></li>
+      <li data-find="Lekcja 2: Moje konto, mój klucz"><span>Lekcja 2: Moje konto, mój klucz (konspekt)</span><span class="pg">14</span></li>
+      <li data-find="Klucz odpowiedzi: lekcja 2"><span>Lekcja 2: klucz odpowiedzi</span><span class="pg">16</span></li>
+      <li data-find="PLANSZA 2.1"><span>Lekcja 2: plansze na rzutnik</span><span class="pg">17</span></li>
+      <li data-find="Karta pracy 2A"><span>Lekcja 2: karty pracy</span><span class="pg">21</span></li>
+      <li data-find="Lekcja 3: Obcy, presja i sekrety"><span>Lekcja 3: Obcy, presja i sekrety (konspekt)</span><span class="pg">26</span></li>
+      <li data-find="Klucz odpowiedzi: lekcja 3"><span>Lekcja 3: klucz odpowiedzi</span><span class="pg">28</span></li>
+      <li data-find="PLANSZA 3.1"><span>Lekcja 3: plansze na rzutnik</span><span class="pg">29</span></li>
+      <li data-find="Karta pracy 3A"><span>Lekcja 3: karty pracy</span><span class="pg">33</span></li>
+      <li data-find="Źródła"><span>Źródła</span><span class="pg">38</span></li>
+    </ul>
+  </div>
+
+  <div class="cover-bottom">
+    Stan na październik 2026. Wszystkie wiadomości, nicki i nadawcy w pakiecie są zmyślone. Adresy zapisano z <code>[.]</code> i końcówką <code>[.]example</code>, żeby nie dało się ich kliknąć; w makietach nie ma prawdziwych logo. Materiał można kopiować na potrzeby lekcji.
+  </div>
+</section>
+
+<!-- ============ JAK KORZYSTAĆ ============ -->
+<section class="page howto">
+  <h2>Jak korzystać z pakietu</h2>
+  <p class="lead">Trzy gotowe lekcje po 45 minut o rozpoznawaniu oszustw w internecie, mówieniu „nie” i proszeniu o pomoc. Jeden poziom dla całej szkoły podstawowej: klasy 4-8.</p>
+
+  <div class="two">
+    <div class="box blue">
+      <span class="lbl blue"><span class="ico">👩‍🏫</span>Dla kogo i jak</span>
+      <ul class="small">
+        <li>Dla nauczyciela, wychowawcy i pedagoga; nie trzeba być informatykiem.</li>
+        <li>3 lekcje po 45 min. Każdą można przeprowadzić osobno.</li>
+        <li>Najlepiej wracać do tematu co kilka tygodni: krótkie, powtarzane ćwiczenia działają lepiej niż jedna duża lekcja.</li>
+      </ul>
+    </div>
+    <div class="box amber">
+      <span class="lbl amber"><span class="ico">📚</span>Co jest w każdej lekcji</span>
+      <ul class="small">
+        <li>konspekt dla nauczyciela na 2 stronach (cele, materiały, przebieg z minutami);</li>
+        <li>klucz odpowiedzi;</li>
+        <li>4 kolorowe plansze na rzutnik w poziomie;</li>
+        <li>czarno-białe karty pracy do ksero, każda na osobnej stronie;</li>
+        <li>karta do domu na pół A4.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="box green">
+      <span class="lbl green"><span class="ico">🖨️</span>Co przygotować</span>
+      <ul class="small">
+        <li>wydruki kart pracy (liczba w konspekcie, w sekcji „Materiały”);</li>
+        <li>rzutnik albo kolorowe wydruki plansz, ewentualnie tablica;</li>
+        <li>pocięte karty decyzji „Co zrobisz?”.</li>
+      </ul>
+      <p class="small" style="margin:1.5mm 0 0"><strong>Uczniowie pracują bez komputerów i telefonów.</strong></p>
+    </div>
+    <div class="box grey">
+      <span class="lbl blue"><span class="ico">🛡️</span>Zasady pakietu</span>
+      <ul class="small">
+        <li>Wszystkie wiadomości i nicki są zmyślone. Adresy zapisano z <code>[.]</code> i końcówką <code>[.]example</code>, więc nie da się ich kliknąć. Brak prawdziwych logo.</li>
+        <li><strong>Około 1/3 przykładów to uczciwe wiadomości</strong>, żeby uczniowie nie oznaczali wszystkiego jako oszustwo. Tego zwykle brakuje w innych scenariuszach.</li>
+        <li>Bez ocen, punktów i rankingów. Odpowiedź „nie wiem, zapytam dorosłego” jest dobra.</li>
+        <li>Scenki ćwiczą odmowę i proszenie o pomoc, a nie oszukiwanie.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box red">
+    <span class="lbl red"><span class="ico">🚨</span>Gdy uczeń ujawni własną sprawę</span>
+    <p class="small">W każdym konspekcie jest ramka „Jeśli uczeń ujawni, że to mu się przytrafiło”. Pełną procedurę opisuje „Rozdział dla nauczyciela” w poradniku „Dziecko trafiło na oszustwo w sieci. Co teraz?”.</p>
+  </div>
+
+  <h3>Lekcje w skrócie</h3>
+  <table>
+    <tr><th style="width:7mm">nr</th><th style="width:40mm">tytuł</th><th>tematy</th><th style="width:52mm">zasada lekcji</th></tr>
+    <tr><td class="k">1</td><td><strong>Oszustwo czy nie? Rozpoznaj sygnały</strong></td><td>darmowe Robuxy, fałszywy admin, SMS i e-mail podszywające się pod firmę lub szkołę</td><td>„Darmowe + link = pytam dorosłego.”</td></tr>
+    <tr><td class="k">2</td><td><strong>Moje konto, mój klucz</strong></td><td>kody i hasła, przejęte konto kolegi, wymiany, prośby o pliki z przeglądarki, cheaty</td><td>„Kod i hasło są jak klucz do domu. Nikomu ich nie daję.”</td></tr>
+    <tr><td class="k">3</td><td><strong>Obcy, presja i sekrety</strong></td><td>przejście do innego komunikatora, sekrety, prezenty, pieniądze i BLIK, kogo prosić o pomoc</td><td>„Sekret od kogoś z internetu = mówię zaufanemu dorosłemu.”</td></tr>
+  </table>
+
+  <p class="small muted">Pakiet działa samodzielnie i nie wymaga aplikacji BezpiecznaAura ani gry.</p>
+</section>
+
+<!-- ============ LEKCJA 1: KONSPEKT A ============ -->
+<section class="page konspekt" data-lesson="1">
+  <div class="lesson-head">
+    <div class="lesson-num">1</div>
+    <div>
+      <h2>Lekcja 1: Oszustwo czy nie? Rozpoznaj sygnały</h2>
+      <div class="tags"><span class="pill blue">klasy 4-8</span><span class="pill amber">45 min</span><span class="pill green">bez komputerów</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <div class="box blue warto-wiedziec">
+    <span class="lbl blue"><span class="ico">💡</span>Warto wiedzieć</span>
+    <p class="small">Ogólne „uważaj w internecie” nie działa. Dzieci lepiej chroni znajomość konkretnych sygnałów: pośpiech, „darmowe”, prośba o kod, hasło albo dane [1]. Na tej lekcji uczniowie ćwiczą trzy częste schematy: „darmowe Robuxy” z linkiem do fałszywej strony logowania, fałszywego admina, który prosi o kod weryfikacyjny, oraz SMS lub e-mail podszywający się pod firmę albo szkołę [2][6]. Roblox ma ok. 150 mln graczy dziennie, a ponad połowa z nich ma mniej niż 16 lat [1].</p>
+    <p class="small muted">Numery w nawiasach odsyłają do listy „Źródła” na końcu pakietu.</p>
+  </div>
+
+  <div class="two">
+    <div class="box grey cele">
+      <span class="lbl blue"><span class="ico">🎯</span>Cele lekcji</span>
+      <p class="small"><strong>Uczeń potrafi:</strong></p>
+      <ul class="small">
+        <li>wymienić co najmniej 4 czerwone flagi oszustwa (np. pośpiech, „darmowe”, prośba o kod lub hasło, dziwny adres);</li>
+        <li>odróżnić wiadomość-oszustwo od uczciwej wiadomości;</li>
+        <li>powiedzieć, co zrobi: nie klika, nie podaje kodu, sprawdza w aplikacji, pyta dorosłego, zgłasza.</li>
+      </ul>
+    </div>
+    <div class="box grey cele-ucznia">
+      <span class="lbl blue"><span class="ico">🗣️</span>Cele w języku ucznia</span>
+      <p class="small"><strong>Dziś nauczysz się:</strong> rozpoznawać oszustwo po kilku sygnałach, odróżniać je od zwykłej wiadomości i wiedzieć, co wtedy zrobić.</p>
+      <p class="small"><strong>Po lekcji umiesz:</strong> wymienić 4 czerwone flagi i powiedzieć zasadę „Darmowe + link = pytam dorosłego”.</p>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="box amber umowa">
+      <span class="lbl amber"><span class="ico">🤝</span>Umowa na lekcję</span>
+      <p class="small">Przeczytaj na początku i zapisz na tablicy:</p>
+      <ul class="small">
+        <li>słucham i nie oceniam;</li>
+        <li>szanuję innych i nie rozpowiadam tego, co powiedzą;</li>
+        <li>nie muszę mówić o sobie;</li>
+        <li>pytam, gdy czegoś nie wiem.</li>
+      </ul>
+    </div>
+    <div class="box green materialy">
+      <span class="lbl green"><span class="ico">📦</span>Materiały</span>
+      <ul class="small">
+        <li>plansze 1.1-1.4 (rzutnik, kolorowy wydruk albo tablica);</li>
+        <li>karta 1A: 1 na parę;</li>
+        <li>karty 1B: 1 komplet pocięty na trójkę;</li>
+        <li>quiz 1C: 1 na ucznia albo odczytany na głos;</li>
+        <li>karta 1D: pół A4 na ucznia.</li>
+      </ul>
+      <p class="small" style="margin-top:1.5mm"><strong>Bez komputerów i telefonów dla uczniów.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: KONSPEKT B ============ -->
+<section class="page konspekt" data-lesson="1">
+  <h2>Lekcja 1: przebieg (45 min)</h2>
+  <table class="przebieg">
+    <tr><th style="width:11mm">min</th><th style="width:34mm">etap</th><th>co robią nauczyciel i uczniowie</th></tr>
+    <tr><td class="min">3</td><td class="etap">Organizacja i „Umowa na lekcję”</td><td>Powitanie, temat i cel w języku ucznia. Przeczytaj „Umowę na lekcję” i zapisz ją na tablicy.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Rozgrzewka TAK/NIE</td><td>Czytasz zdania, uczniowie odpowiadają gestem: TAK = ręce w górę, NIE = ręce skrzyżowane. Po każdym zdaniu podaj krótko prawidłową odpowiedź.
+      <ul>
+        <li>„Admin gry może poprosić cię o hasło.” <strong>NIE</strong></li>
+        <li>„Prawdziwe nagrody w grze odbiera się w grze.” <strong>TAK</strong></li>
+        <li>„Wiadomość z «tylko dziś!» zawsze jest uczciwa.” <strong>NIE</strong></li>
+        <li>„Kod z SMS-a można podać koledze.” <strong>NIE</strong></li>
+        <li>„Gdy nie wiesz, czy to oszustwo, możesz zapytać dorosłego.” <strong>TAK</strong></li>
+      </ul></td></tr>
+    <tr><td class="min">14</td><td class="etap">Ćwiczenie 1 „Detektyw” (pary, karta 1A)</td><td><strong>8 min:</strong> pary zakreślają czerwone flagi na 6 makietach i zaznaczają: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.<br><strong>6 min:</strong> omówienie na planszach 1.1-1.3. Przy każdej makiecie pytaj: „Po czym poznajesz?”. Podkreśl, dlaczego 1.2 i 1.5 są uczciwe: nagrodę odbiera się w grze, bez linku i bez logowania, a kod, na który sam czekasz, wpisujesz tylko w aplikacji.</td></tr>
+    <tr><td class="min">12</td><td class="etap">Ćwiczenie 2 „Co zrobisz?” (trójki, karty 1B)</td><td>Każda trójka dostaje 2 karty. <strong>6 min:</strong> ustalają, czy to oszustwo i co zrobią. <strong>6 min:</strong> trójki krótko prezentują odpowiedzi, nauczyciel uzupełnia z klucza.</td></tr>
+    <tr><td class="min">6</td><td class="etap">Quiz 1C bez ocen</td><td>Uczniowie odpowiadają sami, potem sprawdzają, gdy czytasz odpowiedzi z klucza. Wyników nie zbierasz.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Podsumowanie</td><td>Plansza 1.4: czerwone flagi i zasada „Darmowe + link = pytam dorosłego”. Powiedz do klasy: <em>„Jeśli coś takiego ci się przytrafiło i nie chcesz mówić przy klasie, porozmawiaj ze mną albo z pedagogiem po lekcji.”</em> Rozdaj kartę 1D.</td></tr>
+  </table>
+
+  <div class="box red ramka-ujawnienie">
+    <span class="lbl red"><span class="ico">🚨</span>Jeśli uczeń ujawni, że to mu się przytrafiło</span>
+    <ul class="small">
+      <li>Nie dopytuj przy klasie i nie proś o pokazanie telefonu ani prywatnych wiadomości.</li>
+      <li>Podziękuj krótko i powiedz: „Dobrze, że mówisz. Porozmawiaj ze mną po lekcji”.</li>
+      <li>Po lekcji postępuj według „Rozdział dla nauczyciela” w poradniku (str. 16) i szkolnych standardów ochrony małoletnich.</li>
+      <li>Przy bezpośrednim zagrożeniu dziecka dzwoń na 112.</li>
+    </ul>
+  </div>
+
+  <div class="two">
+    <div class="box grey uwagi-spe">
+      <span class="lbl blue"><span class="ico">🧩</span>Uwagi do realizacji / SPE</span>
+      <p class="small">Makiety czytaj na głos. Łącz uczniów w pary mieszane. Uczniom z trudnościami w czytaniu daj 3 makiety zamiast 6. W rozgrzewce wystarczy gest zamiast ruchu. Bez punktów i rywalizacji między grupami.</p>
+    </div>
+    <div class="box amber do-domu-ref">
+      <span class="lbl amber"><span class="ico">🏠</span>Karta do domu</span>
+      <p class="small">Na koniec rozdaj kartę 1D (karta do domu). Uczeń rozmawia z rodzicem o czerwonych flagach i zasadzie lekcji.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: KLUCZ ============ -->
+<section class="page klucz" data-lesson="1">
+  <h2>Klucz odpowiedzi: lekcja 1</h2>
+  <h3>Makiety 1.1-1.6 (plansze 1.1-1.3, karta 1A)</h3>
+  <table>
+    <tr><th style="width:8mm">nr</th><th style="width:19mm">ocena</th><th>czerwone flagi albo dlaczego jest uczciwa</th><th style="width:58mm">dobra reakcja</th></tr>
+    <tr><td class="k">1.1</td><td><strong>oszustwo</strong></td><td>„za darmo”, „tylko dziś”, logowanie przez link poza grą, adres z wielkim I zamiast l, prośba o kod z SMS-a</td><td>Nie klikam, nie wpisuję kodu, pytam dorosłego, zgłaszam nick w grze.</td></tr>
+    <tr><td class="k">1.2</td><td><strong>uczciwa</strong></td><td>nagrodę odbiera się w grze, nie ma linku, nikt nie prosi o logowanie ani kod</td><td>Mogę sprawdzić zakładkę Wydarzenia w grze. Gdy mam wątpliwości, pytam dorosłego.</td></tr>
+    <tr><td class="k">1.3</td><td><strong>oszustwo</strong></td><td>ktoś udaje moderację, groźba bana, pośpiech („za 10 min”), prośba o kod weryfikacyjny</td><td>Nie podaję kodu, kończę rozmowę, blokuję i zgłaszam, mówię dorosłemu. Prawdziwa moderacja nie prosi o kod.</td></tr>
+    <tr><td class="k">1.4</td><td><strong>oszustwo</strong></td><td>nieznany numer, mała „dopłata”, link do dziwnego adresu, nie czekam na żadną paczkę</td><td>Nie klikam i nie odpisuję, pokazuję SMS-a rodzicowi.</td></tr>
+    <tr><td class="k">1.5</td><td><strong>uczciwa</strong></td><td>sam się właśnie logujesz, więc spodziewasz się kodu; brak linku; wiadomość ostrzega, żeby kodu nikomu nie podawać</td><td>Wpisuję kod tylko w aplikacji gry i nikomu go nie podaję. Ten sam SMS, gdy się nie loguję, oznacza, że ktoś próbuje wejść na konto: mówię dorosłemu.</td></tr>
+    <tr><td class="k">1.6</td><td><strong>oszustwo</strong></td><td>obcy adres nadawcy (nie szkolny), pośpiech („do jutra”), prośba o PESEL, adres i telefon rodzica, formularz poza szkołą</td><td>Nic nie wpisuję, pokazuję rodzicowi lub wychowawcy; szkoła sprawdzi sprawę w dzienniku.</td></tr>
+  </table>
+
+  <h3>Karty 1B „Co zrobisz?”: proponowane reakcje</h3>
+  <table>
+    <tr><th style="width:8mm"></th><th style="width:19mm">ocena</th><th>proponowana reakcja</th></tr>
+    <tr><td class="k">A</td><td><strong>oszustwo</strong></td><td>Konto kolegi mogło zostać przejęte. Nie klikam i nie loguję się; pytam kolegę inną drogą (np. w szkole) i mówię dorosłemu.</td></tr>
+    <tr><td class="k">B</td><td><strong>oszustwo</strong></td><td>Straszenie wirusem to pułapka. Nie klikam, zamykam okienko, mówię dorosłemu.</td></tr>
+    <tr><td class="k">C</td><td><strong>oszustwo</strong></td><td>Nie brałem udziału w konkursie, a ktoś chce danych rodzica. Nie odpisuję, pokazuję SMS-a rodzicowi.</td></tr>
+    <tr><td class="k">D</td><td><strong>oszustwo</strong></td><td>Admin nigdy nie prosi o hasło. Nie podaję, blokuję, zgłaszam, mówię dorosłemu.</td></tr>
+    <tr><td class="k">E</td><td><strong>uczciwa</strong></td><td>Wiadomość od wychowawczyni w dzienniku, bez linku i bez prośby o dane. Mówię rodzicowi o wycieczce.</td></tr>
+    <tr><td class="k">F</td><td><strong>uczciwa</strong></td><td>Oficjalny sklep z aplikacjami, zakup wymaga zgody rodzica. Pytam rodzica, czy możemy kupić.</td></tr>
+  </table>
+
+  <h3>Quiz 1C</h3>
+  <p><strong>1:</strong> B &nbsp;·&nbsp; <strong>2:</strong> C &nbsp;·&nbsp; <strong>3:</strong> A &nbsp;·&nbsp; <strong>4:</strong> A (kod, na który sam czekasz, jest normalny; wpisujesz go tylko w aplikacji i nikomu nie podajesz).</p>
+
+  <div class="box green">
+    <p style="margin:0"><strong>Odpowiedź „nie wiem, zapytam dorosłego” to zawsze dobra reakcja, nie błąd.</strong></p>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: PLANSZA 1.1 ============ -->
+<section class="page plansza" data-lesson="1">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 1.1 · Lekcja 1</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--czat-gry" data-lesson="1" data-example="scam">
+      <div class="mock-head"><span class="mock-no">1.1</span><span class="ini">BB</span><span class="nick">Bonus_Bot_77</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Hej! Event 10 000 Robux za darmo tylko dziś <span class="emo">🎁</span> Zaloguj się na <span class="dom">robIox-bonus[.]example</span> i wpisz kod z SMS, żeby odebrać!</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--powiadomienie" data-lesson="1" data-example="honest">
+      <div class="mock-head"><span class="mock-no">1.2</span><span class="shield"></span><span class="nick">Wydarzenia w grze</span><span class="ch">powiadomienie</span></div>
+      <div class="mock-body">Jesienny Festiwal trwa! Nagrodę odbierzesz w grze, w zakładce Wydarzenia. Nie musisz się nigdzie logować ani podawać kodów.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 1: PLANSZA 1.2 ============ -->
+<section class="page plansza" data-lesson="1">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 1.2 · Lekcja 1</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--czat-gry" data-lesson="1" data-example="scam">
+      <div class="mock-head"><span class="mock-no">1.3</span><span class="ini">MP</span><span class="nick">Mod_Pomoc_24</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Jestem z moderacji. Twoje konto zostanie zbanowane za 10 min. Podaj kod weryfikacyjny, który właśnie dostałeś, żebyśmy mogli to wyjaśnić.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--sms" data-lesson="1" data-example="scam">
+      <div class="mock-head"><span class="mock-no">1.4</span><span class="ini">?</span><span class="nick">Nieznany numer</span><span class="ch">SMS</span></div>
+      <div class="mock-body"><span class="bubble">Twoja paczka czeka. Dopłać 1,99 zł do dostawy: <span class="dom">paczka-doplata[.]example</span></span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 1: PLANSZA 1.3 ============ -->
+<section class="page plansza" data-lesson="1">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 1.3 · Lekcja 1</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--sms" data-lesson="1" data-example="honest">
+      <div class="mock-ctx">Właśnie sam logujesz się do gry na telefonie.</div>
+      <div class="mock-head"><span class="mock-no">1.5</span><span class="ini">G</span><span class="nick">Gra</span><span class="ch">SMS</span></div>
+      <div class="mock-body"><span class="bubble">Twój kod logowania: 482 913. Nie podawaj go nikomu, także pracownikom gry.</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--email" data-lesson="1" data-example="scam">
+      <div class="mock-head"><span class="mock-no">1.6</span><span class="ini">S</span><span class="nick">Skrzynka odbiorcza</span><span class="ch">e-mail</span></div>
+      <div class="mail-meta"><div><b>Od:</b> Sekretariat <span class="dom">sekretariat@szkola-legitymacje[.]example</span></div><div><b>Temat:</b> Pilne: aktualizacja legitymacji do jutra</div></div>
+      <div class="mock-body">Dzień dobry, do jutra trzeba zaktualizować dane do legitymacji. Wpisz swój PESEL, adres domowy i telefon rodzica w formularzu: <span class="dom">szkola-legitymacje[.]example/formularz</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 1: PLANSZA 1.4 ============ -->
+<section class="page plansza" data-lesson="1">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 1.4 · Czerwone flagi</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-flags">
+    <div class="flag"><div class="fi">⏰</div><h3>Pośpiech</h3><p>„tylko dziś”, „za 10 min”</p></div>
+    <div class="flag"><div class="fi">🎁</div><h3>„Darmowe”</h3><p>nagroda za nic, „wygrałeś”</p></div>
+    <div class="flag"><div class="fi">🔑</div><h3>Prośba o kod, hasło lub dane</h3><p>uczciwa gra, szkoła ani firma o to nie prosi</p></div>
+    <div class="flag"><div class="fi">🔗</div><h3>Dziwny adres lub literówka</h3><p>np. wielkie I zamiast l, obca końcówka adresu</p></div>
+    <div class="flag"><div class="fi">⚠️</div><h3>Groźba bana</h3><p>„konto zostanie zbanowane”</p></div>
+    <div class="flag"><div class="fi">🎭</div><h3>Ktoś udaje kogoś innego</h3><p>admina, szkołę albo firmę</p></div>
+  </div>
+  <div class="pl-rule">
+    <div class="r">Darmowe + link = <span>pytam dorosłego</span></div>
+    <img src="../../../assets/Scamerino_Alertinio.png" alt="Scamerinio Alertinio">
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: KARTA 1A ============ -->
+<section class="page ws ws--detektyw" data-lesson="1">
+  <div class="ws-top"><span>Lekcja 1 · karta pracy</span><span>Imiona: <span class="line"></span> Klasa: <span class="line short"></span></span></div>
+  <h2>Karta pracy 1A: Detektyw</h2>
+  <p class="ws-instr">Zakreśl czerwone flagi. Zaznacz: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.</p>
+  <div class="ws-grid">
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="1" data-example="scam">
+        <div class="mock-head"><span class="mock-no">1.1</span><span class="ini">BB</span><span class="nick">Bonus_Bot_77</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Hej! Event 10 000 Robux za darmo tylko dziś <span class="emo">🎁</span> Zaloguj się na <span class="dom">robIox-bonus[.]example</span> i wpisz kod z SMS, żeby odebrać!</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--powiadomienie" data-lesson="1" data-example="honest">
+        <div class="mock-head"><span class="mock-no">1.2</span><span class="shield"></span><span class="nick">Wydarzenia w grze</span><span class="ch">powiadomienie</span></div>
+        <div class="mock-body">Jesienny Festiwal trwa! Nagrodę odbierzesz w grze, w zakładce Wydarzenia. Nie musisz się nigdzie logować ani podawać kodów.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="1" data-example="scam">
+        <div class="mock-head"><span class="mock-no">1.3</span><span class="ini">MP</span><span class="nick">Mod_Pomoc_24</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Jestem z moderacji. Twoje konto zostanie zbanowane za 10 min. Podaj kod weryfikacyjny, który właśnie dostałeś, żebyśmy mogli to wyjaśnić.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--sms" data-lesson="1" data-example="scam">
+        <div class="mock-head"><span class="mock-no">1.4</span><span class="ini">?</span><span class="nick">Nieznany numer</span><span class="ch">SMS</span></div>
+        <div class="mock-body"><span class="bubble">Twoja paczka czeka. Dopłać 1,99 zł do dostawy: <span class="dom">paczka-doplata[.]example</span></span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--sms" data-lesson="1" data-example="honest">
+        <div class="mock-ctx">Właśnie sam logujesz się do gry na telefonie.</div>
+        <div class="mock-head"><span class="mock-no">1.5</span><span class="ini">G</span><span class="nick">Gra</span><span class="ch">SMS</span></div>
+        <div class="mock-body"><span class="bubble">Twój kod logowania: 482 913. Nie podawaj go nikomu, także pracownikom gry.</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--email" data-lesson="1" data-example="scam">
+        <div class="mock-head"><span class="mock-no">1.6</span><span class="ini">S</span><span class="nick">Skrzynka odbiorcza</span><span class="ch">e-mail</span></div>
+        <div class="mail-meta"><div><b>Od:</b> Sekretariat <span class="dom">sekretariat@szkola-legitymacje[.]example</span></div><div><b>Temat:</b> Pilne: aktualizacja legitymacji do jutra</div></div>
+        <div class="mock-body">Dzień dobry, do jutra trzeba zaktualizować dane do legitymacji. Wpisz swój PESEL, adres domowy i telefon rodzica w formularzu: <span class="dom">szkola-legitymacje[.]example/formularz</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: KARTA 1B ============ -->
+<section class="page ws ws--karty" data-lesson="1">
+  <div class="ws-top"><span>Lekcja 1 · karta pracy</span><span>Grupa: <span class="line"></span></span></div>
+  <h2>Karta pracy 1B: Co zrobisz?</h2>
+  <p class="ws-instr"><span class="scissors">✂</span> Wytnij karty wzdłuż przerywanych linii. Każda trójka dostaje 2 karty.</p>
+  <div class="dgrid">
+    <div class="dcard" data-lesson="1" data-example="scam">
+      <div class="dl">A</div>
+      <div class="sit">Kolega z gry, z którym rzadko piszesz, przysyła: „Wygraj skina! Zaloguj się na stronie z linku”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="1" data-example="scam">
+      <div class="dl">B</div>
+      <div class="sit">W trakcie gry wyskakuje okienko: „Twój telefon ma wirusa! Kliknij tutaj, żeby go usunąć”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="1" data-example="scam">
+      <div class="dl">C</div>
+      <div class="sit">Dostajesz SMS-a: „Wygrałeś telefon! Podaj adres i PESEL rodzica, żeby odebrać”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="1" data-example="scam">
+      <div class="dl">D</div>
+      <div class="sit">Ktoś na czacie pisze: „Jestem adminem, podaj hasło, sprawdzę twoje konto”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="1" data-example="honest">
+      <div class="dl">E</div>
+      <div class="sit">Wychowawczyni pisze w dzienniku elektronicznym: „Jutro wycieczka, zbiórka o 8:00 przed szkołą”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="1" data-example="honest">
+      <div class="dl">F</div>
+      <div class="sit">W sklepie z aplikacjami widzisz promocję na grę. Zakup wymaga zgody rodzica w ustawieniach rodzinnych.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 1: KARTA 1C ============ -->
+<section class="page ws ws--quiz" data-lesson="1">
+  <div class="ws-top"><span>Lekcja 1 · karta pracy</span><span>Imię: <span class="line"></span></span></div>
+  <h2>Karta pracy 1C: Quiz bez ocen</h2>
+  <p class="ws-instr">Zakreśl jedną odpowiedź. To nie jest sprawdzian: nie ma ocen ani punktów. Sprawdzisz się sam, gdy nauczyciel przeczyta odpowiedzi.</p>
+  <div class="q">
+    <div class="qt">1. Dostajesz wiadomość: „Darmowe Robuxy! Kliknij link”. Co zrobisz?</div>
+    <ol><li>Klikam szybko, zanim się skończą.</li><li>Nie klikam i pytam dorosłego.</li><li>Wysyłam link kolegom.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">2. Ktoś pisze, że jest adminem, i prosi o kod z SMS-a. Co zrobisz?</div>
+    <ol><li>Podaję, bo admin może wszystko.</li><li>Pytam, po co mu kod, i czekam na odpowiedź.</li><li>Nie podaję, kończę rozmowę i mówię dorosłemu.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">3. Co jest czerwoną flagą?</div>
+    <ol><li>„Tylko dziś!” w wiadomości od nieznajomego.</li><li>Wiadomość od wychowawczyni w dzienniku elektronicznym.</li><li>Ogłoszenie o wydarzeniu w menu gry.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">4. Logujesz się do gry na telefonie i zaraz dostajesz SMS-a z kodem. Co zrobisz?</div>
+    <ol><li>To normalne: wpisuję kod tylko w aplikacji i nikomu go nie podaję.</li><li>Wysyłam kod koledze, żeby sprawdził, czy jest dobry.</li><li>Odpisuję na SMS-a i pytam, kto to.</li></ol>
+  </div>
+  <p class="ws-instr" style="margin-top:6mm">Pamiętaj: odpowiedź „nie wiem, zapytam dorosłego” jest zawsze dobra.</p>
+</section>
+
+<!-- ============ LEKCJA 1: KARTA 1D ============ -->
+<section class="page ws ws--do-domu" data-lesson="1">
+  <h2>Karta pracy 1D: Karta do domu</h2>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 1 „Oszustwo czy nie?”</h3>
+    <p>Dziś na lekcji uczyliśmy się rozpoznawać oszustwa w grach, SMS-ach i e-mailach.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>tym, jakie czerwone flagi znacie (pośpiech, „darmowe”, prośba o kod, dziwny adres);</li>
+      <li>tym, czy ktoś w rodzinie dostał kiedyś podejrzaną wiadomość i co wtedy zrobił;</li>
+      <li>zasadzie „Darmowe + link = pytam dorosłego”.</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Darmowe + link = pytam dorosłego</div>
+  </div>
+  <div class="cutline"><span class="scissors">✂ wytnij</span></div>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 1 „Oszustwo czy nie?”</h3>
+    <p>Dziś na lekcji uczyliśmy się rozpoznawać oszustwa w grach, SMS-ach i e-mailach.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>tym, jakie czerwone flagi znacie (pośpiech, „darmowe”, prośba o kod, dziwny adres);</li>
+      <li>tym, czy ktoś w rodzinie dostał kiedyś podejrzaną wiadomość i co wtedy zrobił;</li>
+      <li>zasadzie „Darmowe + link = pytam dorosłego”.</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Darmowe + link = pytam dorosłego</div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KONSPEKT A ============ -->
+<section class="page konspekt" data-lesson="2">
+  <div class="lesson-head">
+    <div class="lesson-num">2</div>
+    <div>
+      <h2>Lekcja 2: Moje konto, mój klucz</h2>
+      <div class="tags"><span class="pill blue">klasy 4-8</span><span class="pill amber">45 min</span><span class="pill green">bez komputerów</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <div class="box blue warto-wiedziec">
+    <span class="lbl blue"><span class="ico">💡</span>Warto wiedzieć</span>
+    <p class="small">Oszustom w grach najczęściej chodzi o konto dziecka: przedmioty, walutę i listę znajomych. Przejmują je przez wyłudzone kody i hasła, „wymiany na zaufanie” (ty dajesz pierwszy, „pośrednik” polecony przez drugą stronę), fałszywe cheaty, przy których każą wyłączyć antywirusa, oraz prośby o pliki techniczne, dzięki którym oszust wchodzi na konto bez hasła [2]. Przejęte konto służy potem do oszukiwania znajomych, dlatego dziwną prośbę kolegi warto sprawdzić na żywo albo telefonicznie.</p>
+    <p class="small"><strong>Nie wyjaśniaj uczniom, jak taki plik powstaje.</strong> Wystarczy zasada: „Nie wysyłam plików ani kodów, których nie rozumiem. Pytam dorosłego”.</p>
+    <p class="small muted">Numery w nawiasach odsyłają do listy „Źródła” na końcu pakietu.</p>
+  </div>
+
+  <div class="two">
+    <div class="box grey cele">
+      <span class="lbl blue"><span class="ico">🎯</span>Cele lekcji</span>
+      <p class="small"><strong>Uczeń potrafi:</strong></p>
+      <ul class="small">
+        <li>wyjaśnić, dlaczego hasła, kodu ani pliku z przeglądarki nie daje się nikomu;</li>
+        <li>potwierdzić dziwną prośbę kolegi innym kanałem (na żywo, telefonicznie);</li>
+        <li>wymieniać przedmioty tylko w oficjalnym oknie wymiany w grze;</li>
+        <li>odmówić pożyczenia konta;</li>
+        <li>rozpoznać, że kto każe wyłączyć antywirusa, jest oszustem.</li>
+      </ul>
+    </div>
+    <div class="box grey cele-ucznia">
+      <span class="lbl blue"><span class="ico">🗣️</span>Cele w języku ucznia</span>
+      <p class="small"><strong>Dziś nauczysz się chronić swoje konto jak klucz do domu.</strong></p>
+      <p class="small"><strong>Po lekcji umiesz:</strong> odmówić, gdy ktoś prosi o hasło, kod, plik albo konto, i powiedzieć zasadę „Kod i hasło są jak klucz do domu. Nikomu ich nie daję”.</p>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="box amber umowa">
+      <span class="lbl amber"><span class="ico">🤝</span>Umowa na lekcję</span>
+      <p class="small">Przeczytaj na początku i zapisz na tablicy:</p>
+      <ul class="small">
+        <li>słucham i nie oceniam;</li>
+        <li>szanuję innych i nie rozpowiadam tego, co powiedzą;</li>
+        <li>nie muszę mówić o sobie;</li>
+        <li>pytam, gdy czegoś nie wiem.</li>
+      </ul>
+    </div>
+    <div class="box green materialy">
+      <span class="lbl green"><span class="ico">📦</span>Materiały</span>
+      <ul class="small">
+        <li>plansze 2.1-2.4 (rzutnik, kolorowy wydruk albo tablica);</li>
+        <li>karta 2A: 1 na parę;</li>
+        <li>karty 2B: 1 komplet pocięty na trójkę;</li>
+        <li>karty ról 2C: 1 komplet pocięty na parę;</li>
+        <li>quiz 2D: 1 na ucznia albo odczytany na głos;</li>
+        <li>karta 2E: pół A4 na ucznia.</li>
+      </ul>
+      <p class="small" style="margin-top:1.5mm"><strong>Bez komputerów i telefonów dla uczniów.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KONSPEKT B ============ -->
+<section class="page konspekt" data-lesson="2">
+  <h2>Lekcja 2: przebieg (45 min)</h2>
+  <table class="przebieg">
+    <tr><th style="width:11mm">min</th><th style="width:34mm">etap</th><th>co robią nauczyciel i uczniowie</th></tr>
+    <tr><td class="min">3</td><td class="etap">Organizacja i „Umowa na lekcję”</td><td>Powitanie, temat i cel w języku ucznia. Przeczytaj „Umowę na lekcję” i zapisz ją na tablicy.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Rozgrzewka TAK/NIE</td><td>Czytasz zdania, uczniowie odpowiadają gestem: TAK = ręce w górę, NIE = ręce skrzyżowane. Po każdym zdaniu podaj krótko prawidłową odpowiedź.
+      <ul>
+        <li>„Najlepszy przyjaciel może znać moje hasło.” <strong>NIE</strong></li>
+        <li>„Gdy kolega pisze dziwnie, warto zapytać go na żywo.” <strong>TAK</strong></li>
+        <li>„Wymiana «ty pierwszy» jest bezpieczna, jeśli ktoś jest miły.” <strong>NIE</strong></li>
+        <li>„Mogę wysłać plik z przeglądarki komuś, kto obiecuje darmowy rysunek.” <strong>NIE</strong></li>
+        <li>„Weryfikacja dwuetapowa pomaga chronić konto.” <strong>TAK</strong></li>
+      </ul></td></tr>
+    <tr><td class="min">14</td><td class="etap">Ćwiczenie 1 „Detektyw” (pary, karta 2A)</td><td><strong>8 min:</strong> pary zakreślają czerwone flagi na 6 makietach i zaznaczają: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.<br><strong>6 min:</strong> omówienie na planszach 2.1-2.3. Przy każdej makiecie pytaj: „Po czym poznajesz?”. Podkreśl, dlaczego 2.2 i 2.5 są uczciwe: wymiana odbywa się w oficjalnym oknie, gdzie obie strony widzą przedmioty, a powiadomienie o logowaniu, którego sam się spodziewasz, nie ma linku i odsyła do aplikacji.</td></tr>
+    <tr><td class="min">6</td><td class="etap">Ćwiczenie 2 „Co zrobisz?” (trójki, karty 2B)</td><td>Każda trójka losuje jedną kartę ze swojego kompletu. <strong>3 min:</strong> ustalają, czy to oszustwo i co zrobią. <strong>3 min:</strong> szybka runda odpowiedzi, nauczyciel uzupełnia z klucza.</td></tr>
+    <tr><td class="min">6</td><td class="etap">Ćwiczenie 3: scenka „Nie odmawiam grzecznie, odmawiam pewnie” (pary, karty 2C)</td><td>Osoba A czyta tylko zdania z karty, osoba B ćwiczy odmowę gotowymi zdaniami: pewnym głosem, krótko, bez tłumaczenia się. Po jednej scence zamiana ról. Na koniec 2-3 pary pokazują odmowę klasie (chętni).</td></tr>
+    <tr><td class="min">6</td><td class="etap">Quiz 2D bez ocen</td><td>Uczniowie odpowiadają sami, potem sprawdzają, gdy czytasz odpowiedzi z klucza. Wyników nie zbierasz.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Podsumowanie</td><td>Plansza 2.4 „Mój klucz” i zasada „Kod i hasło są jak klucz do domu. Nikomu ich nie daję.” Powiedz do klasy: <em>„Jeśli coś takiego ci się przytrafiło i nie chcesz mówić przy klasie, porozmawiaj ze mną albo z pedagogiem po lekcji.”</em> Rozdaj kartę 2E.</td></tr>
+  </table>
+
+  <div class="box red ramka-ujawnienie">
+    <span class="lbl red"><span class="ico">🚨</span>Jeśli uczeń ujawni, że to mu się przytrafiło</span>
+    <ul class="small">
+      <li>Nie dopytuj przy klasie i nie proś o pokazanie telefonu ani prywatnych wiadomości.</li>
+      <li>Podziękuj krótko i powiedz: „Dobrze, że mówisz. Porozmawiaj ze mną po lekcji”.</li>
+      <li>Po lekcji postępuj według „Rozdział dla nauczyciela” w poradniku (str. 16) i szkolnych standardów ochrony małoletnich. Gdy wyciekło hasło lub kod, rodzic powinien od razu zmienić hasło i włączyć weryfikację dwuetapową.</li>
+      <li>Przy bezpośrednim zagrożeniu dziecka dzwoń na 112.</li>
+    </ul>
+  </div>
+
+  <div class="two">
+    <div class="box grey uwagi-spe">
+      <span class="lbl blue"><span class="ico">🧩</span>Uwagi do realizacji / SPE</span>
+      <p class="small">Makiety czytaj na głos. W scence uczeń może tylko przeczytać gotowe zdanie odmowy. Łącz uczniów w pary mieszane. Bez punktów i rywalizacji między grupami.</p>
+    </div>
+    <div class="box amber do-domu-ref">
+      <span class="lbl amber"><span class="ico">🏠</span>Karta do domu</span>
+      <p class="small">Na koniec rozdaj kartę 2E (karta do domu). Uczeń rozmawia z rodzicem o zabezpieczeniu konta i zasadzie lekcji.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KLUCZ ============ -->
+<section class="page klucz" data-lesson="2">
+  <h2>Klucz odpowiedzi: lekcja 2</h2>
+  <h3>Makiety 2.1-2.6 (plansze 2.1-2.3, karta 2A)</h3>
+  <table>
+    <tr><th style="width:8mm">nr</th><th style="width:19mm">ocena</th><th>czerwone flagi albo dlaczego jest uczciwa</th><th style="width:66mm">dobra reakcja</th></tr>
+    <tr><td class="k">2.1</td><td><strong>oszustwo</strong></td><td>wymiana poza oknem wymiany, „ty wysyłasz pierwszy”, granie na litości („już raz zostałem oszukany”)</td><td>Nie wysyłam pierwszy. Wymieniam tylko w oknie wymiany w grze albo rezygnuję.</td></tr>
+    <tr><td class="k">2.2</td><td><strong>uczciwa</strong></td><td>oficjalne okno wymiany, obie strony widzą przedmioty i potwierdzają, nikt nie każe dawać pierwszemu</td><td>Sprawdzam przedmioty w oknie i potwierdzam tylko, gdy wymiana mi pasuje.</td></tr>
+    <tr><td class="k">2.3</td><td><strong>oszustwo</strong></td><td>„darmowe”, nieznajomy, prośba o plik z przeglądarki, którego nie rozumiem, „resztę ogarnę”</td><td>Nie wysyłam pliku, kończę rozmowę, mówię dorosłemu. Taki plik może dać obcemu dostęp do konta bez hasła.</td></tr>
+    <tr><td class="k">2.4</td><td><strong>oszustwo</strong></td><td>kolega pisze inaczej niż zwykle, logowanie przez link, literówka w adresie (l zamiast i), prośba o przysługę</td><td>Nie loguję się, pytam kolegę na żywo albo telefonicznie. Jego konto mogło zostać przejęte: mówię dorosłemu.</td></tr>
+    <tr><td class="k">2.5</td><td><strong>uczciwa</strong></td><td>sam się właśnie logujesz na nowym telefonie, brak linku, wiadomość odsyła do aplikacji</td><td>Wszystko w porządku. Gdyby to nie byłem ja: mówię rodzicowi i razem zmieniamy hasło w aplikacji.</td></tr>
+    <tr><td class="k">2.6</td><td><strong>oszustwo</strong></td><td>prośba o login i hasło, „pożycz konto”, obietnica nagrody („wbiję ci level”), „nikomu nie powiem”</td><td>Nie pożyczam konta i nie podaję hasła nikomu. Blokuję, zgłaszam, mówię dorosłemu.</td></tr>
+  </table>
+
+  <h3>Karty 2B „Co zrobisz?”: proponowane reakcje</h3>
+  <table>
+    <tr><th style="width:8mm"></th><th style="width:19mm">ocena</th><th>proponowana reakcja</th></tr>
+    <tr><td class="k">A</td><td><strong>oszustwo</strong></td><td>Kto każe wyłączyć antywirusa, jest oszustem. Niczego nie pobieram, mówię dorosłemu.</td></tr>
+    <tr><td class="k">B</td><td><strong>oszustwo</strong></td><td>Hasła nie daję nawet przyjacielowi. Gramy razem, każdy na swoim koncie.</td></tr>
+    <tr><td class="k">C</td><td><strong>oszustwo</strong></td><td>Groźba usunięcia konta i prośba o kod zapasowy. Nie podaję, blokuję, zgłaszam, mówię dorosłemu.</td></tr>
+    <tr><td class="k">D</td><td><strong>oszustwo</strong></td><td>„Pośrednik” drugiej strony to zwykle wspólnik. Wymieniam tylko w oknie wymiany.</td></tr>
+    <tr><td class="k">E</td><td><strong>uczciwa</strong></td><td>Rodzic pomaga chronić konto. Włączamy razem; kodów zapasowych nikomu nie podaję.</td></tr>
+    <tr><td class="k">F</td><td><strong>uczciwa</strong></td><td>Znam kolegę z ławki i mówi mi to na żywo. Mogę go dodać.</td></tr>
+  </table>
+
+  <h3>Scenka 2C: wzorcowe odpowiedzi</h3>
+  <p class="small">Osoba B mówi gotowe zdanie z karty pewnym głosem i nie tłumaczy się. Gdy A naciska drugi raz, B powtarza odmowę i kończy rozmowę: „Nie. Kończę rozmowę”. Każda odmowa z karty jest dobra; zamiana ról pozwala przećwiczyć ją obu osobom.</p>
+
+  <h3>Quiz 2D</h3>
+  <p><strong>1:</strong> B &nbsp;·&nbsp; <strong>2:</strong> A &nbsp;·&nbsp; <strong>3:</strong> C &nbsp;·&nbsp; <strong>4:</strong> A (to ty się logujesz; gdyby nie ty, mówisz rodzicowi i zmieniacie hasło).</p>
+
+  <div class="box green">
+    <p style="margin:0"><strong>Odpowiedź „nie wiem, zapytam dorosłego” to zawsze dobra reakcja, nie błąd.</strong></p>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: PLANSZA 2.1 ============ -->
+<section class="page plansza" data-lesson="2">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 2.1 · Lekcja 2</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--czat-gry" data-lesson="2" data-example="scam">
+      <div class="mock-head"><span class="mock-no">2.1</span><span class="ini">PK</span><span class="nick">PetKing_2014</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Dam ci mojego legendarnego peta za twój miecz. Ale ty wysyłasz pierwszy, bo ja już raz zostałem oszukany <span class="emo">😢</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--powiadomienie" data-lesson="2" data-example="honest">
+      <div class="mock-head"><span class="mock-no">2.2</span><span class="shield"></span><span class="nick">Wymiana w grze</span><span class="ch">powiadomienie</span></div>
+      <div class="mock-body">Gracz Ola_Buduje proponuje wymianę: twój miecz ↔ jej pet. Obie strony widzą przedmioty i muszą potwierdzić.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 2: PLANSZA 2.2 ============ -->
+<section class="page plansza" data-lesson="2">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 2.2 · Lekcja 2</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--komunikator" data-lesson="2" data-example="scam">
+      <div class="mock-head"><span class="mock-no">2.3</span><span class="ini">GA</span><span class="nick">GFX_Artysta</span><span class="ch">komunikator</span></div>
+      <div class="mock-body">Zrobię ci darmowy render 3D twojego awatara! Wyślij mi tylko plik z przeglądarki, resztę ogarnę.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--komunikator" data-lesson="2" data-example="scam">
+      <div class="mock-ctx">Pisze kolega z klasy, ale zwykle pisze inaczej.</div>
+      <div class="mock-head"><span class="mock-no">2.4</span><span class="ini">K</span><span class="nick">Kuba_5b</span><span class="ch">komunikator</span></div>
+      <div class="mock-body">Siema, robię konkurs w szkole, zagłosujesz na mnie? Zaloguj się tutaj: <span class="dom">dlscord-glosowanie[.]example</span> <span class="emo">🙏</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 2: PLANSZA 2.3 ============ -->
+<section class="page plansza" data-lesson="2">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 2.3 · Lekcja 2</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--powiadomienie" data-lesson="2" data-example="honest">
+      <div class="mock-ctx" style="color:#DCE7FB">Właśnie logujesz się na nowym telefonie.</div>
+      <div class="mock-head"><span class="mock-no">2.5</span><span class="shield"></span><span class="nick">Bezpieczeństwo konta</span><span class="ch">powiadomienie</span></div>
+      <div class="mock-body">Nowe logowanie na twoim koncie: telefon. Jeśli to nie ty, otwórz aplikację i zmień hasło.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--czat-gry" data-lesson="2" data-example="scam">
+      <div class="mock-head"><span class="mock-no">2.6</span><span class="ini">PG</span><span class="nick">ProGracz_99</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Pożycz mi konto na godzinę, wbiję ci level. Podaj login i hasło, nikomu nie powiem.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 2: PLANSZA 2.4 ============ -->
+<section class="page plansza" data-lesson="2">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 2.4 · Mój klucz</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-flags">
+    <div class="flag ok"><div class="fi">🔑</div><h3>Hasło i kody: nikomu</h3><p>hasło, kod z SMS-a, kod zapasowy</p></div>
+    <div class="flag ok"><div class="fi">📁</div><h3>Plik z przeglądarki: nikomu</h3><p>nie wysyłam plików ani kodów, których nie rozumiem; pytam dorosłego</p></div>
+    <div class="flag ok"><div class="fi">👤</div><h3>Konta nie pożyczam</h3><p>nawet najlepszemu przyjacielowi</p></div>
+    <div class="flag ok"><div class="fi">🔄</div><h3>Wymiana tylko w oknie wymiany</h3><p>nigdy „ty pierwszy” ani przez „pośrednika”</p></div>
+    <div class="flag ok"><div class="fi">📞</div><h3>Dziwna prośba kolegi?</h3><p>sprawdź na żywo albo telefonicznie</p></div>
+    <div class="flag"><div class="fi">⚠️</div><h3>„Wyłącz antywirusa”</h3><p>kto tak każe, jest oszustem</p></div>
+  </div>
+  <div class="pl-rule">
+    <div class="r long">Kod i hasło są jak klucz do domu. <span>Nikomu ich nie daję.</span></div>
+    <img src="../../../assets/Scamerino_Alertinio.png" alt="Scamerinio Alertinio">
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KARTA 2A ============ -->
+<section class="page ws ws--detektyw" data-lesson="2">
+  <div class="ws-top"><span>Lekcja 2 · karta pracy</span><span>Imiona: <span class="line"></span> Klasa: <span class="line short"></span></span></div>
+  <h2>Karta pracy 2A: Detektyw</h2>
+  <p class="ws-instr">Zakreśl czerwone flagi. Zaznacz: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.</p>
+  <div class="ws-grid">
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="2" data-example="scam">
+        <div class="mock-head"><span class="mock-no">2.1</span><span class="ini">PK</span><span class="nick">PetKing_2014</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Dam ci mojego legendarnego peta za twój miecz. Ale ty wysyłasz pierwszy, bo ja już raz zostałem oszukany <span class="emo">😢</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--powiadomienie" data-lesson="2" data-example="honest">
+        <div class="mock-head"><span class="mock-no">2.2</span><span class="shield"></span><span class="nick">Wymiana w grze</span><span class="ch">powiadomienie</span></div>
+        <div class="mock-body">Gracz Ola_Buduje proponuje wymianę: twój miecz ↔ jej pet. Obie strony widzą przedmioty i muszą potwierdzić.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--komunikator" data-lesson="2" data-example="scam">
+        <div class="mock-head"><span class="mock-no">2.3</span><span class="ini">GA</span><span class="nick">GFX_Artysta</span><span class="ch">komunikator</span></div>
+        <div class="mock-body">Zrobię ci darmowy render 3D twojego awatara! Wyślij mi tylko plik z przeglądarki, resztę ogarnę.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--komunikator" data-lesson="2" data-example="scam">
+        <div class="mock-ctx">Pisze kolega z klasy, ale zwykle pisze inaczej.</div>
+        <div class="mock-head"><span class="mock-no">2.4</span><span class="ini">K</span><span class="nick">Kuba_5b</span><span class="ch">komunikator</span></div>
+        <div class="mock-body">Siema, robię konkurs w szkole, zagłosujesz na mnie? Zaloguj się tutaj: <span class="dom">dlscord-glosowanie[.]example</span> <span class="emo">🙏</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--powiadomienie" data-lesson="2" data-example="honest">
+        <div class="mock-ctx">Właśnie logujesz się na nowym telefonie.</div>
+        <div class="mock-head"><span class="mock-no">2.5</span><span class="shield"></span><span class="nick">Bezpieczeństwo konta</span><span class="ch">powiadomienie</span></div>
+        <div class="mock-body">Nowe logowanie na twoim koncie: telefon. Jeśli to nie ty, otwórz aplikację i zmień hasło.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="2" data-example="scam">
+        <div class="mock-head"><span class="mock-no">2.6</span><span class="ini">PG</span><span class="nick">ProGracz_99</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Pożycz mi konto na godzinę, wbiję ci level. Podaj login i hasło, nikomu nie powiem.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KARTA 2B ============ -->
+<section class="page ws ws--karty" data-lesson="2">
+  <div class="ws-top"><span>Lekcja 2 · karta pracy</span><span>Grupa: <span class="line"></span></span></div>
+  <h2>Karta pracy 2B: Co zrobisz?</h2>
+  <p class="ws-instr"><span class="scissors">✂</span> Wytnij karty wzdłuż przerywanych linii. Każda trójka losuje jedną kartę.</p>
+  <div class="dgrid">
+    <div class="dcard" data-lesson="2" data-example="scam">
+      <div class="dl">A</div>
+      <div class="sit">Ktoś oferuje program na nieskończone życie w grze: „100% bez bana, tylko wyłącz antywirusa”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="2" data-example="scam">
+      <div class="dl">B</div>
+      <div class="sit">Przyjaciel prosi o twoje hasło, „bo pomoże ci przejść poziom”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="2" data-example="scam">
+      <div class="dl">C</div>
+      <div class="sit">Ktoś pisze na czacie: „Wyślij mi kod zapasowy, inaczej twoje konto zostanie usunięte”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="2" data-example="scam">
+      <div class="dl">D</div>
+      <div class="sit">Przy wymianie druga strona poleca „pośrednika”. Pośrednik chce dostać twoje przedmioty na przechowanie.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="2" data-example="honest">
+      <div class="dl">E</div>
+      <div class="sit">Rodzic proponuje, żebyście razem włączyli weryfikację dwuetapową na twoim koncie.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="2" data-example="honest">
+      <div class="dl">F</div>
+      <div class="sit">Kolega z ławki mówi na przerwie: „Dodaj mnie w grze, mój nick to Kuba_Gra”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 2: KARTA 2C ============ -->
+<section class="page ws ws--scenka" data-lesson="2">
+  <div class="ws-top"><span>Lekcja 2 · karta pracy</span><span>Para: <span class="line"></span></span></div>
+  <h2>Karta pracy 2C: Scenka. Odmawiam pewnie</h2>
+  <div class="scenka-zasada">Osoba A czyta tylko zdania z karty. Nie wymyślamy nowych sztuczek, ćwiczymy odmowę.</div>
+  <p class="ws-instr"><span class="scissors">✂</span> Wytnij karty. Osoba A czyta swoje zdania, osoba B odmawia pewnym głosem. Potem zamieńcie się rolami.</p>
+
+  <div class="rola">
+    <div class="rl-title">Scenka 1: „Pożycz konto”</div>
+    <div class="rl-sides">
+      <div class="rl-side">
+        <div class="rl-who">Osoba A (czyta tylko to)</div>
+        <p class="say">„Pożycz mi konto na godzinę, wbiję ci level.”</p>
+        <p class="say">„No weź, przecież jesteśmy kumplami.”</p>
+      </div>
+      <div class="rl-side">
+        <div class="rl-who">Osoba B (odmawia)</div>
+        <p class="say">„Nie pożyczam konta nikomu, nawet przyjacielowi.”</p>
+        <p class="say">„Możemy zagrać razem, każdy na swoim koncie.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rola">
+    <div class="rl-title">Scenka 2: „Wyślij plik”</div>
+    <div class="rl-sides">
+      <div class="rl-side">
+        <div class="rl-who">Osoba A (czyta tylko to)</div>
+        <p class="say">„Wyślij mi plik z przeglądarki, zrobię ci darmowy rysunek awatara.”</p>
+      </div>
+      <div class="rl-side">
+        <div class="rl-who">Osoba B (odmawia)</div>
+        <p class="say">„Nie wysyłam plików, których nie rozumiem. Zapytam dorosłego.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rola">
+    <div class="rl-title">Scenka 3: „Ty pierwszy”</div>
+    <div class="rl-sides">
+      <div class="rl-side">
+        <div class="rl-who">Osoba A (czyta tylko to)</div>
+        <p class="say">„Wyślij pierwszy, ja potem.”</p>
+      </div>
+      <div class="rl-side">
+        <div class="rl-who">Osoba B (odmawia)</div>
+        <p class="say">„Wymieniam tylko w oknie wymiany w grze. Inaczej rezygnuję.”</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="ws-instr" style="margin-top:4mm">Odmawiam pewnie: patrzę na rozmówcę, mówię krótko i nie tłumaczę się. Gdy ktoś naciska, powtarzam „Nie” i kończę rozmowę.</p>
+</section>
+
+<!-- ============ LEKCJA 2: KARTA 2D ============ -->
+<section class="page ws ws--quiz" data-lesson="2">
+  <div class="ws-top"><span>Lekcja 2 · karta pracy</span><span>Imię: <span class="line"></span></span></div>
+  <h2>Karta pracy 2D: Quiz bez ocen</h2>
+  <p class="ws-instr">Zakreśl jedną odpowiedź. To nie jest sprawdzian: nie ma ocen ani punktów. Sprawdzisz się sam, gdy nauczyciel przeczyta odpowiedzi.</p>
+  <div class="q">
+    <div class="qt">1. Kolega pisze inaczej niż zwykle i prosi, żebyś zalogował się przez link „do konkursu”. Co zrobisz?</div>
+    <ol><li>Loguję się, przecież to kolega.</li><li>Sprawdzam u niego na żywo albo telefonicznie, zanim cokolwiek zrobię.</li><li>Wysyłam link innym kolegom.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">2. Ktoś obiecuje ci darmowy rysunek awatara, jeśli wyślesz mu plik z przeglądarki. Co zrobisz?</div>
+    <ol><li>Nie wysyłam i pytam dorosłego.</li><li>Wysyłam, bo rysunek jest za darmo.</li><li>Wysyłam, jeśli obieca, że odda rysunek jutro.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">3. Jak bezpiecznie wymienić się przedmiotem w grze?</div>
+    <ol><li>Wysyłam pierwszy, jeśli druga osoba jest miła.</li><li>Daję przedmiot „pośrednikowi”, którego poleca druga strona.</li><li>Tylko w oknie wymiany w grze, gdzie obie strony widzą przedmioty.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">4. Dostajesz powiadomienie o nowym logowaniu, a to ty przed chwilą zalogowałeś się na nowym telefonie. Co to znaczy?</div>
+    <ol><li>Wszystko w porządku. Gdyby to nie byłeś ty, mówisz rodzicowi i zmieniacie hasło w aplikacji.</li><li>Trzeba odpisać i podać hasło, żeby potwierdzić.</li><li>Trzeba od razu usunąć konto.</li></ol>
+  </div>
+  <p class="ws-instr" style="margin-top:6mm">Pamiętaj: odpowiedź „nie wiem, zapytam dorosłego” jest zawsze dobra.</p>
+</section>
+
+<!-- ============ LEKCJA 2: KARTA 2E ============ -->
+<section class="page ws ws--do-domu" data-lesson="2">
+  <h2>Karta pracy 2E: Karta do domu</h2>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 2 „Moje konto, mój klucz”</h3>
+    <p>Dziś na lekcji uczyliśmy się chronić konto, kody i hasła.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>włączeniu weryfikacji dwuetapowej na twoim koncie;</li>
+      <li>e-mailu rodzica jako adresie do odzyskiwania konta;</li>
+      <li>„słowie-kluczu” z bliskimi na wypadek dziwnych próśb;</li>
+      <li>zasadzie lekcji (w ramce poniżej).</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Kod i hasło są jak klucz do domu. Nikomu ich nie daję.</div>
+  </div>
+  <div class="cutline"><span class="scissors">✂ wytnij</span></div>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 2 „Moje konto, mój klucz”</h3>
+    <p>Dziś na lekcji uczyliśmy się chronić konto, kody i hasła.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>włączeniu weryfikacji dwuetapowej na twoim koncie;</li>
+      <li>e-mailu rodzica jako adresie do odzyskiwania konta;</li>
+      <li>„słowie-kluczu” z bliskimi na wypadek dziwnych próśb;</li>
+      <li>zasadzie lekcji (w ramce poniżej).</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Kod i hasło są jak klucz do domu. Nikomu ich nie daję.</div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KONSPEKT A ============ -->
+<section class="page konspekt" data-lesson="3">
+  <div class="lesson-head">
+    <div class="lesson-num">3</div>
+    <div>
+      <h2>Lekcja 3: Obcy, presja i sekrety</h2>
+      <div class="tags"><span class="pill blue">klasy 4-8</span><span class="pill amber">45 min</span><span class="pill green">bez komputerów</span></div>
+    </div>
+    <img class="scen-ava" src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+
+  <div class="box blue warto-wiedziec">
+    <span class="lbl blue"><span class="ico">💡</span>Warto wiedzieć</span>
+    <p class="small">Obcy zwykle zaczynają rozmowę w grze, a potem namawiają dziecko do przejścia na inny komunikator, gdzie jest mniej moderacji. Budują zaufanie komplementami i prezentami (np. walutą w grze), proszą o sekret, a potem o zdjęcia, dane (szkoła, adres) albo pieniądze [1]. Osobny, częsty schemat to wyłudzanie kodów BLIK: oszust pisze z przejętego konta kogoś bliskiego i prosi o pilną „pożyczkę” [3][4].</p>
+    <p class="small">Dzieci wchodzą w takie relacje z samotności albo potrzeby bycia docenionym. Dlatego rozmawiaj bez obwiniania: winny jest ten, kto oszukuje, a nie dziecko [8].</p>
+    <p class="small muted">Numery w nawiasach odsyłają do listy „Źródła” na końcu pakietu.</p>
+  </div>
+
+  <div class="two">
+    <div class="box grey cele">
+      <span class="lbl blue"><span class="ico">🎯</span>Cele lekcji</span>
+      <p class="small"><strong>Uczeń potrafi:</strong></p>
+      <ul class="small">
+        <li>rozpoznać sygnały: przejście poza grę, prezenty, sekret, prośba o zdjęcie lub dane szkoły i adresu, pieniądze i BLIK, propozycja spotkania;</li>
+        <li>odmówić i zakończyć rozmowę;</li>
+        <li>wymienić co najmniej dwie osoby i jeden numer telefonu, do których zwróci się o pomoc;</li>
+        <li>wyjaśnić, że sekret od kogoś z internetu wolno i trzeba zdradzić.</li>
+      </ul>
+    </div>
+    <div class="box grey cele-ucznia">
+      <span class="lbl blue"><span class="ico">🗣️</span>Cele w języku ucznia</span>
+      <p class="small"><strong>Dziś nauczysz się mówić „nie” i prosić o pomoc.</strong></p>
+      <p class="small"><strong>Po lekcji umiesz:</strong> rozpoznać, kiedy ktoś z internetu cię naciska, zakończyć rozmowę i powiedzieć, do kogo pójdziesz po pomoc. Znasz zasadę „Sekret od kogoś z internetu = mówię zaufanemu dorosłemu”.</p>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="box amber umowa">
+      <span class="lbl amber"><span class="ico">🤝</span>Umowa na lekcję</span>
+      <p class="small">Przeczytaj na początku i zapisz na tablicy:</p>
+      <ul class="small">
+        <li>słucham i nie oceniam;</li>
+        <li>szanuję innych i nie rozpowiadam tego, co powiedzą;</li>
+        <li>nie muszę mówić o sobie;</li>
+        <li>pytam, gdy czegoś nie wiem.</li>
+      </ul>
+    </div>
+    <div class="box green materialy">
+      <span class="lbl green"><span class="ico">📦</span>Materiały</span>
+      <ul class="small">
+        <li>plansze 3.1-3.4 (rzutnik, kolorowy wydruk albo tablica);</li>
+        <li>karta 3A: 1 na parę;</li>
+        <li>karty 3B: 1 komplet pocięty na trójkę;</li>
+        <li>karty ról 3C: 1 komplet pocięty na trójkę;</li>
+        <li>quiz 3D: 1 na ucznia albo odczytany na głos;</li>
+        <li>karta 3E: pół A4 na ucznia.</li>
+      </ul>
+      <p class="small" style="margin-top:1.5mm"><strong>Bez komputerów i telefonów dla uczniów.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KONSPEKT B ============ -->
+<section class="page konspekt" data-lesson="3">
+  <h2>Lekcja 3: przebieg (45 min)</h2>
+  <table class="przebieg">
+    <tr><th style="width:11mm">min</th><th style="width:34mm">etap</th><th>co robią nauczyciel i uczniowie</th></tr>
+    <tr><td class="min">3</td><td class="etap">Organizacja i „Umowa na lekcję”</td><td>Powitanie, temat i cel w języku ucznia. Przeczytaj „Umowę na lekcję” i zapisz ją na tablicy.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Rozgrzewka TAK/NIE</td><td>Czytasz zdania, uczniowie odpowiadają gestem: TAK = ręce w górę, NIE = ręce skrzyżowane. Po każdym zdaniu podaj krótko prawidłową odpowiedź.
+      <ul>
+        <li>„Osoba poznana w grze może poprosić, żebym nie mówił rodzicom.” <strong>NIE</strong></li>
+        <li>„Mogę zablokować i zgłosić kogoś, kto mnie naciska.” <strong>TAK</strong></li>
+        <li>„Kod BLIK można podać cioci przez wiadomość.” <strong>NIE</strong></li>
+        <li>„Jeśli powiem dorosłemu, dostanę karę.” <strong>NIE</strong> (dorosły ma pomóc)</li>
+        <li>„116 111 to bezpłatny telefon dla dzieci.” <strong>TAK</strong></li>
+      </ul></td></tr>
+    <tr><td class="min">12</td><td class="etap">Ćwiczenie 1 „Detektyw” (pary, karta 3A)</td><td><strong>7 min:</strong> pary zakreślają czerwone flagi na 6 makietach i zaznaczają: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.<br><strong>5 min:</strong> omówienie na planszach 3.1-3.3. Podkreśl, dlaczego 3.2 i 3.5 są uczciwe: Olę znasz ze szkoły i możesz to potwierdzić na żywo, a tata pisze z zapisanego numeru i nie prosi o kod, pieniądze ani sekret.</td></tr>
+    <tr><td class="min">6</td><td class="etap">Ćwiczenie 2 „Co zrobisz?” (trójki, karty 3B)</td><td>Każda trójka losuje jedną kartę ze swojego kompletu. <strong>3 min:</strong> ustalają, czy to oszustwo i co zrobią. <strong>3 min:</strong> szybka runda odpowiedzi, nauczyciel uzupełnia z klucza.</td></tr>
+    <tr><td class="min">8</td><td class="etap">Ćwiczenie 3: scenka „Mówię «nie» i proszę o pomoc” (trójki, karty 3C)</td><td><strong>5 min:</strong> trójki czytają scenkę z kart ról: A (nieznajomy) czyta tylko zdania z karty, B odmawia i idzie po pomoc, C (zaufany dorosły) odpowiada zdaniami z karty. <strong>3 min:</strong> omówienie planszy 3.4 „Kogo poprosić o pomoc”.</td></tr>
+    <tr><td class="min">6</td><td class="etap">Quiz 3D bez ocen</td><td>Uczniowie odpowiadają sami, potem sprawdzają, gdy czytasz odpowiedzi z klucza. Wyników nie zbierasz.</td></tr>
+    <tr><td class="min">5</td><td class="etap">Podsumowanie</td><td>Zasada „Sekret od kogoś z internetu = mówię zaufanemu dorosłemu.” Powiedz do klasy: <em>„Jeśli coś takiego ci się przytrafiło i nie chcesz mówić przy klasie, porozmawiaj ze mną albo z pedagogiem po lekcji.”</em> Rozdaj kartę 3E.</td></tr>
+  </table>
+
+  <div class="box red ramka-ujawnienie">
+    <span class="lbl red"><span class="ico">🚨</span>Jeśli uczeń ujawni, że to mu się przytrafiło</span>
+    <ul class="small">
+      <li>Nie dopytuj przy klasie, nie proś o pokazanie telefonu ani prywatnych wiadomości i nie pytaj klasy, kto pisał z obcymi.</li>
+      <li>Podziękuj krótko i powiedz: „Dobrze, że mówisz. Porozmawiaj ze mną po lekcji”.</li>
+      <li><strong>Gdy uczeń mówi o obcym dorosłym, spotkaniu, szantażu lub zdjęciach:</strong> po lekcji od razu uruchom procedurę ze szkolnych standardów ochrony małoletnich i powiadom osobę wyznaczoną w szkole.</li>
+      <li>W pozostałych sprawach postępuj według „Rozdział dla nauczyciela” w poradniku (str. 16).</li>
+      <li>Przy bezpośrednim zagrożeniu dziecka dzwoń na 112.</li>
+    </ul>
+  </div>
+
+  <div class="two">
+    <div class="box grey uwagi-spe">
+      <span class="lbl blue"><span class="ico">🧩</span>Uwagi do realizacji / SPE</span>
+      <p class="small">Makiety czytaj na głos. W scence każdy może zostać przy czytaniu gotowych zdań. Nikt nie gra osoby skrzywdzonej. Bez dotyku i bez odgrywania spotkań. Bez punktów i rywalizacji.</p>
+    </div>
+    <div class="box amber do-domu-ref">
+      <span class="lbl amber"><span class="ico">🏠</span>Karta do domu</span>
+      <p class="small">Na koniec rozdaj kartę 3E (karta do domu). Uczeń rozmawia z rodzicem o tym, z kim gra w internecie i do kogo może przyjść z problemem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KLUCZ ============ -->
+<section class="page klucz" data-lesson="3">
+  <h2>Klucz odpowiedzi: lekcja 3</h2>
+  <h3>Makiety 3.1-3.6 (plansze 3.1-3.3, karta 3A)</h3>
+  <table>
+    <tr><th style="width:8mm">nr</th><th style="width:19mm">ocena</th><th>czerwone flagi albo dlaczego jest uczciwa</th><th style="width:66mm">dobra reakcja</th></tr>
+    <tr><td class="k">3.1</td><td><strong>oszustwo</strong></td><td>przejście z gry na inny komunikator, „za dużo moderacji”, darmowe itemy, „nie mów rodzicom”, sekret</td><td>Nie przechodzę, kończę rozmowę, blokuję i zgłaszam. Mówię zaufanemu dorosłemu.</td></tr>
+    <tr><td class="k">3.2</td><td><strong>uczciwa</strong></td><td>Olę znam ze szkoły, mogę potwierdzić na żywo; zwykłe zaproszenie do gry, bez prezentów, sekretów i próśb</td><td>Mogę dodać. Gdy mam wątpliwości, pytam Olę w szkole.</td></tr>
+    <tr><td class="k">3.3</td><td><strong>oszustwo</strong></td><td>nieznajoma osoba, prośba o zdjęcie i nazwę szkoły, prezent w zamian</td><td>Nie wysyłam zdjęcia ani danych, kończę rozmowę, blokuję, mówię dorosłemu.</td></tr>
+    <tr><td class="k">3.4</td><td><strong>oszustwo</strong></td><td>pośpiech, prośba o kod BLIK, „nie dzwoń”, ciocia zwykle tak nie pisze: jej konto mogło zostać przejęte</td><td>Kodu nie podaję. Dzwonię do cioci albo mówię rodzicowi.</td></tr>
+    <tr><td class="k">3.5</td><td><strong>uczciwa</strong></td><td>zapisany numer taty, zwykła informacja, brak prośby o kod, pieniądze czy sekret</td><td>Czekam na tatę. Gdy coś się zmieni, dzwonię.</td></tr>
+    <tr><td class="k">3.6</td><td><strong>oszustwo</strong></td><td>propozycja spotkania z osobą znaną tylko z internetu, prezent, „nikomu nie mów”</td><td>Nie spotykam się z osobą znaną tylko z internetu. Od razu mówię dorosłemu.</td></tr>
+  </table>
+
+  <h3>Karty 3B „Co zrobisz?”: proponowane reakcje</h3>
+  <table>
+    <tr><th style="width:8mm"></th><th style="width:19mm">ocena</th><th>proponowana reakcja</th></tr>
+    <tr><td class="k">A</td><td><strong>oszustwo</strong></td><td>Komplementy i prośba o sekret przed rodzicami to sygnał ostrzegawczy. Mówię zaufanemu dorosłemu.</td></tr>
+    <tr><td class="k">B</td><td><strong>oszustwo</strong></td><td>Szantaż. Przerywam kontakt i nic nie wysyłam. Niczego nie usuwam, mówię dorosłemu; mogę też zadzwonić na 116 111.</td></tr>
+    <tr><td class="k">C</td><td><strong>oszustwo</strong></td><td>Danych karty rodzica nie podaję nikomu. Kończę rozmowę, mówię rodzicowi.</td></tr>
+    <tr><td class="k">D</td><td><strong>oszustwo</strong></td><td>„Tu nas podsłuchują” to wymówka, żeby wyjść spod moderacji. Nie przechodzę, mówię dorosłemu.</td></tr>
+    <tr><td class="k">E</td><td><strong>uczciwa</strong></td><td>Trener pisze w grupie z rodzicami, zwykła informacja. Mówię rodzicowi o zmianie godziny.</td></tr>
+    <tr><td class="k">F</td><td><strong>uczciwa</strong></td><td>Kuzyna znam, gramy przy rodzicach. Mogę dołączyć do drużyny.</td></tr>
+  </table>
+
+  <h3>Scenka 3C: wzorcowy przebieg</h3>
+  <p class="small">A czyta pierwsze zdanie, B odmawia („Nie przechodzę na inne aplikacje”). A naciska („to nasz sekret”), B odpowiada „Nie mam sekretów przed rodzicami” i kończy rozmowę. Potem B mówi o wszystkim C, a C odpowiada spokojnie zdaniami z karty. Ważne: B nie tłumaczy się obcemu i nie dotrzymuje sekretu.</p>
+
+  <h3>Quiz 3D</h3>
+  <p><strong>1:</strong> B &nbsp;·&nbsp; <strong>2:</strong> C &nbsp;·&nbsp; <strong>3:</strong> A &nbsp;·&nbsp; <strong>4:</strong> B &nbsp;·&nbsp; <strong>5:</strong> A, B i C (pomóc mogą wszyscy).</p>
+
+  <div class="box green">
+    <p style="margin:0"><strong>Odpowiedź „nie wiem, zapytam dorosłego” to zawsze dobra reakcja, nie błąd.</strong></p>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: PLANSZA 3.1 ============ -->
+<section class="page plansza" data-lesson="3">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 3.1 · Lekcja 3</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--czat-gry" data-lesson="3" data-example="scam">
+      <div class="mock-head"><span class="mock-no">3.1</span><span class="ini">WG</span><span class="nick">Wojtek_Gamer88</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Fajnie się gra! Tu jest za dużo moderacji, napisz do mnie na Discordzie, dam ci tam darmowe itemy. Nie mów rodzicom, to nasza tajemnica.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--komunikator" data-lesson="3" data-example="honest">
+      <div class="mock-ctx">Ola chodzi do twojej szkoły, znasz ją z przerw.</div>
+      <div class="mock-head"><span class="mock-no">3.2</span><span class="ini">OB</span><span class="nick">OlaBuduje</span><span class="ch">komunikator</span></div>
+      <div class="mock-body">Hej, tu Ola z 5b, gramy jutro po szkole? Dodaj mnie, mój nick to OlaBuduje.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 3: PLANSZA 3.2 ============ -->
+<section class="page plansza" data-lesson="3">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 3.2 · Lekcja 3</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--komunikator" data-lesson="3" data-example="scam">
+      <div class="mock-head"><span class="mock-no">3.3</span><span class="ini">MS</span><span class="nick">Mila_Star</span><span class="ch">komunikator</span></div>
+      <div class="mock-body">Wyślesz mi swoje zdjęcie? Napisz, do której szkoły chodzisz, to podeślę ci 800 Robuxów <span class="emo">🎁</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--komunikator" data-lesson="3" data-example="scam">
+      <div class="mock-ctx">Pisze ciocia Ania, ale zwykle dzwoni, a nie pisze.</div>
+      <div class="mock-head"><span class="mock-no">3.4</span><span class="ini">CA</span><span class="nick">Ciocia Ania</span><span class="ch">komunikator</span></div>
+      <div class="mock-body">Pilne! Bank zablokował mi kartę. Podaj kod BLIK z telefonu mamy, oddam jutro. Nie dzwoń, nie mogę rozmawiać.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 3: PLANSZA 3.3 ============ -->
+<section class="page plansza" data-lesson="3">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 3.3 · Lekcja 3</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-grid">
+    <div class="mock mock--sms" data-lesson="3" data-example="honest">
+      <div class="mock-ctx">Zapisany kontakt w twoim telefonie.</div>
+      <div class="mock-head"><span class="mock-no">3.5</span><span class="ini">T</span><span class="nick">Tata</span><span class="ch">SMS</span></div>
+      <div class="mock-body"><span class="bubble">Będę po ciebie o 16:30 pod szkołą. Gdyby coś się zmieniło, zadzwoń.</span></div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+    <div class="mock mock--czat-gry" data-lesson="3" data-example="scam">
+      <div class="mock-head"><span class="mock-no">3.6</span><span class="ini">KP</span><span class="nick">Kamil_Pro</span><span class="ch">czat w grze</span></div>
+      <div class="mock-body">Spotkajmy się w sobotę w galerii, dam ci kartę podarunkową. Tylko nikomu nie mów.</div>
+      <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+    </div>
+  </div>
+  <div class="pl-q">Oszustwo czy nie? <span>Po czym poznajesz?</span></div>
+</section>
+
+<!-- ============ LEKCJA 3: PLANSZA 3.4 ============ -->
+<section class="page plansza" data-lesson="3">
+  <div class="pl-head">
+    <div class="pl-title">PLANSZA 3.4 · Kogo poprosić o pomoc</div>
+    <img src="../../../assets/widget-avatar/avatar-128.png" alt="">
+  </div>
+  <div class="pl-help">
+    <ol class="ladder">
+      <li><span class="st">1</span><div><h3>Rodzic lub opiekun</h3><p>Mówię od razu, nawet jeśli coś już kliknąłem albo wysłałem.</p></div></li>
+      <li><span class="st">2</span><div><h3>Inny zaufany dorosły</h3><p>wychowawca, pedagog, psycholog szkolny, ktoś z rodziny</p></div></li>
+      <li><span class="st">3</span><div><h3>116 111</h3><p>telefon zaufania dla dzieci i młodzieży: bezpłatny, anonimowy, całodobowy, także czat</p></div></li>
+    </ol>
+    <div class="help-side">
+      <div class="box red"><div class="big">112</div><p>gdy dzieje się coś groźnego teraz</p></div>
+      <div class="box green"><p><strong>Masz prawo wyjść z gry, zablokować i zgłosić. Mówiąc dorosłemu, nie dostajesz kary.</strong></p></div>
+    </div>
+  </div>
+  <div class="pl-rule">
+    <div class="r long">Sekret od kogoś z internetu = <span>mówię zaufanemu dorosłemu.</span></div>
+    <img src="../../../assets/Scamerino_Alertinio.png" alt="Scamerinio Alertinio">
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KARTA 3A ============ -->
+<section class="page ws ws--detektyw" data-lesson="3">
+  <div class="ws-top"><span>Lekcja 3 · karta pracy</span><span>Imiona: <span class="line"></span> Klasa: <span class="line short"></span></span></div>
+  <h2>Karta pracy 3A: Detektyw</h2>
+  <p class="ws-instr">Zakreśl czerwone flagi. Zaznacz: oszustwo, uczciwa albo nie wiem, zapytam dorosłego.</p>
+  <div class="ws-grid">
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="3" data-example="scam">
+        <div class="mock-head"><span class="mock-no">3.1</span><span class="ini">WG</span><span class="nick">Wojtek_Gamer88</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Fajnie się gra! Tu jest za dużo moderacji, napisz do mnie na Discordzie, dam ci tam darmowe itemy. Nie mów rodzicom, to nasza tajemnica.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--komunikator" data-lesson="3" data-example="honest">
+        <div class="mock-ctx">Ola chodzi do twojej szkoły, znasz ją z przerw.</div>
+        <div class="mock-head"><span class="mock-no">3.2</span><span class="ini">OB</span><span class="nick">OlaBuduje</span><span class="ch">komunikator</span></div>
+        <div class="mock-body">Hej, tu Ola z 5b, gramy jutro po szkole? Dodaj mnie, mój nick to OlaBuduje.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--komunikator" data-lesson="3" data-example="scam">
+        <div class="mock-head"><span class="mock-no">3.3</span><span class="ini">MS</span><span class="nick">Mila_Star</span><span class="ch">komunikator</span></div>
+        <div class="mock-body">Wyślesz mi swoje zdjęcie? Napisz, do której szkoły chodzisz, to podeślę ci 800 Robuxów <span class="emo">🎁</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--komunikator" data-lesson="3" data-example="scam">
+        <div class="mock-ctx">Pisze ciocia Ania, ale zwykle dzwoni, a nie pisze.</div>
+        <div class="mock-head"><span class="mock-no">3.4</span><span class="ini">CA</span><span class="nick">Ciocia Ania</span><span class="ch">komunikator</span></div>
+        <div class="mock-body">Pilne! Bank zablokował mi kartę. Podaj kod BLIK z telefonu mamy, oddam jutro. Nie dzwoń, nie mogę rozmawiać.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--sms" data-lesson="3" data-example="honest">
+        <div class="mock-ctx">Zapisany kontakt w twoim telefonie.</div>
+        <div class="mock-head"><span class="mock-no">3.5</span><span class="ini">T</span><span class="nick">Tata</span><span class="ch">SMS</span></div>
+        <div class="mock-body"><span class="bubble">Będę po ciebie o 16:30 pod szkołą. Gdyby coś się zmieniło, zadzwoń.</span></div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+    <div class="ws-item">
+      <div class="mock mock--czat-gry" data-lesson="3" data-example="scam">
+        <div class="mock-head"><span class="mock-no">3.6</span><span class="ini">KP</span><span class="nick">Kamil_Pro</span><span class="ch">czat w grze</span></div>
+        <div class="mock-body">Spotkajmy się w sobotę w galerii, dam ci kartę podarunkową. Tylko nikomu nie mów.</div>
+        <span class="mock-tag">przykład fikcyjny · ćwiczenie</span>
+      </div>
+      <div class="ans"><span class="box-chk">☐</span> oszustwo &nbsp; <span class="box-chk">☐</span> uczciwa &nbsp; <span class="box-chk">☐</span> nie wiem, zapytam dorosłego</div>
+      <div class="flags">Czerwone flagi: …</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KARTA 3B ============ -->
+<section class="page ws ws--karty" data-lesson="3">
+  <div class="ws-top"><span>Lekcja 3 · karta pracy</span><span>Grupa: <span class="line"></span></span></div>
+  <h2>Karta pracy 3B: Co zrobisz?</h2>
+  <p class="ws-instr"><span class="scissors">✂</span> Wytnij karty wzdłuż przerywanych linii. Każda trójka losuje jedną kartę.</p>
+  <div class="dgrid">
+    <div class="dcard" data-lesson="3" data-example="scam">
+      <div class="dl">A</div>
+      <div class="sit">Nowy znajomy z gry codziennie pisze, że jesteś najlepszym graczem, i prosi, żebyś nie mówił rodzicom o waszych rozmowach.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="3" data-example="scam">
+      <div class="dl">B</div>
+      <div class="sit">Ktoś pisze: „Jeśli nie przyślesz mi kodu, pokażę wszystkim twoje wiadomości”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="3" data-example="scam">
+      <div class="dl">C</div>
+      <div class="sit">Gracz obiecuje doładowanie konta w grze, jeśli podasz mu numer karty rodzica.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="3" data-example="scam">
+      <div class="dl">D</div>
+      <div class="sit">Ktoś prosi, żebyście przeszli na prywatny komunikator, „bo tu nas podsłuchują”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="3" data-example="honest">
+      <div class="dl">E</div>
+      <div class="sit">Trener z klubu pisze w grupie, w której są też rodzice: „Trening w czwartek przeniesiony na 17:00”.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+    <div class="dcard" data-lesson="3" data-example="honest">
+      <div class="dl">F</div>
+      <div class="sit">Kuzyn, z którym grasz przy rodzicach, zaprasza cię do swojej drużyny w grze.</div>
+      <div class="cz">Co zrobisz?</div><div class="wl"></div><div class="wl"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LEKCJA 3: KARTA 3C ============ -->
+<section class="page ws ws--scenka" data-lesson="3">
+  <div class="ws-top"><span>Lekcja 3 · karta pracy</span><span>Grupa: <span class="line"></span></span></div>
+  <h2>Karta pracy 3C: Scenka. Mówię «nie» i proszę o pomoc</h2>
+  <div class="scenka-zasada">Osoba A czyta tylko zdania z karty. Ćwiczymy odmowę i proszenie o pomoc, nie oszukiwanie.</div>
+  <p class="ws-instr"><span class="scissors">✂</span> Wytnij 3 karty ról, każda osoba w trójce dostaje jedną. Kolejność: A mówi zdanie 1, B odmawia. A mówi zdanie 2, B odmawia i kończy rozmowę. Potem B idzie do C i prosi o pomoc.</p>
+
+  <div class="rola">
+    <div class="rl-title">Rola A: Nieznajomy z gry</div>
+    <div class="rl-sides one">
+      <div class="rl-side">
+        <div class="rl-who">Czytasz tylko te zdania</div>
+        <p class="say">1. „Przejdźmy na inny komunikator, tu jest za dużo moderacji.”</p>
+        <p class="say">2. „Nie mów nikomu, to nasz sekret.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rola">
+    <div class="rl-title">Rola B: Ty</div>
+    <div class="rl-sides">
+      <div class="rl-side">
+        <div class="rl-who">Do osoby A</div>
+        <p class="say">„Nie przechodzę na inne aplikacje.”</p>
+        <p class="say">„Nie mam sekretów przed rodzicami.”</p>
+        <p class="say">„Kończę rozmowę, blokuję i zgłaszam.”</p>
+      </div>
+      <div class="rl-side">
+        <div class="rl-who">Potem do osoby C</div>
+        <p class="say">„Ktoś w grze prosi mnie o sekret i przejście na inny komunikator. Pomożesz mi?”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rola">
+    <div class="rl-title">Rola C: Zaufany dorosły</div>
+    <div class="rl-sides one">
+      <div class="rl-side">
+        <div class="rl-who">Odpowiadasz osobie B</div>
+        <p class="say">„Dobrze, że mi o tym mówisz. Razem to ogarniemy.”</p>
+        <p class="say">„To nie twoja wina.”</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="ws-instr" style="margin-top:4mm">Sekret od kogoś z internetu = mówię zaufanemu dorosłemu.</p>
+</section>
+
+<!-- ============ LEKCJA 3: KARTA 3D ============ -->
+<section class="page ws ws--quiz compact" data-lesson="3">
+  <div class="ws-top"><span>Lekcja 3 · karta pracy</span><span>Imię: <span class="line"></span></span></div>
+  <h2>Karta pracy 3D: Quiz bez ocen</h2>
+  <p class="ws-instr">Zakreśl jedną odpowiedź (w pytaniu 5 możesz zakreślić więcej). To nie jest sprawdzian: nie ma ocen ani punktów.</p>
+  <div class="q">
+    <div class="qt">1. Ktoś poznany w grze pisze: „Przejdźmy na Discorda”. Co zrobisz?</div>
+    <ol><li>Przechodzę, tam jest fajniej.</li><li>Nie przechodzę i mówię dorosłemu.</li><li>Przechodzę, ale nie podaję imienia.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">2. Ktoś z internetu prosi: „Nie mów rodzicom, to nasz sekret”. Co zrobisz?</div>
+    <ol><li>Dotrzymuję sekretu.</li><li>Mówię tylko najlepszemu przyjacielowi.</li><li>Mówię zaufanemu dorosłemu.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">3. „Ciocia” pisze w komunikatorze, że pilnie potrzebuje kodu BLIK. Co zrobisz?</div>
+    <ol><li>Kodu nie podaję. Dzwonię do cioci albo mówię rodzicowi.</li><li>Biorę telefon mamy i przepisuję kod.</li><li>Odpisuję i pytam, czy to na pewno ona.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">4. Ola z 5b, którą znasz ze szkoły, zaprasza cię do gry. Co zrobisz?</div>
+    <ol><li>Blokuję ją, bo każda wiadomość to oszustwo.</li><li>Mogę ją dodać; gdy mam wątpliwości, pytam ją w szkole.</li><li>Podaję jej swoje hasło.</li></ol>
+  </div>
+  <div class="q">
+    <div class="qt">5. Kto może ci pomóc, gdy ktoś w internecie cię naciska?</div>
+    <ol><li>Rodzic lub opiekun.</li><li>Wychowawca, pedagog albo psycholog szkolny.</li><li>Telefon zaufania 116 111.</li></ol>
+  </div>
+  <p class="ws-instr" style="margin-top:4mm">Pamiętaj: odpowiedź „nie wiem, zapytam dorosłego” jest zawsze dobra.</p>
+</section>
+
+<!-- ============ LEKCJA 3: KARTA 3E ============ -->
+<section class="page ws ws--do-domu" data-lesson="3">
+  <h2>Karta pracy 3E: Karta do domu</h2>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 3 „Obcy, presja i sekrety”</h3>
+    <p>Dziś na lekcji uczyliśmy się mówić „nie” obcym w internecie i prosić o pomoc.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>tym, z kim grasz w internecie;</li>
+      <li>ustawieniu, żeby wiadomości przychodziły tylko od znajomych;</li>
+      <li>obietnicy: „jeśli przyjdę z problemem, najpierw mi pomożesz, a nie ukarzesz”;</li>
+      <li>zasadzie lekcji (w ramce poniżej).</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Sekret od kogoś z internetu = mówię zaufanemu dorosłemu.</div>
+  </div>
+  <div class="cutline"><span class="scissors">✂ wytnij</span></div>
+  <div class="do-domu-half">
+    <h3>Karta do domu · lekcja 3 „Obcy, presja i sekrety”</h3>
+    <p>Dziś na lekcji uczyliśmy się mówić „nie” obcym w internecie i prosić o pomoc.</p>
+    <p><strong>Porozmawiaj z rodzicem o…</strong></p>
+    <ul>
+      <li>tym, z kim grasz w internecie;</li>
+      <li>ustawieniu, żeby wiadomości przychodziły tylko od znajomych;</li>
+      <li>obietnicy: „jeśli przyjdę z problemem, najpierw mi pomożesz, a nie ukarzesz”;</li>
+      <li>zasadzie lekcji (w ramce poniżej).</li>
+    </ul>
+    <p><strong>Dla rodzica:</strong> poradnik BezpiecznaAura „Dziecko trafiło na oszustwo w sieci. Co teraz?” (PDF u wychowawcy); umowa rodzinna jest na str. 17.</p>
+    <p><strong>116 111</strong>: telefon zaufania dla dzieci i młodzieży, bezpłatny, całodobowy. <strong>800 100 100</strong>: telefon dla rodziców i nauczycieli (dni robocze).</p>
+    <div class="dd-rule">Sekret od kogoś z internetu = mówię zaufanemu dorosłemu.</div>
+  </div>
+</section>
+
+<!-- ============ ŹRÓDŁA ============ -->
+<section class="page zrodla">
+  <h2>Źródła</h2>
+  <p>Numery w nawiasach kwadratowych w konspektach odsyłają do tej listy.</p>
+  <ol class="zrodla">
+    <li>NASK PIB, „Roblox. Cyfrowe podwórko bez kontroli”, 28.05.2026. nask.pl (aktualności)</li>
+    <li>CERT Orange Polska, „Darmowe Robuxy? Cena: twoje konto”, 04.09.2026. cert.orange.pl (aktualności)</li>
+    <li>Centralne Biuro Zwalczania Cyberprzestępczości (CBZC), komunikat o rozbiciu grupy wyłudzającej pieniądze kodami BLIK, 04.02.2026. cbzc.policja.gov.pl</li>
+    <li>Komenda Stołeczna Policji / Policja Mazowiecka, „Znajomy z Messengera prosi o kod BLIK?”, 09.04.2026. mazowiecka.policja.gov.pl</li>
+    <li>NASK / Zintegrowana Platforma Edukacyjna, Cyberlekcje 3.0: „Zagrożenia w sieci i prywatność w Internecie”, scenariusz dla klas 4-6, 2023, licencja CC BY-NC 4.0. zpe.gov.pl</li>
+    <li>PragmaGO / Cyfrowy Skaut, „Nie daj się złowić!”: scenariusz lekcji o phishingu dla klas 4-6, 2025. cdn.pragmago.pl</li>
+    <li>Fundacja Dajemy Dzieciom Siłę, „3… 2… 1… Internet!”, scenariusz zajęć dla klas IV-VI. edukacja.fdds.pl</li>
+    <li>Fundacja Dajemy Dzieciom Siłę, „Uważni online”, scenariusz zajęć dla młodzieży w wieku 12-15 lat, licencja CC BY-NC-ND 3.0 PL. edukacja.fdds.pl</li>
+    <li>Europol, „Cyber Defenders: Fact sheet”. europol.europa.eu</li>
+    <li>NASK PIB, „Zagrożenia w sieci”, scenariusz zajęć dla szkół ponadpodstawowych, 2021, licencja CC BY-NC 4.0. gov.pl (załącznik PDF)</li>
+    <li>Materiały własne zespołu BezpiecznaAura: opracowanie badawcze o oszustwach na dzieci w grach i komunikatorach (ideas/defence/research.md) oraz poradnik „Dziecko trafiło na oszustwo w sieci. Co teraz?” (projects/presentation/poradnik).</li>
+  </ol>
+
+  <div class="box grey">
+    <p class="small"><strong>Data dostępu do wszystkich źródeł internetowych: 3.10.2026.</strong></p>
+    <p class="small">Scenariusze NASK/ZPE są na licencji CC BY-NC 4.0, a scenariusz FDDS „Uważni online” na licencji CC BY-NC-ND 3.0 PL. Z tych wzorów przejęliśmy formę (układ konspektu, karty do pocięcia, umowę na lekcję), a nie tekst.</p>
+    <p class="small">Numery telefonów pomocowych podajemy za poradnikiem BezpiecznaAura (sekcja „Najważniejsze kontakty”).</p>
+  </div>
+
+  <div class="footer-note">Stan na październik 2026. Pakiet ma charakter edukacyjny. Wszystkie przykładowe wiadomości, nicki i adresy w pakiecie są zmyślone.</div>
+</section>
+
+</body>
+</html>
