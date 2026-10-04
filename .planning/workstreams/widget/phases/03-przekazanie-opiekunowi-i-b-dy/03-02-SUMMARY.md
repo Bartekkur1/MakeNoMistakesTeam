@@ -71,12 +71,12 @@ coverage:
     verification:
       - kind: e2e
         ref: "tests/e2e/check.spec.mjs#guardian demo request reaches confirmation; #guardian demo sends the corrected result using Enter/Space"
-        status: flaky
+        status: verified
       - kind: unit
         ref: "tests/unit/guardian-request.test.js, draft.test.js, panel.test.js (125 tests)"
         status: pass
     human_judgment: true
-    rationale: "Enter/Space scenarios fail intermittently due to a test timing race (see Issues); product behavior in the failing trace is a correct in-flight send."
+    rationale: "Enter/Space scenarios had a test timing race (see Issues); fixed by the orchestrator with expect.poll, now 18/18 repeated and 24/24 full."
   - id: D3
     description: "Editable six radios / compatible checkboxes / source select; illegal actions dropped; focus preserved; controls disabled with aria-busy during send."
     verification:
@@ -149,7 +149,7 @@ Codex driver commits, oldest first:
 
 ## Issues Encountered
 
-- **Intermittent e2e failure: a test timing race, not a product failure.** The plan command `npm --prefix projects/widget run test:e2e -- tests/e2e/check.spec.mjs tests/e2e/tracer.spec.mjs` ran twice and **exited 1 both times, with 23/24 passing**. The failing scenario was "guardian demo sends the corrected result using Space" on the first run and "…using Enter" on the second. In a `--repeat-each 6` run of the three handoff scenarios, 17/18 passed. In isolated reruns of the Space scenario, 2 of 3 passed. Codex reported 24/24 at commit time.
+- **Intermittent e2e failure: a test timing race, not a product failure.** The plan command `npm --prefix projects/widget run test:e2e -- tests/e2e/check.spec.mjs tests/e2e/tracer.spec.mjs` ran twice and **exited 1 both times, with 23/24 passing**. The failing scenario was "guardian demo sends the corrected result using Space" on the first run and "…using Enter" on the second. In a `--repeat-each 6` run of the three handoff scenarios, 17/18 passed. In isolated reruns of the Space scenario, 2 of 3 passed. Codex reported 24/24 at commit time. **Resolved by the orchestrator:** `expectSavedReport` now waits with `expect.poll` for the single stubbed request before asserting it; afterwards `--repeat-each 6` gave 18/18 and the full plan command 24/24.
   - Cause: `expectSavedReport` in `check.spec.mjs` reads `self.__reportApiStub.requests` once with a plain `expect(...).toHaveLength(1)`, right after the key press. It does not wait for the worker to reach the stubbed `fetch` (content → runtime message → local session re-read → fetch). In both failure traces the last DOM snapshot shows `Wysyłam…` with `aria-busy="true"`, so the key press did start exactly one send that was still in flight.
   - Not fixed, per the orchestrator's instructions not to change tests. A minimal fix would poll before the one-shot checks, e.g. `await expect.poll(() => serviceWorker.evaluate(() => self.__reportApiStub.requests.length)).toBe(1)` at the top of `expectSavedReport`. This needs an orchestrator/user decision.
 - Playwright `test-results/` is git-ignored. The worktree stayed clean after the runs.
@@ -179,8 +179,8 @@ Paths are relative to `projects/widget/`.
 |---------|--------|
 | `npm --prefix projects/widget run build` | PASS (Tasks 1-2 and final) |
 | `npm --prefix projects/widget test -- tests/unit/guardian-request.test.js tests/unit/draft.test.js tests/unit/panel.test.js` | PASS, 3 files, 125 tests (final) |
-| `npm --prefix projects/widget run test:e2e -- tests/e2e/check.spec.mjs tests/e2e/tracer.spec.mjs` | **FAIL (flaky)**: 23/24 on both final runs (Space, then Enter); 24/24 at Codex commit time |
-| `… test:e2e -- tests/e2e/check.spec.mjs --grep "guardian demo" --repeat-each 6` | 17/18 (one Space failure, same race) |
+| `npm --prefix projects/widget run test:e2e -- tests/e2e/check.spec.mjs tests/e2e/tracer.spec.mjs` | PASS 24/24 after orchestrator fix (was 23/24 flaky before it) |
+| `… test:e2e -- tests/e2e/check.spec.mjs --grep "guardian demo" --repeat-each 6` | 18/18 after fix (17/18 before) |
 | Task 1 `node -e` source check | PASS `SEND_TRACER_SOURCE_OK` (Codex) |
 | `npm --prefix projects/widget test -- tests/unit/check.test.js tests/unit/no-background-reading.test.js` | PASS (Codex, Task 1) |
 | `… test:e2e -- tests/e2e/check.spec.mjs --grep "guardian demo request reaches confirmation"` | PASS 1/1 (Codex, Task 3) |
@@ -209,7 +209,7 @@ Also carry over steps 12-13 from the 03-01 checklist (renewal before POST, singl
 ## Next Phase Readiness
 
 - **03-03 dependency.** The Moje zgłoszenia list (data from `GET /api/reports`, rendering, the two-button menu change, and checking the unknown-delivery item before retrying) is handled by 03-03. `onMyReports`/`showMyReports` and the `myReports` view are ready for it.
-- Before UAT, the orchestrator or user should decide on the flaky e2e handoff assertion (see Issues). Product behavior in the failing traces is correct.
+- The flaky e2e handoff assertion was resolved by the orchestrator (expect.poll in `expectSavedReport`); no open test issue remains.
 - STATE.md, ROADMAP.md and REQUIREMENTS.md were not touched; the orchestrator owns them. The branch stays unmerged for Chrome review.
 
 ## Self-Check: PASSED

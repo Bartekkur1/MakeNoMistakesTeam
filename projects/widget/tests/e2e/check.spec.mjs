@@ -56,6 +56,8 @@ async function prepareReportStub(serviceWorker) {
 }
 
 async function expectSavedReport(serviceWorker, dialog, payload) {
+  // The send travels page → worker → stubbed fetch asynchronously after the key press.
+  await expect.poll(() => serviceWorker.evaluate(() => self.__reportApiStub.requests.length)).toBe(1);
   const api = await serviceWorker.evaluate(() => self.__reportApiStub);
   expect(api.requests).toHaveLength(1);
   expect(api.requests[0]).toMatchObject({ method: reportExample.method,
