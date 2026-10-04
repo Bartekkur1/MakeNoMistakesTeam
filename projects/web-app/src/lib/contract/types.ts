@@ -444,6 +444,8 @@ export interface RobloxIngestRequest {
   hints_used?: 0 | 1;
   score?: number;
   outcome?: RobloxOutcome;
+  training_id?: string;
+  training_name?: string;
 }
 
 // Stored recipient/state snapshot, returned unchanged on retries even after panel transitions.
@@ -454,6 +456,8 @@ export interface RobloxIngestAck {
   state: ReportState;
   // false when the nick is not linked to any child and the report went to the demo fallback child.
   matched: boolean;
+  // true when the attempt was deduplicated because the child already completed this training positively.
+  already_completed?: boolean;
 }
 
 // The ingest endpoint answers in its own envelope, agreed with the Roblox workstream.

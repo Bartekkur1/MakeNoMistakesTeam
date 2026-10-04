@@ -12,6 +12,8 @@ export type ReportExportPayload = {
 	content: string,
 	hints_used: number,
 	outcome: string,
+	training_id: string?,
+	training_name: string?,
 }
 
 export type ReportExportAck = {

@@ -58,6 +58,8 @@ export const LIST = {
     parent: "Sprawy, które przekazało Ci dziecko.",
     teacher: "Sprawy uczniów Twojej klasy, które rodzice przekazali szkole.",
   },
+  tabReports: "Zgłoszenia z sieci",
+  tabTrainings: "Szkolenia Roblox",
   filterLabel: "Stan",
   filterAll: "Wszystkie stany",
   refresh: "Odśwież listę",
@@ -76,6 +78,18 @@ export const LIST = {
   emptyFilteredTitle: "Brak zgłoszeń w stanie „{state}”",
   showAllStates: "Pokaż wszystkie stany",
   metaSeparator: " · ",
+};
+
+
+export const TRAININGS = {
+  emptyTitle: "Brak szkoleń",
+  emptyBody: {
+    parent: "Gdy dziecko ukończy ćwiczenie w grze Roblox, zobaczysz wynik tutaj.",
+    teacher: "Gdy uczeń ukończy ćwiczenie w grze Roblox, wynik pojawi się tutaj.",
+  },
+  statusPassed: "Zaliczone",
+  statusFailed: "Wymaga powtórzenia",
+  loading: "Wczytywanie szkoleń…",
 };
 
 // Risk marker on list rows (D-04, D-10): "Ryzyko: " plus the categories present, joined with ", ".

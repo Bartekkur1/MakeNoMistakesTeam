@@ -47,6 +47,9 @@ export type MissionSnapshot = {
 
 local MissionContent = {}
 
+MissionContent.trainingId = "password_phishing"
+MissionContent.trainingName = "Przeciwdziałanie wyłudzaniu hasła"
+
 MissionContent.initialMatiMessages = {
 	{
 		sender = "MatiBuilds",

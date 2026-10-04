@@ -8,11 +8,11 @@
 // banner (D-07); any other failure shows the contract message. The list state lives in listReducer
 // (list-state.ts); every request carries a request id so a superseded response is ignored.
 
-import { useEffect, useId, useReducer, useRef, type ChangeEvent } from "react";
+import { useEffect, useId, useReducer, useRef, useState, type ChangeEvent } from "react";
 import { buttonLarge, buttonSmall } from "@/app/_landing/styles";
 import { LIMITS, REPORT_STATE_LABELS_PL, type ReportState } from "@/lib/contract/types";
 import { errorMessage, fetchReports, isUnauthorized } from "./api";
-import { ERRORS, LIST } from "./content";
+import { ERRORS, LIST, TRAININGS } from "./content";
 import { capitalize, fillTemplate, formatClock } from "./format";
 import { filterStatesFor, initialListState, listReducer, type ListLoadReason } from "./list-state";
 import { useCurrentSession } from "./PanelShell";
@@ -20,6 +20,9 @@ import { ReportRow } from "./ReportRow";
 import { RobloxAccountCard } from "./RobloxAccountCard";
 import { expireSession, type PanelSession } from "./session";
 import { alertError, card, secondaryButton, selectBase, skeletonBlock } from "./styles";
+import { TrainingRow } from "./TrainingRow";
+
+type PanelTab = "reports" | "trainings";
 
 const SKELETON_ROWS = [0, 1, 2];
 
@@ -32,6 +35,7 @@ export function ReportListView() {
 
 function ReportList({ session }: { session: PanelSession }) {
   const [state, dispatch] = useReducer(listReducer, initialListState);
+  const [activeTab, setActiveTab] = useState<PanelTab>("reports");
   // The last request id handed out; handlers take the next one (the first page uses state's 1).
   const lastRequestId = useRef(initialListState.requestId);
   const listRef = useRef<HTMLUListElement>(null);
@@ -112,6 +116,13 @@ function ReportList({ session }: { session: PanelSession }) {
   const busy = state.pending !== null;
   const reloading = state.pending === "filter" || state.pending === "refresh";
 
+  const reportsCount = state.reports.filter((r) => r.source !== "game").length;
+  const trainingsCount = state.reports.filter((r) => r.source === "game").length;
+  const currentReports =
+    activeTab === "reports"
+      ? state.reports.filter((r) => r.source !== "game")
+      : state.reports.filter((r) => r.source === "game");
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 md:py-12">
       <h1 className="font-display text-2xl font-semibold leading-tight">{LIST.title}</h1>
@@ -122,6 +133,56 @@ function ReportList({ session }: { session: PanelSession }) {
       <p role="status" className="sr-only">
         {state.announcement}
       </p>
+
+      <div className="mt-6 border-b border-titanium-border">
+        <nav className="-mb-px flex space-x-6" aria-label="Kategorie" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            id="tab-reports"
+            aria-selected={activeTab === "reports"}
+            aria-controls="panel-tab-reports"
+            onClick={() => setActiveTab("reports")}
+            className={`inline-flex items-center gap-2 border-b-2 py-3 px-1 text-sm font-semibold transition-colors ${
+              activeTab === "reports"
+                ? "border-shark-blue text-shark-blue-dark"
+                : "border-transparent text-muted-slate hover:border-titanium-border hover:text-navy-slate"
+            }`}
+          >
+            <span>{LIST.tabReports}</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                activeTab === "reports" ? "bg-sky-wash text-shark-blue-dark" : "bg-shield-silver text-navy-slate"
+              }`}
+            >
+              {reportsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            id="tab-trainings"
+            aria-selected={activeTab === "trainings"}
+            aria-controls="panel-tab-trainings"
+            onClick={() => setActiveTab("trainings")}
+            className={`inline-flex items-center gap-2 border-b-2 py-3 px-1 text-sm font-semibold transition-colors ${
+              activeTab === "trainings"
+                ? "border-shark-blue text-shark-blue-dark"
+                : "border-transparent text-muted-slate hover:border-titanium-border hover:text-navy-slate"
+            }`}
+          >
+            <span>🎓 {LIST.tabTrainings}</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                activeTab === "trainings" ? "bg-sky-wash text-shark-blue-dark" : "bg-shield-silver text-navy-slate"
+              }`}
+            >
+              {trainingsCount}
+            </span>
+          </button>
+        </nav>
+      </div>
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -187,14 +248,9 @@ function ReportList({ session }: { session: PanelSession }) {
         </div>
       ) : null}
 
-      {state.status === "ready" && state.reports.length === 0 ? (
+      {state.status === "ready" && currentReports.length === 0 ? (
         <div className={`${card} mt-4 p-4 md:p-6`}>
-          {state.filter === null ? (
-            <>
-              <h2 className="font-display text-xl font-semibold leading-tight">{LIST.emptyTitle}</h2>
-              <p className="mt-2 text-base text-muted-slate">{LIST.emptyBody[role]}</p>
-            </>
-          ) : (
+          {state.filter !== null ? (
             <>
               <h2 className="font-display text-xl font-semibold leading-tight">
                 {fillTemplate(LIST.emptyFilteredTitle, { state: REPORT_STATE_LABELS_PL[state.filter] })}
@@ -208,17 +264,34 @@ function ReportList({ session }: { session: PanelSession }) {
                 {LIST.showAllStates}
               </button>
             </>
+          ) : activeTab === "trainings" ? (
+            <div className="py-4 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-sky-wash text-xl text-shark-blue-dark">
+                🎓
+              </div>
+              <h2 className="font-display text-xl font-semibold leading-tight">{TRAININGS.emptyTitle}</h2>
+              <p className="mt-2 text-base text-muted-slate max-w-md mx-auto">{TRAININGS.emptyBody[role]}</p>
+            </div>
+          ) : (
+            <>
+              <h2 className="font-display text-xl font-semibold leading-tight">{LIST.emptyTitle}</h2>
+              <p className="mt-2 text-base text-muted-slate">{LIST.emptyBody[role]}</p>
+            </>
           )}
         </div>
       ) : null}
 
-      {state.status === "ready" && state.reports.length > 0 ? (
+      {state.status === "ready" && currentReports.length > 0 ? (
         <>
           <div className={`${card} mt-4 overflow-hidden`}>
             <ul ref={listRef} aria-busy={reloading} className="divide-y divide-shield-silver">
-              {state.reports.map((report) => (
-                <ReportRow key={report.id} report={report} sessionChildren={session.children} />
-              ))}
+              {currentReports.map((report) =>
+                activeTab === "trainings" ? (
+                  <TrainingRow key={report.id} report={report} sessionChildren={session.children} />
+                ) : (
+                  <ReportRow key={report.id} report={report} sessionChildren={session.children} />
+                ),
+              )}
             </ul>
           </div>
 

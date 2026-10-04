@@ -82,7 +82,7 @@ describe("POST /api/reports/ingest", () => {
     expect(report.source).toBe("game");
     expect(report.taken_actions).toEqual([]);
     expect(report.content).toBe(
-      `Ćwiczenie Roblox, gracz Robloxianu5a9m1s7a. Wynik ćwiczenia: bezpieczna odmowa. Użyte wskazówki: 1.\n\n${GAME_BODY.content}`,
+      `Szkolenie: Przeciwdziałanie wyłudzaniu hasła [password_phishing]. Ćwiczenie Roblox, gracz Robloxianu5a9m1s7a. Wynik ćwiczenia: bezpieczna odmowa (zaliczone). Użyte wskazówki: 1.\n\n${GAME_BODY.content}`,
     );
   });
 
@@ -142,9 +142,59 @@ describe("POST /api/reports/ingest", () => {
     expect(await again.json()).toEqual(await first.json());
   });
 
-  it("creates a separate report for each new attempt", async () => {
-    await postIngest(GAME_BODY);
-    expect((await postIngest({ ...GAME_BODY, attempt_id: "a0000000-0000-4000-8000-000000000002" })).status).toBe(201);
+  it("deduplicates subsequent positive completions for the same training and child", async () => {
+    const first = await postIngest(GAME_BODY);
+    expect(first.status).toBe(201);
+    const firstData = await first.json();
+
+    // Second positive attempt for the same training: deduplicated, does not insert a new report
+    const second = await postIngest({ ...GAME_BODY, attempt_id: "a0000000-0000-4000-8000-000000000002" });
+    expect(second.status).toBe(200);
+    expect(await second.json()).toMatchObject({
+      ok: true,
+      report_id: firstData.report_id,
+      already_completed: true,
+    });
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+
+    // Another training for the same child creates a new report
+    const differentTraining = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000003",
+      training_id: "discord_fake_link",
+      training_name: "Podejrzane linki na Discordzie",
+    });
+    expect(differentTraining.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(2);
+  });
+
+  it("stores a failed attempt and then a positive completion, deduplicating only subsequent passes", async () => {
+    // Attempt 1: Failed training (compromised_password)
+    const failRes = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000010",
+      outcome: "compromised_password",
+    });
+    expect(failRes.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(1);
+
+    // Attempt 2: Passed training (safe_refusal) -> stored because not yet passed!
+    const passRes = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000011",
+      outcome: "safe_refusal",
+    });
+    expect(passRes.status).toBe(201);
+    expect(fakeSupabase.tables.reports).toHaveLength(2);
+
+    // Attempt 3: Another pass -> deduplicated!
+    const passRes2 = await postIngest({
+      ...GAME_BODY,
+      attempt_id: "a0000000-0000-4000-8000-000000000012",
+      outcome: "safe_refusal",
+    });
+    expect(passRes2.status).toBe(200);
+    expect(await passRes2.json()).toMatchObject({ already_completed: true });
     expect(fakeSupabase.tables.reports).toHaveLength(2);
   });
 

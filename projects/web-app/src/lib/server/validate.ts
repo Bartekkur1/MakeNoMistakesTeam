@@ -355,6 +355,8 @@ export interface RobloxIngestInput {
   hintsUsed: number | null;
   score: number | null;
   outcome: RobloxOutcome | null;
+  trainingId: string;
+  trainingName: string;
 }
 
 function isRobloxOutcome(value: unknown): value is RobloxOutcome {
@@ -428,6 +430,18 @@ export function parseRobloxIngest(body: Record<string, unknown>): ValidationResu
   const hintsUsed = optionalIntInRange(body, "hints_used", ROBLOX_MAX_HINTS, errors);
   const score = optionalIntInRange(body, "score", ROBLOX_MAX_SCORE, errors);
 
+  const rawTrainingId = typeof body.training_id === "string" ? body.training_id.trim() : "";
+  const trainingId = rawTrainingId !== "" ? rawTrainingId : "password_phishing";
+  if (trainingId.length > 64 || !/^[A-Za-z0-9_-]+$/.test(trainingId)) {
+    errors.push({ field: "training_id", message: "Identyfikator szkolenia może zawierać tylko litery, cyfry, myślniki i podkreślenia (maks. 64 znaki)." });
+  }
+
+  const rawTrainingName = typeof body.training_name === "string" ? body.training_name.trim() : "";
+  const trainingName = rawTrainingName !== "" ? rawTrainingName : "Przeciwdziałanie wyłudzaniu hasła";
+  if (trainingName.length > 128) {
+    errors.push({ field: "training_name", message: "Nazwa szkolenia może mieć maksymalnie 128 znaków." });
+  }
+
   const content = typeof body.content === "string" ? body.content.trim() : "";
   if (content === "") {
     errors.push({ field: "content", message: "Treść nie może być pusta." });
@@ -450,6 +464,8 @@ export function parseRobloxIngest(body: Record<string, unknown>): ValidationResu
       hintsUsed,
       score,
       outcome,
+      trainingId,
+      trainingName,
     },
   };
 }

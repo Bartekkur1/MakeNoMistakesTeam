@@ -4,7 +4,7 @@
 // StorageUnavailableError (503), never a 2xx.
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, REPORT_STATES, type RobloxAccount, type RobloxIngestAck } from "@/lib/contract/types";
+import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, REPORT_STATES, type ReportState, type RobloxAccount, type RobloxIngestAck } from "@/lib/contract/types";
 import { StorageUnavailableError } from "./errors";
 import { toIsoUtc } from "./reports";
 import { getSupabase } from "./supabase";
@@ -116,9 +116,12 @@ export const ROBLOX_FALLBACK_CHILD_ID = "00000000-0000-4000-8000-0000000c0001";
 
 // The header line the parent sees above the game's own summary.
 export function ingestContent(input: RobloxIngestInput): string {
-  const parts = [`Ćwiczenie Roblox, gracz ${input.robloxUsername}.`];
-  if (input.outcome === "safe_refusal") parts.push("Wynik ćwiczenia: bezpieczna odmowa.");
-  if (input.outcome === "compromised_password") parts.push("Wynik ćwiczenia: fikcyjne przekazanie hasła (bez rzeczywistego wycieku).");
+  const parts = [
+    `Szkolenie: ${input.trainingName} [${input.trainingId}].`,
+    `Ćwiczenie Roblox, gracz ${input.robloxUsername}.`,
+  ];
+  if (input.outcome === "safe_refusal") parts.push("Wynik ćwiczenia: bezpieczna odmowa (zaliczone).");
+  if (input.outcome === "compromised_password") parts.push("Wynik ćwiczenia: fikcyjne przekazanie hasła (bez rzeczywistego wycieku — wymaga powtórzenia).");
   if (input.score !== null) parts.push(`Wynik szkolenia: ${input.score}/${ROBLOX_MAX_SCORE} pkt.`);
   if (input.hintsUsed !== null) parts.push(`Użyte wskazówki: ${input.hintsUsed}.`);
   return `${parts.join(" ")}\n\n${input.content}`;
@@ -138,14 +141,75 @@ export class RobloxIngestIdempotencyConflictError extends Error {
 function requestFingerprint(input: RobloxIngestInput): string {
   return createHash("sha256").update(JSON.stringify([
     input.robloxUsername, input.robloxUserId, input.attackType, "game", input.takenActions,
-    input.content, input.hintsUsed, input.score, input.outcome,
+    input.content, input.hintsUsed, input.score, input.outcome, input.trainingId,
   ]), "utf8").digest("hex");
+}
+
+// Finds an existing successfully passed training report for the child.
+export async function findCompletedTrainingReport(
+  childId: string,
+  trainingId: string,
+): Promise<{ id: string; state: ReportState } | null> {
+  const data = await run("find_completed_training_report", () =>
+    getSupabase()
+      .from("reports")
+      .select("id, state, content")
+      .eq("child_id", childId)
+      .eq("source", "game"),
+  );
+  if (!Array.isArray(data)) throw shapeError();
+  for (const row of data) {
+    if (typeof row !== "object" || row === null) continue;
+    const r = row as Record<string, unknown>;
+    const content = typeof r.content === "string" ? r.content : "";
+    const isSafeRefusal = content.includes("bezpieczna odmowa");
+    if (!isSafeRefusal) continue;
+    const matchesTraining =
+      content.includes(`[${trainingId}]`) ||
+      content.includes(`(${trainingId})`) ||
+      (trainingId === "password_phishing" && !content.includes("["));
+    if (matchesTraining) {
+      if (typeof r.id !== "string" || typeof r.state !== "string") throw shapeError();
+      return {
+        id: r.id,
+        state: r.state as ReportState,
+      };
+    }
+  }
+  return null;
 }
 
 export async function createRobloxIngestReport(
   input: RobloxIngestInput,
   recipient: { childId: string; parentId: string; childName: string; parentName: string; matched: boolean },
 ): Promise<{ created: boolean; ack: RobloxIngestAck }> {
+  // Check if this attempt_id was already recorded:
+  const attemptRow = await run("find_roblox_ingest_attempt", () =>
+    getSupabase()
+      .from("roblox_ingest_attempts")
+      .select("attempt_id")
+      .eq("attempt_id", input.attemptId)
+      .maybeSingle(),
+  );
+
+  // If this is a new attempt with a positive outcome, deduplicate if already completed by this child:
+  if (!attemptRow && input.outcome === "safe_refusal") {
+    const completed = await findCompletedTrainingReport(recipient.childId, input.trainingId);
+    if (completed) {
+      return {
+        created: false,
+        ack: {
+          report_id: completed.id,
+          child_name: recipient.childName,
+          parent_name: recipient.parentName,
+          state: completed.state,
+          matched: recipient.matched,
+          already_completed: true,
+        },
+      };
+    }
+  }
+
   const data = await run("create_roblox_ingest_report", () => getSupabase().rpc("create_roblox_ingest_report", {
     p_attempt_id: input.attemptId,
     p_request_fingerprint: requestFingerprint(input),

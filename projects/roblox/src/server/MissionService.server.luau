@@ -176,6 +176,8 @@ local function dispatchReportExport(player: Player, state: State, outcome: strin
 		content = contentText,
 		hints_used = hintsUsed,
 		outcome = outcome,
+		training_id = MissionContent.trainingId,
+		training_name = MissionContent.trainingName,
 	}
 
 	local capturedRevision = state.revision
