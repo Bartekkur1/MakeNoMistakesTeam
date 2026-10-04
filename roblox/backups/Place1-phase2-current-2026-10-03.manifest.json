@@ -1,0 +1,16 @@
+{
+  "placeId": 74400324861465,
+  "studio": "Place1-pre-rojo (user-confirmed current Place1)",
+  "files": [
+    {
+      "path": "roblox/backups/Place1-phase2-current-2026-10-03.rbxl",
+      "bytes": 1810733,
+      "sha256": "17e86ab0da6f9177d46f8e2f3a46a4cc8e296d2eb3b78c96baaba184251c3d57"
+    },
+    {
+      "path": "roblox/backups/Place1-phase2-live-scripts-2026-10-03.json",
+      "bytes": 68702,
+      "sha256": "a0d032a432bc44592e41b07e3a58a3debcdfc748c5cba8de0c255e0476c4814e"
+    }
+  ]
+}
