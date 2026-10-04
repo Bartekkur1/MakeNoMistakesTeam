@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 02-cie-ka-sprawdzania
 source: [02-VERIFICATION.md]
 started: 2026-10-03T22:32:30Z
-updated: 2026-10-03T23:12:36Z
+updated: 2026-10-04T00:45:00Z
 ---
 
 ## Current Test
@@ -19,7 +19,8 @@ note: "Override D-13 dodany do 02-VERIFICATION.md (accepted_by: pbartela)"
 
 ### 2. UAT w Google Chrome/Discord — pięć fikcyjnych wiadomości z README
 expected: Język przyjazny dziecku 10–13 lat, brak wstępnych zaznaczeń, widoczna „Podpowiedź z wiadomości”, działają „Popraw odpowiedź” / „Zostaw moją odpowiedź”, brak gwarancji bezpieczeństwa, jeden zrozumiały krok, wznowienie/edycja/nowe zaznaczenie, panel przeciągalny i osiągalny.
-result: issue
+result: pass
+retest: "2026-10-04 po 02-04: dziala (uzytkownik, Chrome/Discord) - przycisk prosby, potwierdzenie demo, nowe sprawdzanie po potwierdzeniu"
 reported: "A.b.c calosc sie udala, ale nie mozliwosci wyslania do opiekuna i prosby o weryfikacje [...] samo api jest odlozone, ale mock tak jak w fazie 1 dalej powinien dzialac, wiec twierdzenie, ze wyslane do opiekuna to tylko mock na potrzeby prezentacji, samo api dojdzie pozniej"
 severity: major
 note: "Scenariusze A, B, C przeszły. C.6: szkic zostaje po odznaczeniu i kliknięciu rekina — akceptowane; przeładowanie kasuje stan. Brakuje mocka wysyłki do opiekuna z fazy 1."
@@ -36,8 +37,8 @@ result: pass
 ## Summary
 
 total: 4
-passed: 3
-issues: 1
+passed: 4
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -46,7 +47,8 @@ blocked: 0
 
 - gap_id: G-02-2
   truth: "Po zakończeniu ścieżki sprawdzania (wynik) dziecko może — jak w fazie 1 — przekazać sprawę opiekunowi przez lokalny mock wysyłki (bez API, na potrzeby prezentacji); prawdziwe API dochodzi w fazie 3."
-  status: failed
+  status: resolved
+  resolved_by: 02-04 (merge dbf5a04), recznie potwierdzone 2026-10-04
   reason: "User reported: brak możliwości wysłania do opiekuna i prośby o weryfikację; mock jak w fazie 1 dalej powinien działać — 'wysłane do opiekuna' to tylko mock na prezentację, API dojdzie później"
   severity: major
   test: 2

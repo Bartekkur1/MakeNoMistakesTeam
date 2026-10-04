@@ -57,6 +57,7 @@ Plans:
   3. Uczciwa fikcyjna wiadomość nie dostaje fałszywego alarmu; przy braku pewności pomocnik to mówi
 
 **Plans**: TBD
+- [x] 02-04-PLAN.md
 - [x] 02-01-PLAN.md
 - [x] 02-02-PLAN.md
 - [x] 02-03-PLAN.md
