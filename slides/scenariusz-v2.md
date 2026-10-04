@@ -16,7 +16,7 @@ Zasady:
 - **Na każdy slajd przypada jedna liczba wypowiedziana na głos i jedno zdanie o tym, co z niej wynika dla Zuzi.** Resztę jury przeczyta samo.
 - Nie wyliczaj punktów z kart i list. Listę widz przeczyta sam, a Twoim zadaniem jest wyjaśnić jej sens.
 - Jeśli coś jest na slajdzie, a nie mówisz o tym, wystarczy wskazać: „szczegóły widzą Państwo na slajdzie”.
-- Hasło **„Darmowe + link = pytam dorosłego”** pada trzy razy: na slajdzie 5, na slajdzie 7 i na zakończenie. Wymawiaj je: „Darmowe plus link równa się: pytam dorosłego”.
+- Hasło **„Darmowe + link = pytam dorosłego”** pada trzy razy: na slajdzie 5, na slajdzie 7 i na zakończenie, gdzie wypowiada je sama Zuzia. Wymawiaj je: „Darmowe plus link równa się: pytam dorosłego”.
 - Mówimy „pomocnik” albo „wtyczka”, nie „AI”. Sprawdzanie działa na jawnych regułach, lokalnie w przeglądarce.
 - Zwracaj się do jury per „Państwo”, nigdy per „wy”.
 - Mów spokojnie i rób krótkie pauzy po liczbach. Pauza po liczbie mówi więcej niż przymiotnik.
@@ -98,13 +98,19 @@ Zasady:
 >
 > Szkoła może zacząć już jutro, nawet bez komputerów: wystarczą trzy gotowe lekcje, wydruki i rzutnik. Dla samej Zuzi wszystko jest bezpłatne.
 
-## 10. Plan na przyszłość: badanie skuteczności · ~25 s
+## 10. Plan na przyszłość: rozwój i badanie skuteczności · ~45 s
 
-> Powiedzmy uczciwie: nie wiemy jeszcze, czy nasze rozwiązanie działa lepiej niż zwykła lekcja. Zresztą w tej dziedzinie mało kto to wie: [wskaż „5 z 57”] spośród pięćdziesięciu siedmiu badań tylko pięć miało grupę kontrolną.
+> Co dalej? Dziś Scamerino pomaga rozpoznać próby wyłudzenia hasła i przejęcia konta. Oszuści nie są jednak jedynym zagrożeniem, z którym dziecko zostaje w sieci samo. W kolejnych wersjach chcemy, żeby rekin pomagał rozpoznać także hejt i mowę nienawiści oraz sytuacje, w których ktoś namawia dziecko do czegoś złego: do niebezpiecznego wyzwania, do zrobienia sobie krzywdy albo do spotkania w tajemnicy przed rodzicami.
+>
+> Zasada pozostanie ta sama: rekin nie wydaje wyroku, tylko pomaga dziecku się zatrzymać i pójść z tym do dorosłego.
+>
+> Zanim jednak rozbudujemy rozwiązanie, powiedzmy uczciwie: nie wiemy jeszcze, czy nasze rozwiązanie działa lepiej niż zwykła lekcja. Zresztą w tej dziedzinie mało kto to wie: [wskaż „5 z 57”] spośród pięćdziesięciu siedmiu badań tylko pięć miało grupę kontrolną.
 >
 > Plan pilotażu widzą Państwo na slajdzie. Najważniejszy jest w nim ostatni punkt: powtórny test po kilku tygodniach. Właśnie po takim czasie efekt zwykłej lekcji znika. Chcemy sprawdzić, czy po miesiącu Zuzia nadal będzie pamiętać.
 >
-> A jeśli mają Państwo zapamiętać z tego wystąpienia tylko jedno zdanie, niech brzmi ono: **„Darmowe + link = pytam dorosłego”**. Dziękujemy za uwagę.
+> [pauza] Wróćmy na koniec do tamtej soboty. Wpół do dziesiątej wieczorem Zuzia znów dostaje wiadomość o darmowych Robuxach. Tym razem nie podaje hasła. Mówi pod nosem: **„Darmowe + link = pytam dorosłego”** i idzie do pokoju obok, do rodziców.
+>
+> Właśnie po to zbudowaliśmy BezpiecznąAurę. Dziękujemy za uwagę.
 
 ---
 
@@ -134,6 +140,7 @@ Liczby i szczegóły, które w v2 zostały tylko na slajdach, znajdują się tut
 | Dlaczego szkoła miałaby się zgodzić? | Ponieważ ustawa „Kamilka” (art. 22c ust. 2 pkt 2-3) wymaga zasad korzystania z urządzeń z dostępem do internetu i procedur ochrony przed zagrożeniami w sieci, a ust. 6 nakazuje oceniać standardy co najmniej raz na dwa lata. Dostarczamy gotową misję, procedurę reakcji, wyniki misji jako materiał do oceny standardów, poradnik dla rodziców i nauczycieli oraz pakiet warsztatowy. |
 | Jak duży jest rynek? | 14 tys. szkół podstawowych i około 1,6 mln uczniów w wieku 10-13 lat. |
 | Czy macie dowód, że to działa? | Jeszcze nie i mówimy o tym otwarcie. Na obecnym etapie nie prowadziliśmy badań porównawczych. Mamy działający produkt i plan badania z grupą kontrolną, które chcemy przeprowadzić w ramach pilotażu w pierwszej szkole. |
+| Czy rekin rozpoznaje też hejt albo namawianie do krzywdy? | Jeszcze nie. Dziś skupiamy się na wyłudzeniach haseł i przejęciach kont. Hejt, mowę nienawiści i namawianie do niebezpiecznych zachowań (groźne wyzwania, samookaleczenia, tajne spotkania z obcymi) planujemy w kolejnych wersjach. Zasada się nie zmieni: rekin nie ocenia, tylko pomaga dziecku zwrócić się do dorosłego. Już dziś panel prowadzi do Dyżurnetu przy treściach szkodliwych i do numeru 112, gdy dziecku grozi niebezpieczeństwo. |
 | Jak wygląda plan badania? | Pilotaż w jednej lub dwóch klasach. Test przed misją i po niej, bez pomocnika, porównany z wynikami grupy kontrolnej, która przejdzie zwykłą lekcję. Liczymy zarówno trafne reakcje, jak i fałszywe alarmy, dlatego w teście są też uczciwe wiadomości. Test powtarzamy po 2-4 tygodniach. |
 | Dlaczego akurat 10-13 lat? | To wiek masowej obecności w Robloxie, korzystania z TikToka przed dozwolonym wiekiem i pierwszego smartfona. Zarazem to wiek, w którym dziecko wciąż słucha rodziców i szkoły. |
 | Czy szkoła potrzebuje komputerów, żeby zacząć? | Nie. Pakiet warsztatowy działa samodzielnie: trzy lekcje po 45 minut, wydruki kart pracy i rzutnik. Nie wymaga ani aplikacji, ani gry. Misja w Robloxie i panel to kolejny krok. |
