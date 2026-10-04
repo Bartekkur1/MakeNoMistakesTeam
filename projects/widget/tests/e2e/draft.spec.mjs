@@ -46,5 +46,18 @@ test.describe('real bfcache',()=>{
  });
 });
 test('same document SPA channel keeps edited draft',async({page,netlog})=>{await draft(page);await page.evaluate(()=>history.pushState({},'','/chat-like.html?kanal=2'));await button(page,'Zamknij okno').click();await clear(page);await avatar(page).click();await expect(text(page)).toHaveValue('Darmowe Nitro! Kliknij link');await assertOnlyLocal(netlog);});
-test('draft uses no page storage or extension storage',async({page,serviceWorker,netlog})=>{await draft(page);expect(await page.evaluate(()=>[localStorage.length,sessionStorage.length])).toEqual([0,0]);expect(await serviceWorker.evaluate(()=>typeof chrome.storage)).toBe('undefined');expect(await serviceWorker.evaluate(()=>self.__aura.messages.length)).toBe(0);await assertOnlyLocal(netlog);});
+test('draft uses no page storage and extension storage holds credentials only',async({page,serviceWorker,netlog})=>{
+ await draft(page);expect(await page.evaluate(()=>[localStorage.length,sessionStorage.length])).toEqual([0,0]);
+ expect(await serviceWorker.evaluate(async()=>{
+  const stored=await chrome.storage.local.get(null);
+  const exact=(value,keys)=>value!==null&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(key=>Object.hasOwn(value,key));
+  return {available:typeof chrome.storage==='object',credentialsOnly:Object.keys(stored).every(key=>{
+   if(key!=='auraSession')return false;
+   const session=stored[key];
+   return exact(session,['token','expires_at','account','email','code'])&&['token','expires_at','email','code'].every(field=>typeof session[field]==='string')
+    &&exact(session.account,['id','email','role','display_name'])&&Object.values(session.account).every(value=>typeof value==='string')&&session.account.role==='parent';
+  })};
+ })).toEqual({available:true,credentialsOnly:true});
+ expect(await serviceWorker.evaluate(()=>self.__aura.messages.length)).toBe(0);await assertOnlyLocal(netlog);
+});
 test('first selected link prefills editable link field',async({page,netlog})=>{await draft(page,false);await expect(page.getByRole('textbox',{name:'Link (jeśli jest)',exact:true})).toHaveValue('https://discord-nitro-free.example/gift');await assertOnlyLocal(netlog);});

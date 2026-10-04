@@ -136,21 +136,28 @@ for (const kind of ['edit', 'replacement']) test(`${kind} candidate survives int
  s.cancelCheckEdit(); expect(s.get().view).toBe('question'); expect(s.get().check).toBe(old);
 });
 
+const session = { status: 'connected', revision: 0, account: { id: '00000000-0000-4000-8000-0000000a0001', display_name: 'Mama Oli (demo)' } };
+const openReport = s => { s.setSessionStatus(session); s.openSendPreview(); };
+const receipt = token => ({ ok: true, recipient: token.recipient, report: { ...token.payload,
+ id: '00000000-0000-4000-8000-0000000d0007', child_id: '00000000-0000-4000-8000-0000000c0001',
+ parent_id: token.expected_account_id, state: 'pending_parent', created_at: '2026-10-03T12:30:00.000Z', updated_at: '2026-10-03T12:30:00.000Z' } });
+const complete = (s, outcome, token) => outcome === 'reportSent' ? s.reportSent(token, receipt(token)) : s.reportFailed(token, { kind: 'http' });
+
 for (const step of ['empty', 'preview', 'safety', 'sender', 'request', 'verify', 'edit', 'closed']) {
- test(`guardian request is a no-op before a ready visible result: ${step}`, () => {
+ test(`reviewed report send is a no-op before a ready visible result: ${step}`, () => {
   const s = step === 'empty' || step === 'preview' ? createDraftStore() : storeAt(['edit', 'closed'].includes(step) ? 'result' : step);
   if (step === 'preview') s.submitPaste({ text: 'Unapproved', link: '' });
   if (step === 'edit') s.editCheckContent();
   if (step === 'closed') s.close();
-  const before = s.get(); expect(s.beginGuardianRequest()).toBeNull(); expect(s.get()).toBe(before);
+  const before = s.get(); expect(s.beginReportSend()).toBeNull(); expect(s.get()).toBe(before);
  });
 }
 
-test('pending guardian request blocks every check mutation and duplicate transaction', () => {
+test('pending reviewed report send blocks every check mutation and duplicate transaction', () => {
  const s = storeAt('result'); s.onAvatarClick({ text: 'Pending candidate' });
- const oldCheck = s.get().check; const selection = s.get().pendingSelection;
- const token = s.beginGuardianRequest(); expect(typeof token).toBe('number');
- expect(s.beginGuardianRequest()).toBeNull(); expect(s.beginSubmit()).toBeNull();
+ openReport(s); const oldCheck = s.get().check; const selection = s.get().pendingSelection;
+ const token = s.beginReportSend(); expect(token).toMatchObject({ case_id: s.get().case_id, expected_account_id: session.account.id, session_revision: 0 });
+ expect(s.beginReportSend()).toBeNull(); expect(s.beginSubmit()).toBeNull();
  const pending = s.get();
  for (const action of [() => s.fixAnswers(), () => s.editCheckContent(), () => s.checkNewSelection(),
   () => s.insertPendingSelection(), () => s.edit({ text: 'Changed', link: 'https://unapproved.example/' }),
@@ -161,48 +168,48 @@ test('pending guardian request blocks every check mutation and duplicate transac
  }
  s.onAvatarClick({ text: 'New selection during waiting' });
  expect(s.get().check).toBe(oldCheck); expect(s.get().pendingSelection).toBe(selection);
- expect(s.get().draft).toBeNull(); expect(s.get().view).toBe('result');
+ expect(s.get().draft).toBeNull(); expect(s.get().view).toBe('sendPreview');
  expect(s.submitFailed(token)).toBe(false); expect(s.approved(token, oldCheck.case)).toBe(false);
- expect(s.get().submitting).toBe(true); expect(s.guardianRequested(token)).toBe(true);
+ expect(s.get().submitting).toBe(true); expect(s.reportSent(token, receipt(token))).toBe(true);
 });
 
-test('guardian completion methods cannot complete an approval transaction', () => {
+test('report completion methods cannot complete an approval transaction', () => {
  const s = createDraftStore(); s.submitPaste({ text: 'Unapproved', link: '' });
  const c = caseModule.buildCase(s.get().draft); const token = s.beginSubmit(); const before = s.get();
- expect(s.guardianRequested(token)).toBe(false); expect(s.guardianRequestFailed(token)).toBe(false);
+ expect(s.reportSent(token)).toBe(false); expect(s.reportFailed(token)).toBe(false);
  expect(s.get()).toBe(before); expect(s.approved(token, c)).toBe(true);
 });
 
-test('guardian failure retains case answers and result while retry rejects the old token', () => {
- const s = storeAt('result'); const check = s.get().check;
- const token = s.beginGuardianRequest(); expect(s.guardianRequestFailed(token)).toBe(true);
- expect(s.get().check).toBe(check);
- expect(s.get()).toMatchObject({ view: 'result', error: 'guardianRequest', submitting: false });
- const retry = s.beginGuardianRequest(); expect(retry).toBeGreaterThan(token); const pending = s.get();
- expect(s.guardianRequested(token)).toBe(false); expect(s.guardianRequestFailed(token)).toBe(false);
- expect(s.get()).toBe(pending); expect(s.guardianRequested(retry)).toBe(true);
+test('report failure retains case answers and result while retry rejects the old token', () => {
+ const s = storeAt('result'); openReport(s); const check = s.get().check;
+ const token = s.beginReportSend(); expect(s.reportFailed(token, { kind: 'http' })).toBe(true);
+ expect(s.get().check.case).toBe(check.case); expect(s.get().check.answers).toBe(check.answers); expect(s.get().check.result).toBe(check.result);
+ expect(s.get()).toMatchObject({ view: 'sendPreview', sendOutcome: { kind: 'http' }, submitting: false });
+ const retry = s.beginReportSend(); expect(retry.generation).toBeGreaterThan(token.generation); const pending = s.get();
+ expect(s.reportSent(token)).toBe(false); expect(s.reportFailed(token)).toBe(false);
+ expect(s.get()).toBe(pending); expect(s.reportSent(retry, receipt(retry))).toBe(true);
  expect(s.get().check.case).toBe(check.case); expect(s.get().check.answers).toBe(check.answers);
  expect(s.get().check.result).toBe(check.result);
- expect(s.get().check).toMatchObject({ step: 'confirmation', resumeStep: 'confirmation' });
- expect(s.beginGuardianRequest()).toBeNull(); expect(s.guardianRequested(retry)).toBe(false);
+ expect(s.get().check).toMatchObject({ step: 'result', resumeStep: 'confirmation' });
+ expect(s.beginReportSend()).toBeNull(); expect(s.reportSent(retry)).toBe(false);
 });
 
 for (const interruption of ['close', 'hide']) {
- for (const outcome of ['guardianRequested', 'guardianRequestFailed']) test(`${interruption} during ${outcome} stays closed and resumes the right endpoint`, () => {
-  const s = storeAt('result'); const check = s.get().check; const token = s.beginGuardianRequest(); s[interruption]();
-  expect(s[outcome](token)).toBe(true); expect(s.get().view).toBe('closed');
+ for (const outcome of ['reportSent', 'reportFailed']) test(`${interruption} during ${outcome} stays closed and resumes the right endpoint`, () => {
+  const s = storeAt('result'); openReport(s); const check = s.get().check; const token = s.beginReportSend(); s[interruption]();
+  expect(complete(s, outcome, token)).toBe(true); expect(s.get().view).toBe('closed');
   expect(s.get().check.case).toBe(check.case); expect(s.get().check.answers).toBe(check.answers); expect(s.get().check.result).toBe(check.result);
   s.show(); s.onAvatarClick({ text: '' });
-  expect(s.get().view).toBe(outcome === 'guardianRequested' ? 'confirmation' : 'result');
-  if (outcome === 'guardianRequestFailed') expect(s.get().error).toBe('guardianRequest');
+  expect(s.get().view).toBe(outcome === 'reportSent' ? 'confirmation' : 'sendPreview');
+  if (outcome === 'reportFailed') expect(s.get().sendOutcome.kind).toBe('http');
  });
 }
 
-for (const outcome of ['guardianRequested', 'guardianRequestFailed']) test(`document reset ignores stale ${outcome} even after a new approval`, () => {
- const s = storeAt('result'); const token = s.beginGuardianRequest(); s.resetForNewDocument();
+for (const outcome of ['reportSent', 'reportFailed']) test(`document reset ignores stale ${outcome} even after a new approval`, () => {
+ const s = storeAt('result'); openReport(s); const token = s.beginReportSend(); s.resetForNewDocument();
  const reset = s.get(); expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(reset);
  s.submitPaste({ text: 'New approved session', link: '' });
- const current = s.beginSubmit(); expect(current).toBeGreaterThan(token);
+ const current = s.beginSubmit(); expect(current).toBeGreaterThan(0); expect(s.get().sendGeneration).toBeGreaterThan(token.generation);
  const pending = s.get(); expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(pending);
  s.approved(current, caseModule.buildCase(s.get().draft)); const newCheck = s.get();
  expect(s[outcome](token)).toBe(false); expect(s.get()).toBe(newCheck);

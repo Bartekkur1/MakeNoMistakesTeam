@@ -1,22 +1,44 @@
-# BezpiecznaAura – rozszerzenie Scamerinio (faza 2)
+# BezpiecznaAura – rozszerzenie Scamerinio (faza 3)
 
 Scamerinio prowadzi dziecko przez sprawdzanie wybranej wiadomości. Zaznacz tekst i kliknij rekina albo wybierz „Sprawdź wiadomość” i wklej tekst oraz opcjonalny link. Podgląd pozwala usunąć dane, zmienić tekst i świadomie zatwierdzić. Następnie pojawia się wskazówka bezpieczeństwa, trzy pytania i wynik: sygnały, brakujące informacje oraz jeden wyjaśniony krok.
 
 Rekin pozostaje widoczny, a otwarte okno przesuwa się razem z nim. Przeciąganie zachowuje tekst i fokus. Podpowiedzi oznaczone „Podpowiedź z wiadomości” nie zaznaczają odpowiedzi; dziecko wybiera je samodzielnie i klika „Dalej”. „Nie wiem” jest pełnoprawną odpowiedzią. „Wróć” i „Popraw odpowiedzi” zachowują wybory, a zmiany przeliczają wynik.
 
-**Zatwierdzenie w fazie 2 jest lokalne: nie wysłało niczego do rzeczywistego opiekuna.** Sprawa trafia do pamięci service workera, a reguły i odpowiedzi działają w pamięci karty. Po ukończeniu pytań osobny przycisk na wyniku „Poproś opiekuna o sprawdzenie” uruchamia lokalny mock na potrzeby prezentacji. Dopiero udany zapis zatwierdzonej sprawy i aktualnego wyniku pokazuje „Przekazano opiekunowi — demo”. Samo zatwierdzenie, wyświetlenie wyniku lub poprawienie odpowiedzi nie uruchamia prośby. Nie ma rzeczywistego doręczenia, API opiekuna, AI ani oceny reputacji linku.
+**Zatwierdzenie jest lokalne i niczego nie wysyła (D-01).** „Zatwierdzam” przyjmuje tekst do sprawdzania w pamięci karty; reguły, pytania i wynik działają lokalnie. Wynik zostaje u dziecka. Na wyniku są dwa niezależne przyciski: **„Pokaż opiekunowi”** (podgląd zgłoszenia dla rodzica) i **„Jak zgłosić na platformie”** (stała instrukcja, która nic nie wysyła). Jedynym przyciskiem, który wysyła cokolwiek do serwera, jest **„Wyślij”** w podglądzie „Sprawdź, co wyślesz”. Odpowiedzią dla dziecka jest **status zgłoszenia** w „Moje zgłoszenia” (decyzja rodzica, D-16) — nie ma odpowiedzi tekstowej, historii, szczegółów ani komentarzy.
 
-Przeniesiona decyzja dla fazy 3: po zatwierdzeniu sprawa ma być od razu przekazywana opiekunowi, a wynik dopisywany później. Starszy `.planning/shared/CONTRACT.md` i HND-02 nie odzwierciedlają jeszcze tego modelu i wymagają uzgodnienia przez właściciela kontraktu. Rzeczywiste API i odpowiedź opiekuna pozostają w fazie 3. Faza 2 udostępnia wyłącznie lokalny mock demo po jawnym kliknięciu na wyniku; nie zmienia wspólnych materiałów. Decyzja UAT P7 zachowuje teksty `guardianNotice` i `howToPrivacy` („…zobaczy Twój opiekun”) jako zapowiedź docelowej widoczności. Potwierdzenie demo wyraźnie wyjaśnia, że nie oznacza rzeczywistego doręczenia.
+## Połączenie z kontem rodzica (D-08…D-12)
 
-## Lokalne przekazanie opiekunowi — demo
+1. Po instalacji rozszerzenie samo otwiera kartę logowania (to samo co „Opcje” rozszerzenia). Loguje się **rodzic**, nie dziecko: krok 1 — e-mail (nic nie wysyła), krok 2 — czterocyfrowy kod. Konto nauczyciela dostaje komunikat, że wtyczkę łączy rodzic (403).
+2. „Zobacz konta demo” pokazuje trzy fikcyjne konta rodziców. Do prezentacji używaj **Mama Oli (demo)** — `rodzic.ola@bezpiecznaaura.example`, kod `0000`. Kod demo jest wspólny i jawny (AR-01 web-app): logowanie demo nie jest zabezpieczeniem produkcyjnym. Nie podawaj tego kodu dziecku ani nie przedstawiaj go jako jego hasła.
+3. Po zalogowaniu karta pokazuje „Wtyczka połączona”. „Wyloguj” działa bez PIN-u i potwierdzenia. Bez konta sprawdzanie działa w pełni, a zamiast „Pokaż opiekunowi” widać „Wtyczka nie jest połączona z kontem rodzica…” i „Otwórz logowanie” (D-11).
+4. Sesja nie wygasa dla dziecka: gdy token wygaśnie albo serwer odpowie 401, service worker sam loguje się ponownie zapisanym e-mailem/kodem i powtarza **jedną** operację (tylko przy jawnym „Wyślij”, „Moje zgłoszenia” lub „Spróbuj ponownie”). Odczyt statusu sesji jest lokalny i nie łączy się z siecią.
 
-1. Zatwierdź fikcyjną wiadomość, przejdź wskazówkę bezpieczeństwa i trzy pytania. Na wyniku pozostają trzy sekcje, jeden zalecany krok i początkowy fokus na „Popraw odpowiedzi”.
-2. Jeśli poprawisz odpowiedzi, ukończ pytania ponownie. Prośba przekazuje przeliczony wynik, nie wcześniejszą wersję. Kliknij „Poproś opiekuna o sprawdzenie” poza sekcjami wyniku. Z klawiatury przejdź do tego przycisku przez Tab i użyj Enter lub Spacji.
-3. Po lokalnym zapisie zobaczysz „Przekazano opiekunowi — demo” oraz wyjaśnienie, że sprawa i wynik są tylko w pamięci rozszerzenia, a prawdziwa wysyłka do opiekuna pojawi się w kolejnej wersji. Fokus trafia na „Zamknij”; obok są „Wróć do menu” (kończy to sprawdzanie) i „Edytuj wiadomość”. Podczas oczekiwania nie można ponownie poprosić, zmieniać odpowiedzi ani edytować treści; zamknięcie okna i schowanie rekina nadal działają. Błąd zapisu zachowuje wynik i pozwala ponowić prośbę.
-4. Wybierz „Zamknij” i kliknij rekina bez nowego zaznaczenia: wraca potwierdzenie demo bez ponownego przekazania. Jeśli zaznaczysz inną wiadomość, kliknięcie rekina otwiera podgląd nowej treści, a jej zatwierdzenie zaczyna nowe sprawdzanie. Zamknięcie podczas oczekiwania nie otwiera okna po odpowiedzi; późniejsze wznowienie pokazuje potwierdzenie po sukcesie lub zachowany wynik po błędzie.
-5. Przeładuj kartę, usuń zaznaczenie i kliknij rekina: menu jest puste, bez poprzedniej sesji. Przeładowanie karty usuwa stan UI, lecz nie musi usuwać rekordów mocka service workera. Restart service workera usuwa jego pamięć.
+Adres API jest wbudowany w paczkę: domyślnie `https://bezpieczna-aura.pl`. Do pracy na lokalnym backendzie zbuduj `AURA_API=http://localhost:3000 npm run build`. Inne adresy są odrzucane przy budowaniu.
 
-Mock przyjmuje wiadomość `aura/guardian-request` ze sprawą i kluczami aktualnego wyniku, po sprawdzeniu nadawcy i danych. Rekordy można zobaczyć w konsoli service workera jako `self.__aura.guardianRequests` (maksymalnie 100). Chrome usypia nieaktywny service worker po ok. 30 s, co czyści te kolekcje — pokazuj rekord od razu po kliknięciu prośby (otwarte DevTools service workera utrzymują go przy życiu). Zatwierdzenie zachowuje osobną kolekcję `self.__aura.cases`; prośba nie dodaje do niej drugiej sprawy. Te kolekcje są ulotne, bez sieci i trwałego zapisu. Pokazuj je wyłącznie na fikcyjnych treściach; nie są skrzynką ani odpowiedzią prawdziwego opiekuna.
+## Pokaż opiekunowi → Sprawdź, co wyślesz → Wyślij (HND-01, ERR-01)
+
+1. Na wyniku kliknij „Pokaż opiekunowi”. Podgląd pokazuje odbiorcę („Do: Mama Oli (demo)”), dokładną treść zgłoszenia (tekst i ewentualnie `Link: …`), proponowany rodzaj ataku z oznaczeniem „Propozycja z Twoich odpowiedzi”, pola „Co już zrobiłeś?” i źródło. Wszystko można zmienić; nic nie zostało jeszcze wysłane.
+2. „Wyślij” wysyła jedno zgłoszenie z dokładnie czterema polami: rodzaj ataku, podjęte działania, źródło i treść. Wynik sprawdzania i odpowiedzi na pytania nie są wysyłane.
+3. „Wysłano do: …”, godzina i „Status: Czeka, aż rodzic zobaczy” pojawiają się tylko po zapisanym obiekcie zgłoszenia z serwera. Tej samej sprawy nie da się wysłać drugi raz.
+4. Błędy mają osobne komunikaty i zawsze zostawiają wybory w podglądzie: „Nie wysłano — brak połączenia” (brak sieci, 503), „Nie wysłano” (400/413/500 i inne), „Nie wiemy, czy dotarło” (zerwane połączenie po wysłaniu, limit 15 s, niepoprawna odpowiedź) oraz „Rozszerzenie zostało przeładowane…”. Nie ma automatycznych powtórzeń. Przy „Nie wiemy, czy dotarło” dziecko najpierw otwiera „Moje zgłoszenia”, a dopiero potem może świadomie kliknąć „Wyślij jeszcze raz”.
+
+## Moje zgłoszenia (HND-03, D-14)
+
+Menu rekina ma trzy pozycje: „Sprawdź wiadomość”, „Moje zgłoszenia”, „Jak to działa”. Każde otwarcie listy (i „Spróbuj ponownie”) wysyła jedno `GET /api/reports?limit=10` dla połączonego konta rodzica. Lista pokazuje do 10 najnowszych zgłoszeń w kolejności z serwera, bez „Pokaż więcej”: początek treści (60 znaków), rodzaj ataku z datą i spokojny status:
+
+| Stan | Tekst dla dziecka |
+|---|---|
+| `pending_parent` | Czeka, aż rodzic zobaczy |
+| `with_teacher` | Rodzic poprosił o pomoc nauczyciela |
+| `escalated` | Dorośli zgłosili to dalej |
+| `closed` | Sprawa zamknięta |
+| `rejected` | Rodzic zobaczył — porozmawiajcie o tym |
+
+Wiersze to zwykły tekst — bez szczegółów, historii i komentarzy (token wtyczki nie ma do nich dostępu). Lista istnieje tylko w pamięci otwartego widoku; nic nie trafia na dysk. Pusta lista pokazuje „Nie ma jeszcze zgłoszeń”, błąd — „Nie udało się wczytać zgłoszeń” i „Spróbuj ponownie”, brak konta — komunikat D-11. Obejrzenie listy nigdy nie oznacza sprawy jako wysłanej i niczego nie wysyła ponownie. Wylogowanie lub zmiana konta w opcjach czyści wyświetlone wiersze w otwartych kartach.
+
+## Jak zgłosić na platformie (HND-02, D-15)
+
+Przycisk na wyniku działa także bez konta rodzica. Otwiera krótką instrukcję dla wybranego źródła (Discord, Gra, Mail, SMS, Inne; to samo pole co w podglądzie), z informacją „To zgłoszenie do serwisu, nie do rodzica. Ta instrukcja niczego nie wysyła.” Jedyne linki w rozszerzeniu to stałe adresy: Roblox (dla gry), CERT Polska i Dyżurnet.pl; otwierają się w nowej karcie. Link z wiadomości dziecka zawsze pozostaje tekstem. „Wróć do wyniku” wraca do tego samego wyniku.
 
 ## Roboczy pakiet treści i ograniczenia
 
@@ -88,18 +110,18 @@ Odczyt następuje tylko po kliknięciu awatara i dotyczy aktualnego zaznaczenia.
 
 Hasła i inne nietekstowe pola, ramki oraz pola wewnątrz shadow DOM innych komponentów nie są odczytywane. Można wkleić wybrany tekst ręcznie. Link pozostaje tekstem: rozszerzenie nie otwiera go i nie pobiera.
 
-Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina, zmiana karty i zmiana kanału SPA zachowują szkic oraz trwające sprawdzanie. Po kliknięciu rekina wraca ten sam ekran: wskazówka bezpieczeństwa, jedno z trzech pytań, wynik albo potwierdzenie demo. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz”, również z bfcache, kasują stan karty i unieważniają spóźnione odpowiedzi. Nie oznacza to usunięcia ulotnych rekordów osobnego service workera. Nowe zaznaczenie zastępuje niezatwierdzony szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. W trakcie sprawdzania przycisk „Sprawdź nowe zaznaczenie” otwiera osobny podgląd; stara sprawa i odpowiedzi zostają aż do udanego zatwierdzenia nowej treści.
+Szkic, bufor wklejania, odpowiedzi, wynik, podgląd zgłoszenia i lista „Moje zgłoszenia” są tylko w pamięci karty. Zamknięcie okna, schowanie rekina, zmiana karty i zmiana kanału SPA zachowują szkic oraz trwające sprawdzanie lub wysyłkę. Po kliknięciu rekina wraca ten sam ekran: wskazówka bezpieczeństwa, jedno z trzech pytań, wynik, podgląd, instrukcja platformy albo potwierdzenie wysłania. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz”, również z bfcache, kasują stan karty i unieważniają spóźnione odpowiedzi. Service worker trzyma osobno, tylko w pamięci, ostatni wynik wysyłki dla karty, dokumentu i sprawy (maks. 100 wpisów, 5 minut po zakończeniu); Chrome usypia go po ok. 30 s bezczynności i wtedy ta pamięć znika — utracony wynik nigdy nie jest zgadywany ani wysyłany ponownie. Nowe zaznaczenie zastępuje niezatwierdzony szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. W trakcie sprawdzania przycisk „Sprawdź nowe zaznaczenie” otwiera osobny podgląd; stara sprawa i odpowiedzi zostają aż do udanego zatwierdzenia nowej treści.
 
-„Edytuj wiadomość” otwiera kopię zatwierdzonego tekstu i linku. „Wróć do sprawdzania” anuluje edycję lub podgląd nowego zaznaczenia i wraca do poprzedniego pytania albo wyniku. Sama edycja, podgląd i anulowanie nie tworzą sprawy. Udane ponowne zatwierdzenie zmienionego tekstu **lub samego linku** rozpoczyna wskazówkę bezpieczeństwa i trzy puste pytania. Niezmieniona treść po normalizacji zachowuje postęp. Błąd zatwierdzenia zachowuje edytowaną kopię i starą sesję; przeładowanie zalecane przez komunikat usuwa je obie. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. W fazie 2 nie ma wysyłki sieciowej.
+„Edytuj wiadomość” otwiera kopię zatwierdzonego tekstu i linku. „Wróć do sprawdzania” anuluje edycję lub podgląd nowego zaznaczenia i wraca do poprzedniego pytania albo wyniku. Sama edycja, podgląd i anulowanie nie tworzą sprawy. Udane ponowne zatwierdzenie zmienionego tekstu **lub samego linku** rozpoczyna wskazówkę bezpieczeństwa i trzy puste pytania. Niezmieniona treść po normalizacji zachowuje postęp. Błąd zatwierdzenia zachowuje edytowaną kopię i starą sesję; przeładowanie zalecane przez komunikat usuwa je obie. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. Ruch sieciowy wykonuje wyłącznie service worker i tylko po jawnej akcji: logowanie rodzica, „Wyślij” oraz otwarcie lub odświeżenie „Moje zgłoszenia”. Uruchomienie strony, sprawdzanie, przeciąganie, instrukcja platformy i zmiana źródła nie łączą się z siecią.
 
-Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Nie ma uprawnienia storage. Otwarty shadow root może być czytany przez stronę; zatrzymywanie zdarzeń chroni jedynie przed listenerami klawiatury w fazie bubble. To zaakceptowane ograniczenia MVP z fikcyjnymi danymi, z wariantem panelu iframe w razie problemu na Discordzie.
+Uprawnienia: `activeTab` i `scripting` (przywracanie po kliknięciu ikony) oraz `storage`; hosty tylko `https://bezpieczna-aura.pl/*` i `http://localhost:3000/*`. Jedynym zapisem na dysku jest wpis `auraSession` z danymi logowania rodzica (token, `expires_at`, konto, e-mail i kod demo) — wyjątek D-10 od zasady „treść spraw nie trafia na dysk”. `chrome.storage.local` jest dostępny tylko dla zaufanych kontekstów rozszerzenia (service worker, strona logowania), a token nigdy nie trafia do skryptu na stronie, adresu URL ani logów. Otwarty shadow root może być czytany przez stronę; zatrzymywanie zdarzeń chroni jedynie przed listenerami klawiatury w fazie bubble. To zaakceptowane ograniczenia MVP z fikcyjnymi danymi, z wariantem panelu iframe w razie problemu na Discordzie.
 
 ## Lista kontrolna przed demo (Google Chrome, Discord w przeglądarce, fikcyjne konto i dane)
 
 1. Zbuduj rozszerzenie i załaduj `projects/widget/dist` w Google Chrome.
 2. Na zwykłej stronie (np. pl.wikipedia.org) sprawdź ostrość rekina, nieuciętą płetwę i kolory palety.
 3. Na Discordzie sprawdź, że rekin nie zasłania kompozytora. Przeciągnij, schowaj, przywróć ikoną; po przeładowaniu wraca.
-4. Zaznacz jedną z pięciu fikcyjnych wiadomości powyżej. Kliknij rekina: tylko zaznaczony tekst, „Ze strony: discord.com” i informacja o docelowym modelu opiekuna. Usuń imię i dopisz kilka znaków. Kompozytor Discorda pozostaje pusty; sprawdź izolację pisania zgodnie z ograniczeniem capture poniżej. Zatwierdź: wskazówka „Zanim sprawdzimy…”, następnie trzy pytania i wynik. Lokalne zatwierdzenie nie oznacza wysłania do opiekuna.
+4. Zaznacz jedną z pięciu fikcyjnych wiadomości powyżej. Kliknij rekina: tylko zaznaczony tekst, „Ze strony: discord.com” i informacja, że nic nie zostanie wysłane bez „Pokaż opiekunowi” i „Wyślij”. Usuń imię i dopisz kilka znaków. Kompozytor Discorda pozostaje pusty; sprawdź izolację pisania zgodnie z ograniczeniem capture poniżej. Zatwierdź: wskazówka „Zanim sprawdzimy…”, następnie trzy pytania i wynik. Lokalne zatwierdzenie nie oznacza wysłania do opiekuna.
 5. Wpisz fikcyjne zdanie w kompozytorze Discorda bez wysyłania. Zaznacz fragment i kliknij rekina. Podgląd pokazuje dokładnie fragment; kompozytor zachowuje tekst.
 6. Utwórz szkic i zmień kanał Discorda: szkic zostaje. Odśwież stronę, usuń zaznaczenie i kliknij rekina: menu, bez starego szkicu.
 7. Wyłącz rozszerzenie, otwórz nową kartę ze zwykłą stroną, włącz rozszerzenie i kliknij jego ikonę na tej karcie. Rekin pojawia się i działa.
@@ -109,7 +131,7 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 
 ## Retest ścieżki sprawdzania w Google Chrome
 
-Używaj pięciu fikcyjnych scenariuszy z tabeli powyżej. Zatwierdzenie nadal oznacza wyłącznie lokalne przyjęcie. Osobny przycisk na wyniku uruchamia opisane wyżej demo przekazania; oznaczone potwierdzenie dotyczy lokalnego mocka, bez wiadomości lub odpowiedzi od rzeczywistego opiekuna.
+Używaj pięciu fikcyjnych scenariuszy z tabeli powyżej. Zatwierdzenie nadal oznacza wyłącznie lokalne przyjęcie; wysyłka do rodzica następuje dopiero po „Pokaż opiekunowi” → „Wyślij”.
 
 1. Na wskazówce bezpieczeństwa, Q1, Q2, Q3 i wyniku zamknij okno przez ×, a następnie przez Escape i otwórz rekinem. Powinien wrócić ten sam ekran i wybrane odpowiedzi. Powtórz ze schowaniem rekina i przywróceniem ikoną rozszerzenia.
 2. Na Q2 wybierz dwie odpowiedzi i zmień kartę przeglądarki. Okno zostaje na pierwszej karcie; po powrocie oba wybory zostają. Zmiana kanału Discorda bez przeładowania również zachowuje postęp.
@@ -132,6 +154,21 @@ Po załadowaniu nowego buildu w Google Chrome przeładuj rozszerzenie i odświe�
 5. Zaznacz fikcyjny tekst na stronie, otwórz podgląd i przeciągnij rekina. Dopiero świadome „Zatwierdzam” pokazuje wskazówkę bezpieczeństwa. Także to okno podąża za rekinem. Sprawdź ręczne schowanie i przywrócenie ikoną rozszerzenia.
 
 Wynik retestu zgłoś przez `$gsd-verify-work 1 --ws widget`; testy automatyczne nie zastępują tej oceny wizualnej.
+
+## Lista kontrolna fazy 3 w Google Chrome (fikcyjne dane, konto Mama Oli)
+
+Wysyłki testowe rób na lokalnym backendzie (`AURA_API=http://localhost:3000`) albo kontami smoke; na prezentacji używaj Mamy Oli. Ruch obserwuj w DevTools service workera (chrome://extensions → „service worker”).
+
+1. **Dokładne pola.** Zaloguj Mamę Oli, sprawdź wiadomość „Gratulacje! Wygrałeś skina, odbierz nagrodę: https://nagroda-demo.example/odbierz”. Do wyniku nie ma żadnego żądania. „Pokaż opiekunowi” → podgląd: „Do: Mama Oli (demo)”, treść kończy się `Link: …`, propozycja „Fałszywa nagroda lub konkurs”. Zmień rodzaj ataku, działania i źródło; niedozwolone działania znikają. „Wyślij” → jedno `POST /api/reports` z czterema polami równymi podglądowi.
+2. **Instrukcja platformy.** Na wyniku (także wylogowany) „Jak zgłosić na platformie”: przejrzyj Discord, Gra, Mail, SMS, Inne. Żadnego żądania sieciowego. Źródło wybrane tu jest tym samym w podglądzie wysyłki. Zamknij i otwórz okno — wraca instrukcja; „Wróć do wyniku” wraca do wyniku.
+3. **Moje zgłoszenia.** Menu → „Moje zgłoszenia” → jedno `GET /api/reports?limit=10`; „Wróć” i ponowne otwarcie robią nowe żądanie. Zmień stan zgłoszenia w panelu rodzica (zatwierdź, odrzuć, przekaż nauczycielowi, zamknij) i otwórz listę ponownie: widać dokładny status, także „Rodzic zobaczył — porozmawiajcie o tym”. Sprawdź 0, 1 i 10 wierszy (kontrolowane odpowiedzi lub konta demo): separatory, brak „Pokaż więcej”, kolejność z serwera, dwa zgłoszenia z tą samą datą pozostają osobnymi wierszami.
+4. **Awarie listy.** Offline lub zatrzymany backend: „Nie udało się wczytać zgłoszeń” i „Spróbuj ponownie”; bez konta: „Otwórz logowanie”.
+5. **Awarie wysyłki.** Kolejno: offline przed wysłaniem i 503 → „Nie wysłano — brak połączenia”; 400/413/500 → „Nie wysłano”; opóźnienie powyżej 15 s, 204 lub uszkodzona odpowiedź → „Nie wiemy, czy dotarło”. Wybory zostają, nic nie ponawia się samo.
+6. **Niepewna wysyłka.** Przy „Nie wiemy, czy dotarło” kliknij „Moje zgłoszenia”, sprawdź listę, „Wróć” — podgląd z tymi samymi wyborami i ostrzeżeniem. „Wyślij jeszcze raz” wysyła dopiero po kliknięciu.
+7. **Konto.** Bez logowania: komunikat D-11. Wyloguj w opcjach przy otwartym podglądzie lub liście: wiersze znikają, pojawia się „Otwórz logowanie”. Zaloguj inne konto demo między otwarciem podglądu a „Wyślij”: wysyłka nie idzie do nieobejrzanego rodzica, „Do:” pokazuje nowe konto. Zepsuty token z przyszłą datą: jedno 401 → ciche logowanie → jedno powtórzenie.
+8. **Duplikaty i zamknięcie.** Dwuklik „Wyślij” daje jedno `POST`. Zamknij okno lub schowaj rekina w trakcie wysyłki: po ponownym otwarciu widać „Wysyłam…” albo wynik, bez drugiego `POST`. Po potwierdzeniu ta sama sprawa nie wyśle się drugi raz.
+9. **Nowy dokument.** Przeładowanie lub przejście na inną stronę czyści sprawdzanie, podgląd i listę; restart service workera usuwa tylko jego ulotny wynik wysyłki, nigdy nie powoduje ponownego wysłania.
+10. **Ton.** Osoba 4 ocenia statusy, instrukcje i komunikaty: spokojny polski dla 9–13 lat, „odrzucone” nie brzmi jak wina dziecka.
 
 ## Jeśli Discord przechwytuje pisanie
 

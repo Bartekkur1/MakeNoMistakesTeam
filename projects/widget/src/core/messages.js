@@ -1,3 +1,11 @@
 export const MSG_CASE_APPROVED = 'aura/case-approved';
-export const MSG_GUARDIAN_REQUEST = 'aura/guardian-request';
 export const MSG_SHOW = 'aura/show';
+export const MSG_AUTH_LOGIN = 'aura/auth-login';
+export const MSG_AUTH_LOGOUT = 'aura/auth-logout';
+export const MSG_SESSION_STATUS = 'aura/session-status';
+export const MSG_OPEN_LOGIN = 'aura/open-login';
+export const MSG_REPORT_SEND = 'aura/report-send';
+export const MSG_REPORT_OUTCOME = 'aura/report-outcome';
+export const MSG_REPORT_CLEAR = 'aura/report-clear';
+export const MSG_REPORT_LIST = 'aura/report-list';
+export const MSG_SESSION_CHANGED = 'aura/session-changed';

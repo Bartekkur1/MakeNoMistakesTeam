@@ -24,6 +24,19 @@ export const test = base.extend({
     const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker');
     await use(worker);
   },
+  page: async ({ context, serviceWorker }, use) => {
+    // Keep the production install tab open. Tests own a separate content page, selected
+    // explicitly rather than assuming the first persistent-context tab is the chat.
+    const loginUrl = new URL('login.html', serviceWorker.url()).href;
+    const page = await context.newPage();
+    const installedPage = opened => opened.once('domcontentloaded', () => {
+      if (opened.url() === loginUrl && !page.isClosed()) page.bringToFront().catch(() => {});
+    });
+    context.on('page', installedPage);
+    await page.bringToFront();
+    try { await use(page); }
+    finally { context.off('page', installedPage); await page.close(); }
+  },
 });
 export const expect = test.expect;
 

@@ -2,7 +2,7 @@ import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 
 const url = 'http://127.0.0.1:4173/chat-like.html';
-const guardianNotice = 'Gdy zatwierdzisz, tę wiadomość i wynik sprawdzania zobaczy Twój opiekun.';
+const guardianNotice = 'Najpierw razem sprawdzimy wiadomość. Nic nie wysyłam, dopóki sam nie wybierzesz „Pokaż opiekunowi” i „Wyślij”.';
 
 test('zaznaczenie → podgląd → zatwierdzenie; nic nie wysłane wcześniej', async ({ page, serviceWorker, netlog }) => {
   await page.goto(url);

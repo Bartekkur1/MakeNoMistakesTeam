@@ -3,6 +3,10 @@ import { createDraftStore } from '../../src/core/draft.js';
 import { buildCase } from '../../src/core/case.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 const draft = () => { const s = createDraftStore(); s.onAvatarClick({ text: 'Fictional', truncated: false }); return s; };
+// Result entry and lifecycle now add local session-status / outcome-clear RPCs; only these
+// approvals are case submissions, and no report is ever sent by approval.
+const approvals = send => send.mock.calls.filter(([message]) => message.type === 'aura/case-approved');
+const localOnly = send => send.mock.calls.every(([message]) => ['aura/case-approved', 'aura/session-status', 'aura/report-clear'].includes(message.type));
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); document.querySelector('bezpieczna-aura-widget')?.remove(); });
 test('one pending approval freezes edits and rejects duplicates', () => {
   expect(createDraftStore().beginSubmit()).toBeNull();
@@ -116,7 +120,7 @@ for (const normalized of [false, true]) test(`unchanged edit approval resumes th
  }
  click(STRINGS.approve);
  await vi.waitFor(() => expect(root.querySelector('h2').textContent).toBe(rendered));
- expect(send).toHaveBeenCalledTimes(1);
+ expect(approvals(send)).toHaveLength(1); expect(localOnly(send)).toBe(true);
  expect(s.get().check).toBe(old);
  expect(s.get()).toMatchObject({ view: 'result', draft: null, candidateKind: null, submitting: false, error: null });
 });
@@ -158,8 +162,10 @@ for (const outcome of ['approved', 'submitFailed']) test(`late replacement ${out
 });
 
 for (const outcome of ['success', 'failure', 'reset-success', 'reset-failure']) test(`replacement controller preserves ownership on deferred ${outcome}`, async () => {
- vi.resetModules(); let captured = 'Fictional'; let resolve;
- const send = vi.fn().mockResolvedValueOnce({ ok: true }).mockImplementation(() => new Promise(r => { resolve = r; }));
+ vi.resetModules(); let captured = 'Fictional'; let resolve; let approvalCount = 0;
+ // Local lifecycle RPCs answer at once; only the replacement approval stays deferred.
+ const send = vi.fn(message => message.type !== 'aura/case-approved' ? Promise.resolve({ ok: true })
+  : ++approvalCount === 1 ? Promise.resolve({ ok: true }) : new Promise(r => { resolve = r; }));
  vi.stubGlobal('chrome', { runtime: { id: 'test-ext', sendMessage: send, onMessage: { addListener: vi.fn() } } });
  const capture = vi.spyOn(document, 'getSelection').mockImplementation(() => ({ toString: () => captured }));
  await import('../../src/content/main.js');
@@ -174,8 +180,8 @@ for (const outcome of ['success', 'failure', 'reset-success', 'reset-failure']) 
  captured = 'Replacement https://new.example/'; root.querySelector('.avatar').click();
  expect(root.querySelector('input[value="code"]').checked).toBe(true);
  click(STRINGS.checkNewSelection);
- expect(root.querySelector('textarea').value).toBe(captured); expect(send).toHaveBeenCalledTimes(1);
- click(STRINGS.approve); findButton(STRINGS.approve).click(); expect(send).toHaveBeenCalledTimes(2);
+ expect(root.querySelector('textarea').value).toBe(captured); expect(approvals(send)).toHaveLength(1);
+ click(STRINGS.approve); findButton(STRINGS.approve).click(); expect(approvals(send)).toHaveLength(2);
  expect(root.querySelector('textarea').readOnly).toBe(true); expect(findButton(STRINGS.cancelCheckEdit).disabled).toBe(true);
  root.querySelector('[aria-label="Zamknij okno"]').click();
  if (outcome.startsWith('reset')) window.dispatchEvent(new Event('pagehide'));
@@ -194,6 +200,6 @@ for (const outcome of ['success', 'failure', 'reset-success', 'reset-failure']) 
   click(STRINGS.cancelCheckEdit); expect(root.querySelector('input[value="code"]').checked).toBe(true);
  }
  if (outcome === 'success') { click(STRINGS.next); expect(root.querySelectorAll('input:checked')).toHaveLength(0); }
- expect(send).toHaveBeenCalledTimes(2); expect(capture).toHaveBeenCalledTimes(3);
- expect(send.mock.calls[1][0].case).toMatchObject({ content: 'Replacement https://new.example/', link: 'https://new.example/', origin: 'selection' });
+ expect(approvals(send)).toHaveLength(2); expect(localOnly(send)).toBe(true); expect(capture).toHaveBeenCalledTimes(3);
+ expect(approvals(send)[1][0].case).toMatchObject({ content: 'Replacement https://new.example/', link: 'https://new.example/', origin: 'selection' });
 });
