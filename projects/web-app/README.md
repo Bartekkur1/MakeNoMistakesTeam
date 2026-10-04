@@ -34,6 +34,7 @@ W edytorze SQL Supabase (SQL Editor) uruchom w całości, w tej kolejności:
    - `20261003170000_reports.sql`
    - `20261003170100_report_transitions.sql`
    - `20261003170200_append_only_guards.sql` - blokuje usuwanie i `TRUNCATE` historii i komentarzy; usunięcie zgłoszenia nadal kasuje je kaskadowo (z tego korzysta `seed.sql`)
+   - `20261004140000_roblox_ingest_idempotency.sql` - obsługa transakcyjna prób Roblox Ingest, unikalność attempt_id i niezmienność potwierdzenia dla opiekuna
 2. `supabase/seed.sql`.
 
 Migracje można też zastosować przez `supabase db push` (po `supabase link`). `seed.sql` to dane demo, które można uruchamiać wielokrotnie - przywraca sześć zgłoszeń demo do stanu początkowego. Po zmianie zbioru danych demo generuje się go ponownie przez `npm run seed:build`.

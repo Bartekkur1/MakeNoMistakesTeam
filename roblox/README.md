@@ -83,3 +83,15 @@ Zgodnie z kontraktem fazy 1 w Workspace znajdują się obiekty:
 
 ### Pomocnik Scamerino
 Zgodnie z decyzją D-14, pomocnik Scamerino w Fazie 1 występuje w interfejsie 2D (GUI dialogu) jako portret/obrazek. W świecie 3D model jest zabezpieczony jako prefab w `ServerStorage.ScamerinoAlertinio_Prefab` oraz `roblox/assets/ScamerinoAlertinio-legacy.rbxm`, a jego pełne włączenie jako aktywnego aktora 3D następuje w kolejnym etapie.
+
+## Eksport zgłoszeń do panelu opiekuna (Faza 3)
+
+Po zakończeniu ćwiczenia (zarówno przy bezpiecznej odmowie, jak i uległości) serwer gry wysyła raport bezpośrednio do backendu (`POST /api/reports/ingest`).
+
+### Wymagania konfiguracyjne:
+1. **Game Settings ➔ Security:**
+   - Opcja **Allow HTTP Requests** musi być włączona (**ON**).
+2. **ServerStorage.ReportExportSettings (instancja Configuration):**
+   - Atrybut typu String `BackendBaseUrl`: publiczny adres HTTPS backendu (np. `https://bezpieczna-aura.pl`). Endpointy bez HTTPS lub `localhost` są odrzucane przez mechanizm fail-closed.
+   - Atrybut typu String `IngestSecret`: tajny klucz uwierzytelniający M2M zgodny ze zmienną `ROBLOX_INGEST_SECRET` backendu.
+   - Wartości te znajdują się wyłącznie w `ServerStorage` (po stronie serwera) i nigdy nie są replikowane do klienta, logowane ani umieszczane w publicznym repozytorium.

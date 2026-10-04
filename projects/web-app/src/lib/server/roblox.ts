@@ -4,11 +4,11 @@
 // StorageUnavailableError (503), never a 2xx.
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, type RobloxAccount } from "@/lib/contract/types";
+import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, REPORT_STATES, type RobloxAccount, type RobloxIngestAck } from "@/lib/contract/types";
 import { StorageUnavailableError } from "./errors";
 import { toIsoUtc } from "./reports";
 import { getSupabase } from "./supabase";
-import type { RobloxIngestInput } from "./validate";
+import { isUuid, type RobloxIngestInput } from "./validate";
 
 const ROBLOX_ACCOUNT_COLUMNS = ROBLOX_ACCOUNT_FIELDS.join(",");
 
@@ -116,8 +116,67 @@ export const ROBLOX_FALLBACK_CHILD_ID = "00000000-0000-4000-8000-0000000c0001";
 
 // The header line the parent sees above the game's own summary.
 export function ingestContent(input: RobloxIngestInput): string {
-  const parts = [`Gra Roblox, gracz ${input.robloxUsername}.`];
+  const parts = [`Ćwiczenie Roblox, gracz ${input.robloxUsername}.`];
+  if (input.outcome === "safe_refusal") parts.push("Wynik ćwiczenia: bezpieczna odmowa.");
+  if (input.outcome === "compromised_password") parts.push("Wynik ćwiczenia: fikcyjne przekazanie hasła (bez rzeczywistego wycieku).");
   if (input.score !== null) parts.push(`Wynik szkolenia: ${input.score}/${ROBLOX_MAX_SCORE} pkt.`);
   if (input.hintsUsed !== null) parts.push(`Użyte wskazówki: ${input.hintsUsed}.`);
   return `${parts.join(" ")}\n\n${input.content}`;
+}
+
+export type { RobloxIngestAck } from "@/lib/contract/types";
+
+export class RobloxIngestIdempotencyConflictError extends Error {
+  constructor() {
+    super("idempotency_conflict");
+    this.name = "RobloxIngestIdempotencyConflictError";
+  }
+}
+
+// Fixed field order, normalized values only; recipient mappings and unknown JSON keys are
+// deliberately excluded so linking a nick later cannot rewrite a completed attempt's ack.
+function requestFingerprint(input: RobloxIngestInput): string {
+  return createHash("sha256").update(JSON.stringify([
+    input.robloxUsername, input.robloxUserId, input.attackType, "game", input.takenActions,
+    input.content, input.hintsUsed, input.score, input.outcome,
+  ]), "utf8").digest("hex");
+}
+
+export async function createRobloxIngestReport(
+  input: RobloxIngestInput,
+  recipient: { childId: string; parentId: string; childName: string; parentName: string; matched: boolean },
+): Promise<{ created: boolean; ack: RobloxIngestAck }> {
+  const data = await run("create_roblox_ingest_report", () => getSupabase().rpc("create_roblox_ingest_report", {
+    p_attempt_id: input.attemptId,
+    p_request_fingerprint: requestFingerprint(input),
+    p_parent_id: recipient.parentId,
+    p_child_id: recipient.childId,
+    p_attack_type: input.attackType,
+    p_taken_actions: input.takenActions,
+    p_content: ingestContent(input),
+    p_child_name: recipient.childName,
+    p_parent_name: recipient.parentName,
+    p_matched: recipient.matched,
+  }));
+  if (data === null || typeof data !== "object" || Array.isArray(data)) throw shapeError();
+  const row = data as Record<string, unknown>;
+  if (row.result === "conflict") {
+    if (Object.keys(row).length !== 1) throw shapeError();
+    throw new RobloxIngestIdempotencyConflictError();
+  }
+  if ((row.result !== "created" && row.result !== "replayed") || !isUuid(row.report_id) ||
+    typeof row.child_name !== "string" || !row.child_name.trim() ||
+    typeof row.parent_name !== "string" || !row.parent_name.trim() ||
+    typeof row.state !== "string" || !(REPORT_STATES as readonly string[]).includes(row.state) ||
+    typeof row.matched !== "boolean") throw shapeError();
+  return {
+    created: row.result === "created",
+    ack: {
+      report_id: row.report_id,
+      child_name: row.child_name,
+      parent_name: row.parent_name,
+      state: row.state as RobloxIngestAck["state"],
+      matched: row.matched,
+    },
+  };
 }

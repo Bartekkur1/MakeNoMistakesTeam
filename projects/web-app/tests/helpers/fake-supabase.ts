@@ -20,7 +20,7 @@ import {
   type TransitionAction,
 } from "@/lib/contract/types";
 
-export type TableName = "reports" | "report_history" | "report_comments" | "child_roblox_accounts";
+export type TableName = "reports" | "report_history" | "report_comments" | "child_roblox_accounts" | "roblox_ingest_attempts";
 export type Row = Record<string, unknown>;
 
 export interface FakeError {
@@ -50,7 +50,7 @@ export interface FakeCall {
 export type RpcHandler = (args: Record<string, unknown>, fake: FakeSupabase) => FakeResult;
 export type BeforeCallCallback = (fake: FakeSupabase) => void;
 
-const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments", "child_roblox_accounts"];
+const TABLE_NAMES: readonly TableName[] = ["reports", "report_history", "report_comments", "child_roblox_accounts", "roblox_ingest_attempts"];
 
 // Tables with a `seq bigint generated always as identity` column.
 type SeqTable = "report_history" | "report_comments";
@@ -66,6 +66,7 @@ const TIMESTAMP_DEFAULTS: Record<TableName, readonly string[]> = {
   report_history: ["created_at"],
   report_comments: ["created_at"],
   child_roblox_accounts: ["updated_at"],
+  roblox_ingest_attempts: [],
 };
 
 const DEFAULT_CLOCK = "2026-10-03T12:00:00.000Z";
@@ -301,7 +302,7 @@ export class FakeRpcCall implements PromiseLike<FakeResult> {
 }
 
 export class FakeSupabase {
-  tables: Record<TableName, Row[]> = { reports: [], report_history: [], report_comments: [], child_roblox_accounts: [] };
+  tables: Record<TableName, Row[]> = { reports: [], report_history: [], report_comments: [], child_roblox_accounts: [], roblox_ingest_attempts: [] };
   callCount = 0;
   calls: FakeCall[] = [];
   // Registry name -> handler. reset() leaves it alone; a test that registers a handler
@@ -332,6 +333,7 @@ export class FakeSupabase {
       child_roblox_accounts: (initial.child_roblox_accounts ?? []).map((row) =>
         storeRow({ ...row, roblox_username_key: String(row.roblox_username).toLowerCase() }),
       ),
+      roblox_ingest_attempts: (initial.roblox_ingest_attempts ?? []).map(storeRow),
     };
     this.callCount = 0;
     this.calls = [];
@@ -529,6 +531,45 @@ fakeSupabase.rpcHandlers.create_report = (args, fake) => {
     created_at: now,
   });
   return { data: clone(report), error: null };
+};
+
+// Synchronous handler is the fake's atomic transaction boundary: all checks precede writes;
+// concurrent awaited calls finish this section before the next handler can claim the key.
+fakeSupabase.rpcHandlers.create_roblox_ingest_report = (args, fake) => {
+  const stored = fake.tables.roblox_ingest_attempts.find((r) => r.attempt_id === args.p_attempt_id);
+  if (stored && stored.request_fingerprint !== args.p_request_fingerprint) {
+    return { data: { result: "conflict" }, error: null };
+  }
+  let attempt = stored;
+  if (!attempt) {
+    if (typeof args.p_attempt_id !== "string" || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(args.p_attempt_id) ||
+      typeof args.p_request_fingerprint !== "string" || !/^[0-9a-f]{64}$/.test(args.p_request_fingerprint) ||
+      typeof args.p_child_name !== "string" || !args.p_child_name.trim() ||
+      typeof args.p_parent_name !== "string" || !args.p_parent_name.trim() || typeof args.p_matched !== "boolean") {
+      return { data: null, error: { code: "23514", message: "invalid attempt fields" } };
+    }
+    const result = fake.rpcHandlers.create_report({ ...args, p_source: "game" }, fake);
+    if (result.error) return result;
+    const report = result.data as Row;
+    attempt = {
+      attempt_id: args.p_attempt_id,
+      request_fingerprint: args.p_request_fingerprint,
+      report_id: report.id,
+      ack_child_name: args.p_child_name,
+      ack_parent_name: args.p_parent_name,
+      ack_state: report.state,
+      ack_matched: args.p_matched,
+    };
+    fake.tables.roblox_ingest_attempts.push(attempt);
+  }
+  return { data: {
+    result: stored ? "replayed" : "created",
+    report_id: attempt.report_id,
+    child_name: attempt.ack_child_name,
+    parent_name: attempt.ack_parent_name,
+    state: attempt.ack_state,
+    matched: attempt.ack_matched,
+  }, error: null };
 };
 
 function raise(message: string): FakeResult {
