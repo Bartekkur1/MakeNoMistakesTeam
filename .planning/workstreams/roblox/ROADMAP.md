@@ -67,7 +67,13 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   2. Ukończenie daje jedną kosmetyczną nagrodę; zgłoszenia nie są punktowane
   3. Wynik można wyeksportować w formacie kontraktu; import ręczny jest oznaczony w demo
 
-**Plans**: TBD
+**Plans**: 2 plans in 2 waves
+
+**Wave 1**
+- [ ] 03-01-PLAN.md — punktacja (SCR-01), kosmetyczna nagroda 3D Accessory ze złotymi cząsteczkami (SCR-02) i ekran podsumowania z raportem JSON
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — bezpieczny moduł serwerowy eksportu HTTP do skrzynki backendu (SCR-03), obsługa doręczenia, fallback offline i raport testowy
 
 ---
 *Roadmap created: 2026-10-03*
