@@ -1,4 +1,5 @@
-import { MSG_CASE_APPROVED, MSG_SHOW, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR } from '../core/messages.js';
+import { MSG_CASE_APPROVED, MSG_SHOW, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR,
+  MSG_REPORT_LIST, MSG_SESSION_CHANGED } from '../core/messages.js';
 import { isValidCase } from '../core/case.js';
 import { ACCOUNT_FIELDS, ACTIONS_BY_ATTACK_TYPE, API_ERROR_CODES, ATTACK_TYPES, CHILD_FIELDS,
   LIMITS, REPORT_FIELDS, REPORT_SOURCES, REPORT_STATES, TAKEN_ACTIONS } from '../../../web-app/src/lib/contract/types.ts';
@@ -110,7 +111,8 @@ async function apiRequest(path, { body, token, method = 'POST' }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const headers = { Accept: 'application/json', 'Content-Type': 'application/json' };
+    const headers = { Accept: 'application/json' };
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (token) headers.Authorization = `Bearer ${token}`;
     const response = await fetch(API_ORIGIN + path, { method, headers,
       body: body === undefined ? undefined : JSON.stringify(body), credentials: 'omit', redirect: 'error',
@@ -180,6 +182,7 @@ async function refreshSession(session, revision) {
       if (!response.ok) {
         if (response.code === 'invalid_credentials') {
           const cleared = await clearSession(++sessionRevision);
+          notifySessionChanged();
           return cleared.ok ? { ok: false, kind: 'no-account' } : cleared;
         }
         // Report POST has not begun: a failed renewal is reliably a no-send outcome.
@@ -229,6 +232,71 @@ export function isValidSavedReport(report, expectedAccountId, payload = null) {
     && report.taken_actions.every((action, index) => action === payload.taken_actions[index]));
 }
 
+// D-14: extension-scope list rows. Unlike POST, rows may come from the panel or the game
+// ingest, so actions are checked against the canonical list rather than the attack subset.
+const REPORT_LIST_LIMIT = 10;
+function isValidListedReport(report, expectedAccountId) {
+  if (!exactKeys(report, REPORT_FIELDS) || !uuid(report.id) || !uuid(report.child_id) || report.parent_id !== expectedAccountId
+    || !ATTACK_TYPES.includes(report.attack_type) || !REPORT_SOURCES.includes(report.source)
+    || !REPORT_STATES.includes(report.state) || !keyedList(report.taken_actions, TAKEN_ACTIONS)
+    || typeof report.content !== 'string' || report.content.length === 0
+    || Array.from(report.content).length > LIMITS.contentMaxChars || loneSurrogate.test(report.content)
+    || !isoDate(report.created_at) || !isoDate(report.updated_at)
+    || Date.parse(report.updated_at) < Date.parse(report.created_at)) return false;
+  const ordered = TAKEN_ACTIONS.filter(action => report.taken_actions.includes(action));
+  return report.taken_actions.every((action, index) => action === ordered[index]);
+}
+export function isValidReportList(value, expectedAccountId) {
+  if (!exactKeys(value, ['reports', 'next_cursor']) || !Array.isArray(value.reports)
+    || value.reports.length > REPORT_LIST_LIMIT) return false;
+  if (value.next_cursor !== null && (typeof value.next_cursor !== 'string' || value.next_cursor.length === 0
+    || value.next_cursor.length > 4096)) return false;
+  const ids = new Set();
+  for (let index = 0; index < value.reports.length; index += 1) {
+    const report = value.reports[index];
+    if (!Object.hasOwn(value.reports, index) || !isValidListedReport(report, expectedAccountId) || ids.has(report.id)) return false;
+    ids.add(report.id);
+  }
+  return true;
+}
+async function operationSession(operation) {
+  let session;
+  try { session = await serializeSession(readStoredSession); }
+  catch { return { ok: false, kind: 'storage' }; }
+  if (operation.session_revision !== sessionRevision) return { ok: false, kind: 'account-changed' };
+  if (!session) return { ok: false, kind: 'no-account' };
+  if (session.account.id !== operation.expected_account_id) return { ok: false, kind: 'account-changed' };
+  return { ok: true, session };
+}
+// Read-only and on demand: the only query is the fixed first page of ten. No cursor, filter,
+// polling, detail, history or comment call; the list is never stored or cached here.
+async function handleReportList(operation) {
+  let ready = await operationSession(operation);
+  if (!ready.ok) return ready;
+  if (Date.parse(ready.session.expires_at) <= Date.now()) {
+    ready = await refreshSession(ready.session, operation.session_revision);
+    if (!ready.ok) return ready;
+  }
+  let usedSession = null;
+  const get = async () => {
+    const checked = await operationSession(operation);
+    if (!checked.ok) return checked;
+    usedSession = checked.session;
+    return apiRequest('/api/reports?limit=' + REPORT_LIST_LIMIT, { method: 'GET', token: checked.session.token });
+  };
+  let response = await get();
+  if (!response.ok && response.kind === 'http' && response.status === 401 && usedSession) {
+    const refreshed = await refreshSession(usedSession, operation.session_revision);
+    if (!refreshed.ok) return refreshed;
+    response = await get(); // One replay after a confirmed rejection only.
+  }
+  if (!response.ok) return response;
+  if (operation.session_revision !== sessionRevision) return { ok: false, kind: 'account-changed' };
+  if (!isValidReportList(response.value, operation.expected_account_id)) return { ok: false, kind: 'unknown' };
+  return { ok: true, reports: response.value.reports, next_cursor: response.value.next_cursor,
+    account_id: operation.expected_account_id, revision: operation.session_revision };
+}
+
 const reportOutcomes = new Map();
 const reportDocuments = new Map();
 const OUTCOME_TTL_MS = 5 * 60 * 1000;
@@ -240,6 +308,14 @@ function observeDocument(sender) {
   const previous = reportDocuments.get(sender.tab.id);
   if (previous && previous !== sender.documentId) clearTabOutcomes(sender.tab.id);
   reportDocuments.set(sender.tab.id, sender.documentId);
+}
+// Tell already connected child documents that the parent session changed, so they drop
+// cached account metadata and list rows. Carries no account data; reads no page content.
+function notifySessionChanged() {
+  if (typeof chrome.tabs?.sendMessage !== 'function') return;
+  for (const [tabId, documentId] of reportDocuments) {
+    Promise.resolve().then(() => chrome.tabs.sendMessage(tabId, { type: MSG_SESSION_CHANGED }, { documentId })).catch(() => {});
+  }
 }
 function pruneCompletedOutcomes() {
   const now = Date.now();
@@ -364,6 +440,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     return asyncResponse(() => handleReportMessage(msg, sender), sendResponse);
   }
+  if (msg?.type === MSG_REPORT_LIST) {
+    if (!childSender(sender) || !exactKeys(msg, ['type', 'request_id', 'expected_account_id', 'session_revision'])) {
+      sendResponse({ ok: false, kind: 'context' }); return;
+    }
+    if (!localId(msg.request_id) || !uuid(msg.expected_account_id) || !Number.isSafeInteger(msg.session_revision)
+      || msg.session_revision < 0) {
+      sendResponse({ ok: false, kind: 'http', status: 400, code: 'validation_error' }); return;
+    }
+    observeDocument(sender);
+    return asyncResponse(() => handleReportList(msg), sendResponse);
+  }
   if ([MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN].includes(msg?.type)) {
     const privileged = msg.type === MSG_AUTH_LOGIN || msg.type === MSG_AUTH_LOGOUT;
     const keys = msg.type === MSG_AUTH_LOGIN ? ['type', 'email', 'code'] : ['type'];
@@ -376,11 +463,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       // Start synchronously so the revision invalidates older work before this listener returns.
       const operation = handleLogin(msg.email, msg.code);
+      // Login clears the previous account first, so connected tabs are told either way.
+      operation.finally(notifySessionChanged).catch(() => {});
       return asyncResponse(() => operation, sendResponse);
     }
     if (msg.type === MSG_AUTH_LOGOUT) {
       const revision = ++sessionRevision;
-      return asyncResponse(() => clearSession(revision), sendResponse);
+      const operation = clearSession(revision);
+      operation.finally(notifySessionChanged).catch(() => {});
+      return asyncResponse(() => operation, sendResponse);
     }
     if (childSender(sender)) observeDocument(sender);
     if (msg.type === MSG_SESSION_STATUS) return asyncResponse(sessionStatus, sendResponse);

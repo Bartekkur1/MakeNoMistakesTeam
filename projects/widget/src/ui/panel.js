@@ -1,7 +1,12 @@
 import { normalizeText } from '../core/case.js';
-import { ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, TAKEN_ACTIONS, TAKEN_ACTION_LABELS_PL, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
+import { ATTACK_TYPES, ATTACK_TYPE_LABELS_PL, REPORT_STATES, TAKEN_ACTIONS, TAKEN_ACTION_LABELS_PL, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
 
 const capitalized = text => text[0].toLocaleUpperCase('pl-PL') + text.slice(1);
+// Whitespace collapsed, first 60 code points (never a split surrogate pair), ellipsis only when cut.
+export function reportExcerpt(content, max = 60) {
+  const points = Array.from(String(content).replace(/\s+/g, ' ').trim());
+  return points.length > max ? points.slice(0, max).join('') + '\u2026' : points.join('');
+}
 
 export function computePanelPosition(avatarRect, panelSize, viewport, { gap = 12, margin = 8 } = {}) {
   const { width, height } = panelSize;
@@ -42,6 +47,23 @@ export function createPanel({ root, strings, handlers }) {
     replace.disabled = Boolean(state.submitting);
     body.append(replace);
   };
+  // Only fixed, trusted destinations from strings become anchors; supplied links stay text.
+  const trustedLink = ({ text, href }) => {
+    const a = node('a', text);
+    a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.style.color = 'var(--color-shark-blue-dark)'; a.style.textDecoration = 'underline'; a.style.fontSize = '15px';
+    return a;
+  };
+  const sourceSelect = (id, value, disabled, handler) => {
+    const select = node('select'); select.id = id; select.disabled = disabled;
+    for (const source of REPORT_SOURCES) {
+      const option = node('option', capitalized(REPORT_SOURCE_LABELS_PL[source]));
+      option.value = source; select.append(option);
+    }
+    select.value = value;
+    select.addEventListener('change', () => handler(select.value));
+    return select;
+  };
   const noAccountNotice = () => {
     const notice = node('div', undefined, 'notice');
     notice.append(node('p', strings.noAccount), button(strings.openLogin, 'btn-secondary', () => handlers.onOpenLogin()));
@@ -61,16 +83,70 @@ export function createPanel({ root, strings, handlers }) {
     appendReplacement(state);
     done.focus();
   };
+  let lastView = null;
+  const reportRow = (report, index) => {
+    // Plain text only: no detail, history, comment or link. Fixed style values, never user data.
+    const item = node('li');
+    Object.assign(item.style, { padding: '12px 0', overflowWrap: 'anywhere' });
+    if (index > 0) item.style.borderTop = '1px solid var(--color-shield-silver-border)';
+    const excerpt = node('p', reportExcerpt(report.content));
+    Object.assign(excerpt.style, { margin: '0', fontSize: '15px', fontWeight: '400' });
+    const date = new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      .format(new Date(report.created_at));
+    const meta = node('p', capitalized(ATTACK_TYPE_LABELS_PL[report.attack_type]) + ' \u00b7 ' + date, 'hint');
+    Object.assign(meta.style, { margin: '4px 0 0', fontWeight: '400' });
+    const status = node('p', REPORT_STATES.includes(report.state) ? strings.reportStates[report.state] : '');
+    Object.assign(status.style, { margin: '4px 0 0', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-primary)' });
+    item.append(excerpt, meta, status);
+    return item;
+  };
+  const myReports = state => {
+    const reports = state.reports ?? {};
+    const back = button(strings.back, 'btn-secondary', () => handlers.onReportsBack());
+    const region = node('div', undefined, 'review-block');
+    const loading = Boolean(reports.loading) || (!reports.items && !reports.error);
+    region.setAttribute('aria-busy', String(loading));
+    if (reports.error === 'no-account') region.append(noAccountNotice());
+    else if (loading) {
+      const status = node('p', strings.reportsLoading, 'hint');
+      status.setAttribute('role', 'status');
+      region.append(status);
+    } else if (reports.error) {
+      const alert = node('div', undefined, 'alert-error');
+      alert.setAttribute('role', 'alert');
+      alert.append(node('h3', strings.reportsErrorTitle), node('p', strings.reportsErrorBody));
+      const retryRow = node('div', undefined, 'row');
+      retryRow.append(button(strings.reportsRetry, 'btn-primary', () => handlers.onRetryReports()));
+      region.append(alert, retryRow);
+    } else if (reports.items.length === 0) {
+      const empty = node('h3', strings.reportsEmptyTitle);
+      Object.assign(empty.style, { fontSize: '15px', fontWeight: '600', margin: '0 0 8px' });
+      region.append(empty, node('p', strings.reportsEmptyBody, 'hint'));
+    } else {
+      const list = node('ol', undefined, 'reports');
+      Object.assign(list.style, { listStyle: 'none', margin: '0', padding: '0' });
+      reports.items.forEach((report, index) => list.append(reportRow(report, index)));
+      region.append(list);
+    }
+    const row = node('div', undefined, 'row');
+    row.append(back);
+    body.append(node('h2', strings.myReports), node('p', strings.reportsIntro, 'hint'), region, row);
+    return back;
+  };
   return {
     el,
     render(state, ctx) {
-      const focusedId = ['question', 'sendPreview'].includes(state.view) ? root.activeElement?.id : undefined;
+      const previousView = lastView;
+      lastView = state.view;
+      const focusedId = ['question', 'sendPreview', 'platformHowTo'].includes(state.view) ? root.activeElement?.id : undefined;
       body.replaceChildren();
-      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports', 'platformHowTo'].includes(state.view);
       if (el.hidden) return;
       if (state.view === 'menu') {
         const menu = node('div', undefined, 'menu');
-        menu.append(button(strings.menuCheck, 'btn-primary', () => handlers.onCheck()), button(strings.menuHowTo, 'btn-secondary', () => handlers.onHowTo()));
+        menu.append(button(strings.menuCheck, 'btn-primary', () => handlers.onCheck()),
+          button(strings.menuReports, 'btn-secondary', () => handlers.onMyReports()),
+          button(strings.menuHowTo, 'btn-secondary', () => handlers.onHowTo()));
         body.append(node('p', strings.menuIntro, 'intro'), menu);
         menu.querySelector('button').focus();
         return;
@@ -98,9 +174,10 @@ export function createPanel({ root, strings, handlers }) {
         return;
       }
       if (state.view === 'myReports') {
-        // Navigation contract for 03-03; list fetching/rendering belongs to that plan.
-        body.append(node('h2', strings.myReports), button(strings.back, 'btn-secondary', () => handlers.onSendBack()));
-        body.querySelector('button').focus();
+        // Focus Back on entry; a later list arrival keeps focus where the child left it.
+        const active = root.activeElement;
+        const back = myReports(state);
+        if (previousView !== 'myReports' || !active || !active.isConnected) back.focus();
         return;
       }
       if (state.view === 'sendPreview') {
@@ -143,14 +220,7 @@ export function createPanel({ root, strings, handlers }) {
         const sourceBlock = node('div', undefined, 'review-block');
         const sourceLabel = node('label', strings.reportSourceLabel, 'field-label');
         sourceLabel.htmlFor = 'report-source';
-        const source = node('select'); source.id = 'report-source';
-        source.disabled = Boolean(state.submitting);
-        for (const value of REPORT_SOURCES) {
-          const option = node('option', capitalized(REPORT_SOURCE_LABELS_PL[value]));
-          option.value = value; source.append(option);
-        }
-        source.value = preview.source;
-        source.addEventListener('change', () => handlers.onReportSourceChange(source.value));
+        const source = sourceSelect('report-source', preview.source, Boolean(state.submitting), value => handlers.onReportSourceChange(value));
         sourceBlock.append(sourceLabel, source);
         review.append(attacks, actions, sourceBlock, node('p', strings.sendPrivacy, 'notice review-block'));
         if (!state.submitting && (state.sessionStatus.status === 'none' || state.sendOutcome?.kind === 'no-account')) review.append(noAccountNotice());
@@ -183,6 +253,36 @@ export function createPanel({ root, strings, handlers }) {
         body.append(review);
         const focused = focusedId ? [...review.querySelectorAll('input, select')].find(control => control.id === focusedId) : null;
         (state.submitting ? close : focused ?? (kind ? retry && !retry.disabled ? retry : review.querySelector('button:not(:disabled)') : content) ?? content).focus();
+        return;
+      }
+      if (state.view === 'platformHowTo') {
+        // D-15: fixed local copy only; no handler here reaches the network or sends a report.
+        const value = REPORT_SOURCES.includes(state.reportSource) ? state.reportSource : 'other';
+        const sourceBlock = node('div', undefined, 'review-block');
+        const label = node('label', strings.reportSourceLabel, 'field-label');
+        label.htmlFor = 'platform-source';
+        const select = sourceSelect('platform-source', value, false, next => handlers.onPlatformSourceChange(next));
+        sourceBlock.append(label, select);
+        const steps = node('ol', undefined, 'steps');
+        for (const text of strings.platformSteps[value]) steps.append(node('li', text));
+        body.append(node('h2', strings.platformHeading), node('p', strings.platformNotice, 'notice'), sourceBlock, steps);
+        if (value === 'game') { const p = node('p'); p.append(trustedLink(strings.platformRoblox)); body.append(p); }
+        const elsewhere = node('section', undefined, 'result-section');
+        const title = node('h3', strings.platformElsewhere);
+        title.id = 'platform-elsewhere';
+        elsewhere.setAttribute('aria-labelledby', title.id);
+        const list = node('ul');
+        for (const destination of strings.platformLinks) {
+          const item = node('li');
+          item.append(trustedLink(destination), doc.createTextNode(' — ' + destination.use));
+          list.append(item);
+        }
+        elsewhere.append(title, list);
+        const back = button(strings.platformBack, 'btn-secondary', () => handlers.onPlatformBack());
+        const row = node('div', undefined, 'row');
+        row.append(back);
+        body.append(elsewhere, node('p', strings.platformSafety), row);
+        (focusedId === 'platform-source' ? select : back).focus();
         return;
       }
       if (state.view === 'safety') {
@@ -260,6 +360,8 @@ export function createPanel({ root, strings, handlers }) {
           request.disabled = state.sessionStatus?.status !== 'connected';
           handoff.append(request);
         }
+        // HND-02: independent of the parent connection; opens local guidance only.
+        handoff.append(button(strings.platformHowTo, 'btn-secondary', () => handlers.onPlatformHowTo()));
         body.append(step, handoff, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
           button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
         appendReplacement(state);

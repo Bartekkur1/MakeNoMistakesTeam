@@ -1,4 +1,4 @@
-import { MSG_CASE_APPROVED, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR } from './messages.js';
+import { MSG_CASE_APPROVED, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR, MSG_REPORT_LIST } from './messages.js';
 import { API_ERROR_CODES, REPORT_FIELDS } from '../../../web-app/src/lib/contract/types.ts';
 
 export async function submitCase(c) {
@@ -76,4 +76,19 @@ export async function readReportOutcome(case_id) {
 export async function clearReportOutcome(case_id) {
   const response = await rpc({ type: MSG_REPORT_CLEAR, case_id });
   return response?.ok === true ? { ok: true } : failure(response);
+}
+
+// D-14: explicit open/retry only. The worker validates the extension-scope rows; this adapter
+// copies the exact report fields and never treats a malformed reply as a valid (empty) list.
+export async function getReports(operation) {
+  const response = await rpc({ type: MSG_REPORT_LIST, request_id: operation.request_id,
+    expected_account_id: operation.expected_account_id, session_revision: operation.session_revision });
+  const rows = response?.reports;
+  if (response?.ok !== true || !Array.isArray(rows) || rows.length > 10
+    || !(response.next_cursor === null || typeof response.next_cursor === 'string')
+    || response.account_id !== operation.expected_account_id || response.revision !== operation.session_revision
+    || !rows.every(row => row !== null && typeof row === 'object' && Reflect.ownKeys(row).length === REPORT_FIELDS.length
+      && REPORT_FIELDS.every(key => Object.hasOwn(row, key)))) return failure(response);
+  return { ok: true, reports: rows.map(row => Object.fromEntries(REPORT_FIELDS.map(key => [key, row[key]]))),
+    next_cursor: response.next_cursor, account_id: response.account_id, revision: response.revision };
 }

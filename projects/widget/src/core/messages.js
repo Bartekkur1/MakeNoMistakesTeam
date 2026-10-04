@@ -7,3 +7,5 @@ export const MSG_OPEN_LOGIN = 'aura/open-login';
 export const MSG_REPORT_SEND = 'aura/report-send';
 export const MSG_REPORT_OUTCOME = 'aura/report-outcome';
 export const MSG_REPORT_CLEAR = 'aura/report-clear';
+export const MSG_REPORT_LIST = 'aura/report-list';
+export const MSG_SESSION_CHANGED = 'aura/session-changed';

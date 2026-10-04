@@ -6,8 +6,8 @@ const button=(p,name)=>p.getByRole('button',{name,exact:true});
 const text=p=>p.getByRole('textbox',{name:'Wiadomość',exact:true});
 const link=p=>p.getByRole('textbox',{name:'Link (jeśli jest)',exact:true});
 async function open(page){await page.goto(url);await avatar(page).click();}
-test('empty selection shows ordered two-button menu',async({page,netlog})=>{
- await open(page);expect(await page.locator('.menu button').allTextContents()).toEqual([STRINGS.menuCheck,STRINGS.menuHowTo]);await assertOnlyLocal(netlog);
+test('empty selection shows ordered three-button menu',async({page,netlog})=>{
+ await open(page);expect(await page.locator('.menu button').allTextContents()).toEqual([STRINGS.menuCheck,STRINGS.menuReports,STRINGS.menuHowTo]);await assertOnlyLocal(netlog);
 });
 test('instructions show three ordered steps and privacy sentence',async({page,netlog})=>{
  await open(page);await button(page,STRINGS.menuHowTo).click();expect(await page.locator('ol li').allTextContents()).toEqual(STRINGS.howToSteps);await expect(page.getByText(STRINGS.howToPrivacy,{exact:true})).toBeVisible();await button(page,STRINGS.back).click();await expect(page.locator('.menu')).toBeVisible();await assertOnlyLocal(netlog);

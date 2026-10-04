@@ -2,17 +2,23 @@ import { normalizeText, capCodePoints, normalizeLink, extractFirstLink, isValidC
 import { QUESTIONS, detectHints, evaluate } from './check.js';
 export { detectHints, evaluate } from './check.js';
 
-import { ATTACK_TYPES, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_FIELDS } from '../../../web-app/src/lib/contract/types.ts';
+import { ATTACK_TYPES, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_FIELDS, REPORT_STATES } from '../../../web-app/src/lib/contract/types.ts';
 
 const ORDER = Object.keys(QUESTIONS);
 const freezeAnswers = answers => Object.freeze(Object.fromEntries(Object.entries(answers).map(([id, values]) => [id, Object.freeze(values)])));
-const checkView = step => ['safety', 'result', 'confirmation', 'sendPreview', 'myReports'].includes(step) ? step : 'question';
-const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, case_id: null, request_id: null, sendGeneration: 0, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, sessionStatus: Object.freeze({ status: 'unknown', account: null, revision: null }), reportsReturnView: 'menu', paste: { text: '', link: '' } });
+const checkView = step => ['safety', 'result', 'confirmation', 'sendPreview', 'myReports', 'platformHowTo'].includes(step) ? step : 'question';
+// D-14: list rows live only in this transient tab state; every open/retry fetches anew.
+const noReports = (returnView = 'menu') => Object.freeze({ request_id: null, returnView, loading: false, items: null,
+  error: null, account_id: null, revision: null });
+const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, case_id: null, request_id: null, sendGeneration: 0, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, reportSource: null, sessionStatus: Object.freeze({ status: 'unknown', account: null, revision: null }), reports: noReports(), paste: { text: '', link: '' } });
 
 export function createDraftStore() {
   let state = initial();
   const currentSend = token => token === state.sendOperation && token?.generation === state.sendGeneration
     && token.case_id === state.case_id && state.submitting && state.submissionKind === 'report';
+  // Only the current list-open request may replace rows; close, back, reset and account changes drop it.
+  const reportsCurrent = token => state.view === 'myReports' && state.reports.loading && Boolean(token?.request_id)
+    && state.reports.request_id === token.request_id;
   const setResume = step => Object.freeze({ ...state.check, resumeStep: step });
   const replaceSelection = patch => {
     if (state.view !== 'sendPreview' || state.submitting || state.sentReport || !state.sendPreview) return false;
@@ -97,7 +103,7 @@ export function createDraftStore() {
       state = { ...state, view: 'preview', candidateKind: 'replacement', error: null,
         draft: { ...p, link: extractFirstLink(p.text), origin: 'selection' }, pendingSelection: null };
     },
-    close() { state = { ...state, view: 'closed', pendingSelection: null }; },
+    close() { state = { ...state, view: 'closed', pendingSelection: null, reports: noReports(state.reports.returnView) }; },
     beginSubmit() {
       if (state.submitting || !state.draft || !normalizeText(state.draft.text)) return null;
       state = { ...state, gen: state.gen + 1, submitting: true, submissionKind: 'case', error: null };
@@ -112,7 +118,7 @@ export function createDraftStore() {
         answers: freezeAnswers({ sender: [], request: [], verify: [] }), hints: detectHints(approvedCase), result: null,
         keptAnswers: Object.freeze({}), discrepancy: null });
       const reportState = unchanged ? {} : { case_id: globalThis.crypto.randomUUID(), request_id: null,
-        sendGeneration: state.sendGeneration + 1, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null };
+        sendGeneration: state.sendGeneration + 1, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, reportSource: null };
       state = { ...state, ...reportState, view: state.view === 'closed' ? 'closed' : checkView(check.resumeStep), check,
         draft: null, candidateKind: null, pendingSelection: null, error: null, submitting: false, submissionKind: null };
       return true;
@@ -143,11 +149,35 @@ export function createDraftStore() {
         const proposal = proposeAttackType(state.check.answers, state.check.result);
         try {
           sendPreview = Object.freeze({ ...buildReportPayload(state.check.case,
-            { attack_type: proposal, taken_actions: [], source: sourceFromCase(state.check.case) }),
+            { attack_type: proposal, taken_actions: [], source: state.reportSource ?? sourceFromCase(state.check.case) }),
             proposal, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
         } catch { return false; }
       } else sendPreview = Object.freeze({ ...sendPreview, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
-      state = { ...state, view: 'sendPreview', sendPreview, check: setResume('sendPreview'), pendingSelection: null };
+      state = { ...state, view: 'sendPreview', sendPreview, reportSource: sendPreview.source, check: setResume('sendPreview'), pendingSelection: null };
+      return true;
+    },
+    // D-15: local platform guidance. It shares the case-bound source with the send preview,
+    // never sends anything and never changes the current check.
+    openPlatformHowTo() {
+      if (state.view !== 'result' || !state.check?.result || state.draft || state.submitting || state.sentReport
+        || !isValidCase(state.check.case)) return false;
+      const reportSource = state.sendPreview?.source ?? state.reportSource ?? sourceFromCase(state.check.case);
+      state = { ...state, view: 'platformHowTo', reportSource, check: setResume('platformHowTo'), pendingSelection: null };
+      return true;
+    },
+    setPlatformSource(value) {
+      if (state.view !== 'platformHowTo' || !REPORT_SOURCES.includes(value) || state.submitting || !state.check) return false;
+      let sendPreview = state.sendPreview;
+      if (sendPreview && !state.sentReport) {
+        try { sendPreview = Object.freeze({ ...sendPreview, ...buildReportPayload(state.check.case, { ...sendPreview, source: value }) }); }
+        catch { return false; }
+      }
+      state = { ...state, reportSource: value, sendPreview };
+      return true;
+    },
+    backFromPlatformHowTo() {
+      if (state.view !== 'platformHowTo' || !state.check?.result || state.submitting) return false;
+      state = { ...state, view: 'result', check: setResume('result') };
       return true;
     },
     setSendAttackType(value) {
@@ -160,17 +190,61 @@ export function createDraftStore() {
       const selected = state.sendPreview.taken_actions;
       return replaceSelection({ taken_actions: selected.includes(value) ? selected.filter(action => action !== value) : [...selected, value] });
     },
-    setReportSource(value) { return REPORT_SOURCES.includes(value) && replaceSelection({ source: value }); },
+    setReportSource(value) {
+      if (!REPORT_SOURCES.includes(value) || !replaceSelection({ source: value })) return false;
+      state = { ...state, reportSource: value };
+      return true;
+    },
     backFromSendPreview() {
-      if (state.submitting || !state.check || !['sendPreview', 'myReports'].includes(state.view)) return false;
-      const view = state.view === 'myReports' ? state.reportsReturnView : state.sentReport ? 'confirmation' : 'result';
+      if (state.submitting || !state.check || state.view !== 'sendPreview') return false;
+      const view = state.sentReport ? 'confirmation' : 'result';
       state = { ...state, view, check: setResume(view) };
       return true;
     },
-    showMyReports() {
-      if (state.submitting) return false;
-      state = { ...state, reportsReturnView: state.view === 'sendPreview' ? 'sendPreview' : 'menu', view: 'myReports',
-        check: state.check ? setResume('myReports') : null };
+    // Opened from the menu or from the unknown-delivery warning. Viewing the list never marks a
+    // case as sent and never resends; the warning preview keeps its payload, controls and outcome.
+    openMyReports(returnView = state.view === 'sendPreview' ? 'sendPreview' : 'menu') {
+      if (state.submitting || !['menu', 'sendPreview'].includes(state.view) || !['menu', 'sendPreview'].includes(returnView)
+        || (returnView === 'sendPreview' && (!state.check || !state.sendPreview))) return false;
+      state = { ...state, view: 'myReports', reports: Object.freeze({ ...noReports(returnView), loading: true }),
+        check: returnView === 'sendPreview' ? setResume('myReports') : state.check };
+      return true;
+    },
+    beginReportsLoad() {
+      if (state.view !== 'myReports') return null;
+      const token = Object.freeze({ request_id: globalThis.crypto.randomUUID() });
+      // A retry replaces the list: old rows are dropped before the new reply arrives.
+      state = { ...state, reports: Object.freeze({ ...noReports(state.reports.returnView), request_id: token.request_id, loading: true }) };
+      return token;
+    },
+    reportsCurrent,
+    reportsLoaded(token, response) {
+      if (!reportsCurrent(token) || response?.ok !== true || !Array.isArray(response.reports) || response.reports.length > 10
+        || state.sessionStatus.status !== 'connected' || response.account_id !== state.sessionStatus.account.id
+        || response.revision !== state.sessionStatus.revision
+        || !response.reports.every(row => row !== null && typeof row === 'object' && REPORT_FIELDS.every(key => Object.hasOwn(row, key))
+          && REPORT_STATES.includes(row.state) && ATTACK_TYPES.includes(row.attack_type) && typeof row.content === 'string'
+          && Number.isFinite(Date.parse(row.created_at)))) return false;
+      // Server order (created_at desc, id desc) is kept exactly; nothing is merged or resorted.
+      const items = Object.freeze(response.reports.map(row => Object.freeze({ ...row, taken_actions: Object.freeze([...row.taken_actions]) })));
+      state = { ...state, reports: Object.freeze({ ...state.reports, loading: false, items, error: null,
+        account_id: response.account_id, revision: response.revision }) };
+      return true;
+    },
+    reportsFailed(token, outcome) {
+      if (!reportsCurrent(token)) return false;
+      state = { ...state, reports: Object.freeze({ ...state.reports, loading: false, items: null,
+        error: outcome?.kind === 'no-account' ? 'no-account' : 'failed' }) };
+      return true;
+    },
+    // Account/session change: old rows are cleared before anything else is shown.
+    clearReports() {
+      state = { ...state, reports: Object.freeze({ ...noReports(state.reports.returnView), loading: state.view === 'myReports' }) };
+    },
+    backFromReports() {
+      if (state.view !== 'myReports' || state.submitting) return false;
+      const returnView = state.reports.returnView === 'sendPreview' && state.check && state.sendPreview ? 'sendPreview' : 'menu';
+      state = { ...state, view: returnView, reports: noReports(), check: returnView === 'sendPreview' ? setResume('sendPreview') : state.check };
       return true;
     },
     beginReportSend() {
@@ -256,7 +330,7 @@ export function createDraftStore() {
         check: Object.freeze({ ...state.check, step: 'sender', resumeStep: 'sender', result: null }) };
     },
     submitFailed,
-    hide() { state = { ...state, hidden: true, view: 'closed', pendingSelection: null }; },
+    hide() { state = { ...state, hidden: true, view: 'closed', pendingSelection: null, reports: noReports(state.reports.returnView) }; },
     show() { state = { ...state, hidden: false }; },
     resetForNewDocument() { state = { ...initial(), gen: state.gen + 1, sendGeneration: state.sendGeneration + 1 }; },
   };
