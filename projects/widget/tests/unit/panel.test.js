@@ -21,7 +21,7 @@ test('panel position prefers above, flips and clamps', () => {
 });
 test('menu and instructions have fixed order and Escape closes', () => {
   const {panel,root,handlers}=setup(); panel.render({view:'menu'},{});
-  expect([...root.querySelectorAll('.menu button')].map(b=>b.textContent)).toEqual([STRINGS.menuCheck,STRINGS.menuHowTo]);
+  expect([...root.querySelectorAll('.menu button')].map(b=>b.textContent)).toEqual([STRINGS.menuCheck,STRINGS.menuReports,STRINGS.menuHowTo]);
   panel.render({view:'howto'},{}); expect([...root.querySelectorAll('ol li')].map(el=>el.textContent)).toEqual(STRINGS.howToSteps);
   expect(root.querySelector('.privacy').textContent).toBe(STRINGS.howToPrivacy);
   panel.el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'})); expect(handlers.onClose).toHaveBeenCalledOnce();
