@@ -29,6 +29,8 @@ export const LOGIN = {
   step2Intro: "Wpisz kod logowania dla adresu {email}.",
   codeLabel: "Kod logowania",
   codeEmpty: "Wpisz kod logowania.",
+  codeIncomplete: "Kod ma 4 cyfry. Wpisz wszystkie.",
+  codeDigit: (index: number, length: number) => `Cyfra ${index + 1} z ${length}`,
   submit: "Zaloguj się",
   pending: "Logowanie…",
   // The server accepted the login but this browser could not keep the session (blocked or full

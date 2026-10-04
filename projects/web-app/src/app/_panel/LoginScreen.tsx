@@ -13,6 +13,7 @@ import { buttonLarge, textLink } from "@/app/_landing/styles";
 import { API_ERROR_MESSAGES_PL, LIMITS } from "@/lib/contract/types";
 import { errorMessage, loginRequest } from "./api";
 import { LOGIN, PANEL_HREF, SHELL } from "./content";
+import { OtpInput, type OtpInputHandle } from "./OtpInput";
 import { SessionLoading } from "./PanelShell";
 import { clearNotice, readNotice, saveSession, useSession, type SessionNotice } from "./session";
 import { alertError, alertWarning, card, fieldError, inputBase, panelPrimaryButton } from "./styles";
@@ -20,6 +21,9 @@ import { alertError, alertWarning, card, fieldError, inputBase, panelPrimaryButt
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
 const EMAIL_ERROR_ID = "login-email-error";
 const CODE_ERROR_ID = "login-code-error";
+// The login code is four digits. Kept here rather than read from the demo module, so the code
+// itself never lands in a client chunk.
+const CODE_LENGTH = 4;
 
 type Step = "email" | "code";
 
@@ -65,7 +69,8 @@ function LoginCard() {
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
-  const codeRef = useRef<HTMLInputElement>(null);
+  const codeRef = useRef<OtpInputHandle>(null);
+  const codeFormRef = useRef<HTMLFormElement>(null);
 
   function submitEmail(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -91,8 +96,13 @@ function LoginCard() {
     event.preventDefault();
     if (pending) return;
     setFormError(null);
-    if (code.trim() === "") {
+    if (code === "") {
       setCodeError(LOGIN.codeEmpty);
+      codeRef.current?.focus();
+      return;
+    }
+    if (code.length < CODE_LENGTH) {
+      setCodeError(LOGIN.codeIncomplete);
       codeRef.current?.focus();
       return;
     }
@@ -198,28 +208,32 @@ function LoginCard() {
                   {formError}
                 </div>
               ) : null}
-              <form noValidate onSubmit={submitCode} className="mt-6">
-                <label htmlFor="login-code" className="block text-sm font-semibold text-navy-slate">
+              <form ref={codeFormRef} noValidate onSubmit={submitCode} className="mt-6">
+                <label id="login-code-label" htmlFor="login-code" className="block text-sm font-semibold text-navy-slate">
                   {LOGIN.codeLabel}
                 </label>
-                <input
-                  ref={codeRef}
-                  id="login-code"
-                  name="code"
-                  type="text"
-                  autoComplete="one-time-code"
-                  inputMode="numeric"
-                  maxLength={LIMITS.codeMaxChars}
-                  autoFocus
-                  readOnly={pending}
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  aria-invalid={codeError ? true : undefined}
-                  aria-describedby={codeError ? CODE_ERROR_ID : undefined}
-                  className={`${inputBase} mt-2`}
-                />
+                <div className="mt-2">
+                  <OtpInput
+                    ref={codeRef}
+                    id="login-code"
+                    length={CODE_LENGTH}
+                    autoFocus
+                    readOnly={pending}
+                    value={code}
+                    onChange={(next) => {
+                      setCode(next);
+                      if (codeError) setCodeError(null);
+                    }}
+                    // Filling the last box logs in straight away, like a real one-time-code field.
+                    onComplete={() => requestAnimationFrame(() => codeFormRef.current?.requestSubmit())}
+                    invalid={codeError !== null}
+                    describedBy={codeError ? CODE_ERROR_ID : undefined}
+                    labelledBy="login-code-label"
+                    digitLabel={LOGIN.codeDigit}
+                  />
+                </div>
                 {codeError ? (
-                  <p id={CODE_ERROR_ID} className={fieldError}>
+                  <p id={CODE_ERROR_ID} className={`${fieldError} text-center`}>
                     {codeError}
                   </p>
                 ) : null}
