@@ -28,7 +28,7 @@ export type ApiFailure =
 export type ApiResult<T> = { ok: true; value: T } | ApiFailure;
 
 export interface ApiCallOptions {
-  method: "GET" | "POST";
+  method: "GET" | "POST" | "DELETE";
   token?: string;
   body?: unknown;
 }
@@ -106,6 +106,9 @@ export async function apiCall<T>(path: string, options: ApiCallOptions): Promise
     payload = null;
   }
 
+  if (response.status === 204) {
+    return { ok: true, value: undefined as T };
+  }
   if (response.ok) {
     return payload === null ? httpFailure(response.status, "internal_error") : { ok: true, value: payload as T };
   }
@@ -150,6 +153,15 @@ export function postComment(token: string, id: string, body: string): Promise<Ap
     method: "POST",
     token,
     body: { body },
+  });
+}
+
+// Deletes the account's own comment (D-11, amended 2026-10-04). Idempotent on the server: a comment
+// that is already gone answers 204 too, so a retry after a network failure is safe.
+export function deleteComment(token: string, id: string, commentId: string): Promise<ApiResult<void>> {
+  return apiCall<void>(`/api/reports/${encodeURIComponent(id)}/comments/${encodeURIComponent(commentId)}`, {
+    method: "DELETE",
+    token,
   });
 }
 

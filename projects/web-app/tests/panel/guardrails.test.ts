@@ -53,6 +53,12 @@ function importSpecifiers(code: string): string[] {
   return patterns.flatMap((pattern) => [...code.matchAll(pattern)].map((match) => match[1]));
 }
 
+// The /login server page passes the demo accounts to the informational "Konta demo" dialog as
+// props (rendered data, never a client chunk; bundle.test.ts checks the emitted JavaScript). It is
+// the only panel file allowed to import them, and only while it stays a server component.
+const DEMO_PROPS_SERVER_PAGE = "src/app/login/page.tsx";
+const CLIENT_PANEL_FILES = () => PANEL_FILES.filter((file) => file.path !== DEMO_PROPS_SERVER_PAGE);
+
 // Modules that hold the demo e-mails or the login code and so must never reach a client bundle.
 const FORBIDDEN_IN_CLIENT = ["src/lib/contract/demo-accounts.ts", "src/app/_landing/content.ts"];
 
@@ -123,9 +129,16 @@ describe("panel guardrails", () => {
     expect(bad).toEqual([]);
   });
 
+  it("(a) keeps the /login page that passes the demo accounts a server component", () => {
+    const page = PANEL_FILES.find((file) => file.path === DEMO_PROPS_SERVER_PAGE);
+
+    expect(page).toBeDefined();
+    expect(page?.code).not.toMatch(/["']use client["']/);
+  });
+
   it("(a) never imports the demo account list or the landing copy that re-exports it", () => {
     const forbidden = /(^|\/)contract\/demo-accounts$|(^|\/)_landing\/content$/;
-    const bad = PANEL_FILES.flatMap((file) =>
+    const bad = CLIENT_PANEL_FILES().flatMap((file) =>
       importSpecifiers(file.code)
         .filter((specifier) => forbidden.test(specifier))
         .map((specifier) => `${file.path} imports ${specifier}`),
@@ -138,7 +151,7 @@ describe("panel guardrails", () => {
     // Panel code ships to every visitor. The bundler keeps a whole imported module in the client
     // chunk, so a module that is reachable at all leaks every e-mail and the login code (D-02, D-06).
     const forbidden = new Set(FORBIDDEN_IN_CLIENT.map((path) => join(process.cwd(), path)));
-    const bad = PANEL_FILES.flatMap((file) => {
+    const bad = CLIENT_PANEL_FILES().flatMap((file) => {
       const chain = chainTo(join(process.cwd(), file.path), forbidden);
       return chain ? [chain.map(rel).join(" -> ")] : [];
     });
@@ -170,9 +183,9 @@ describe("panel guardrails", () => {
   });
 
   it("(e) never imports the login code, the account list or the landing panel and footer copy", () => {
-    expect(offenders(/\bDEMO_LOGIN_CODE\b|\bpresentableDemoAccounts\b/)).toEqual([]);
+    expect(offenders(/\bDEMO_LOGIN_CODE\b|\bpresentableDemoAccounts\b/, CLIENT_PANEL_FILES())).toEqual([]);
 
-    const landingImports = PANEL_FILES.flatMap((file) =>
+    const landingImports = CLIENT_PANEL_FILES().flatMap((file) =>
       [...file.code.matchAll(/\bimport\s+([^;]*?)\s+from\s*["']@\/app\/_landing\/content["']/g)].map((match) => ({
         path: file.path,
         clause: match[1],
@@ -187,12 +200,17 @@ describe("panel guardrails", () => {
 
   it("writes panel copy without em dashes, dash-joined clauses or any presentation marking", () => {
     const strings = allStrings(panelContent);
+    // DEMO_INFO is the copy of the informational demo accounts dialog on /login.
+    const { DEMO_INFO, ...rest } = panelContent;
+    const unmarked = allStrings(rest);
 
     expect(strings.length).toBeGreaterThan(0);
     expect(strings.filter((text) => text.includes("—"))).toEqual([]);
     expect(strings.filter((text) => text.includes(" - "))).toEqual([]);
-    expect(strings.filter((text) => /demo/i.test(text))).toEqual([]);
+    expect(allStrings(DEMO_INFO).length).toBeGreaterThan(0);
+    expect(unmarked.filter((text) => /demo/i.test(text))).toEqual([]);
     expect(strings.filter((text) => text.includes("0000"))).toEqual([]);
+    expect(unmarked.length).toBeLessThan(strings.length);
     expect(strings.filter((text) => text.includes("(smoke)"))).toEqual([]);
   });
 

@@ -13,7 +13,7 @@
 // automatically.
 
 import { useEffect, useId, useRef, useState } from "react";
-import { buttonLarge } from "@/app/_landing/styles";
+import { buttonLarge, textLink } from "@/app/_landing/styles";
 import { LIMITS, type ReportState, type TransitionAction, type TransitionResponse } from "@/lib/contract/types";
 import { postTransition } from "./api";
 import { DIALOG } from "./content";
@@ -161,6 +161,35 @@ export function TransitionDialog({
         {copy.title}
       </h2>
       <p className="mt-2 text-base">{copy.body}</p>
+
+      {action === "escalate" ? (
+        <section className="mt-4" aria-labelledby={`${baseId}-where`}>
+          <h3 id={`${baseId}-where`} className="text-sm font-semibold">
+            {DIALOG.escalateWhereTitle}
+          </h3>
+          <ul className="mt-2 space-y-2">
+            {DIALOG.escalateWhere.map((place) => (
+              <li key={place.href} className="text-sm">
+                <a
+                  href={place.href}
+                  {...(place.href.startsWith("tel:") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                  className={textLink}
+                >
+                  {place.name}
+                </a>
+                <span className="block text-muted-slate">{place.use}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-sm font-semibold">
+            {DIALOG.escalateWhereEmergency}
+            <a href={`tel:${DIALOG.emergencyNumber}`} className={textLink}>
+              {DIALOG.emergencyNumber}
+            </a>
+            .
+          </p>
+        </section>
+      ) : null}
 
       <div className="mt-6">
         <label htmlFor={fieldId} className="block text-sm font-semibold">

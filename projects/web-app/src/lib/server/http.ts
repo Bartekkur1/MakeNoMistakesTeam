@@ -14,7 +14,7 @@ import { AuthNotConfiguredError, StorageUnavailableError } from "./errors";
 
 export const CORS_HEADERS: Readonly<Record<string, string>> = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Access-Control-Max-Age": "86400",
 };
@@ -39,6 +39,11 @@ export function apiError(code: ApiErrorCode, details?: FieldError[]): Response {
 
 export function preflight(): Response {
   return new Response(null, { status: 204, headers: { ...CORS_HEADERS } });
+}
+
+// A successful request with nothing to return (DELETE).
+export function noContent(): Response {
+  return new Response(null, { status: 204, headers: { ...CORS_HEADERS, "Cache-Control": "no-store" } });
 }
 
 export type JsonBodyResult =

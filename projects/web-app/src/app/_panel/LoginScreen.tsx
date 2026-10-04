@@ -3,20 +3,22 @@
 // Two-step login (D-05, D-06): step 1 only collects the e-mail and sends nothing, so an unknown
 // address is not revealed; step 2 sends e-mail and code in one call. A wrong e-mail and a wrong
 // code get the same message under the code field. Nothing on this screen hints at the code or
-// lists accounts (D-02). The e-mail stays in component state, never in the URL.
+// lists accounts (D-02), except the "Zobacz konta demo" dialog, whose data the server page passes
+// in. The e-mail stays in component state, never in the URL.
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { buttonLarge, textLink } from "@/app/_landing/styles";
+import { buttonLarge, buttonSmall, textLink } from "@/app/_landing/styles";
 import { API_ERROR_MESSAGES_PL, LIMITS } from "@/lib/contract/types";
 import { errorMessage, loginRequest } from "./api";
-import { LOGIN, PANEL_HREF, SHELL } from "./content";
+import { DEMO_INFO, LOGIN, PANEL_HREF, SHELL } from "./content";
+import { DemoAccountsDialog, type DemoLoginInfo } from "./DemoAccountsDialog";
 import { OtpInput, type OtpInputHandle } from "./OtpInput";
 import { SessionLoading } from "./PanelShell";
 import { clearNotice, readNotice, saveSession, useSession, type SessionNotice } from "./session";
-import { alertError, alertWarning, card, fieldError, inputBase, panelPrimaryButton } from "./styles";
+import { alertError, alertWarning, card, fieldError, inputBase, panelPrimaryButton, secondaryButton } from "./styles";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
 const EMAIL_ERROR_ID = "login-email-error";
@@ -27,7 +29,7 @@ const CODE_LENGTH = 4;
 
 type Step = "email" | "code";
 
-export function LoginScreen() {
+export function LoginScreen({ demo }: { demo?: DemoLoginInfo }) {
   const state = useSession();
   const router = useRouter();
   const authenticated = state.status === "authenticated";
@@ -39,7 +41,7 @@ export function LoginScreen() {
   }, [authenticated, router]);
 
   if (state.status === "anonymous") {
-    return <LoginCard />;
+    return <LoginCard demo={demo} />;
   }
   return <SessionLoading />;
 }
@@ -56,8 +58,9 @@ function SessionNoticeBanner({ notice }: { notice: SessionNotice }) {
 
 // Renders only on the client, after the session snapshot resolved to anonymous, so the lazy
 // readNotice initializer never runs on the server.
-function LoginCard() {
+function LoginCard({ demo }: { demo?: DemoLoginInfo }) {
   const [notice] = useState(readNotice);
+  const [demoOpen, setDemoOpen] = useState(false);
   useEffect(() => {
     clearNotice();
   }, []);
@@ -146,6 +149,14 @@ function LoginCard() {
     setCodeError(null);
     setFormError(null);
     setStep("email");
+  }
+
+  // A demo account picked in the dialog fills the e-mail field (back on step 1, nothing is sent).
+  function pickDemoEmail(picked: string): void {
+    changeEmail();
+    setEmail(picked);
+    setEmailError(null);
+    requestAnimationFrame(() => emailRef.current?.focus());
   }
 
   const [introBefore, introAfter] = LOGIN.step2Intro.split("{email}");
@@ -255,11 +266,27 @@ function LoginCard() {
           )}
         </div>
 
+        {demo ? (
+          <p className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setDemoOpen(true)}
+              className={`${secondaryButton} ${buttonSmall} w-full`}
+            >
+              {DEMO_INFO.open}
+            </button>
+          </p>
+        ) : null}
+
         <p className="mt-6 text-center">
           <Link href="/" className={textLink}>
             {LOGIN.backHome}
           </Link>
         </p>
+
+        {demo && demoOpen ? (
+          <DemoAccountsDialog info={demo} onPick={pickDemoEmail} onClose={() => setDemoOpen(false)} />
+        ) : null}
       </div>
     </main>
   );

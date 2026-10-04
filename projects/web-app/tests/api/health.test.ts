@@ -72,7 +72,7 @@ describe("OPTIONS /api/health", () => {
     expect(res.status).toBe(204);
     expect(await res.text()).toBe("");
     expect(res.headers.get("access-control-allow-headers")).toContain("Authorization");
-    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, OPTIONS");
+    expect(res.headers.get("access-control-allow-methods")).toBe("GET, POST, DELETE, OPTIONS");
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
     expect(res.headers.get("access-control-allow-credentials")).toBeNull();
   });

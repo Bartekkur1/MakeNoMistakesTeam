@@ -2,10 +2,12 @@
 // state changes and comments on one axis, oldest first, each with its type word, author ("(Ty)" for
 // the logged-in account), role and time. Notes and comments were written by people and may quote
 // the scam, so they are rendered only as React text, never as HTML and never turned into links.
-// The card's children slot holds the new-comment form under the timeline.
+// The card's children slot holds the new-comment form under the timeline. The page may add actions
+// to the logged-in account's own comments (commentActions: the delete button), so this file stays
+// hook-free.
 
 import type { ReactNode } from "react";
-import { ACTOR_ROLE_LABELS_PL, type ChildInfo, type ReportDetail } from "@/lib/contract/types";
+import { ACTOR_ROLE_LABELS_PL, type ChildInfo, type ReportComment, type ReportDetail } from "@/lib/contract/types";
 import { TIMELINE } from "./content";
 import { actorName, formatDateTime, historyEntryBody, mergeTimeline, type TimelineItem } from "./format";
 import { card } from "./styles";
@@ -16,6 +18,7 @@ export interface TimelineProps {
   items: readonly TimelineItem[];
   sessionChildren: readonly ChildInfo[];
   ownAccountId: string;
+  commentActions?: (comment: ReportComment) => ReactNode;
 }
 
 interface EntryHeaderProps {
@@ -46,7 +49,12 @@ function Marker({ kind }: { kind: TimelineItem["kind"] }) {
   return <span aria-hidden="true" className={`absolute mt-1 -ml-[31px] size-3 rounded-full ${look}`} />;
 }
 
-function TimelineEntry({ item, sessionChildren, ownAccountId }: { item: TimelineItem } & Omit<TimelineProps, "items">) {
+function TimelineEntry({
+  item,
+  sessionChildren,
+  ownAccountId,
+  commentActions,
+}: { item: TimelineItem } & Omit<TimelineProps, "items">) {
   if (item.kind === "history") {
     const { entry } = item;
     return (
@@ -70,28 +78,36 @@ function TimelineEntry({ item, sessionChildren, ownAccountId }: { item: Timeline
     );
   }
   const { comment } = item;
+  const own = comment.author_id === ownAccountId;
   return (
     <li className="relative">
       <Marker kind="comment" />
       <EntryHeader
         typeWord={TIMELINE.comment}
         author={actorName(comment.author_id, comment.author_role, sessionChildren)}
-        own={comment.author_id === ownAccountId}
+        own={own}
         roleLabel={ACTOR_ROLE_LABELS_PL[comment.author_role]}
         createdAt={comment.created_at}
       />
       <p className="mt-2 rounded-lg border border-titanium-border bg-white px-4 py-2 text-base whitespace-pre-wrap [overflow-wrap:anywhere]">
         {comment.body}
       </p>
+      {own && commentActions ? <div className="mt-2 flex flex-col items-end">{commentActions(comment)}</div> : null}
     </li>
   );
 }
 
-export function Timeline({ items, sessionChildren, ownAccountId }: TimelineProps) {
+export function Timeline({ items, sessionChildren, ownAccountId, commentActions }: TimelineProps) {
   return (
     <ol className="mt-6 space-y-6 border-l-2 border-shield-silver pl-6">
       {items.map((item) => (
-        <TimelineEntry key={`${item.kind}:${item.id}`} item={item} sessionChildren={sessionChildren} ownAccountId={ownAccountId} />
+        <TimelineEntry
+          key={`${item.kind}:${item.id}`}
+          item={item}
+          sessionChildren={sessionChildren}
+          ownAccountId={ownAccountId}
+          commentActions={commentActions}
+        />
       ))}
     </ol>
   );
@@ -101,10 +117,11 @@ export interface TimelineCardProps {
   report: ReportDetail;
   sessionChildren: readonly ChildInfo[];
   ownAccountId: string;
+  commentActions?: (comment: ReportComment) => ReactNode;
   children?: ReactNode;
 }
 
-export function TimelineCard({ report, sessionChildren, ownAccountId, children }: TimelineCardProps) {
+export function TimelineCard({ report, sessionChildren, ownAccountId, commentActions, children }: TimelineCardProps) {
   return (
     <section aria-labelledby={TIMELINE_TITLE_ID} className={`${card} p-4 md:p-6 lg:col-start-1`}>
       <h2 id={TIMELINE_TITLE_ID} className="font-display text-xl font-semibold leading-tight">
@@ -114,6 +131,7 @@ export function TimelineCard({ report, sessionChildren, ownAccountId, children }
         items={mergeTimeline(report.history, report.comments)}
         sessionChildren={sessionChildren}
         ownAccountId={ownAccountId}
+        commentActions={commentActions}
       />
       {children}
     </section>

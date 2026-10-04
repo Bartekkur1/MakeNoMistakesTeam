@@ -129,7 +129,7 @@ function pgrst116(count: number): FakeError {
   };
 }
 
-type Mode = "select" | "insert";
+type Mode = "select" | "insert" | "delete";
 type Cardinality = "many" | "single" | "maybeSingle";
 
 export class FakeQueryBuilder implements PromiseLike<FakeResult> {
@@ -151,7 +151,13 @@ export class FakeQueryBuilder implements PromiseLike<FakeResult> {
   select(columns?: string): this {
     this.ops.push({ method: "select", args: columns === undefined ? [] : [columns] });
     this.columns = columns;
-    if (this.mode === "insert") this.returning = true;
+    if (this.mode !== "select") this.returning = true;
+    return this;
+  }
+
+  delete(): this {
+    this.ops.push({ method: "delete", args: [] });
+    this.mode = "delete";
     return this;
   }
 
@@ -229,6 +235,11 @@ export class FakeQueryBuilder implements PromiseLike<FakeResult> {
       rows.push(...inserted);
       if (!this.returning) return { data: null, error: null };
       result = inserted;
+    } else if (this.mode === "delete") {
+      result = rows.filter((row) => this.filters.every((f) => f(row)));
+      const kept = rows.filter((row) => !result.includes(row));
+      rows.splice(0, rows.length, ...kept);
+      if (!this.returning) return { data: null, error: null };
     } else {
       result = rows.filter((row) => this.filters.every((f) => f(row)));
       if (this.orders.length > 0) {

@@ -41,6 +41,17 @@ export const LOGIN = {
   backHome: "Wróć na stronę główną",
 };
 
+// The informational demo accounts dialog on /login. The only panel copy allowed to say "demo"
+// (tests/panel/guardrails.test.ts exempts this object).
+export const DEMO_INFO = {
+  open: "Zobacz konta demo",
+  title: "Konta demo",
+  intro: "To wersja demonstracyjna z fikcyjnymi danymi. Zaloguj się jednym z kont poniżej.",
+  use: "Użyj",
+  codeLabel: "Kod logowania dla każdego konta:",
+  close: "Zamknij",
+};
+
 export const LIST = {
   title: "Zgłoszenia",
   subtitle: {
@@ -117,7 +128,7 @@ export const TIMELINE = {
 export const COMMENT = {
   label: "Nowy komentarz",
   helper:
-    "Komentarze widzą rodzic i nauczyciel prowadzący zgłoszenie. Dziecko ich nie widzi. Komentarza nie można później edytować ani usunąć.",
+    "Komentarze widzą rodzic i nauczyciel prowadzący zgłoszenie. Dziecko ich nie widzi. Komentarza nie można później edytować, ale możesz usunąć swój.",
   empty: "Wpisz treść komentarza.",
   counter: "{n}/{max}",
   submit: "Dodaj komentarz",
@@ -125,6 +136,20 @@ export const COMMENT = {
   added: "Komentarz dodany.",
   networkError:
     "Nie udało się potwierdzić zapisu komentarza. Odśwież zgłoszenie i sprawdź historię, zanim wyślesz komentarz ponownie.",
+};
+
+// Deleting one's own comment under the timeline. Two steps, no browser dialog: "Usuń" asks inline,
+// "Tak, usuń" sends. Deleting is idempotent on the server, so a failed attempt can simply be repeated.
+export const COMMENT_DELETE = {
+  delete: "Usuń",
+  deleteLabel: "Usuń komentarz",
+  confirm: "Usunąć ten komentarz? Zniknie też u drugiej strony.",
+  confirmYes: "Tak, usuń",
+  cancel: "Anuluj",
+  pending: "Usuwanie…",
+  deleted: "Komentarz usunięty.",
+  forbidden: "Możesz usunąć tylko swój komentarz.",
+  networkError: "Nie udało się usunąć komentarza. Spróbuj ponownie.",
 };
 
 // The "Zmień stan" card on the detail page (D-12). A state is shown only after the server's 201.
@@ -162,8 +187,34 @@ export const DIALOG = {
   },
   escalate: {
     title: "Eskalować zgłoszenie?",
-    body: "Zapisz, do kogo przekazujesz sprawę, na przykład CERT Polska (NASK) albo moderatorzy gry. Aplikacja niczego nie wysyła automatycznie.",
+    body: "Zgłoś sprawę w jednym z miejsc poniżej, a potem zapisz, do kogo ją przekazujesz. Aplikacja niczego nie wysyła automatycznie.",
   },
+  // Where a teacher can report an incident; the dialog lists these as links opening in a new tab.
+  escalateWhereTitle: "Gdzie zgłosić",
+  escalateWhereEmergency: "Gdy dziecku grozi niebezpieczeństwo, dzwoń pod ",
+  emergencyNumber: "112",
+  escalateWhere: [
+    {
+      name: "Dyżurnet.pl (NASK)",
+      href: "https://dyzurnet.pl/formularz-zgloszeniowy",
+      use: "Treści szkodliwe dla dzieci: wykorzystywanie seksualne, grooming, przemoc, cyberprzemoc.",
+    },
+    {
+      name: "CERT Polska (NASK)",
+      href: "https://incydent.cert.pl/",
+      use: "Oszustwa i phishing: fałszywe strony, linki, wyłudzanie kont lub danych.",
+    },
+    {
+      name: "Zgłoszenie w Roblox",
+      href: "https://about.roblox.com/reporting-and-blocking",
+      use: "Naruszenie zasad przez gracza lub grę. Sprawę sprawdzą moderatorzy Roblox.",
+    },
+    {
+      name: "800 100 100 (FDDS)",
+      href: "tel:800100100",
+      use: "Bezpłatna porada dla nauczycieli i rodziców, jak pomóc dziecku.",
+    },
+  ],
   close: {
     title: "Zamknąć zgłoszenie?",
     body: "Zgłoszenie zostanie oznaczone jako zamknięte. Można je później wznowić.",
