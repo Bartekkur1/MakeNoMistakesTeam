@@ -1,7 +1,7 @@
 ---
 theme: default
-title: Scamerino Alertinio
-info: Cyberpomocnik dla dzieci 9-13 lat · Make No Mistakes Team · HackYeah 2026 Defence
+title: BezpiecznaAura · Scamerino Alertinio
+info: Higiena bezpieczeństwa w sieci dla dzieci 10-13 lat · Make No Mistakes Team · HackYeah 2026 Defence
 colorSchema: light
 aspectRatio: 16/9
 htmlAttrs:
@@ -19,299 +19,285 @@ backgroundSize: contain
 
 <div class="kicker">HackYeah 2026 · Defence</div>
 
-# Scamerino Alertinio
+# BezpiecznaAura
 
 <p class="text-xl leading-snug lead" style="color: var(--ink)">
-Cyberpomocnik, który uczy dzieci w&nbsp;wieku <span class="whitespace-nowrap">9-13 lat</span> rozpoznawać oszustwa w&nbsp;grach i&nbsp;pomaga, gdy podejrzana wiadomość przyjdzie naprawdę.
+Uczymy dzieci w&nbsp;wieku <span class="whitespace-nowrap">10-13 lat</span> higieny bezpieczeństwa w&nbsp;sieci w&nbsp;ich własnym języku: krótko, absurdalnie i&nbsp;tam, gdzie naprawdę są.
 </p>
 
-<div class="mt-8 flex gap-2 flex-wrap">
+<p class="text-base lead mt-3" style="color: var(--muted)">
+Prowadzi je <b style="color: var(--shark-dark)">Scamerino Alertinio</b>, rekin z&nbsp;kogutem alarmowym.
+</p>
+
+<div class="mt-6 flex gap-2 flex-wrap">
   <span class="pill blue">misja w Roblox</span>
-  <span class="pill blue">pomocnik w przeglądarce</span>
-  <span class="pill blue">panel opiekuna</span>
+  <span class="pill blue">wtyczka w Chrome</span>
+  <span class="pill blue">panel rodzica i nauczyciela</span>
 </div>
 
 <div class="absolute bottom-8 left-12 text-sm" style="color: var(--muted)">
 Make No Mistakes Team
 </div>
 
-<!--
-Jedno zdanie: kim jesteśmy i co robimy. Pokazujemy Scamerino. Nie czytamy slajdu.
--->
-
 ---
 
-<div class="kicker">Problem</div>
+<div class="kicker">Problem · świat dziecka</div>
 
-# Dzieci grają tam, gdzie są oszuści
+# Dzieci wychowuje <span class="ac-amber">feed</span>, a nie lekcja
 
 <div class="grid grid-cols-3 gap-5 mt-4">
-  <div class="card flex flex-col">
+  <div class="card bar-blue flex flex-col">
+    <div class="stat">34%</div>
+    <div class="stat-label">dzieci w&nbsp;wieku <span class="whitespace-nowrap">7-12 lat</span> regularnie korzysta z&nbsp;TikToka (<b>800 tys.</b>), choć jest dozwolony od 13 lat.</div>
+    <div class="src"><a href="https://pkdp.gov.pl/wp-content/uploads/2025/11/Internet-dzieci-2025_2-raport-polowkowy.pdf" target="_blank">„Internet dzieci 2025/2”, Gemius, IV 2025</a></div>
+  </div>
+  <div class="card bar-amber flex flex-col">
+    <div class="stat amber">20+ razy</div>
+    <div class="stat-label">dziennie otwiera TikToka ok. <b>250 tys.</b> dzieci <span class="whitespace-nowrap">7-12 lat</span>. Ponad 500 tys. spędza w&nbsp;nim ponad godzinę dziennie.</div>
+    <div class="src"><a href="https://pkdp.gov.pl/wp-content/uploads/2025/11/Internet-dzieci-2025_2-raport-polowkowy.pdf" target="_blank">„Internet dzieci 2025/2”, Gemius, IV 2025</a></div>
+  </div>
+  <div class="card bar-blue flex flex-col">
     <div class="stat">4,72 mln</div>
-    <div class="stat-label">użytkowników Robloxa w&nbsp;Polsce. To&nbsp;lider wśród gier.</div>
-    <div class="src"><a href="https://www.gry-online.pl/newsroom/roblox-krolem-polskiego-gamingu-472-mln-polakow-odwiedzilo-te-pla/z32eec4" target="_blank">Mediapanel, VIII 2025</a></div>
-  </div>
-  <div class="card flex flex-col">
-    <div class="stat red">28%</div>
-    <div class="stat-label">polskich nastolatków padło ofiarą cyberataku. <b>12%</b> doświadczyło włamania na konto, <b>8%</b> kradzieży przedmiotów w&nbsp;grach.</div>
-    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024, N = 3665</a></div>
-  </div>
-  <div class="card flex flex-col">
-    <div class="stat amber">#2</div>
-    <div class="stat-label">Pod Robloxa oszuści podszywają się najczęściej zaraz po Microsofcie (12,3% prób phishingu).</div>
-    <div class="src"><a href="https://nordvpn.com/blog/nordvpn-consumer-cybersecurity-report-2026/" target="_blank">NordVPN, Cybersecurity Report 2026</a></div>
-  </div>
-</div>
-
-<div class="card compact mt-4 flex flex-col">
-  <div class="flex items-center gap-4">
-    <div class="stat red" style="font-size: 1.8rem">610 tys.</div>
-    <div class="stat-label" style="margin: 0">kont Roblox przejętych w&nbsp;ciągu 4 miesięcy przez malware udające narzędzia do gry.</div>
-  </div>
-  <div class="src"><a href="https://cert.orange.pl/aktualnosci/oszustwa-na-robloxie/" target="_blank">CERT Orange Polska, 09.2026</a></div>
-</div>
-
-<!--
-Liczby tylko z pierwotnych źródeł. W UK w Roblox gra 51% dzieci w wieku 8-14 lat (Ofcom 2026), dla Polski brak danych o wieku graczy.
--->
-
----
-
-<div class="kicker">Luka</div>
-
-# Nikt nie stoi obok dziecka w chwili ataku
-
-<div class="grid grid-cols-3 gap-5 mt-4">
-  <div class="card flex flex-col">
-    <div class="pill amber self-start">Rodzice nie widzą</div>
-    <div class="stat mt-3">57% → 21%</div>
-    <div class="stat-label">57% rodziców twierdzi, że monitoruje dziecko w&nbsp;sieci. Potwierdza to 21% nastolatków.</div>
-    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
-  </div>
-  <div class="card flex flex-col">
-    <div class="pill amber self-start">Dzieci milczą</div>
-    <div class="stat mt-3">13% vs 28%</div>
-    <div class="stat-label">Rodzice wiedzą o&nbsp;cyberataku na dziecko w&nbsp;13% przypadków, a&nbsp;doświadczyło go 28% nastolatków.</div>
-    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
-  </div>
-  <div class="card flex flex-col">
-    <div class="pill amber self-start">Efekt szybko mija</div>
-    <div class="stat mt-3">4 tygodnie</div>
-    <div class="stat-label">Po treningu dzieci radziły sobie o&nbsp;14% lepiej. Po miesiącu efekt zniknął.</div>
-    <div class="src"><a href="https://www.usenix.org/conference/soups2017/technical-sessions/presentation/lastdrager" target="_blank">Lastdrager i in., SOUPS 2017 (NL)</a></div>
+    <div class="stat-label">użytkowników Robloxa w&nbsp;Polsce. To&nbsp;lider wśród gier, a&nbsp;45% uczniów kl. 7-8 miało smartfon przed 9.&nbsp;urodzinami.</div>
+    <div class="src"><a href="https://www.gry-online.pl/newsroom/roblox-krolem-polskiego-gamingu-472-mln-polakow-odwiedzilo-te-pla/z32eec4" target="_blank">Mediapanel VIII 2025</a> · <a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK 2024</a></div>
   </div>
 </div>
 
 <p class="mt-6 text-lg">
-Lekcja raz w&nbsp;roku nie wystarczy. Pomoc musi być <b>pod ręką wtedy, gdy przychodzi wiadomość</b>, a&nbsp;trening trzeba powtarzać.
+Uwaga dziecka to <span class="ac-amber">krótkie formy, memy i&nbsp;gry</span>. Wiedza o&nbsp;bezpieczeństwie musi przyjść <span class="ac-blue">tym samym kanałem</span>, inaczej przegrywa z&nbsp;feedem.
 </p>
 
-<!--
-Tylko 5 z 57 badań nad grami o cyberbezpieczeństwie dla dzieci miało grupę kontrolną (Damenu 2025). Wracamy do tego na slajdzie o pomiarze.
--->
+---
+
+<div class="kicker">Problem · zagrożenie</div>
+
+# <span class="ac-red">Oszuści</span> są blisko, a lekcja nie nadąża
+
+<div class="grid grid-cols-4 gap-4 mt-2 left">
+  <div class="card bar-red flex flex-col">
+    <div class="stat red" style="font-size: 2.4rem">28%</div>
+    <div class="stat-label text-sm">nastolatków padło ofiarą cyberataku. 12% straciło konto.</div>
+    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
+  </div>
+  <div class="card bar-red flex flex-col">
+    <div class="stat red" style="font-size: 2.4rem">610 tys.</div>
+    <div class="stat-label text-sm">kont Roblox przejętych w&nbsp;4 miesiące.</div>
+    <div class="src"><a href="https://cert.orange.pl/aktualnosci/oszustwa-na-robloxie/" target="_blank">CERT Orange Polska, IX 2026</a></div>
+  </div>
+  <div class="card bar-amber flex flex-col">
+    <div class="stat amber" style="font-size: 2.4rem">13%</div>
+    <div class="stat-label text-sm">rodziców wie o&nbsp;ataku na dziecko. Dziecko zostaje z&nbsp;oszustem samo.</div>
+    <div class="src"><a href="https://www.nask.pl/media/2025/09/Nastolatki_RAPORT-2.pdf" target="_blank">NASK „Nastolatki” 2024</a></div>
+  </div>
+  <div class="card bar-amber flex flex-col">
+    <div class="stat amber" style="font-size: 2.4rem">4 tyg.</div>
+    <div class="stat-label text-sm">Po treningu dzieci radziły sobie o&nbsp;14% lepiej. Po miesiącu efekt zniknął.</div>
+    <div class="src"><a href="https://www.usenix.org/conference/soups2017/technical-sessions/presentation/lastdrager" target="_blank">Lastdrager i in., SOUPS 2017</a></div>
+  </div>
+</div>
+
+<div class="text-base font-bold mt-5">Pogadanka raz w roku <span class="ac-red">przegrywa z feedem</span>, bo jest:</div>
+
+<div class="grid grid-cols-3 gap-4 mt-2 text-center">
+  <div class="card compact"><b class="ac-red">Za rzadko</b><div class="text-sm" style="color: var(--muted)">jedna lekcja vs 20+ wejść w&nbsp;TikToka dziennie</div></div>
+  <div class="card compact"><b class="ac-red">Nie w tym miejscu</b><div class="text-sm" style="color: var(--muted)">lekcja w&nbsp;klasie, oszust na czacie gry</div></div>
+  <div class="card compact"><b class="ac-red">Nie w tym języku</b><div class="text-sm" style="color: var(--muted)">slajdy z&nbsp;regułkami dla pokolenia memów</div></div>
+</div>
+
+---
+
+<div class="kicker">Insight</div>
+
+# <span class="ac-amber">Brainrot</span> to język, nie wróg
+
+<div class="grid grid-cols-[1fr_250px] gap-6 items-start left">
+  <div class="flex flex-col gap-3">
+    <div class="card compact bar-amber">
+      <b>🧠 „Brain rot”</b> <span class="text-sm" style="color: var(--muted)">· Słowo Roku Oxford 2024</span>
+      <div class="stat-label">Krótkie, absurdalne treści to dziś główny format, w&nbsp;którym dzieci uczą się świata.</div>
+    </div>
+    <div class="card compact bar-blue">
+      <b>🦈 Italian brainrot</b> <span class="text-sm" style="color: var(--muted)">· TikTok, od I 2025</span>
+      <div class="stat-label">Ikoną trendu jest <span class="ac-blue">Tralalero Tralala: rekin z&nbsp;włoskim imieniem</span>. Dzieci znają te postacie na pamięć.</div>
+    </div>
+    <div class="card compact bar-amber">
+      <b>🎮 Steal a&nbsp;Brainrot</b> <span class="text-sm" style="color: var(--muted)">· Roblox, X 2025</span>
+      <div class="stat-label"><span class="ac-amber">25 mln graczy jednocześnie</span>, rekord Robloxa. Brainrot i&nbsp;Roblox to <b>ta sama publiczność</b>.</div>
+    </div>
+  </div>
+  <div class="flex flex-col items-center">
+    <img src="/scamerino.png" class="w-[230px] object-contain" />
+    <div class="card compact mt-2 text-center" style="border-color: var(--gold)">
+      <b style="color: var(--shark-dark)">Scamerino Alertinio</b>
+      <div class="text-xs" style="color: var(--muted)">postać z&nbsp;ich świata, nie kolejny pan z&nbsp;prelekcji</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-src"><a href="https://corp.oup.com/news/brain-rot-named-oxford-word-of-the-year-2024/" target="_blank">Oxford University Press, XII 2024</a> · <a href="https://knowyourmeme.com/editorials/guides/what-does-the-tralalero-tralala-meme-mean-the-origins-of-the-italian-brainrot-tiktok-trend-featuring-a-shark-wearing-nikes-explained" target="_blank">Know Your Meme</a> · <a href="https://www.pocketgamer.biz/robloxs-steal-a-brainrot-becomes-first-game-to-surpass-25m-concurrent-players" target="_blank">PocketGamer.biz, X 2025</a></div>
 
 ---
 
 <div class="kicker">Rozwiązanie</div>
 
-# Jedna postać, trzy miejsca
+# BezpiecznaAura: <span class="ac-blue">jedna postać</span>, trzy miejsca
 
-<div class="grid grid-cols-[1fr_300px] gap-8 items-start">
-  <div class="flex flex-col gap-3">
-    <div class="card compact">
-      <b>🎮 Trening w Roblox</b>
-      <div class="stat-label">Misja ze Scamerino: „darmowe Robuxy”, fałszywy admin i&nbsp;wymiana „ty pierwszy”.</div>
-    </div>
-    <div class="card compact">
-      <b>🦈 Pomoc w prawdziwej sytuacji</b>
-      <div class="stat-label">Dziecko wkleja wiadomość z&nbsp;gry, Discorda, SMS-a lub maila. Scamerino zadaje pytania i&nbsp;podpowiada, co zrobić dalej.</div>
-    </div>
-    <div class="card compact">
-      <b>🛡️ Wsparcie opiekuna</b>
-      <div class="stat-label">Dziecko przekazuje sprawę rodzicowi i&nbsp;widzi, co mu udostępnia. Rodzic odpowiada w&nbsp;panelu.</div>
-    </div>
+<div class="grid grid-cols-[1fr_auto_1.15fr_auto_1fr] gap-3 items-stretch left" style="margin-top: -0.6rem">
+  <div class="card compact bar-blue flex flex-col">
+    <div class="pill blue self-start">Trening</div>
+    <b class="mt-2">🎮 Misja w&nbsp;Roblox</b>
+    <div class="stat-label text-sm">Dziecko ćwiczy reakcję na oszusta w&nbsp;grze, w&nbsp;której i&nbsp;tak spędza czas.</div>
+    <div class="text-xs mt-auto pt-1 ac-blue">wynik misji → panel</div>
   </div>
-  <img src="/scamerino-trojca.jpg" loading="eager" class="w-[300px] h-[300px] object-cover rounded-3xl" style="box-shadow: var(--shadow)" />
+  <div class="arrow">→</div>
+  <div class="card compact hero flex flex-col">
+    <div class="pill gold self-start">Łączy wszystko</div>
+    <b class="mt-2 text-lg">🛡️ Panel rodzica i&nbsp;nauczyciela</b>
+    <div class="stat-label text-sm">Tu spotykają się dziecko, rodzic i&nbsp;szkoła. Rodzic widzi sprawy i&nbsp;wyniki misji, w&nbsp;razie potrzeby prosi o&nbsp;pomoc nauczyciela.</div>
+    <div class="text-xs mt-auto pt-1"><b class="gold">dziecko · rodzic · nauczyciel</b></div>
+  </div>
+  <div class="arrow">←</div>
+  <div class="card compact bar-blue flex flex-col">
+    <div class="pill blue self-start">Codzienność</div>
+    <b class="mt-2">🦈 Wtyczka w&nbsp;Chrome</b>
+    <div class="stat-label text-sm">Gdy przyjdzie prawdziwa wiadomość, ten sam rekin pomaga ją sprawdzić na Discordzie czy w&nbsp;mailu.</div>
+    <div class="text-xs mt-auto pt-1 ac-blue">„Pokaż opiekunowi” → panel</div>
+  </div>
 </div>
 
-<!--
-Wyróżnik: ta sama postać w treningu i w codziennej sytuacji. Sama gra na Robloxie nie jest nowością (Europol Cyber Defenders).
--->
+<div class="text-sm font-bold mt-3" style="color: var(--shark-dark)">Co to daje:</div>
+
+<div class="grid grid-cols-3 gap-3 mt-1 left">
+  <div class="card compact bar-blue">
+    <b class="ac-blue">🛡️ Bezpieczeństwo młodzieży</b>
+    <div class="stat-label text-sm">Dziecko rozpoznaje oszustwo, zanim straci konto, dane lub pieniądze.</div>
+  </div>
+  <div class="card compact bar-amber">
+    <b class="ac-amber">⚡ Szybka reakcja</b>
+    <div class="stat-label text-sm">Od wiadomości do rodzica jedno kliknięcie. Rodzic od razu widzi, co dziecko zrobiło.</div>
+  </div>
+  <div class="card compact bar-red">
+    <b class="ac-red">📣 Informacja idzie dalej</b>
+    <div class="stat-label text-sm">Zgłoszenie do CERT Polska, Dyżurnet.pl lub Roblox. Szkoła wie, jakie oszustwa krążą wśród uczniów.</div>
+  </div>
+</div>
 
 ---
-
-<div class="kicker">Jak działa pomoc</div>
-
-# Od wiadomości do bezpiecznego kroku
-
-<div class="grid grid-cols-[1fr_1.4fr] gap-6 mt-2">
-  <div class="card">
-    <div class="text-xs mb-2" style="color: var(--muted)">Wiadomość w grze (fikcyjna)</div>
-    <div class="msg">Hej! Event <b>10 000 Robux za darmo</b> tylko dziś 🎁 Zaloguj się na <b>robIox-bonus[.]xyz</b> i wpisz kod z SMS!</div>
-    <div class="flex gap-2 flex-wrap mt-3">
-      <span class="pill red">darmowe + link</span>
-      <span class="pill red">pośpiech</span>
-      <span class="pill red">I zamiast l</span>
-      <span class="pill red">prośba o kod</span>
-    </div>
-  </div>
-  <div class="grid grid-cols-4 gap-2 items-start">
-    <div class="step"><div class="num">1</div><b class="text-base">Wiadomość</b><div class="text-sm">treść, link albo zrzut ekranu</div></div>
-    <div class="step"><div class="num">2</div><b class="text-base">Pytania</b><div class="text-sm">„Znasz tę osobę?” „Prosi o kod?”</div></div>
-    <div class="step"><div class="num">3</div><b class="text-base">Sygnały</b><div class="text-sm">co jest podejrzane i dlaczego</div></div>
-    <div class="step"><div class="num" style="background: var(--amber)">4</div><b class="text-base">Następny krok</b><div class="text-sm">sprawdź w&nbsp;aplikacji, przerwij rozmowę, zgłoś, zapytaj opiekuna</div></div>
-  </div>
-</div>
-
-<div class="card mt-5 flex items-center gap-4" style="border-color: var(--gold)">
-  <div class="text-2xl">💡</div>
-  <div class="body-text"><b>„Darmowe + link = pytam dorosłego”.</b> Scamerino nie mówi, że coś jest bezpieczne. Uczy sprawdzać i&nbsp;prosić o&nbsp;pomoc, a&nbsp;od początku mówi wprost, że jest AI.</div>
-</div>
-
-<!--
-Hasło zapożyczone od CERT Orange Polska. AI Act, art. 50: awatar informuje, że jest AI.
--->
-
+layout: default
 ---
 
-<div class="kicker">Demo</div>
+<div class="kicker">Szczegół 1 · Trening</div>
 
-# Co zbudowaliśmy w 24 godziny
+# Misja w Roblox: <span class="ac-red">„1500 Robuxów za hasło”</span>
 
-<div class="grid grid-cols-3 gap-5 mt-2">
-  <div class="card compact">
-    <div class="video-ph">
-      <div class="play">▶&#xFE0E;</div>
-      <div>[film - wkrótce]</div>
-    </div>
-    <div class="demo-title">Misja w Roblox</div>
-  </div>
-  <div class="card compact">
-    <div class="video-ph">
-      <div class="play">▶&#xFE0E;</div>
-      <div>[film - wkrótce]</div>
-    </div>
-    <div class="demo-title">Pomocnik: rozszerzenie i&nbsp;strona</div>
-  </div>
-  <div class="card compact">
-    <div class="video-ph">
-      <div class="play">▶&#xFE0E;</div>
-      <div>[film - wkrótce]</div>
-    </div>
-    <div class="demo-title">Panel opiekuna i&nbsp;wyniki klasy</div>
-  </div>
-</div>
-
-<p class="mt-4 text-sm" style="color: var(--muted)">
-W&nbsp;demo używamy wyłącznie fikcyjnych wiadomości i&nbsp;danych. Link do repozytorium i&nbsp;demo: <b>[uzupełnić]</b>
-</p>
-
-<!--
-TODO: podmienić placeholdery na filmy (element video wewnątrz .video-ph, w-full h-full object-cover rounded-xl), gdy będą nagrane.
--->
-
----
-
-<div class="kicker">Pomiar</div>
-
-# Mało kto sprawdza, czy to działa
-
-<div class="grid grid-cols-2 gap-6 mt-2">
-  <div class="card flex flex-col">
-    <div class="stat red" style="font-size: 4.2rem">5 z 57</div>
-    <div class="stat-label text-lg">badań nad grami o&nbsp;cyberbezpieczeństwie dla dzieci miało grupę kontrolną.</div>
-    <p class="text-sm mt-3">Z&nbsp;porównywanych programów badanie z&nbsp;grupą kontrolną ma tylko Interlandia (Google), i&nbsp;to w&nbsp;USA. Polskie programy nie publikują takich wyników.</p>
-    <div class="src"><a href="https://arxiv.org/abs/2508.17414" target="_blank">Damenu i in., przegląd systematyczny, 2025</a></div>
-  </div>
-  <div class="card" style="border-color: var(--gold)">
-    <b>Nasz protokół</b>
-    <div class="text-sm" style="color: var(--muted)">mierzymy, czy dziecko radzi sobie samo</div>
-    <ul class="text-base mt-3 leading-relaxed">
-      <li>porównanie z&nbsp;<span class="hl">grupą kontrolną</span> (zwykła lekcja)</li>
-      <li>test <b>przed i&nbsp;po</b> treningu, na nowych przykładach i&nbsp;<b>bez pomocnika</b></li>
-      <li>liczymy trafne reakcje <b>i</b>&nbsp;fałszywe alarmy (w&nbsp;teście są też uczciwe oferty)</li>
-      <li><b>powtórny test po <span class="whitespace-nowrap">2-4 tygodniach</span></b></li>
+<div class="grid grid-cols-[1.25fr_1fr] gap-6 items-start">
+  <img src="/roblox-mission-poster.jpg" class="rounded-2xl w-full" style="box-shadow: var(--shadow)" />
+  <div class="flex flex-col gap-2">
+    <div class="msg">MatiBuilds: Robimy giveaway. Mam dla ciebie <b>1500 Robuxów</b>. Podasz login i&nbsp;hasło? Tylko szybko, zostało jedno miejsce.</div>
+    <div class="text-sm font-bold mt-2">Dziecko samo wybiera:</div>
+    <ul class="labels text-sm">
+      <li><span class="ac-blue">„Nie, nie podam hasła”</span> → oszust naciska dalej</li>
+      <li><span class="ac-blue">„Po co ci hasło?”</span> → karta zasad Roblox</li>
+      <li><span class="ac-blue">„Scamerino, pomocy!”</span> → rekin wskazuje sygnały</li>
     </ul>
+    <div class="card compact mt-1">
+      <div class="text-sm">Wynik <b style="color: #15803D">zaliczone</b> albo <span class="ac-amber">do powtórzenia</span> trafia sam do <span class="ac-blue">panelu rodzica i&nbsp;nauczyciela</span>.</div>
+    </div>
   </div>
 </div>
 
-<p class="mt-5 text-sm" style="color: var(--muted)">
-Demo pokazuje, jak mierzymy efekt. Trwałą skuteczność potwierdzi dopiero pilotaż w&nbsp;szkole.
-</p>
+---
+
+<div class="kicker">Szczegół 2 · Codzienność</div>
+
+# Wtyczka: <span class="ac-blue">sprawdź</span>, zanim klikniesz
+
+<div class="grid grid-cols-[1.2fr_1fr] gap-6 items-start">
+  <img src="/widget-report-1.png" class="rounded-2xl w-full" style="box-shadow: var(--shadow)" />
+  <div class="flex flex-col gap-2">
+    <div class="flex gap-2 items-start"><div class="pill blue">1</div><div class="text-sm">Zaznacz wiadomość i&nbsp;kliknij rekina. Usuń z&nbsp;podglądu, czego nie chcesz pokazać.</div></div>
+    <div class="flex gap-2 items-start"><div class="pill blue">2</div><div class="text-sm"><b>Trzy pytania:</b> kto wysłał? czego chce i&nbsp;czy pogania? jak sprawdzisz to poza wiadomością?</div></div>
+    <div class="flex gap-2 items-start"><div class="pill blue">3</div><div class="text-sm"><b>Wynik:</b> sygnały ostrzegawcze, czego brakuje i&nbsp;<b>jeden</b> bezpieczny krok.</div></div>
+    <div class="flex gap-2 items-start"><div class="pill amber">4</div><div class="text-sm"><span class="ac-amber">„Pokaż opiekunowi”</span> albo „Jak zgłosić na platformie” (Roblox, CERT, Dyżurnet).</div></div>
+    <div class="card compact mt-2" style="border-color: var(--gold)">
+      <div class="text-sm">Sprawdzanie działa <span class="ac-blue">lokalnie, na jawnych regułach</span>. Nic nie wychodzi z&nbsp;komputera bez „Wyślij”. Scamerino <span class="ac-red">nigdy nie mówi „to jest bezpieczne”</span>.</div>
+    </div>
+  </div>
+</div>
 
 ---
 
-<div class="kicker">Pozycjonowanie</div>
+<div class="kicker">Szczegół 3 · Dorośli</div>
 
-# Uzupełniamy to, co już istnieje
+# Panel: <span class="ac-blue">rodzic wie</span>, dziecko zachowuje <span class="ac-amber">prywatność</span>
 
 <div class="grid grid-cols-3 gap-4 mt-2">
-  <div class="card flex flex-col">
-    <div class="pill self-start">Przed: edukacja</div>
+  <div class="card bar-blue flex flex-col">
+    <div class="pill blue self-start">Dziecko</div>
     <ul class="labels text-sm mt-3">
-      <li>Sieciaki.pl (FDDS), 7+</li>
-      <li>Interlandia / Asy Internetu (Google), <span class="whitespace-nowrap">kl. 4-8</span></li>
-      <li>Europol Cyber Defenders, <span class="whitespace-nowrap">9-12 lat</span>, w&nbsp;Roblox</li>
-      <li>Cyberlekcje 3.0 (MC&nbsp;+&nbsp;NASK), <span class="whitespace-nowrap">kl. I-VIII</span></li>
-    </ul>
-    <div class="text-xs mt-auto pt-3" style="color: var(--muted)">Po lekcji dziecko zostaje z&nbsp;wiadomością samo.</div>
-  </div>
-  <div class="card flex flex-col" style="border: 2px solid var(--shark); background: rgba(15, 98, 219, 0.05)">
-    <div class="pill blue self-start">W chwili wiadomości</div>
-    <div class="font-bold mt-2" style="color: var(--shark-dark)">Scamerino Alertinio, 9-13 lat</div>
-    <div class="text-xs" style="color: var(--muted)">Tylko my łączymy:</div>
-    <ul class="labels checks text-sm mt-2">
-      <li><span class="yes">✓</span> trening w&nbsp;Roblox</li>
-      <li><span class="yes">✓</span> pomoc przy prawdziwej wiadomości</li>
-      <li><span class="yes">✓</span> wsparcie opiekuna</li>
-      <li><span class="yes">✓</span> pomiar z&nbsp;grupą kontrolną</li>
+      <li>samo decyduje, co przekazuje</li>
+      <li>przed wysłaniem widzi dokładnie, co zobaczy rodzic</li>
+      <li>dostaje spokojny status, np. „Rodzic zobaczył, porozmawiajcie o&nbsp;tym”</li>
     </ul>
   </div>
-  <div class="card flex flex-col">
-    <div class="pill self-start">Po fakcie: zgłoszenie</div>
+  <div class="card bar-blue flex flex-col">
+    <div class="pill blue self-start">Rodzic</div>
     <ul class="labels text-sm mt-3">
-      <li>Telefon 116&nbsp;111 (FDDS): rozmowa z&nbsp;człowiekiem</li>
-      <li>CERT: SMS 8080</li>
-      <li>przycisk „Zgłoś” w&nbsp;Roblox</li>
+      <li>widzi treść i&nbsp;<span class="ac-red">co dziecko już zrobiło</span>: kliknęło, podało dane, zapłaciło</li>
+      <li>widzi wyniki misji w&nbsp;Roblox</li>
+      <li>może poprosić o&nbsp;pomoc nauczyciela</li>
     </ul>
-    <div class="text-xs mt-auto pt-3" style="color: var(--muted)">Działa, gdy dziecko samo rozpozna problem i&nbsp;poprosi o&nbsp;pomoc.</div>
+  </div>
+  <div class="card bar-amber flex flex-col">
+    <div class="pill amber self-start">Nauczyciel</div>
+    <ul class="labels text-sm mt-3">
+      <li>prowadzi sprawy przekazane przez rodzica</li>
+      <li>zgłasza dalej: <span class="ac-red">CERT Polska, Dyżurnet.pl, Roblox</span>, 800&nbsp;100&nbsp;100</li>
+      <li>widzi wyniki misji uczniów swojej klasy</li>
+    </ul>
   </div>
 </div>
 
-<p class="mt-4 text-sm">
-Nie zastępujemy tych służb, tylko do nich kierujemy: dzieci do 116&nbsp;111, rodziców do 800&nbsp;100&nbsp;100 i&nbsp;do CERT (SMS 8080). <b>Celem pilotażu jest partnerstwo z&nbsp;FDDS lub NASK.</b>
-</p>
+<div class="card compact mt-4" style="border-color: var(--gold)">
+  <div class="body-text"><span class="ac-amber">🔒 Nikt nie widzi czatów, historii przeglądania ani innych aplikacji dziecka.</span> Punkty są za umiejętności, nie za liczbę zgłoszeń. Bez rankingów i&nbsp;bez kar za proszenie o&nbsp;pomoc.</div>
+</div>
 
 ---
 
-<div class="kicker">Wdrożenie</div>
+<div class="kicker">Klient · szkoła · model biznesowy</div>
 
-# Bezpieczne dla dziecka, opłacalne dla szkoły
+# Szkoła <span class="ac-red">musi</span> to zrobić. My dajemy <span class="ac-blue">narzędzie</span>
 
-<div class="grid grid-cols-2 gap-6 mt-2">
-  <div class="card">
-    <b>🔒 Prywatność i prawo</b>
-    <ul class="text-base mt-3 leading-relaxed">
-      <li>Nauczyciel widzi <b>wyniki ćwiczeń</b>, a&nbsp;nie prywatne zgłoszenia dziecka.</li>
-      <li>Konto dziecka poniżej 16 lat wymaga <b>zgody rodzica</b> (art. 8 RODO).</li>
-      <li>Awatar informuje, że jest AI (<b>art. 50 AI Act</b>).</li>
-      <li>Bez presji i&nbsp;dark patterns. Punkty za umiejętności, a&nbsp;nie za liczbę zgłoszeń.</li>
+<div class="grid grid-cols-2 gap-6 mt-1 left">
+  <div class="card bar-red flex flex-col">
+    <div class="pill red self-start">Obowiązek prawny od 15.08.2024</div>
+    <b class="mt-2">⚖️ Ustawa „Kamilka”, art. 22c</b>
+    <ul class="tight text-base mt-2">
+      <li>Standardy ochrony małoletnich muszą zawierać <span class="ac-red">zasady korzystania z&nbsp;urządzeń z&nbsp;internetem</span> i&nbsp;<span class="ac-red">procedury ochrony przed zagrożeniami w&nbsp;sieci</span> (ust. 2 pkt 2-3).</li>
+      <li>Ocena standardów <b>co najmniej raz na 2 lata</b>, z&nbsp;udokumentowanymi wnioskami (ust. 6).</li>
     </ul>
+    <div class="src">Ustawa z 13.05.2016 o przeciwdziałaniu zagrożeniom przestępczością na tle seksualnym i ochronie małoletnich</div>
   </div>
-  <div class="card">
-    <b>🏫 Rynek i model</b>
-    <div class="flex gap-6 mt-2">
-      <div><div class="stat" style="font-size: 1.9rem">14 tys.</div><div class="stat-label">szkół podstawowych</div></div>
-      <div><div class="stat" style="font-size: 1.9rem">~2 mln</div><div class="stat-label">uczniów kl. 3-7 (szacunek)</div></div>
-    </div>
-    <ul class="text-base mt-3 leading-relaxed">
-      <li>Ustawa „Kamilka” wymaga od szkół <b>standardów ochrony małoletnich</b>. Trening z&nbsp;pomiarem pomaga je wdrażać.</li>
-      <li>Bezpłatne dla dziecka i&nbsp;rodzica. Koszt pokrywa szkoła, samorząd albo sponsor w&nbsp;ramach CSR.</li>
+  <div class="card hero flex flex-col">
+    <div class="pill gold self-start">Nasza odpowiedź</div>
+    <b class="mt-2">🏫 Co dostaje szkoła</b>
+    <ul class="ticks tight text-base mt-2">
+      <li><b class="gold">gotowa lekcja</b>: misja w&nbsp;Roblox, którą uczniowie chcą przejść</li>
+      <li><b class="gold">procedura reakcji</b>: od dziecka przez rodzica do nauczyciela, z&nbsp;historią</li>
+      <li><b class="gold">dowód do przeglądu</b>: wyniki misji klasy</li>
+      <li><b class="gold">poradnik PDF</b> dla rodziców i&nbsp;nauczycieli</li>
+      <li><b class="gold">pakiet warsztatowy dla nauczyciela</b>: 3&nbsp;lekcje po 45&nbsp;min bez komputerów</li>
     </ul>
   </div>
 </div>
 
-<div class="footer-src"><a href="https://stat.gov.pl/dla-mediow/informacje-prasowe/polska-szkola-w-liczbach-jak-wyglada-edukacja-w-roku-szkolnym-20242025,36,1.html" target="_blank">GUS 2024/2025</a>. Liczba uczniów kl. 3-7 to szacunek: 3,2 mln / 8 roczników × 5.</div>
+<div class="grid grid-cols-[1fr_1.3fr_1.4fr] gap-3 mt-3">
+  <div class="tile blue"><span class="stat">14 tys.</span><span class="stat-label">szkół podstawowych</span></div>
+  <div class="tile blue"><span class="stat">~1,6 mln</span><span class="stat-label">uczniów w&nbsp;wieku 10-13 lat (szacunek)</span></div>
+  <div class="tile gold"><span class="stat-label" style="font-size: 0.95rem"><b style="color: var(--shark-dark)">Płaci szkoła lub samorząd.</b> Dla dziecka i&nbsp;rodzica bezpłatne.</span></div>
+</div>
+
+<div class="footer-src"><a href="https://stat.gov.pl/dla-mediow/informacje-prasowe/polska-szkola-w-liczbach-jak-wyglada-edukacja-w-roku-szkolnym-20242025,36,1.html" target="_blank">GUS 2024/2025</a>. Szacunek: 3,2 mln uczniów SP / 8 roczników × 4.</div>
 
 ---
 layout: image-right
@@ -319,21 +305,23 @@ image: /scamerinio2.jpg
 backgroundSize: contain
 ---
 
-<div class="kicker">Dalej</div>
+<div class="kicker">Dalej · plan na przyszłość</div>
 
-# Pilotaż w jednej szkole
+<h1 style="font-size: 2.1rem; margin-bottom: 1rem">Plan: zbadać <span class="ac-blue">skuteczność</span></h1>
 
-<ol class="labels text-base leading-relaxed mt-2">
-  <li>Ankieta w&nbsp;<span class="whitespace-nowrap">1-2 klasach</span>: kto gra w&nbsp;Roblox i&nbsp;na jakich kontach.</li>
-  <li>Trening z&nbsp;grupą kontrolną i&nbsp;powtórnym testem po <span class="whitespace-nowrap">2-4 tygodniach</span>.</li>
-  <li>Szukamy partnera: FDDS, NASK albo program CSR operatora lub banku.</li>
+<p class="text-sm" style="color: var(--muted); text-align: left">Tylko <b style="color: var(--crimson)">5 z 57</b> badań nad grami o&nbsp;cyberbezpieczeństwie dla dzieci miało grupę kontrolną (<a href="https://arxiv.org/abs/2508.17414" target="_blank">Damenu i in., 2025</a>). Dziś mamy działający produkt. <span class="ac-amber">Badania skuteczności jeszcze nie prowadziliśmy</span> i&nbsp;chcemy zrobić je rzetelnie.</p>
+
+<div class="text-sm font-bold mt-2">Planujemy:</div>
+
+<ol class="labels text-sm leading-snug mt-1">
+  <li>Pilotaż w&nbsp;<span class="whitespace-nowrap">1-2 klasach</span> w&nbsp;szkole, która wdroży BezpiecznąAurę.</li>
+  <li>Test <b>przed i&nbsp;po</b> misji, bez pomocnika, porównany z&nbsp;<span class="hl">grupą kontrolną</span> (zwykła lekcja).</li>
+  <li>Liczenie trafnych reakcji <b>i</b>&nbsp;fałszywych alarmów. W&nbsp;teście także uczciwe wiadomości.</li>
+  <li>Powtórny test po <span class="whitespace-nowrap">2-4 tygodniach</span>, bo tyle trwa efekt jednej lekcji.</li>
 </ol>
 
-<div class="card mt-6" style="border-color: var(--gold)">
-  <div class="text-xl font-bold" style="color: var(--shark-dark)">„Darmowe + link = pytam dorosłego”</div>
-  <div class="stat-label">Scamerino przypomina o&nbsp;tym w&nbsp;grze i&nbsp;poza nią.</div>
-</div>
 
-<div class="absolute bottom-8 left-12 text-sm" style="color: var(--muted)">
-Make No Mistakes Team · HackYeah 2026
+<div class="card compact mt-2" style="border-color: var(--gold)">
+  <div class="text-lg font-bold" style="color: var(--shark-dark)">„Darmowe + link = pytam dorosłego”</div>
+  <div class="stat-label">Scamerino przypomina o&nbsp;tym w&nbsp;grze i&nbsp;poza nią.</div>
 </div>

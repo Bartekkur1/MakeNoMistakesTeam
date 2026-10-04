@@ -203,3 +203,58 @@
 /* Źródła jako linki: kolor tekstu, podkreślenie Slidev, niebieskie po najechaniu */
 .src a, .footer-src a { color: inherit; }
 .src a:hover, .footer-src a:hover { color: var(--shark); }
+
+/* Karty w wąskich kolumnach: wyrównanie do lewej zamiast justowania */
+.slidev-layout .left p,
+.slidev-layout .left li,
+.slidev-layout .left .stat-label,
+.slidev-layout .left .body-text { text-align: left; }
+
+/* Akcenty kolorystyczne w tekście i tytułach */
+.ac-blue { color: var(--shark); font-weight: 800; }
+.ac-red { color: var(--crimson); font-weight: 800; }
+.ac-amber { color: #D97706; font-weight: 800; }
+.slidev-layout h1 .ac-blue,
+.slidev-layout h1 .ac-red,
+.slidev-layout h1 .ac-amber { font-weight: 700; }
+
+/* Karty z kolorowym paskiem u góry */
+.card.bar-blue { border-top: 5px solid var(--shark); }
+.card.bar-red { border-top: 5px solid var(--crimson); }
+.card.bar-amber { border-top: 5px solid var(--amber); }
+.card.bar-gold { border-top: 5px solid var(--gold); }
+
+/* Karta wyróżniona: ciemnoniebieskie tło, biały tekst */
+.card.hero {
+  background: linear-gradient(160deg, var(--shark) 0%, var(--shark-dark) 100%);
+  border: none;
+  color: white;
+}
+.card.hero .stat-label,
+.slidev-layout .card.hero li,
+.slidev-layout .card.hero p { color: rgba(255, 255, 255, 0.92); }
+.card.hero b { color: white; }
+.card.hero .gold { color: var(--gold); }
+.pill.gold { background: var(--gold); color: var(--shark-dark); }
+.pill.white { background: rgba(255, 255, 255, 0.18); color: white; }
+
+/* Strzałki prowadzące do panelu */
+.arrow { font-size: 2.2rem; font-weight: 800; color: var(--shark); align-self: center; line-height: 1; }
+
+/* Kafelki z liczbami (slajd biznesowy) */
+.tile {
+  border-radius: 1rem;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.tile.blue { background: rgba(15, 98, 219, 0.10); }
+.tile.gold { background: rgba(255, 184, 0, 0.22); }
+.tile .stat { font-size: 1.9rem; }
+.tile .stat-label { margin-top: 0; font-size: 0.85rem; text-align: left; }
+.slidev-layout ul.ticks { list-style: none; padding-left: 0; }
+.slidev-layout ul.ticks li { padding-left: 1.5rem; position: relative; text-align: left; }
+.slidev-layout ul.ticks li::before { content: "✓"; position: absolute; left: 0; color: var(--gold); font-weight: 900; }
+.card.hero .pill.gold { color: var(--shark-dark); }
+.slidev-layout .tight li { line-height: 1.4; margin-top: 0.15rem; margin-bottom: 0.15rem; }
