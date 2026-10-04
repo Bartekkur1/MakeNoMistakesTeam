@@ -14,8 +14,12 @@ export const inputBase =
   "block w-full h-12 rounded-lg border border-titanium-border bg-white px-4 text-base text-navy-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shark-blue aria-[invalid=true]:border-hook-crimson";
 export const textareaBase =
   "block w-full min-h-32 rounded-lg border border-titanium-border bg-white px-4 py-2 text-base leading-6 text-navy-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shark-blue aria-[invalid=true]:border-hook-crimson";
+// The native arrow sits flush with the right edge, so selectBase hides it and the panel draws its own
+// chevron (selectChevron) inset like the text. Wrap the select and the chevron in selectWrap.
+export const selectWrap = "relative inline-block";
+export const selectChevron = "pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-slate";
 export const selectBase =
-  "h-10 rounded-lg border border-titanium-border bg-white px-3 text-sm text-navy-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shark-blue";
+  "h-10 appearance-none rounded-lg border border-titanium-border bg-white pl-3 pr-10 text-sm text-navy-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shark-blue";
 
 // Surfaces.
 export const card = "rounded-dashboard border border-titanium-border bg-white shadow-shield-card";

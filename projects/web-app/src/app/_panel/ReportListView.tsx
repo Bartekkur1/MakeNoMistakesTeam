@@ -19,7 +19,7 @@ import { useCurrentSession } from "./PanelShell";
 import { ReportRow } from "./ReportRow";
 import { RobloxAccountCard } from "./RobloxAccountCard";
 import { expireSession, type PanelSession } from "./session";
-import { alertError, card, secondaryButton, selectBase, skeletonBlock } from "./styles";
+import { alertError, card, secondaryButton, selectBase, selectChevron, selectWrap, skeletonBlock } from "./styles";
 import { TrainingRow } from "./TrainingRow";
 
 type PanelTab = "reports" | "trainings";
@@ -189,20 +189,25 @@ function ReportList({ session }: { session: PanelSession }) {
           <label htmlFor={filterId} className="block text-sm font-semibold">
             {LIST.filterLabel}
           </label>
-          <select
-            id={filterId}
-            className={`${selectBase} mt-2`}
-            value={state.filter ?? ""}
-            onChange={changeFilter}
-            disabled={busy}
-          >
-            <option value="">{LIST.filterAll}</option>
-            {filterStates.map((s) => (
-              <option key={s} value={s}>
-                {capitalize(REPORT_STATE_LABELS_PL[s])}
-              </option>
-            ))}
-          </select>
+          <div className={`${selectWrap} mt-2`}>
+            <select
+              id={filterId}
+              className={selectBase}
+              value={state.filter ?? ""}
+              onChange={changeFilter}
+              disabled={busy}
+            >
+              <option value="">{LIST.filterAll}</option>
+              {filterStates.map((s) => (
+                <option key={s} value={s}>
+                  {capitalize(REPORT_STATE_LABELS_PL[s])}
+                </option>
+              ))}
+            </select>
+            <svg className={selectChevron} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-4">
           {state.refreshedAt !== null ? (
