@@ -1,4 +1,7 @@
 import { normalizeText } from '../core/case.js';
+import { ATTACK_TYPE_LABELS_PL, TAKEN_ACTION_LABELS_PL, REPORT_SOURCE_LABELS_PL } from '../../../web-app/src/lib/contract/types.ts';
+
+const capitalized = text => text[0].toLocaleUpperCase('pl-PL') + text.slice(1);
 
 export function computePanelPosition(avatarRect, panelSize, viewport, { gap = 12, margin = 8 } = {}) {
   const { width, height } = panelSize;
@@ -39,12 +42,31 @@ export function createPanel({ root, strings, handlers }) {
     replace.disabled = Boolean(state.submitting);
     body.append(replace);
   };
+  const noAccountNotice = () => {
+    const notice = node('div', undefined, 'notice');
+    notice.append(node('p', strings.noAccount), button(strings.openLogin, 'btn-secondary', () => handlers.onOpenLogin()));
+    return notice;
+  };
+  const confirmation = state => {
+    if (!state.sentReport) return;
+    const { report, recipient } = state.sentReport;
+    const notice = node('div', undefined, 'notice');
+    const time = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit' }).format(new Date(report.created_at));
+    notice.append(node('h2', strings.sentRecipientPrefix + ' ' + recipient.display_name),
+      node('p', strings.sentTimePrefix + ' ' + time), node('p', strings.sentStatus), node('p', strings.sentHint, 'hint'));
+    const row = node('div', undefined, 'row');
+    const done = button(strings.confirmationClose, 'btn-primary', () => handlers.onClose());
+    row.append(button(strings.checkNewMessage, 'btn-secondary', () => handlers.onFinishCheck()), done);
+    body.append(notice, row);
+    appendReplacement(state);
+    done.focus();
+  };
   return {
     el,
     render(state, ctx) {
       const focusedId = state.view === 'question' ? root.activeElement?.id : undefined;
       body.replaceChildren();
-      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result', 'sendPreview', 'myReports'].includes(state.view);
       if (el.hidden) return;
       if (state.view === 'menu') {
         const menu = node('div', undefined, 'menu');
@@ -72,14 +94,49 @@ export function createPanel({ root, strings, handlers }) {
         body.append(row); text.focus(); return;
       }
       if (state.view === 'confirmation') {
-        const done = node('button', strings.confirmationClose, 'btn-secondary');
-        done.type = 'button';
-        done.addEventListener('click', () => handlers.onClose());
-        body.append(node('h2', strings.confirmationHeading), node('p', strings.confirmationBody), done);
-        body.append(button(strings.confirmationBackToMenu, 'btn-secondary', () => handlers.onFinishCheck()),
-          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
-        appendReplacement(state);
-        done.focus();
+        confirmation(state);
+        return;
+      }
+      if (state.view === 'myReports') {
+        // Navigation contract for 03-03; list fetching/rendering belongs to that plan.
+        body.append(node('h2', strings.myReports), button(strings.back, 'btn-secondary', () => handlers.onSendBack()));
+        body.querySelector('button').focus();
+        return;
+      }
+      if (state.view === 'sendPreview') {
+        const preview = state.sendPreview;
+        if (!preview) return;
+        const review = node('div');
+        review.setAttribute('aria-busy', String(Boolean(state.submitting)));
+        const content = node('div', preview.content, 'sent-content');
+        content.tabIndex = 0;
+        content.setAttribute('aria-label', strings.reportContentLabel);
+        review.append(node('h2', strings.sendPreviewHeading), node('p', strings.recipientPrefix, 'source'),
+          node('p', preview.recipient.display_name, 'recipient'), node('p', strings.messageLabel), content,
+          node('p', strings.sendEditHint, 'hint'), node('h3', strings.attackLegend),
+          node('p', capitalized(ATTACK_TYPE_LABELS_PL[preview.attack_type])), node('h3', strings.actionsLegend));
+        const actions = node('ul');
+        for (const action of preview.taken_actions) actions.append(node('li', capitalized(TAKEN_ACTION_LABELS_PL[action])));
+        if (!preview.taken_actions.length) actions.append(node('li', strings.noActions));
+        review.append(actions, node('h3', strings.reportSourceLabel), node('p', capitalized(REPORT_SOURCE_LABELS_PL[preview.source])),
+          node('p', strings.sendPrivacy, 'notice'));
+        if (state.sessionStatus.status === 'none' || state.sendOutcome?.kind === 'no-account') review.append(noAccountNotice());
+        else if (state.sendOutcome) {
+          const copy = strings.sendOutcomes[state.sendOutcome.kind] ?? strings.sendOutcomes.http;
+          const alert = node('div', undefined, state.sendOutcome.kind === 'unknown' ? 'alert-warning' : 'alert-error');
+          alert.setAttribute('role', 'alert');
+          alert.append(node('h3', copy.title), node('p', copy.body));
+          review.append(alert);
+        }
+        const row = node('div', undefined, 'row');
+        const back = button(strings.back, 'btn-secondary', () => handlers.onSendBack());
+        const send = button(state.submitting ? strings.sending : strings.send, 'btn-primary', () => handlers.onSendReport());
+        back.disabled = Boolean(state.submitting);
+        send.disabled = Boolean(state.submitting) || state.sessionStatus.status !== 'connected';
+        row.append(back, send);
+        review.append(row);
+        body.append(review);
+        (state.submitting ? close : content).focus();
         return;
       }
       if (state.view === 'safety') {
@@ -131,6 +188,7 @@ export function createPanel({ root, strings, handlers }) {
         return;
       }
       if (state.view === 'result') {
+        if (state.sentReport) { confirmation(state); return; }
         const result = state.check.result;
         body.append(node('h2', strings.checkSummaries[result.summaryKey]));
         for (const key of ['signals', 'unknowns']) {
@@ -149,19 +207,17 @@ export function createPanel({ root, strings, handlers }) {
         title.id = 'check-result-step';
         step.setAttribute('aria-labelledby', title.id);
         step.append(title, node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
-        body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
+        const handoff = node('div', undefined, 'actions');
+        if (state.sessionStatus?.status === 'none') handoff.append(noAccountNotice());
+        else {
+          const request = button(strings.showSendPreview, 'btn-primary', () => handlers.onShowSendPreview());
+          request.disabled = state.sessionStatus?.status !== 'connected';
+          handoff.append(request);
+        }
+        body.append(step, handoff, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
           button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
         appendReplacement(state);
-        const request = button(strings.requestGuardianVerification, 'btn-primary', () => handlers.onRequestGuardianVerification());
-        body.append(request);
-        for (const action of body.querySelectorAll('button')) action.disabled = Boolean(state.submitting);
-        if (['guardianRequest', 'guardianRequestContextInvalidated'].includes(state.error)) {
-          const error = node('p', state.error === 'guardianRequestContextInvalidated'
-            ? strings.guardianRequestContextInvalidated : strings.guardianRequestError, 'error');
-          error.setAttribute('role', 'alert');
-          body.append(error);
-        }
-        (state.submitting ? close : body.querySelector('button')).focus();
+        (handoff.querySelector('button:not(:disabled)') ?? body.querySelector('button:not(:disabled)') ?? close).focus();
         return;
       }
       if (state.pendingSelection && !state.candidateKind) {
