@@ -1,6 +1,5 @@
-import { MSG_CASE_APPROVED, MSG_GUARDIAN_REQUEST, MSG_SHOW } from '../core/messages.js';
+import { MSG_CASE_APPROVED, MSG_SHOW, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR } from '../core/messages.js';
 import { isValidCase } from '../core/case.js';
-import { RESULT_KEYS } from '../core/check.js';
 import { ACCOUNT_FIELDS, ACTIONS_BY_ATTACK_TYPE, API_ERROR_CODES, ATTACK_TYPES, CHILD_FIELDS,
   LIMITS, REPORT_FIELDS, REPORT_SOURCES, REPORT_STATES, TAKEN_ACTIONS } from '../../../web-app/src/lib/contract/types.ts';
 
@@ -334,9 +333,9 @@ function handleReportMessage(message, sender) {
   observeDocument(sender);
   pruneCompletedOutcomes();
   const key = outcomeKey(sender, message.case_id);
-  if (message.type === 'aura/report-send') return handleReportSend(message, sender);
+  if (message.type === MSG_REPORT_SEND) return handleReportSend(message, sender);
   const entry = reportOutcomes.get(key);
-  if (message.type === 'aura/report-clear') {
+  if (message.type === MSG_REPORT_CLEAR) {
     // Keep active/confirmed records as duplicate-send guards. Unsuccessful outcomes can be
     // cleared locally; new case IDs and document lifecycle clear the other namespaces.
     if (entry?.outcome && !entry.outcome.ok) reportOutcomes.delete(key);
@@ -346,36 +345,16 @@ function handleReportMessage(message, sender) {
   if (entry.revision !== sessionRevision) return { ok: false, kind: 'account-changed' };
   return entry.promise;
 }
-function isValidResult(result) {
-  if (!exactKeys(result, ['summaryKey', 'signals', 'unknowns', 'step', 'mismatches'])) return false;
-  if (!RESULT_KEYS.summaries.includes(result.summaryKey)) return false;
-  if (!keyedList(result.signals, RESULT_KEYS.signals) || !keyedList(result.unknowns, RESULT_KEYS.unknowns)) return false;
-  const step = result.step;
-  if (!exactKeys(step, ['id', 'explanationKey']) || typeof step.id !== 'string'
-      || !RESULT_KEYS.steps.includes(step.id) || step.explanationKey !== step.id + '_how') return false;
-  if (!(Array.isArray(result.mismatches) && result.mismatches.length <= RESULT_KEYS.mismatches.length
-    && Array.from(result.mismatches).every(m => exactKeys(m, ['questionId', 'answerId', 'messageKey'])
-      && m.questionId === 'request' && ['password', 'code'].includes(m.answerId)
-      && m.messageKey === 'credential_' + m.answerId && RESULT_KEYS.mismatches.includes(m.messageKey)
-      && result.signals.includes(m.messageKey)))) return false;
-  if (new Set(result.mismatches.map(m => m.messageKey)).size !== result.mismatches.length
-      || Boolean(result.mismatches.length) !== result.unknowns.includes('conflict')) return false;
-  const summaryKey = result.mismatches.length ? 'conflicting_answers' : result.signals.length ? 'caution'
-    : result.unknowns.length ? 'insufficient_information' : 'no_signals';
-  return result.summaryKey === summaryKey;
-}
-
 const cases = [];
-const guardianRequests = [];
 const messages = [];
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (['aura/report-send', 'aura/report-outcome', 'aura/report-clear'].includes(msg?.type)) {
-    const keys = msg.type === 'aura/report-send'
+  if ([MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR].includes(msg?.type)) {
+    const keys = msg.type === MSG_REPORT_SEND
       ? ['type', 'case_id', 'request_id', 'expected_account_id', 'session_revision', 'payload'] : ['type', 'case_id'];
     if (!childSender(sender) || !exactKeys(msg, keys) || !localId(msg.case_id)) {
       sendResponse({ ok: false, kind: 'context' }); return;
     }
-    if (msg.type === 'aura/report-send') {
+    if (msg.type === MSG_REPORT_SEND) {
       if (!localId(msg.request_id) || !uuid(msg.expected_account_id) || !Number.isSafeInteger(msg.session_revision)
         || msg.session_revision < 0 || !isValidReportRequest(msg.payload)) {
         sendResponse({ ok: false, kind: 'http', status: 400, code: 'validation_error' }); return;
@@ -385,13 +364,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     return asyncResponse(() => handleReportMessage(msg, sender), sendResponse);
   }
-  if (['aura/auth-login', 'aura/auth-logout', 'aura/session-status', 'aura/open-login'].includes(msg?.type)) {
-    const privileged = msg.type === 'aura/auth-login' || msg.type === 'aura/auth-logout';
-    const keys = msg.type === 'aura/auth-login' ? ['type', 'email', 'code'] : ['type'];
+  if ([MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN].includes(msg?.type)) {
+    const privileged = msg.type === MSG_AUTH_LOGIN || msg.type === MSG_AUTH_LOGOUT;
+    const keys = msg.type === MSG_AUTH_LOGIN ? ['type', 'email', 'code'] : ['type'];
     if (!exactKeys(msg, keys) || !(privileged ? optionsSender(sender) : optionsSender(sender) || childSender(sender))) {
       sendResponse({ ok: false, kind: 'context' }); return;
     }
-    if (msg.type === 'aura/auth-login') {
+    if (msg.type === MSG_AUTH_LOGIN) {
       if (!emailValid(msg.email) || typeof msg.code !== 'string' || !/^\d{4}$/.test(msg.code)) {
         sendResponse({ ok: false, kind: 'http', status: 400, code: 'validation_error' }); return;
       }
@@ -399,29 +378,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const operation = handleLogin(msg.email, msg.code);
       return asyncResponse(() => operation, sendResponse);
     }
-    if (msg.type === 'aura/auth-logout') {
+    if (msg.type === MSG_AUTH_LOGOUT) {
       const revision = ++sessionRevision;
       return asyncResponse(() => clearSession(revision), sendResponse);
     }
     if (childSender(sender)) observeDocument(sender);
-    if (msg.type === 'aura/session-status') return asyncResponse(sessionStatus, sendResponse);
+    if (msg.type === MSG_SESSION_STATUS) return asyncResponse(sessionStatus, sendResponse);
     return asyncResponse(async () => {
       try { await chrome.tabs.create({ url: chrome.runtime.getURL('login.html') }); return { ok: true }; }
       catch { return { ok: false, kind: 'context' }; }
     }, sendResponse);
   }
-  if (![MSG_CASE_APPROVED, MSG_GUARDIAN_REQUEST].includes(msg?.type)) return;
+  if (msg?.type !== MSG_CASE_APPROVED) return;
   messages.push({ type: msg.type, at: Date.now() });
   if (sender.id !== chrome.runtime.id || !sender.tab) return;
   if (childSender(sender)) observeDocument(sender);
-  if (msg?.type === MSG_GUARDIAN_REQUEST) {
-    if (!isValidCase(msg.case) || !isValidResult(msg.result)) { sendResponse({ ok: false }); return; }
-    guardianRequests.push({ case: msg.case, result: msg.result });
-    if (guardianRequests.length > 100) guardianRequests.shift();
-    sendResponse({ ok: true });
-    return;
-  }
-  if (msg?.type !== MSG_CASE_APPROVED) return;
   if (!isValidCase(msg.case)) { sendResponse({ ok: false }); return; }
   cases.push(msg.case);
   if (cases.length > 100) cases.shift();
@@ -444,4 +415,4 @@ chrome.runtime.onInstalled?.addListener(details => {
   if (details.reason !== 'install') return;
   Promise.resolve().then(() => chrome.tabs.create({ url: chrome.runtime.getURL('login.html') })).catch(() => {});
 });
-self.__aura = { cases, guardianRequests, messages, onActionClicked };
+self.__aura = { cases, messages, onActionClicked };

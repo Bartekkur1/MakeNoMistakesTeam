@@ -1,4 +1,8 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
+import fs from 'node:fs';
+
+const loginExample = JSON.parse(fs.readFileSync(new URL('../../../../.planning/shared/examples/post-auth-login-extension.json', import.meta.url), 'utf8'));
+const reportExample = JSON.parse(fs.readFileSync(new URL('../../../../.planning/shared/examples/post-reports.json', import.meta.url), 'utf8'));
 
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const honest = 'Dziś gramy o 17, spotkajmy się w naszej grupie';
@@ -32,49 +36,66 @@ async function untouchedQuestion(dialog, title) {
 const shark = page => page.getByRole('button', { name: 'Scamerinio', exact: true });
 const clearSelection = page => page.evaluate(() => getSelection().removeAllRanges());
 
-test('guardian demo request reaches confirmation', async ({ page, serviceWorker, netlog }) => {
-  const text = 'Podaj kod do konta';
-  const link = 'https://demo.example/check';
-  const dialog = await approve(page, serviceWorker, text, link);
-  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests ?? [])).toEqual([]);
-  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
-  await next.click();
-  for (const label of ['Nie znam nadawcy', 'Podania kodu do konta', 'Nie mam innego sposobu']) {
-    await dialog.getByLabel(label, { exact: true }).check();
-    await next.click();
-  }
-  await expect(dialog.locator('.result-section')).toHaveCount(3);
-  await expect(dialog.locator('.result-step')).toHaveCount(1);
-  await expect(dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true })).toBeFocused();
-  const before = await serviceWorker.evaluate(() => ({
-    messages: self.__aura.messages.length, cases: self.__aura.cases,
-    requests: self.__aura.guardianRequests ?? [],
-  }));
-  expect(before.messages).toBe(1);
-  expect(before.cases).toHaveLength(1);
-  expect(before.cases[0]).toMatchObject({ content: text, link, origin: 'paste' });
-  expect(before.requests).toEqual([]);
+// Installed only by the three inherited handoff scenarios. Fetch never falls through
+// to a real origin; stubbed API invocations are counted separately from context traffic.
+async function prepareReportStub(serviceWorker) {
+  await serviceWorker.evaluate(async ({ login, report }) => {
+    self.__reportApiStub = { requests: [], reports: [] };
+    self.fetch = async (url, options) => {
+      const request = { url: String(url), method: options.method, headers: { ...options.headers }, body: JSON.parse(options.body) };
+      self.__reportApiStub.requests.push(request);
+      if (!request.url.endsWith('/api/reports') || request.method !== 'POST') throw new Error('Unexpected stubbed operation');
+      const saved = { ...report.response.body, ...request.body };
+      self.__reportApiStub.reports.push(saved);
+      return new Response(JSON.stringify(saved), { status: report.response.status, headers: { 'Content-Type': 'application/json' } });
+    };
+    await chrome.storage.local.set({ auraSession: { token: login.response.body.token,
+      expires_at: '2099-10-04T00:00:00.000Z', account: login.response.body.account,
+      email: login.request.email, code: login.request.code } });
+  }, { login: loginExample, report: reportExample });
+}
 
-  const request = dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true });
-  await expect(request).toBeVisible();
-  await expect(dialog.locator('.result-section').getByRole('button')).toHaveCount(0);
-  await request.click();
-  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
-  await expect(dialog).toContainText('To pokaz działania. Sprawa i wynik są zapisane tylko w pamięci rozszerzenia. Prawdziwa wysyłka do opiekuna będzie dostępna w fazie 3.');
+async function expectSavedReport(serviceWorker, dialog, payload) {
+  const api = await serviceWorker.evaluate(() => self.__reportApiStub);
+  expect(api.requests).toHaveLength(1);
+  expect(api.requests[0]).toMatchObject({ method: reportExample.method,
+    headers: { Authorization: 'Bearer ' + loginExample.response.body.token }, body: payload });
+  expect(new URL(api.requests[0].url).pathname).toBe(reportExample.path);
+  expect(Object.keys(api.requests[0].body).sort()).toEqual(['attack_type', 'content', 'source', 'taken_actions']);
+  expect(api.reports).toEqual([{ ...reportExample.response.body, ...payload }]);
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Wysłano do: ' + loginExample.response.body.account.display_name);
+  const time = await dialog.evaluate((_el, created) => new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit' }).format(new Date(created)), reportExample.response.body.created_at);
+  await expect(dialog).toContainText('Godzina wysłania: ' + time);
+  await expect(dialog).toContainText('Status: Czeka, aż rodzic zobaczy');
   await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
-  const after = await serviceWorker.evaluate(() => ({
-    messages: self.__aura.messages.map(m => m.type), cases: self.__aura.cases,
-    requests: self.__aura.guardianRequests,
-  }));
-  expect(after.messages).toEqual(['aura/case-approved', 'aura/guardian-request']);
+}
+
+test('guardian demo request reaches confirmation', async ({ page, serviceWorker, netlog }) => {
+  await prepareReportStub(serviceWorker);
+  const text = 'Podaj kod do konta'; const link = 'https://demo.example/check';
+  const dialog = await approve(page, serviceWorker, text, link);
+  expect(await serviceWorker.evaluate(() => self.__reportApiStub.requests)).toEqual([]);
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true }); await next.click();
+  for (const label of ['Nie znam nadawcy', 'Podania kodu do konta', 'Nie mam innego sposobu']) {
+    await dialog.getByLabel(label, { exact: true }).check(); await next.click();
+  }
+  await expect(dialog.locator('.result-section')).toHaveCount(3); await expect(dialog.locator('.result-step')).toHaveCount(1);
+  const request = dialog.getByRole('button', { name: 'Pokaż opiekunowi', exact: true }); await expect(request).toBeFocused();
+  const before = await serviceWorker.evaluate(() => ({ messages: self.__aura.messages.map(m => m.type), cases: self.__aura.cases, requests: self.__reportApiStub.requests }));
+  expect(before.messages).toEqual(['aura/case-approved']); expect(before.cases).toHaveLength(1);
+  expect(before.cases[0]).toMatchObject({ content: text, link, origin: 'paste' }); expect(before.requests).toEqual([]);
+  await expect(dialog.locator('.result-section').getByRole('button')).toHaveCount(0); await request.click();
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Sprawdź, co wyślesz');
+  await expect(dialog.locator('.sent-content')).toHaveText(text + '\n\nLink: ' + link, { useInnerText: false });
+  await expect(dialog.locator('.recipient')).toHaveText(loginExample.response.body.account.display_name);
+  await expect(dialog.getByRole('radio', { name: 'Prośba o dane, hasło lub kod', exact: true })).toBeChecked();
+  await expect(dialog.locator('input[type=checkbox]:checked')).toHaveCount(0); await expect(dialog.locator('select')).toHaveValue('other');
+  expect(await serviceWorker.evaluate(() => self.__reportApiStub.requests)).toEqual([]);
+  await dialog.getByRole('button', { name: 'Wyślij', exact: true }).click();
+  await expectSavedReport(serviceWorker, dialog, { attack_type: 'data_request', taken_actions: [], source: 'other', content: text + '\n\nLink: ' + link });
+  const after = await serviceWorker.evaluate(() => ({ messages: self.__aura.messages.map(m => m.type), cases: self.__aura.cases }));
+  expect(after.messages.filter(type => type !== 'aura/session-status')).toEqual(['aura/case-approved', 'aura/report-send']);
   expect(after.cases).toEqual(before.cases);
-  expect(after.requests).toEqual([{
-    case: before.cases[0],
-    result: {
-      summaryKey: 'caution', signals: ['credential_code'], unknowns: ['sender', 'official_channel'],
-      step: { id: 'protect_credentials', explanationKey: 'protect_credentials_how' }, mismatches: [],
-    },
-  }]);
   await assertOnlyLocal(netlog);
 });
 
@@ -90,14 +111,14 @@ async function reachStep(dialog, step) {
 }
 
 for (const key of ['Enter', 'Space']) test(`guardian demo sends the corrected result using ${key}`, async ({ page, serviceWorker, netlog }) => {
+  await prepareReportStub(serviceWorker);
   const dialog = await approve(page, serviceWorker);
-  const next = dialog.getByRole('button', { name: 'Dalej', exact: true });
-  await next.click();
+  const next = dialog.getByRole('button', { name: 'Dalej', exact: true }); await next.click();
   for (const label of ['Osoba, którą znam', 'Zwykła wiadomość, bez takich próśb', 'Przez znaną mi aplikację, stronę lub kontakt']) {
     await dialog.getByLabel(label, { exact: true }).check(); await next.click();
   }
   await expect(dialog.getByRole('heading', { level: 2 })).toHaveText(summary);
-  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([]);
+  expect(await serviceWorker.evaluate(() => self.__reportApiStub.requests)).toEqual([]);
   const approvedCases = await serviceWorker.evaluate(() => self.__aura.cases);
   await dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true }).click();
   await expect(dialog.getByLabel('Osoba, którą znam', { exact: true })).toBeChecked(); await next.click();
@@ -106,21 +127,18 @@ for (const key of ['Enter', 'Space']) test(`guardian demo sends the corrected re
   await expect(dialog.getByRole('heading', { level: 2 })).not.toHaveText(summary);
   await expect(dialog).toContainText('Prośba o kod do konta to sygnał ostrzegawczy. Nie podawaj go.');
   await expect(dialog.locator('.result-section')).toHaveCount(3);
-  await expect(dialog.getByRole('button', { name: 'Popraw odpowiedzi', exact: true })).toBeFocused();
+  const show = dialog.getByRole('button', { name: 'Pokaż opiekunowi', exact: true }); await expect(show).toBeFocused();
   expect(await serviceWorker.evaluate(() => self.__aura.messages.length)).toBe(1);
-  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([]);
-  await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
-  await expect(dialog.getByRole('button', { name: 'Poproś opiekuna o sprawdzenie', exact: true })).toBeFocused();
+  expect(await serviceWorker.evaluate(() => self.__reportApiStub.requests)).toEqual([]);
   await page.keyboard.press(key);
-  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Przekazano opiekunowi — demo');
-  await expect(dialog.getByRole('button', { name: 'Zamknij', exact: true })).toBeFocused();
+  await expect(dialog.getByRole('heading', { level: 2 })).toHaveText('Sprawdź, co wyślesz');
+  await expect(dialog.locator('.sent-content')).toBeFocused(); await expect(dialog.locator('.sent-content')).toHaveText(honest);
+  await expect(dialog.getByRole('radio', { name: 'Prośba o dane, hasło lub kod', exact: true })).toBeChecked();
+  expect(await serviceWorker.evaluate(() => self.__reportApiStub.requests)).toEqual([]);
+  const send = dialog.getByRole('button', { name: 'Wyślij', exact: true }); await expect(send).toBeEnabled(); await send.focus(); await page.keyboard.press(key);
+  await expectSavedReport(serviceWorker, dialog, { attack_type: 'data_request', taken_actions: [], source: 'other', content: honest });
   expect(await serviceWorker.evaluate(() => self.__aura.cases)).toEqual(approvedCases);
-  expect(await serviceWorker.evaluate(() => self.__aura.messages.map(m => m.type))).toEqual(['aura/case-approved', 'aura/guardian-request']);
-  expect(await serviceWorker.evaluate(() => self.__aura.guardianRequests)).toEqual([{
-    case: approvedCases[0],
-    result: { summaryKey: 'caution', signals: ['credential_code'], unknowns: [],
-      step: { id: 'protect_credentials', explanationKey: 'protect_credentials_how' }, mismatches: [] },
-  }]);
+  expect(await serviceWorker.evaluate(() => self.__aura.messages.map(m => m.type).filter(type => type !== 'aura/session-status'))).toEqual(['aura/case-approved', 'aura/report-send']);
   await assertOnlyLocal(netlog);
 });
 
