@@ -17,6 +17,7 @@ import { capitalize, fillTemplate, formatClock } from "./format";
 import { filterStatesFor, initialListState, listReducer, type ListLoadReason } from "./list-state";
 import { useCurrentSession } from "./PanelShell";
 import { ReportRow } from "./ReportRow";
+import { RobloxAccountCard } from "./RobloxAccountCard";
 import { expireSession, type PanelSession } from "./session";
 import { alertError, card, secondaryButton, selectBase, skeletonBlock } from "./styles";
 
@@ -115,6 +116,8 @@ function ReportList({ session }: { session: PanelSession }) {
     <main className="mx-auto w-full max-w-4xl px-4 py-8 md:py-12">
       <h1 className="font-display text-2xl font-semibold leading-tight">{LIST.title}</h1>
       <p className="mt-2 text-base text-muted-slate">{LIST.subtitle[role]}</p>
+
+      {role === "parent" ? <RobloxAccountCard session={session} /> : null}
 
       <p role="status" className="sr-only">
         {state.announcement}

@@ -176,6 +176,28 @@ export const DIALOG = {
   },
 };
 
+// The "Konto Roblox" card on the parent's list page: the nick links the child's training results
+// from the Roblox game to this panel.
+export const ROBLOX = {
+  title: "Konto Roblox dziecka",
+  intro:
+    "Wpisz nick, którego dziecko używa w Roblox. Gdy ukończy w grze szkolenie bezpieczeństwa, wynik pojawi się tutaj jako nowe zgłoszenie.",
+  label: "Nick Roblox: {child}",
+  helper: "Od 3 do 20 znaków: litery, cyfry lub podkreślnik.",
+  placeholder: "np. Robloxianin123",
+  linked: "Połączono z kontem Roblox",
+  notLinked: "Nie połączono",
+  empty: "Wpisz nick Roblox.",
+  invalid: "Nick Roblox ma od 3 do 20 znaków: litery, cyfry lub podkreślnik.",
+  save: "Zapisz nick",
+  change: "Zmień nick",
+  cancel: "Anuluj",
+  pending: "Zapisywanie…",
+  saved: "Zapisano. Wyniki gracza {nick} trafią do panelu.",
+  loading: "Wczytywanie konta Roblox…",
+  networkError: "Nie udało się potwierdzić zapisu nicku. Spróbuj ponownie.",
+};
+
 export const ERRORS = {
   networkLoad: "Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.",
   retry: "Spróbuj ponownie",

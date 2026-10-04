@@ -16,6 +16,7 @@ export default defineConfig({
       SUPABASE_URL: "http://supabase.invalid",
       SUPABASE_SERVICE_ROLE_KEY: "test-only-not-a-key",
       DEMO_AUTH_SECRET: "test-only-demo-auth-secret-0123456789abcdef",
+      ROBLOX_INGEST_SECRET: "test-only-roblox-ingest-secret",
     },
   },
 });
