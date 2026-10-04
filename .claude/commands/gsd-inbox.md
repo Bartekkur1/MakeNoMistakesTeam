@@ -21,7 +21,7 @@ and optionally applies labels or closes non-compliant submissions.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/inbox.md
+@/workspace/.claude/gsd-core/workflows/inbox.md
 </execution_context>
 
 <context>

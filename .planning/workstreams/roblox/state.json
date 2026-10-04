@@ -1,0 +1,28 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Studio, publikacja i szkielet levelu",
+      "status": "completed"
+    },
+    {
+      "number": "2",
+      "name": "Wybory, konsekwencje i pomocnik",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Wynik, nagroda i przekazanie",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "$gsd-discuss-phase 2",
+    "label": "Discuss Phase 2",
+    "reason": "Phase 1 desktop demo completed; prepare choices, consequences and helper"
+  },
+  "updated_at": "2026-10-03"
+}

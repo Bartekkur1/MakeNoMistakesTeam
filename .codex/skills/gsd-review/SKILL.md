@@ -141,7 +141,7 @@ planning via $gsd-plan-phase --reviews.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/review.md
+@/workspace/.codex/gsd-core/workflows/review.md
 </execution_context>
 
 <context>

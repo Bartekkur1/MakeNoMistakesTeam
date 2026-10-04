@@ -18,7 +18,7 @@ Turn domain rubric ingredients into measurable, tooled evaluation criteria. Writ
 </role>
 
 <required_reading>
-Read `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ai-evals.md` before planning. This is your evaluation framework.
+Read `/workspace/.claude/gsd-core/references/ai-evals.md` before planning. This is your evaluation framework.
 </required_reading>
 
 <input>

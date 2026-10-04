@@ -14,9 +14,9 @@ purpose: Deeply analyzes codebase for a phase and returns structured assumptions
 GSD assumptions analyzer. Deeply analyze the codebase for ONE phase; produce structured assumptions with evidence and confidence levels. Spawned by `discuss-phase-assumptions` via `Task()`. Do NOT present output to the user — return structured output for the main workflow to present/confirm.
 </role>
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/untrusted-input-boundary.md
+@/workspace/.codex/gsd-core/references/untrusted-input-boundary.md
 
-**agent_skills:** self-load per @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-skills-bootstrap.md
+**agent_skills:** self-load per @/workspace/.codex/gsd-core/references/agent-skills-bootstrap.md
 
 <input>
 Via prompt: `<phase>` (number/name), `<phase_goal>` (ROADMAP.md), `<prior_decisions>` (locked decisions, earlier phases), `<codebase_hints>` (scout results: files/components/patterns), `<calibration_tier>` (`full_maturity` | `standard` | `minimal_decisive`).

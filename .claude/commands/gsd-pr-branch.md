@@ -19,7 +19,7 @@ changes that are irrelevant to code review.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/pr-branch.md
+@/workspace/.claude/gsd-core/workflows/pr-branch.md
 </execution_context>
 
 <process>

@@ -30,10 +30,10 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/new-workspace.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/list-workspaces.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/remove-workspace.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/workflows/new-workspace.md
+@/workspace/.claude/gsd-core/workflows/list-workspaces.md
+@/workspace/.claude/gsd-core/workflows/remove-workspace.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

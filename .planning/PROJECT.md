@@ -23,7 +23,7 @@ Dziecko ćwiczy reakcję na oszustwo i łatwo prosi o pomoc: ścieżka treść �
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ **widget / Phase 1 (WID-01, WID-02):** rozszerzenie z awatarem przyjmuje zaznaczoną lub wklejoną treść wyłącznie na działanie użytkownika; wszystkie 5 testów UAT zaliczone.
 
 ### Active
 
@@ -69,8 +69,10 @@ Szczegółowe wymagania są w workstreamach (`.planning/workstreams/<nazwa>/REQU
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
+| Projekty w `projects/<nazwa>/` | Osobne katalogi kodu i zależności; wspólne `assets/` i `.planning/shared/` w repozytorium | ✓ widget przeniesiony do `projects/widget/` |
 | Workstreamy: web-app, widget, roblox, presentation | Osobne ROADMAP/STATE/fazy, żeby tory pracy się nie mieszały | — Pending |
 | `.planning/shared/` na kontrakt, treści i pomiar | Jedno źródło prawdy dla wszystkich torów; właściciel edytuje, reszta czyta | — Pending |
+| Widoczny rekin i otwarty panel przesuwają się razem | Zachowanie tekstu i fokusu podczas przeciągania; doprecyzowanie użytkownika | ✓ widget Phase 1, UAT pass |
 | Kontrakt API prowadzi osoba 3, potwierdza osoba 2 | Zgodnie z taski.md; implementacja po potwierdzeniu | — Pending |
 | Dwa zestawy testowe A/B o podobnej trudności | Test przed–po bez pomocnika, bez kopiowania scenariusza treningowego | — Pending |
 | Punkty za umiejętności, nie za liczbę zgłoszeń | Unikamy zachęty do fałszywych zgłoszeń | — Pending |
@@ -93,4 +95,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-03 after initialization (replaced Czujny Senior, see git 9d8e7c4)*
+*Last updated: 2026-10-03 after widget Phase 1 completion*

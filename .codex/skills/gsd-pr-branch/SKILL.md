@@ -141,7 +141,7 @@ changes that are irrelevant to code review.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/pr-branch.md
+@/workspace/.codex/gsd-core/workflows/pr-branch.md
 </execution_context>
 
 <process>

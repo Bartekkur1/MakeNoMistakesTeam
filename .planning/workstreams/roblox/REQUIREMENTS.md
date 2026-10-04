@@ -8,11 +8,11 @@
 
 ### Uruchomienie
 
-- [ ] **RBX-01**: Projekt Studio jest gotowy; ograniczenia publikacji gry rozpoznane do 2 h; pokaz w Studio jako wariant awaryjny
+- [x] **RBX-01**: Projekt Studio jest gotowy; ograniczenia publikacji gry rozpoznane do 2 h; pokaz w Studio jako wariant awaryjny
 
 ### Misja
 
-- [ ] **MIS-01**: Mały level: start, spotkanie z NPC, podejrzana oferta, decyzja, zakończenie (bez rozbudowanej mapy)
+- [x] **MIS-01**: Mały level: start, spotkanie z NPC, podejrzana oferta, decyzja, zakończenie (bez rozbudowanej mapy)
 - [ ] **MIS-02**: Wybory i konsekwencje: sprawdzenie oferty, fikcyjne przekazanie kodu, odmowa, prośba o pomoc; nigdy prawdziwe hasło ani kod
 - [ ] **MIS-03**: Pomocnik wyjaśnia prośbę o kod, presję czasu i obietnicę nagrody zgodnie z treściami osoby 4; błąd umożliwia ponowną próbę
 - [ ] **MIS-04**: Misję można odtworzyć od początku
@@ -40,8 +40,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RBX-01 | Phase 1 | Pending |
-| MIS-01 | Phase 1 | Pending |
+| RBX-01 | Phase 1 | Complete for Studio demo; publication NO-GO, two-hour deadline missed |
+| MIS-01 | Phase 1 | Complete for desktop demo; user-confirmed, mobile testing deferred |
 | MIS-02 | Phase 2 | Pending |
 | MIS-03 | Phase 2 | Pending |
 | MIS-04 | Phase 2 | Pending |

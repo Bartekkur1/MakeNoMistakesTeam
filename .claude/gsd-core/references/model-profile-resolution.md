@@ -26,7 +26,7 @@ string** when nothing resolved.
 
 ## Lookup Table
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/model-profiles.md
+@/workspace/.claude/gsd-core/references/model-profiles.md
 
 ## Passing the model to a spawn
 

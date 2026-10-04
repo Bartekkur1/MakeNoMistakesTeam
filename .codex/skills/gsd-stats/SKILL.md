@@ -137,7 +137,7 @@ Display comprehensive project statistics including phase progress, plan executio
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/stats.md
+@/workspace/.codex/gsd-core/workflows/stats.md
 </execution_context>
 
 <process>

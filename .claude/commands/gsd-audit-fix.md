@@ -26,7 +26,7 @@ Flags:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/audit-fix.md
+@/workspace/.claude/gsd-core/workflows/audit-fix.md
 </execution_context>
 
 <process>

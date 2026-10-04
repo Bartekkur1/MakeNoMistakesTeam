@@ -42,9 +42,9 @@ via filesystem and git state.
 
 <required_reading>
 Read STATE.md before any operation to load project context.
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/agent-contracts.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/context-budget.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/gates.md
+@/workspace/.codex/gsd-core/references/agent-contracts.md
+@/workspace/.codex/gsd-core/references/context-budget.md
+@/workspace/.codex/gsd-core/references/gates.md
 </required_reading>
 
 <available_agent_types>
@@ -84,7 +84,7 @@ If `--wave` is absent, preserve the current behavior of executing all incomplete
 <step name="initialize" priority="first">
 Load all context in one call:
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/gsd-run-resolver.md
+@/workspace/.codex/gsd-core/references/gsd-run-resolver.md
 
 ```bash
 WAVE_PARAM=""; if [[ "{{GSD_ARGS}}" =~ (^|[[:space:]])--wave[[:space:]]+([^[:space:]-][^[:space:]]*) ]]; then WAVE_PARAM="--wave ${BASH_REMATCH[2]}"; fi
@@ -101,7 +101,7 @@ Parse JSON for: `executor_model`, `verifier_model`, `commit_docs`, `parallelizat
 
 **Model resolution:** If `executor_model` is `"inherit"`, omit the `model=` parameter from all `Agent()` calls — do NOT pass `model="inherit"` to Agent. Omitting the `model=` parameter causes Claude Code to inherit the orchestrator model automatically. Only set `model=` when `executor_model` is an explicit model name (e.g., `"claude-sonnet-5"`, `"claude-opus-4-8"`).
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-response-language.md
+@/workspace/.codex/gsd-core/references/execute-phase-response-language.md
 
 Read runtime/worktree config and fail closed before any executor dispatch:
 
@@ -150,8 +150,8 @@ When `CONTEXT_WINDOW >= 500000` (1M-class models), subagent prompts include rich
 - This enables cross-phase awareness and history-aware verification
 
 When `CONTEXT_WINDOW < 200000` (sub-200K models), subagent prompts are thinned to reduce static overhead:
-- Executor agents omit extended deviation rule examples and checkpoint examples from inline prompt — load on-demand via @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/executor-examples.md
-- Planner agents omit extended anti-pattern lists and specificity examples from inline prompt — load on-demand via @/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/planner-antipatterns.md
+- Executor agents omit extended deviation rule examples and checkpoint examples from inline prompt — load on-demand via @/workspace/.codex/gsd-core/references/executor-examples.md
+- Planner agents omit extended anti-pattern lists and specificity examples from inline prompt — load on-demand via @/workspace/.codex/gsd-core/references/planner-antipatterns.md
 - Core rules and decision logic remain inline; only verbose examples and edge-case lists are extracted
 - This reduces executor static overhead by ~40% while preserving behavioral correctness
 
@@ -246,7 +246,7 @@ if [ "$TDD_MODE" = "true" ]; then
   fi
 fi
 ```
-Pure doc-only / config-only / test-only tasks return `is_behavior_adding=false` and are exempt. When the gate trips, Read `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-mvp-tdd.md` for the exact halt report format.
+Pure doc-only / config-only / test-only tasks return `is_behavior_adding=false` and are exempt. When the gate trips, Read `/workspace/.codex/gsd-core/references/execute-mvp-tdd.md` for the exact halt report format.
 </step>
 
 <step name="check_blocking_antipatterns" priority="first">
@@ -519,9 +519,9 @@ increases monotonically across waves. `{status}` is `complete` (success),
 
 **For each wave:**
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-wave-guard.md
+@/workspace/.codex/gsd-core/references/execute-phase-wave-guard.md
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-context-guard.md
+@/workspace/.codex/gsd-core/references/execute-phase-context-guard.md
 
 1. **Intra-wave files_modified overlap check (BEFORE spawning):**
 
@@ -692,12 +692,12 @@ increases monotonically across waves. `{status}` is `complete` (success),
 
        <execution_context>
        ORCHESTRATOR build-time embed (NOT a sub-agent runtime step): before this dispatch, read each file listed below and replace this note with those files' contents, inlined verbatim in this block in the listed order. Never leave `@`-include lines in the dispatched prompt — `@path` never expands inside an Agent() `prompt="..."` string (#3324), so an include arrives as literal text the executor never sees.
-       - `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/execute-plan.md`
-       - `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/templates/summary.md`
-       - `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/checkpoints.md`
-       ${TDD_APPLICABLE ? '- `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/tdd.md`' : ''}  # #3990/#4265: type: tdd, tdd="true", or workflow.tdd_mode
-       - `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/worktree-path-safety.md`
-       ${CONTEXT_WINDOW < 200000 ? '' : '- `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/executor-examples.md`'}
+       - `/workspace/.codex/gsd-core/workflows/execute-plan.md`
+       - `/workspace/.codex/gsd-core/templates/summary.md`
+       - `/workspace/.codex/gsd-core/references/checkpoints.md`
+       ${TDD_APPLICABLE ? '- `/workspace/.codex/gsd-core/references/tdd.md`' : ''}  # #3990/#4265: type: tdd, tdd="true", or workflow.tdd_mode
+       - `/workspace/.codex/gsd-core/references/worktree-path-safety.md`
+       ${CONTEXT_WINDOW < 200000 ? '' : '- `/workspace/.codex/gsd-core/references/executor-examples.md`'}
        </execution_context>
 
        <required_reading>
@@ -1043,9 +1043,9 @@ increases monotonically across waves. `{status}` is `complete` (success),
    **Step 7.3 — `class == "unknown-failure"`:**
    Report failed plan and ask Continue/Stop; continuing may cascade into dependent plan failures.
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-quota-recovery.md
+@/workspace/.codex/gsd-core/references/execute-phase-quota-recovery.md
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-between-wave-reset.md
+@/workspace/.codex/gsd-core/references/execute-phase-between-wave-reset.md
 
 8. **Execute checkpoint plans between waves** — see `<checkpoint_handling>`.
 9. **Proceed to next wave.**
@@ -1177,7 +1177,7 @@ CHECK_EXIT=$?
 
 **Gate evaluation** uses the same two-step contract as `execute:wave:post` above.
 
-**TDD review escalation (overrides the advisory default for the `tdd.review-checkpoint` gate only).** The tdd `execute:post` gate is declared `blocking: false`, so by the generic contract above it displays its `message`/table and continues. There is ONE documented exception (see `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-mvp-tdd.md`): when `TDD_MODE=true` AND `GATE_RESULT.block == true` (one or more TDD plans miss a RED or GREEN gate commit; #4011 — no MVP condition), the end-of-phase TDD review escalates from advisory to **blocking under TDD** — refuse to mark the phase complete and present:
+**TDD review escalation (overrides the advisory default for the `tdd.review-checkpoint` gate only).** The tdd `execute:post` gate is declared `blocking: false`, so by the generic contract above it displays its `message`/table and continues. There is ONE documented exception (see `/workspace/.codex/gsd-core/references/execute-mvp-tdd.md`): when `TDD_MODE=true` AND `GATE_RESULT.block == true` (one or more TDD plans miss a RED or GREEN gate commit; #4011 — no MVP condition), the end-of-phase TDD review escalates from advisory to **blocking under TDD** — refuse to mark the phase complete and present:
 
 ```
 Phase blocked: {N} TDD plan(s) violate the RED→GREEN gate sequence under TDD.
@@ -1313,7 +1313,7 @@ Verify-work will walk you through each item and mark the phase complete when all
 **If user reports issues now:** Proceed to gap closure.
 
 **If gaps_found:**
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/references/execute-phase-requirement-revert.md
+@/workspace/.codex/gsd-core/references/execute-phase-requirement-revert.md
 ```
 ## ⚠ Phase {X}: {Name} — Gaps Found
 
@@ -1435,7 +1435,7 @@ transition in **post-completion mode**: SKIP its `verify_completion` and
 `update_roadmap_and_state` (re-running `phase.complete` would double-write state) and
 BEGIN at `evolve_project`, running the full set through `offer_next_phase`.
 
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/transition.md
+@/workspace/.codex/gsd-core/workflows/transition.md
 </step>
 
 </process>

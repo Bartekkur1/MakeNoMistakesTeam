@@ -167,14 +167,14 @@ DISCUSS_MODE=$(gsd_run query config-get workflow.discuss_mode --raw 2>/dev/null 
 ```
 
 If `--assumptions` is in {{GSD_ARGS}}:
-Read and execute `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/list-phase-assumptions.md` end-to-end.
+Read and execute `/workspace/.codex/gsd-core/workflows/list-phase-assumptions.md` end-to-end.
 Stop here.
 
 Otherwise, if `DISCUSS_MODE` is `"assumptions"`:
-Read and execute `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/discuss-phase-assumptions.md` end-to-end.
+Read and execute `/workspace/.codex/gsd-core/workflows/discuss-phase-assumptions.md` end-to-end.
 
 Otherwise (`"discuss"` / unset / any other value):
-Read and execute `/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/discuss-phase.md` end-to-end.
+Read and execute `/workspace/.codex/gsd-core/workflows/discuss-phase.md` end-to-end.
 
 **MANDATORY:** Read the appropriate workflow file BEFORE taking any action. The objective and success_criteria sections in this command file are summaries — the workflow file contains the complete step-by-step process with all required behaviors, config checks, and interaction patterns. Do not improvise from the summary.
 

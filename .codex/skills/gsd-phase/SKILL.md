@@ -154,10 +154,10 @@ Mode routing:
 </routing>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/add-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/insert-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/remove-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/edit-phase.md
+@/workspace/.codex/gsd-core/workflows/add-phase.md
+@/workspace/.codex/gsd-core/workflows/insert-phase.md
+@/workspace/.codex/gsd-core/workflows/remove-phase.md
+@/workspace/.codex/gsd-core/workflows/edit-phase.md
 </execution_context>
 
 <context>

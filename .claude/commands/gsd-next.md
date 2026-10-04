@@ -17,8 +17,8 @@ This is a launcher/router only. It never does the work itself. It reads project 
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/smart-entry.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ui-brand.md
+@/workspace/.claude/gsd-core/workflows/smart-entry.md
+@/workspace/.claude/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>
@@ -26,5 +26,5 @@ Arguments: $ARGUMENTS
 </context>
 
 <process>
-Follow /home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/smart-entry.md. Detect the situation, present the menu, and dispatch exactly one command. Then stop.
+Follow /workspace/.claude/gsd-core/workflows/smart-entry.md. Detect the situation, present the menu, and dispatch exactly one command. Then stop.
 </process>

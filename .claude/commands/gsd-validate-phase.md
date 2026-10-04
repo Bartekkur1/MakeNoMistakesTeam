@@ -23,7 +23,7 @@ Output: updated VALIDATION.md + generated test files.
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/validate-phase.md
+@/workspace/.claude/gsd-core/workflows/validate-phase.md
 </execution_context>
 
 <context>

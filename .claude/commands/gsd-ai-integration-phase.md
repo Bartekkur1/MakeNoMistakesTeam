@@ -22,9 +22,9 @@ Flow: Select Framework → Research Docs → Research Domain → Design Eval Str
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/workflows/ai-integration-phase.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ai-frameworks.md
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.claude/gsd-core/references/ai-evals.md
+@/workspace/.claude/gsd-core/workflows/ai-integration-phase.md
+@/workspace/.claude/gsd-core/references/ai-frameworks.md
+@/workspace/.claude/gsd-core/references/ai-evals.md
 </execution_context>
 
 <context>

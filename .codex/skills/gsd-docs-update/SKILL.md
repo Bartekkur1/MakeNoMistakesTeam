@@ -145,7 +145,7 @@ Flag handling rule:
 </objective>
 
 <execution_context>
-@/home/turu/Repositories/HackYeah/MakeNoMistakesTeam/.codex/gsd-core/workflows/docs-update.md
+@/workspace/.codex/gsd-core/workflows/docs-update.md
 </execution_context>
 
 <context>
