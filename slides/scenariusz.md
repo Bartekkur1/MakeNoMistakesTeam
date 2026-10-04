@@ -1,6 +1,6 @@
 # Scenariusz wystąpienia: BezpiecznaAura (Scamerino Alertinio)
 
-Na podstawie `slides/slides.md` (10 slajdów). Cel: **ok. 5 minut**.
+Na podstawie `slides/slides.md` (10 slajdów). Cel: **ok. 5 minut** (z pakietem warsztatowym blisko 5,5 minuty; przy twardym limicie użyj wersji skróconej).
 Czas przy każdym slajdzie jest orientacyjny.
 
 Oś opowieści: **od ogółu do szczegółu**.
@@ -97,13 +97,17 @@ Zasady:
 >
 > Dziecko otrzymuje jedynie spokojny komunikat, na przykład: „Rodzic zobaczył, porozmawiajcie o tym”. Nikt nie czyta jego rozmów ani historii przeglądania. Nie ma rankingów ani kar za proszenie o pomoc.
 
-## 9. Klient: szkoła · ~30 s
+## 9. Klient: szkoła · ~40 s
 
 > Kto za to zapłaci? Szkoła. I to nie dlatego, że chce, lecz dlatego, że musi.
 >
 > Od sierpnia 2024 roku ustawa „Kamilka” zobowiązuje każdą szkołę do wdrożenia standardów ochrony małoletnich. Artykuł 22c stanowi wprost, że standardy te muszą obejmować zasady korzystania z urządzeń z dostępem do internetu oraz procedury chroniące dzieci przed zagrożeniami w sieci. Co najmniej raz na dwa lata szkoła musi je ocenić, a wnioski udokumentować.
 >
-> My dostarczamy do tego gotowe narzędzie: lekcję, którą uczniowie chcą przejść, procedurę reakcji, która prowadzi od dziecka przez rodzica do nauczyciela, wyniki misji jako materiał do oceny standardów, a także poradnik dla rodziców. Mówimy o czternastu tysiącach szkół podstawowych i ponad półtora miliona uczniów w wieku od dziesięciu do trzynastu lat. Dla dziecka i rodzica narzędzie jest bezpłatne, koszty ponosi szkoła lub samorząd.
+> My dostarczamy do tego gotowe narzędzie: lekcję, którą uczniowie chcą przejść, procedurę reakcji, która prowadzi od dziecka przez rodzica do nauczyciela, wyniki misji jako materiał do oceny standardów, a także poradnik dla rodziców i nauczycieli.
+>
+> Do tego dochodzi pakiet warsztatowy dla nauczyciela: trzy gotowe lekcje po czterdzieści pięć minut dla klas od czwartej do ósmej. Pierwsza uczy rozpoznawać oszustwo po sygnałach, druga chronić hasło i konto, trzecia mówić „nie” obcym i prosić o pomoc. Każda ma konspekt, plansze na rzutnik, karty pracy, klucz odpowiedzi i kartę do domu dla rodziców. Wystarczą wydruki i rzutnik, bez komputerów i bez naszej aplikacji, a mniej więcej co trzecia wiadomość w ćwiczeniach jest uczciwa, żeby dzieci uczyły się odróżniać, a nie bać.
+>
+> Mówimy o czternastu tysiącach szkół podstawowych i ponad półtora miliona uczniów w wieku od dziesięciu do trzynastu lat. Dla dziecka i rodzica narzędzie jest bezpłatne, koszty ponosi szkoła lub samorząd.
 
 ## 10. Plan na przyszłość: badanie skuteczności · ~25 s
 
@@ -120,7 +124,7 @@ Zasady:
 - Slajd 2: tylko TikTok (co trzecie dziecko w wieku 7-12 lat, ponad 20 razy dziennie) i wniosek.
 - Slajd 3: dwie liczby (28% nastolatków padło ofiarą ataku, efekt szkolenia znika po miesiącu) oraz trzy powody, dla których pogadanka przegrywa.
 - Slajdy 6-8: po jednym zdaniu na slajd: misja uczy, wtyczka pomaga, panel łączy z dorosłym.
-- Slajd 9: ustawa, artykuł 22c i zdanie „szkoła musi”, bez liczb dotyczących rynku.
+- Slajd 9: ustawa, artykuł 22c, zdanie „szkoła musi” i jedno zdanie o pakiecie warsztatowym (trzy lekcje po 45 minut, bez komputerów), bez liczb dotyczących rynku.
 
 ## Ściągawka na pytania jury
 
@@ -130,9 +134,11 @@ Zasady:
 | Czy to nie jest kolejna gra edukacyjna? | Gra służy wyłącznie do treningu. Ten sam rekin pomaga przy prawdziwej wiadomości na Discordzie czy w poczcie, a sprawa może trafić do rodzica i do szkoły. Europol Cyber Defenders również działa w Robloxie, lecz nie towarzyszy dziecku na co dzień. |
 | Czy to sztuczna inteligencja? Co, jeśli się pomyli? | Sprawdzanie opiera się na jawnych regułach i odbywa się w przeglądarce dziecka. Wynik nigdy nie brzmi „bezpieczne”. Wskazuje sygnały ostrzegawcze, brakujące informacje i jeden ostrożny krok. Nadmierna ostrożność niczym dziecku nie grozi. |
 | A prywatność dziecka? | Bez kliknięcia „Wyślij” nic nie opuszcza komputera. Dziecko widzi i może poprawić to, co wysyła. Rodzic nie czyta rozmów ani historii przeglądania. Nauczyciel widzi wyłącznie sprawy przekazane przez rodzica oraz wyniki misji. Założenie konta przez dziecko poniżej szesnastego roku życia wymaga zgody rodzica (art. 8 RODO). |
-| Dlaczego szkoła miałaby za to zapłacić? | Ponieważ ustawa „Kamilka” (art. 22c ust. 2 pkt 2-3) wymaga procedur ochrony przed zagrożeniami w internecie, a ust. 6 nakazuje oceniać standardy co dwa lata. Dostarczamy gotową lekcję, procedurę i dokumentację. |
+| Dlaczego szkoła miałaby za to zapłacić? | Ponieważ ustawa „Kamilka” (art. 22c ust. 2 pkt 2-3) wymaga procedur ochrony przed zagrożeniami w internecie, a ust. 6 nakazuje oceniać standardy co dwa lata. Dostarczamy gotową misję, procedurę reakcji, dokumentację oraz pakiet warsztatowy z trzema lekcjami. |
 | Czy macie dowód, że to działa? | Jeszcze nie, i mówimy o tym otwarcie. Na obecnym etapie nie prowadziliśmy badań porównawczych. Mamy działający produkt i plan badania z grupą kontrolną, które chcemy przeprowadzić w pilotażu w pierwszej szkole. |
 | Dlaczego akurat 10-13 lat? | To wiek masowej obecności w Robloxie, korzystania z TikToka przed dozwolonym wiekiem i pierwszego smartfona. Zarazem to wiek, w którym dziecko wciąż słucha rodziców i szkoły. |
+| Czy szkoła potrzebuje komputerów, żeby zacząć? | Nie. Pakiet warsztatowy działa samodzielnie: trzy lekcje po 45 minut, wydruki kart pracy i rzutnik. Nie wymaga ani aplikacji, ani gry. Misja w Robloxie i panel to kolejny krok. |
+| Co jest w pakiecie warsztatowym? | Trzy lekcje dla klas 4-8: „Oszustwo czy nie?”, „Moje konto, mój klucz” i „Obcy, presja i sekrety”. Każda ma konspekt z przebiegiem minuta po minucie, plansze, karty pracy, klucz odpowiedzi i kartę do domu. Bez ocen i rankingów. Jest też ramka na wypadek, gdyby uczeń ujawnił własną sprawę. |
 | Na czym to działa? | Wtyczka działa w przeglądarce Chrome na komputerze, misja w Robloxie, a panel w przeglądarce. Z myślą o telefonach przygotowujemy stronę, na której dziecko wklei treść wiadomości. |
 | Skąd ponad półtora miliona uczniów? | To szacunek: 3,2 mln uczniów szkół podstawowych (GUS) podzielone przez 8 roczników i pomnożone przez 4 roczniki (klasy 4-7, czyli 10-13 lat). Wychodzi około 1,6 mln. |
 
