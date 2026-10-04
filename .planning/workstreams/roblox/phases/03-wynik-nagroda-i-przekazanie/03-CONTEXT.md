@@ -4,49 +4,46 @@
 **Status:** Ready for planning  
 **Workstream:** roblox  
 **Phase:** 03-wynik-nagroda-i-przekazanie  
-**Requirements:** SCR-01, SCR-02, SCR-03  
+**Requirements:** SCR-01 (zaktualizowane: ocena binarna/zaliczony test zamiast punktacji numerycznej), SCR-02, SCR-03  
 
 <domain>
 ## Phase Boundary
 
-Faza 3 zamyka cykl misji edukacyjnej w Robloxie i integruje ją z panelem opiekuna (rodzica i szkoły):
-1. **Punktacja (SCR-01):** Obliczenie wyniku na serwerze zgodnie z regułami `shared/MEASUREMENT.md` i `shared/CONTRACT.md`:
-   - Działanie (0–2 pkt): bezpieczna odmowa (+2 pkt), uległość w symulacji hasła (0 pkt).
-   - Quiz/wskazówki (0–1 pkt): rozpoznanie sygnałów za pierwszym razem (+1 pkt), za drugim razem (+0.5 pkt / uwzględnienie `hints_used: 1`).
-   - Metryka `hints_used` (0, 1 lub 2).
-2. **Nagroda kosmetyczna (SCR-02):**
-   - Przyznanie graczowi jednej kosmetycznej nagrody 3D za ukończenie misji: Złota Tarcza Bezpieczeństwa Scamerino (`ScamerinoShieldAccessory`) nakładana na model postaci (Accessory do `BodyBackAttachment` / pleców lub piersi) ze złotym rozbłyskiem cząsteczkowym (`ParticleEmitter`).
-   - Brak punktowania czy nagradzania rzeczywistych zgłoszeń; odznaka za ukończenie ćwiczenia.
-3. **Eksport do skrzynki rodzica w panelu (SCR-03):**
-   - Połączenie gry ze skrzynką odbiorczą panelu opiekuna (`web-app`) na dedykowany endpoint `POST /api/reports/ingest`.
-   - **Model bezpieczeństwa M2M (Machine-to-Machine):** Serwer Robloxa autoryzuje się kluczem serwerowym `x-ingest-secret` (nigdy nie ujawnianym klientowi).
-   - **Parowanie tożsamości (Parent-Child Pairing via Username):** Backend dopasowuje nick dziecka z gry (`roblox_username`, np. `Robloxianu5a9m1s7a` dla Oli) do konta rodzica (`Mama Oli (demo)`), automatycznie tworząc sprawę `Report` w stanie `pending_parent`.
-   - Ekran końcowy w Robloxie prezentuje status wysyłki do rodzica, punktację, odznakę oraz podgląd raportu JSON z możliwością skopiowania.
-   - Odporność na brak sieci / SSRF localhost: w przypadku braku tunelu/sieci pcall bezpiecznie przechodzi do trybu demonstracyjnego z podglądem JSON i informacją o gotowości do importu ręcznego.
+Faza 3 integruje grę Roblox z panelem opiekuna (rodzica i szkoły) oraz nagradza gracza za bezpieczną postawę:
+1. **Brak punktacji numerycznej (Decyzja użytkownika):**
+   - Misja nie wystawia ocen cyfrowych ani punktów (np. 0-3 pkt).
+   - Wynik ma charakter jakościowy i edukacyjny: **Test zdany pomyślnie** (bezpieczna odmowa) lub **Symulacja: konto zagrożone** (uległość).
+2. **Wizualna nagroda kosmetyczna za zdany test (SCR-02):**
+   - Gracz za bezpieczną odmowę i obronę przed scammerem otrzymuje kosmetyczną nagrodę 3D: Złotą Tarczę Bezpieczeństwa Scamerino (`ScamerinoShieldAccessory`) nałożoną na postać gracza (Accessory do `BodyBackAttachment`) wraz z rozbłyskiem złotych cząsteczek (`ParticleEmitter`).
+   - Przy restarcie misji (`resetForPlayer`) tarcza jest zdejmowana, aby gracz mógł przejść test ponownie.
+3. **Komunikacja z panelem opiekuna w formacie istniejącego panelu (SCR-03):**
+   - Serwer gry generuje raport incydentu dokładnie w formacie oczekiwanym przez panel `web-app` (`Report`):
+     - `source: "game"` (w panelu: etykieta „gra”).
+     - `attack_type: "data_request"` (w panelu: „Prośba o dane, hasło lub kod”).
+     - `taken_actions`: `[]` (gdy uczeń odmówił – w panelu zielony komunikat: *„Nic z tych rzeczy: dziecko nie kliknęło, nie podało danych i nie zapłaciło”*) lub `["entered_password"]` (gdy uczeń uległ w symulacji – w panelu: *„Ryzyko: podanie danych”*).
+     - `content`: sformatowany opis incydentu, który idealnie prezentuje się w karcie treści wiadomości panelu (`ReportContentCard`).
+   - Wysłanie raportu do skrzynki `POST /api/reports/ingest` z autoryzacją M2M nagłówkiem `x-ingest-secret`.
+   - Powiązanie tożsamości: nick gracza w Roblox (`Robloxianu5a9m1s7a`) jest mapowany na dziecko `Ola (demo)` i trafia do skrzynki `Mama Oli (demo)` ze statusem `pending_parent`.
+   - Ekran końcowy w Robloxie prezentuje status wysyłki do rodzica, odznakę 3D oraz podgląd danych.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Punktacja i pomiar (SCR-01)
-- **D-30:** Punktacja wyliczana wyłącznie na serwerze w `MissionService.server.luau` na podstawie stanu sesji gracza (`stage`, `helpReceived`, `quizAttempts`, `selected_action`). Klient otrzymuje gotowy wynik, nie może sam zadeklarować punktów.
-- **D-31:** Skala punktowa: 0–3 punkty:
-  - 2 pkt za skuteczną odmowę scammerowi (`refusal_2_final` lub bezpieczna decyzja po karcie/pomocy).
-  - 1 pkt za bezbłędny quiz pomocnika (0 podpowiedzi).
-  - 0.5 pkt za quiz ukończony z podpowiedzią (`hints_used = 1`).
-  - 0 pkt za uległość w symulacji (`share_fake_password`).
-  - Pole `hints_used` przyjmuje wartość 0, 1 lub 2.
+### Ocena i wynik (SCR-01 update)
+- **D-30:** Brak punktacji numerycznej. Wynik to status: `status = "passed"` (bezpieczna odmowa) lub `status = "failed"` (przekazanie hasła w symulacji).
+- **D-31:** Rejestrowane są metryki przebiegu: czy gracz użył pomocy Scamerino (`helpReceived`), ile prób potrzebował w quizie (`quizAttempts`), oraz czy sprawdził kartę zasad (`checkedOffer`).
 
 ### Kosmetyczna nagroda 3D (SCR-02)
-- **D-32:** Nagroda to obiekt `Accessory` („Złota Tarcza Scamerino”) przyczepiany do postaci gracza przez `Humanoid:AddAccessory`.
-- **D-33:** Tarcza ma złoty kolor, emblemat ochronny i emituje subtelne złote iskry (`ParticleEmitter`).
-- **D-34:** Wręczenie nagrody następuje po pomyślnym ukończeniu ćwiczenia (bezpieczna odmowa). Przy resecie gry (`resetForPlayer`) tarcza jest zdejmowana, aby umożliwić ponowne przejście.
+- **D-32:** Nagroda przyznawana wyłącznie za zdany test (`status == "passed"`): obiekt `Accessory` o nazwie `ScamerinoShieldAccessory` przyczepiany do `BodyBackAttachment` postaci.
+- **D-33:** Wygląd tarczy: złota barwa, emblemat tarczy ochronnej oraz 3-sekundowy efekt złotych cząsteczek (`ParticleEmitter`).
+- **D-34:** Przy resecie (`resetForPlayer`) tarcza jest zdejmowana z postaci.
 
-### Skrzynka odbiorcza i eksport do backendu (SCR-03)
-- **D-35:** Dedykowany endpoint skrzynki `POST /api/reports/ingest` z autoryzacją nagłówkiem `x-ingest-secret`. Gra nie loguje się na konto rodzica i nie zna jego haseł.
-- **D-36:** Payload zawiera: `roblox_username` (`player.Name`), `roblox_user_id` (`player.UserId`), `attack_type: "data_request"`, `source: "game"`, `taken_actions` (`[]` lub `["entered_password"]`), `content`, `hints_used`, `score`, `outcome`.
-- **D-37:** Odporność sieciowa: serwer wysyła zapytanie w `task.spawn` z `pcall`. W przypadku sukcesu HTTP (201 Created) klient wyświetla zielony status *„Wysłano na skrzynkę: Mama Oli (demo)”*. W przypadku braku łączności (np. brak tunelu dla localhost) klient wyświetla *„Zapisano w raporcie misji”* i umożliwia podejrzenie raportu JSON.
+### Komunikacja z panelem opiekuna (SCR-03)
+- **D-35:** Format danych dopasowany 1:1 do encji `Report` z panelu (`source: "game"`, `attack_type: "data_request"`, `taken_actions`).
+- **D-36:** Bezpieczny transfer M2M: serwer gry (`ReportExportService.luau`) wysyła zapytanie na skrzynkę `POST /api/reports/ingest` z nagłówkiem `x-ingest-secret`.
+- **D-37:** Odporność sieciowa: zapytanie wykonywane przez `pcall`. W przypadku braku sieci/tunelu interfejs Robloxa wyświetla podgląd wygenerowanego raportu ze statusem gotowości do importu ręcznego.
 
 </decisions>
 
@@ -55,16 +52,6 @@ Faza 3 zamyka cykl misji edukacyjnej w Robloxie i integruje ją z panelem opieku
 
 | Boundary | Description |
 |----------|-------------|
-| Klient Roblox → Serwer Roblox | Klient nie może manipulować punktacją ani wysyłać zapytań HTTP na zewnątrz. |
-| Serwer Roblox → Backend Web-App | Serwer Roblox wysyła nagłówek `x-ingest-secret`, nie ma dostępu do kont użytkowników ani bazy. |
-| Gracz → Tożsamość dziecka | Gracz identyfikowany przez `player.Name` / `UserId`; rodzic widzi nick powiązany w szkole. |
-
-## STRIDE Threat Register
-
-| Threat ID | Category | Component | Severity | Disposition | Mitigation Plan |
-|-----------|----------|-----------|----------|-------------|-----------------|
-| T-03-01 | Tampering | Punktacja misji | high | mitigate | Serwer autorytatywnie wylicza punkty i `hints_used` w `MissionService`. |
-| T-03-02 | Information disclosure | Sekrety API | high | mitigate | Klucz `x-ingest-secret` przechowywany wyłącznie na serwerze Robloxa (`ServerScriptService`), nigdy w LocalScript. |
-| T-03-03 | Denial of service | HttpService requests | medium | mitigate | Pojedyncze zapytanie per zakończenie misji z timeoutem i `pcall`, rate-limit po stronie serwera. |
-| T-03-04 | Spoofing | Zgłoszenia ze skrzynki | medium | mitigate | Weryfikacja `x-ingest-secret` po stronie backendu i oznaczanie `source = "game"`. |
+| Klient Roblox → Serwer Roblox | Klient nie może sam przyznać sobie nagrody ani zmienić statusu zdanego testu. |
+| Serwer Roblox → Backend Panelu | Wysyłka wyłącznie przez M2M z nagłówkiem `x-ingest-secret`. Gra nie ma dostępu do kont rodziców ani tokenów użytkowników. |
 </threat_model>

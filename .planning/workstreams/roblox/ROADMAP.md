@@ -59,21 +59,21 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
 
 ### Phase 3: Wynik, nagroda i przekazanie
 
-**Goal**: Misja kończy się wynikiem z użyciem podpowiedzi, nagrodą i zapisem zgodnym z kontraktem
+**Goal**: Misja kończy się wizualną nagrodą 3D za zdany test oraz bezpiecznym przekazaniem zgłoszenia do panelu opiekuna
 **Depends on**: Phase 2, `shared/MEASUREMENT.md`, `shared/CONTRACT.md`
 **Requirements**: SCR-01, SCR-02, SCR-03
 **Success Criteria** (what must be TRUE):
-  1. Punkty liczone według wspólnych zasad, wynik zawiera hints_used
-  2. Ukończenie daje jedną kosmetyczną nagrodę; zgłoszenia nie są punktowane
-  3. Wynik można wyeksportować w formacie kontraktu; import ręczny jest oznaczony w demo
+  1. Wynik misji to status zdanego testu (bezpieczna odmowa) lub symulowanego błędu bez punktacji numerycznej
+  2. Zdany test przyznaje wizualną kosmetyczną nagrodę 3D: Złotą Tarczę Scamerino (Accessory 3D) ze złotymi cząsteczkami
+  3. Zgłoszenie trafia do skrzynki panelu opiekuna w formacie 1:1 zgodnym z panelem rodzica (source: game, attack_type, taken_actions, content)
 
 **Plans**: 2 plans in 2 waves
 
 **Wave 1**
-- [ ] 03-01-PLAN.md — punktacja (SCR-01), kosmetyczna nagroda 3D Accessory ze złotymi cząsteczkami (SCR-02) i ekran podsumowania z raportem JSON
+- [ ] 03-01-PLAN.md — wizualna nagroda 3D Accessory za zdany test (SCR-02), format zgłoszenia panelu i ekran podsumowania
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — bezpieczny moduł serwerowy eksportu HTTP do skrzynki backendu (SCR-03), obsługa doręczenia, fallback offline i raport testowy
+- [ ] 03-02-PLAN.md — bezpieczny moduł serwerowy wysyłki do skrzynki panelu (SCR-03), obsługa doręczenia, fallback offline i raport testowy
 
 ---
 *Roadmap created: 2026-10-03*
