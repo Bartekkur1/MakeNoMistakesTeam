@@ -1,14 +1,27 @@
-import { normalizeText, capCodePoints, normalizeLink, extractFirstLink, isValidCase } from './case.js';
+import { normalizeText, capCodePoints, normalizeLink, extractFirstLink, isValidCase, proposeAttackType, sourceFromCase, buildReportPayload } from './case.js';
 import { QUESTIONS, detectHints, evaluate } from './check.js';
 export { detectHints, evaluate } from './check.js';
 
+import { ATTACK_TYPES, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES, REPORT_FIELDS } from '../../../web-app/src/lib/contract/types.ts';
+
 const ORDER = Object.keys(QUESTIONS);
 const freezeAnswers = answers => Object.freeze(Object.fromEntries(Object.entries(answers).map(([id, values]) => [id, Object.freeze(values)])));
-const checkView = step => ['safety', 'result', 'confirmation'].includes(step) ? step : 'question';
-const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, paste: { text: '', link: '' } });
+const checkView = step => ['safety', 'result', 'confirmation', 'sendPreview', 'myReports'].includes(step) ? step : 'question';
+const initial = () => ({ view: 'closed', draft: null, candidateKind: null, check: null, pendingSelection: null, hidden: false, error: null, submitting: false, submissionKind: null, gen: 0, case_id: null, request_id: null, sendGeneration: 0, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null, sessionStatus: Object.freeze({ status: 'unknown', account: null, revision: null }), reportsReturnView: 'menu', paste: { text: '', link: '' } });
 
 export function createDraftStore() {
   let state = initial();
+  const currentSend = token => token === state.sendOperation && token?.generation === state.sendGeneration
+    && token.case_id === state.case_id && state.submitting && state.submissionKind === 'report';
+  const setResume = step => Object.freeze({ ...state.check, resumeStep: step });
+  const replaceSelection = patch => {
+    if (state.view !== 'sendPreview' || state.submitting || state.sentReport || !state.sendPreview) return false;
+    try {
+      const payload = buildReportPayload(state.check.case, { ...state.sendPreview, ...patch });
+      state = { ...state, sendPreview: Object.freeze({ ...state.sendPreview, ...payload }) };
+      return true;
+    } catch { return false; }
+  };
   const submitFailed = token => {
     if (!state.submitting || state.submissionKind !== 'case' || token !== state.gen) return false;
     state = { ...state, view: state.view === 'closed' ? 'closed' : 'preview', error: 'submit', submitting: false, submissionKind: null };
@@ -31,7 +44,7 @@ export function createDraftStore() {
           state = { ...state, view: 'preview', candidateKind: 'replacement', error: null,
             draft: { ...pendingSelection, link: extractFirstLink(text), origin: 'selection' }, pendingSelection: null };
         } else state = { ...state, view: checkView(state.check.resumeStep),
-          error: ['guardianRequest', 'guardianRequestContextInvalidated'].includes(state.error) ? state.error : null, pendingSelection };
+          error: null, pendingSelection };
       }
       else if (text) state = { ...state, view: 'preview', draft: { text, link: extractFirstLink(text), origin: 'selection', truncated: Boolean(truncated) } };
       else state = { ...state, view: normalizeText(state.paste.text) || normalizeText(state.paste.link) ? 'paste' : 'menu' };
@@ -51,8 +64,8 @@ export function createDraftStore() {
     showHowTo() { if (!state.submitting) state = { ...state, view: 'howto' }; },
     back() { if (!state.submitting) state = { ...state, view: 'menu', error: null }; },
     finishCheck() {
-      if (state.submitting || state.view !== 'confirmation') return;
-      state = { ...initial(), view: 'menu', hidden: state.hidden, gen: state.gen + 1 };
+      if (state.submitting || !state.sentReport || !['confirmation', 'result'].includes(state.view)) return;
+      state = { ...initial(), view: 'menu', hidden: state.hidden, gen: state.gen + 1, sendGeneration: state.sendGeneration + 1 };
     },
     submitPaste({ text, link }) {
       if (state.submitting) return;
@@ -68,7 +81,7 @@ export function createDraftStore() {
       state = { ...state, draft: state.draft ? { ...state.draft, ...edits } : null };
     },
     editCheckContent() {
-      if (!state.check || state.draft || state.submitting || !['safety', 'question', 'result', 'confirmation'].includes(state.view)) return;
+      if (!state.check || state.draft || state.submitting || !['safety', 'question', 'result'].includes(state.view)) return;
       const c = state.check.case;
       state = { ...state, view: 'preview', candidateKind: 'edit', error: null,
         draft: { text: c.content, link: c.link, origin: c.origin, truncated: c.truncated } };
@@ -98,26 +111,107 @@ export function createDraftStore() {
       const check = unchanged ? state.check : Object.freeze({ case: Object.freeze(approvedCase), step: 'safety', resumeStep: 'safety',
         answers: freezeAnswers({ sender: [], request: [], verify: [] }), hints: detectHints(approvedCase), result: null,
         keptAnswers: Object.freeze({}), discrepancy: null });
-      state = { ...state, view: state.view === 'closed' ? 'closed' : checkView(check.resumeStep), check,
+      const reportState = unchanged ? {} : { case_id: globalThis.crypto.randomUUID(), request_id: null,
+        sendGeneration: state.sendGeneration + 1, sendOperation: null, sendPreview: null, sendOutcome: null, sentReport: null };
+      state = { ...state, ...reportState, view: state.view === 'closed' ? 'closed' : checkView(check.resumeStep), check,
         draft: null, candidateKind: null, pendingSelection: null, error: null, submitting: false, submissionKind: null };
       return true;
     },
-    beginGuardianRequest() {
-      if (state.view !== 'result' || !state.check?.result || state.draft || state.submitting) return null;
-      state = { ...state, gen: state.gen + 1, submitting: true, submissionKind: 'guardian', error: null };
-      return state.gen;
-    },
-    guardianRequested(token) {
-      if (!state.submitting || state.submissionKind !== 'guardian' || token !== state.gen) return false;
-      state = { ...state, view: state.view === 'closed' ? 'closed' : 'confirmation',
-        check: Object.freeze({ ...state.check, step: 'confirmation', resumeStep: 'confirmation' }),
-        pendingSelection: null, error: null, submitting: false, submissionKind: null };
+    setSessionStatus(metadata) {
+      if (!['unknown', 'none', 'connected'].includes(metadata?.status)
+        || (metadata.status === 'connected' && (!metadata.account?.id || !metadata.account?.display_name || !Number.isInteger(metadata.revision)))) return false;
+      const sessionStatus = Object.freeze({ status: metadata.status,
+        account: metadata.status === 'connected' ? Object.freeze({ ...metadata.account }) : null, revision: metadata.revision ?? null });
+      let sendPreview = state.sendPreview;
+      // An active operation keeps its reviewed recipient snapshot even if another account logs in.
+      if (sendPreview && !state.submitting && !state.sentReport && sessionStatus.status === 'connected') {
+        sendPreview = Object.freeze({ ...sendPreview, recipient: sessionStatus.account, session_revision: sessionStatus.revision });
+      }
+      state = { ...state, sessionStatus, sendPreview,
+        sendOutcome: !state.submitting && sessionStatus.status === 'connected' && state.sendOutcome?.kind === 'no-account' ? null : state.sendOutcome };
       return true;
     },
-    guardianRequestFailed(token, contextInvalidated = false) {
-      if (!state.submitting || state.submissionKind !== 'guardian' || token !== state.gen) return false;
-      state = { ...state, view: state.view === 'closed' ? 'closed' : 'result',
-        error: contextInvalidated ? 'guardianRequestContextInvalidated' : 'guardianRequest', submitting: false, submissionKind: null };
+    openSendPreview(session = state.sessionStatus) {
+      if (!state.check?.result || state.draft || state.submitting || !isValidCase(state.check.case)) return false;
+      if (state.sentReport) {
+        state = { ...state, view: 'confirmation', check: setResume('confirmation') };
+        return true;
+      }
+      if (session?.status !== 'connected' || !session.account?.id || !Number.isInteger(session.revision)) return false;
+      let sendPreview = state.sendPreview;
+      if (!sendPreview) {
+        const proposal = proposeAttackType(state.check.answers, state.check.result);
+        try {
+          sendPreview = Object.freeze({ ...buildReportPayload(state.check.case,
+            { attack_type: proposal, taken_actions: [], source: sourceFromCase(state.check.case) }),
+            proposal, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
+        } catch { return false; }
+      } else sendPreview = Object.freeze({ ...sendPreview, recipient: Object.freeze({ ...session.account }), session_revision: session.revision });
+      state = { ...state, view: 'sendPreview', sendPreview, check: setResume('sendPreview'), pendingSelection: null };
+      return true;
+    },
+    setSendAttackType(value) {
+      if (!ATTACK_TYPES.includes(value) || !state.sendPreview) return false;
+      return replaceSelection({ attack_type: value,
+        taken_actions: state.sendPreview.taken_actions.filter(action => ACTIONS_BY_ATTACK_TYPE[value].includes(action)) });
+    },
+    toggleSendAction(value) {
+      if (!state.sendPreview || !ACTIONS_BY_ATTACK_TYPE[state.sendPreview.attack_type].includes(value)) return false;
+      const selected = state.sendPreview.taken_actions;
+      return replaceSelection({ taken_actions: selected.includes(value) ? selected.filter(action => action !== value) : [...selected, value] });
+    },
+    setReportSource(value) { return REPORT_SOURCES.includes(value) && replaceSelection({ source: value }); },
+    backFromSendPreview() {
+      if (state.submitting || !state.check || !['sendPreview', 'myReports'].includes(state.view)) return false;
+      const view = state.view === 'myReports' ? state.reportsReturnView : state.sentReport ? 'confirmation' : 'result';
+      state = { ...state, view, check: setResume(view) };
+      return true;
+    },
+    showMyReports() {
+      if (state.submitting) return false;
+      state = { ...state, reportsReturnView: state.view === 'sendPreview' ? 'sendPreview' : 'menu', view: 'myReports',
+        check: state.check ? setResume('myReports') : null };
+      return true;
+    },
+    beginReportSend() {
+      if (state.view !== 'sendPreview' || !state.check?.result || state.draft || state.submitting || state.sentReport
+        || !state.sendPreview || state.sessionStatus.status !== 'connected'
+        || state.sessionStatus.account.id !== state.sendPreview.recipient.id
+        || state.sessionStatus.revision !== state.sendPreview.session_revision) return null;
+      let payload;
+      try { payload = buildReportPayload(state.check.case, state.sendPreview); } catch { return null; }
+      const token = Object.freeze({ generation: state.sendGeneration + 1, case_id: state.case_id,
+        request_id: globalThis.crypto.randomUUID(), expected_account_id: state.sendPreview.recipient.id,
+        session_revision: state.sendPreview.session_revision, recipient: state.sendPreview.recipient, payload });
+      state = { ...state, sendGeneration: token.generation, request_id: token.request_id, sendOperation: token,
+        submitting: true, submissionKind: 'report', sendOutcome: null };
+      return token;
+    },
+    reportSent(token, response) {
+      if (!currentSend(token)) return false;
+      const report = response?.report;
+      const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+      const date = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) && Number.isFinite(Date.parse(value));
+      if (response?.ok !== true || response.recipient?.id !== token.expected_account_id || !report
+        || Reflect.ownKeys(report).length !== REPORT_FIELDS.length || !REPORT_FIELDS.every(key => Object.hasOwn(report, key))
+        || !uuid(report.id) || !uuid(report.child_id) || report.parent_id !== token.expected_account_id
+        || report.state !== 'pending_parent' || !date(report.created_at) || !date(report.updated_at)
+        || Date.parse(report.updated_at) < Date.parse(report.created_at)
+        || !['content', 'source', 'attack_type'].every(key => report[key] === token.payload[key])
+        || !Array.isArray(report.taken_actions) || report.taken_actions.length !== token.payload.taken_actions.length
+        || !report.taken_actions.every((action, i) => action === token.payload.taken_actions[i])) return false;
+      state = { ...state, view: state.view === 'closed' ? 'closed' : 'confirmation',
+        check: setResume('confirmation'), sentReport: Object.freeze({ report: Object.freeze({ ...report,
+          taken_actions: Object.freeze([...report.taken_actions]) }), recipient: token.recipient }),
+        sendOutcome: null, pendingSelection: null, submitting: false, submissionKind: null };
+      return true;
+    },
+    reportFailed(token, outcome) {
+      if (!currentSend(token)) return false;
+      const kind = ['offline', 'http', 'unknown', 'no-account', 'account-changed', 'context', 'storage'].includes(outcome?.kind) ? outcome.kind : 'unknown';
+      state = { ...state, view: state.view === 'closed' ? 'closed' : 'sendPreview', check: setResume('sendPreview'),
+        sendOutcome: Object.freeze({ kind }), submitting: false, submissionKind: null,
+        sessionStatus: kind === 'no-account' ? Object.freeze({ status: 'none', account: null, revision: null }) : state.sessionStatus };
       return true;
     },
     startQuestions() {
@@ -164,6 +258,6 @@ export function createDraftStore() {
     submitFailed,
     hide() { state = { ...state, hidden: true, view: 'closed', pendingSelection: null }; },
     show() { state = { ...state, hidden: false }; },
-    resetForNewDocument() { state = { ...initial(), gen: state.gen + 1 }; },
+    resetForNewDocument() { state = { ...initial(), gen: state.gen + 1, sendGeneration: state.sendGeneration + 1 }; },
   };
 }

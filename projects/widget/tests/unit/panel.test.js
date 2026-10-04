@@ -3,10 +3,11 @@ import * as panelModule from '../../src/ui/panel.js';
 import { createDraftStore } from '../../src/core/draft.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
 import { buildCase } from '../../src/core/case.js';
+import { ATTACK_TYPES, ACTIONS_BY_ATTACK_TYPE, REPORT_SOURCES } from '../../../web-app/src/lib/contract/types.ts';
 import { detectHints, evaluate } from '../../src/core/check.js';
 const hosts = [];
 afterEach(() => { for (const host of hosts.splice(0)) host.remove(); });
-const setup = () => { const host = document.createElement('div'); document.body.append(host); hosts.push(host); const root=host.attachShadow({mode:'open'}); const handlers=Object.fromEntries(['onClose','onCheck','onHowTo','onBack','onPasteEdit','onPasteNext','onSafetyNext','onAnswer','onQuestionNext','onQuestionBack','onFixAnswers','onEditCheckContent','onCancelCheckEdit','onCheckNewSelection','onInsertSelection','onEdit','onApprove','onRequestGuardianVerification'].map(k=>[k,vi.fn()])); return {root,handlers,panel:panelModule.createPanel({root,strings:STRINGS,handlers})}; };
+const setup = () => { const host = document.createElement('div'); document.body.append(host); hosts.push(host); const root=host.attachShadow({mode:'open'}); const handlers=Object.fromEntries(['onClose','onCheck','onHowTo','onBack','onPasteEdit','onPasteNext','onSafetyNext','onAnswer','onQuestionNext','onQuestionBack','onFixAnswers','onEditCheckContent','onCancelCheckEdit','onCheckNewSelection','onInsertSelection','onEdit','onApprove','onShowSendPreview','onSendReport','onReportAttackChange','onReportActionChange','onReportSourceChange','onSendBack','onOpenLogin','onMyReports','onFinishCheck'].map(k=>[k,vi.fn()])); return {root,handlers,panel:panelModule.createPanel({root,strings:STRINGS,handlers})}; };
 const checkStore = () => {
   const store = createDraftStore(); store.submitPaste({ text: 'Podaj kod do konta', link: '' });
   const c = buildCase(store.get().draft); store.approved(store.beginSubmit(), c);
@@ -258,48 +259,70 @@ test('unapproved preview retains its original insert-selection control without a
  expect(handlers.onCheckNewSelection).not.toHaveBeenCalled();
 });
 
-test('guardian result action invokes its callback and freezes all check controls while pending', () => {
+const session = { status: 'connected', revision: 0, account: { id: '00000000-0000-4000-8000-0000000a0001', display_name: 'Mama Oli (demo)' } };
+const receipt = token => ({ ok: true, recipient: token.recipient, report: { ...token.payload,
+ id: '00000000-0000-4000-8000-0000000d0007', child_id: '00000000-0000-4000-8000-0000000c0001',
+ parent_id: token.expected_account_id, state: 'pending_parent', created_at: '2026-10-03T12:30:00.000Z', updated_at: '2026-10-03T12:30:00.000Z' } });
+
+test('reviewed result action invokes its callback and freezes all preview controls while pending', () => {
  const { panel, root, handlers } = setup(); const store = checkStore(); store.startQuestions();
  for (const id of ['sender', 'request', 'verify']) { store.answer(id, 'unknown'); store.nextQuestion(); }
- store.onAvatarClick({ text: 'Pending new selection' });
+ store.setSessionStatus(session); store.onAvatarClick({ text: 'Pending new selection' });
  const find = text => [...root.querySelectorAll('button')].find(b => b.textContent === text);
  panel.render(store.get(), {});
- expect(root.activeElement).toBe(find(STRINGS.fixAnswers));
+ expect(root.activeElement).toBe(find(STRINGS.showSendPreview));
  expect(root.querySelectorAll('.result-section')).toHaveLength(3);
  expect(root.querySelectorAll('.result-section button')).toHaveLength(0);
- expect(find(STRINGS.requestGuardianVerification).textContent).toBe('Poproś opiekuna o sprawdzenie');
- find(STRINGS.requestGuardianVerification).click(); expect(handlers.onRequestGuardianVerification).toHaveBeenCalledOnce();
- expect(handlers.onApprove).not.toHaveBeenCalled();
- store.beginGuardianRequest(); panel.render(store.get(), {});
- for (const label of [STRINGS.fixAnswers, STRINGS.editCheckContent, STRINGS.checkNewSelection, STRINGS.requestGuardianVerification]) {
-  expect(find(label).disabled).toBe(true); find(label).click();
+ expect(find(STRINGS.showSendPreview).textContent).toBe('Pokaż opiekunowi');
+ find(STRINGS.showSendPreview).click(); expect(handlers.onShowSendPreview).toHaveBeenCalledOnce();
+ expect(handlers.onSendReport).not.toHaveBeenCalled(); expect(handlers.onApprove).not.toHaveBeenCalled();
+ store.openSendPreview(); panel.render(store.get(), {});
+ expect(root.querySelector('.sent-content').textContent).toBe(store.get().sendPreview.content);
+ expect(root.activeElement).toBe(root.querySelector('.sent-content'));
+ expect([...root.querySelectorAll('input[type=radio]')].map(input => input.value)).toEqual(ATTACK_TYPES);
+ expect([...root.querySelectorAll('input[type=checkbox]')].map(input => input.value)).toEqual(ACTIONS_BY_ATTACK_TYPE[store.get().sendPreview.attack_type]);
+ expect([...root.querySelectorAll('select option')].map(option => option.value)).toEqual(REPORT_SOURCES);
+ expect(root.querySelectorAll('a')).toHaveLength(0);
+ store.beginReportSend(); panel.render(store.get(), {});
+ for (const control of root.querySelectorAll('.send-review button, .send-review input, .send-review select')) {
+  expect(control.disabled).toBe(true); control.click();
  }
- expect(handlers.onRequestGuardianVerification).toHaveBeenCalledOnce();
+ expect(root.querySelector('.send-review').getAttribute('aria-busy')).toBe('true');
+ expect(find(STRINGS.sending).disabled).toBe(true);
+ expect(handlers.onSendReport).not.toHaveBeenCalled();
  expect(handlers.onFixAnswers).not.toHaveBeenCalled(); expect(handlers.onEditCheckContent).not.toHaveBeenCalled();
  expect(handlers.onCheckNewSelection).not.toHaveBeenCalled();
  expect(root.querySelector('[aria-label="' + STRINGS.closeLabel + '"]').disabled).toBe(false);
+ expect(root.activeElement.getAttribute('aria-label')).toBe(STRINGS.closeLabel);
 });
 
-test('guardian error is an alert on the unchanged result with focused correction and enabled retry', () => {
+test('report error is an alert on the unchanged review with focused enabled retry', () => {
  const { panel, root } = setup(); const store = checkStore(); store.startQuestions();
  for (const id of ['sender', 'request', 'verify']) { store.answer(id, 'unknown'); store.nextQuestion(); }
  const result = store.get().check.result;
- store.guardianRequestFailed(store.beginGuardianRequest()); panel.render(store.get(), {});
- expect(root.querySelector('[role="alert"]').textContent).toBe(STRINGS.guardianRequestError);
- expect(root.querySelectorAll('.result-section')).toHaveLength(3); expect(store.get().check.result).toBe(result);
- expect(root.activeElement.textContent).toBe(STRINGS.fixAnswers);
- expect([...root.querySelectorAll('button')].find(b => b.textContent === STRINGS.requestGuardianVerification).disabled).toBe(false);
- expect(root.textContent).not.toContain(STRINGS.confirmationHeading);
+ store.setSessionStatus(session); store.openSendPreview(); const preview = store.get().sendPreview;
+ store.reportFailed(store.beginReportSend(), { kind: 'http' }); panel.render(store.get(), {});
+ expect(root.querySelector('[role="alert"]').textContent).toBe(STRINGS.sendOutcomes.http.title + STRINGS.sendOutcomes.http.body);
+ expect(store.get().sendPreview).toBe(preview); expect(store.get().check.result).toBe(result);
+ expect(root.activeElement.textContent).toBe(STRINGS.sendRetry);
+ expect([...root.querySelectorAll('button')].find(b => b.textContent === STRINGS.sendRetry).disabled).toBe(false);
+ expect(root.textContent).not.toContain(STRINGS.sentRecipientPrefix);
 });
 
-test('confirmation labels the local demo and focuses Close with the existing privacy copy intact', () => {
+test('confirmation requires a saved report and focuses Close with corrected privacy copy', () => {
  const { panel, root, handlers } = setup(); panel.render({ view: 'confirmation' }, {});
- expect(root.querySelector('h2').textContent).toBe(STRINGS.confirmationHeading);
- expect(STRINGS.confirmationHeading).toBe('Przekazano opiekunowi — demo');
- expect(root.textContent).toContain(STRINGS.confirmationBody);
- expect(STRINGS.confirmationBody).toBe('To pokaz działania. Sprawa i wynik są zapisane tylko w pamięci rozszerzenia. Prawdziwa wysyłka do opiekuna pojawi się w kolejnej wersji.');
+ expect(root.querySelector('h2')).toBeNull();
+ const store = checkStore(); store.startQuestions();
+ for (const id of ['sender', 'request', 'verify']) { store.answer(id, 'unknown'); store.nextQuestion(); }
+ store.setSessionStatus(session); store.openSendPreview(); const token = store.beginReportSend();
+ store.reportSent(token, receipt(token)); panel.render(store.get(), {});
+ expect(root.querySelector('h2').textContent).toBe(STRINGS.sentRecipientPrefix + ' ' + session.account.display_name);
+ const time = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit' }).format(new Date(receipt(token).report.created_at));
+ expect(root.textContent).toContain(STRINGS.sentTimePrefix + ' ' + time);
+ expect(root.textContent).toContain(STRINGS.sentStatus);
  expect(root.activeElement.textContent).toBe(STRINGS.confirmationClose); root.activeElement.click();
- expect(handlers.onClose).toHaveBeenCalledOnce(); expect(handlers.onRequestGuardianVerification).not.toHaveBeenCalled();
- expect(STRINGS.guardianNotice).toBe('Gdy zatwierdzisz, tę wiadomość i wynik sprawdzania zobaczy Twój opiekun.');
- expect(STRINGS.howToPrivacy).toBe('Widzę tylko to, co mi pokażesz. Zatwierdzoną sprawę zobaczy Twój opiekun.');
+ expect(handlers.onClose).toHaveBeenCalledOnce(); expect(handlers.onSendReport).not.toHaveBeenCalled();
+ expect([...root.querySelectorAll('button')].some(b => b.textContent === STRINGS.editCheckContent)).toBe(false);
+ expect(STRINGS.guardianNotice).toBe('Najpierw razem sprawdzimy wiadomość. Nic nie wysyłam, dopóki sam nie wybierzesz „Pokaż opiekunowi” i „Wyślij”.');
+ expect(STRINGS.howToPrivacy).toBe('Widzę tylko to, co mi pokażesz. Opiekun dostaje tylko to, co sam wyślesz — wynik sprawdzania zostaje u Ciebie.');
 });

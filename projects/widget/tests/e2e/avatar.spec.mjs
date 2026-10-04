@@ -77,6 +77,7 @@ async function openView(page, view) {
         await formButton(page, STRINGS.next).click();
         await page.getByLabel('Przez znaną mi aplikację, stronę lub kontakt', { exact: true }).check();
         await formButton(page, STRINGS.next).click();
+        await expect(formButton(page, STRINGS.openLogin)).toBeVisible();
       }
     }
   }
@@ -96,7 +97,7 @@ async function expectBounded(page) {
 }
 for (const view of ['menu', 'howto', 'paste', 'preview', 'safety', 'question', 'result']) {
   test(`open ${view} follows avatar throughout drag without rebuilding or submitting`, async ({page, serviceWorker, netlog}) => {
-    await page.setViewportSize({ width: 1400, height: 1000 });
+    await page.setViewportSize({ width: 1400, height: view === 'result' ? 1400 : 1000 });
     await openView(page, view);
     if (view === 'safety') {
       await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
@@ -118,7 +119,7 @@ for (const view of ['menu', 'howto', 'paste', 'preview', 'safety', 'question', '
     }
     if (checking) {
       await page.locator('#msg2').selectText();
-      await (view === 'question' ? page.getByLabel('Podania kodu do konta', { exact: true }) : formButton(page, STRINGS.fixAnswers)).focus();
+      await (view === 'question' ? page.getByLabel('Podania kodu do konta', { exact: true }) : formButton(page, STRINGS.openLogin)).focus();
     }
     const snapshot = await page.locator('bezpieczna-aura-widget').evaluate(host => {
       const root = host.shadowRoot;

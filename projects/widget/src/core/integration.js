@@ -1,16 +1,8 @@
-import { MSG_CASE_APPROVED, MSG_GUARDIAN_REQUEST } from './messages.js';
+import { MSG_CASE_APPROVED, MSG_AUTH_LOGIN, MSG_AUTH_LOGOUT, MSG_SESSION_STATUS, MSG_OPEN_LOGIN, MSG_REPORT_SEND, MSG_REPORT_OUTCOME, MSG_REPORT_CLEAR } from './messages.js';
 import { API_ERROR_CODES, REPORT_FIELDS } from '../../../web-app/src/lib/contract/types.ts';
 
 export async function submitCase(c) {
   const response = await chrome.runtime.sendMessage({ type: MSG_CASE_APPROVED, case: c });
-  if (response?.ok !== true) throw new Error('not-accepted');
-  return response;
-}
-
-export async function requestGuardianVerification(c, result) {
-  const snapshot = { summaryKey: result.summaryKey, signals: [...result.signals], unknowns: [...result.unknowns],
-    step: { ...result.step }, mismatches: result.mismatches.map(mismatch => ({ ...mismatch })) };
-  const response = await chrome.runtime.sendMessage({ type: MSG_GUARDIAN_REQUEST, case: c, result: snapshot });
   if (response?.ok !== true) throw new Error('not-accepted');
   return response;
 }
@@ -39,19 +31,19 @@ function failure(response) {
 }
 
 export async function loginParent(email, code) {
-  const response = await rpc({ type: 'aura/auth-login', email, code });
+  const response = await rpc({ type: MSG_AUTH_LOGIN, email, code });
   const account = publicAccount(response?.account);
   return response?.ok === true && account && Number.isInteger(response.revision)
     ? { ok: true, account, revision: response.revision } : failure(response);
 }
 
 export async function logoutParent() {
-  const response = await rpc({ type: 'aura/auth-logout' });
+  const response = await rpc({ type: MSG_AUTH_LOGOUT });
   return response?.ok === true ? { ok: true } : failure(response);
 }
 
 export async function readSessionStatus() {
-  const response = await rpc({ type: 'aura/session-status' });
+  const response = await rpc({ type: MSG_SESSION_STATUS });
   const account = publicAccount(response?.account);
   if (!Number.isInteger(response?.revision) || !['connected', 'none'].includes(response?.status)
     || (response.status === 'connected' && !account)) return failure(response);
@@ -59,7 +51,7 @@ export async function readSessionStatus() {
 }
 
 export async function openLogin() {
-  const response = await rpc({ type: 'aura/open-login' });
+  const response = await rpc({ type: MSG_OPEN_LOGIN });
   return response?.ok === true ? { ok: true } : failure(response);
 }
 
@@ -71,17 +63,17 @@ function reportOutcome(response) {
 }
 
 export async function submitReport(operation) {
-  return reportOutcome(await rpc({ type: 'aura/report-send', case_id: operation.case_id,
+  return reportOutcome(await rpc({ type: MSG_REPORT_SEND, case_id: operation.case_id,
     request_id: operation.request_id, expected_account_id: operation.expected_account_id,
     session_revision: operation.session_revision, payload: operation.payload }));
 }
 
 export async function readReportOutcome(case_id) {
-  const response = await rpc({ type: 'aura/report-outcome', case_id });
+  const response = await rpc({ type: MSG_REPORT_OUTCOME, case_id });
   return response?.ok === true && response.report === null ? { ok: true, report: null } : reportOutcome(response);
 }
 
 export async function clearReportOutcome(case_id) {
-  const response = await rpc({ type: 'aura/report-clear', case_id });
+  const response = await rpc({ type: MSG_REPORT_CLEAR, case_id });
   return response?.ok === true ? { ok: true } : failure(response);
 }
