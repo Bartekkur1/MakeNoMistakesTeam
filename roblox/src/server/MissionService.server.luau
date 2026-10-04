@@ -1,10 +1,13 @@
 --!strict
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MissionContent = require(ReplicatedStorage:WaitForChild("MissionContent") :: ModuleScript)
 local NPCNavigation = require(script.Parent:WaitForChild("NPCNavigation") :: ModuleScript)
 local ScamerinoNPCManager = require(script.Parent:WaitForChild("ScamerinoNPCManager") :: ModuleScript)
 local RewardManager = require(script.Parent:WaitForChild("RewardManager") :: ModuleScript)
+local ReportExportConfig = require(script.Parent:WaitForChild("ReportExportConfig") :: ModuleScript)
+local ReportExportService = require(script.Parent:WaitForChild("ReportExportService") :: ModuleScript)
 local arbiter = NPCNavigation.getDefaultArbiter()
 
 local folder = ReplicatedStorage:FindFirstChild("MissionRemotes")
@@ -42,6 +45,10 @@ type State = {
 	quizAttempts: number,
 	resultStatus: MissionContent.ResultStatus,
 	rewardJustEarned: boolean,
+	deliveryStatus: MissionContent.DeliveryStatus?,
+	deliveryRecipientName: string?,
+	deliveryRecipientIsDemo: boolean?,
+	deliveryAttemptId: string?,
 }
 local states: { [Player]: State } = {}
 local function stateFor(player: Player): State
@@ -61,6 +68,10 @@ local function stateFor(player: Player): State
 		quizAttempts = 0,
 		resultStatus = "none",
 		rewardJustEarned = false,
+		deliveryStatus = "idle",
+		deliveryRecipientName = nil,
+		deliveryRecipientIsDemo = nil,
+		deliveryAttemptId = nil,
 	}
 	states[player] = state
 	return state
@@ -87,6 +98,10 @@ local function send(player: Player, state: State)
 		resultStatus = state.resultStatus,
 		rewardEarned = RewardManager.hasEarned(player),
 		rewardJustEarned = state.rewardJustEarned,
+		deliveryStatus = state.deliveryStatus,
+		deliveryRecipientName = state.deliveryRecipientName,
+		deliveryRecipientIsDemo = state.deliveryRecipientIsDemo,
+		deliveryAttemptId = state.deliveryAttemptId,
 		title = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
 		interlocutorName = if state.activeConversation == "scamerino" then "Scamerino" else "MatiBuilds",
 		ruleCard = if state.stage == "rule_card" then MissionContent.ruleCard else nil,
@@ -131,6 +146,53 @@ local function getMatiHead(): BasePart?
 		return head
 	end
 	return nil
+end
+
+local function dispatchReportExport(player: Player, state: State, outcome: string)
+	local config = ReportExportConfig.load()
+	if not config then
+		state.deliveryStatus = "failed"
+		return
+	end
+
+	local attemptId = HttpService:GenerateGUID(false):lower()
+	state.deliveryStatus = "sending"
+	state.deliveryAttemptId = attemptId
+	state.deliveryRecipientName = nil
+	state.deliveryRecipientIsDemo = nil
+
+	local hintsUsed = if state.helpReceived then 1 else 0
+	local contentText = if outcome == "safe_refusal"
+		then "Bezpieczna odmowa podania hasła w grze edukacyjnej."
+		else "Fikcyjne podanie hasła w grze edukacyjnej. Hasło wymaga natychmiastowej zmiany."
+
+	local payload: ReportExportService.ReportExportPayload = {
+		attempt_id = attemptId,
+		roblox_username = player.Name,
+		roblox_user_id = player.UserId,
+		attack_type = "data_request",
+		source = "game",
+		taken_actions = {},
+		content = contentText,
+		hints_used = hintsUsed,
+		outcome = outcome,
+	}
+
+	local capturedRevision = state.revision
+
+	task.spawn(function()
+		ReportExportService.exportAttemptAsync(payload, config, function(status, ack)
+			if not current(player, state, capturedRevision) or state.deliveryAttemptId ~= attemptId then
+				return
+			end
+			state.deliveryStatus = status
+			if ack then
+				state.deliveryRecipientName = ack.parent_name
+				state.deliveryRecipientIsDemo = not ack.matched
+			end
+			send(player, state)
+		end)
+	end)
 end
 
 query.OnInvoke = function(player: Player)
@@ -234,6 +296,10 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 		state.quizAttempts = 0
 		state.resultStatus = "none"
 		state.rewardJustEarned = false
+		state.deliveryStatus = "idle"
+		state.deliveryRecipientName = nil
+		state.deliveryRecipientIsDemo = nil
+		state.deliveryAttemptId = nil
 		arbiter.cancelPlayer(player)
 		ScamerinoNPCManager.resetForPlayer(player, state.revision)
 		setStage(player, state, "start")
@@ -381,6 +447,7 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 			state.rewardJustEarned = RewardManager.grantShield(player)
 			setStage(player, state, "ending_good")
 			arbiter.releaseOwner(player)
+			dispatchReportExport(player, state, "safe_refusal")
 			send(player, state)
 		end)
 	elseif action == "check_offer" then
@@ -469,14 +536,27 @@ request.OnServerEvent:Connect(function(player: Player, action: any, revision: an
 					"Stop! Hasło daje pełny dostęp do konta. To było ćwiczenie — spróbuj jeszcze raz!"
 				)
 			end
+			state.resultStatus = "failed"
+			state.rewardJustEarned = false
 			setStage(player, state, "ending_bad")
 			arbiter.releaseOwner(player)
+			dispatchReportExport(player, state, "compromised_password")
 			send(player, state)
 		end)
 	end
 end)
 
 local function hookPlayer(player: Player)
+	player.CharacterAdded:Connect(function(character: Model)
+		RewardManager.restoreShield(player, character)
+	end)
+	-- Avatar appearance loading can replace accessories after CharacterAdded.
+	player.CharacterAppearanceLoaded:Connect(function(character: Model)
+		RewardManager.restoreShield(player, character)
+	end)
+	if player.Character then
+		task.spawn(RewardManager.restoreShield, player, player.Character)
+	end
 	player.CharacterRemoving:Connect(function()
 		cancel(player)
 	end)
@@ -488,5 +568,6 @@ end
 Players.PlayerRemoving:Connect(function(player)
 	arbiter.cancelPlayer(player)
 	ScamerinoNPCManager.cancelPlayer(player)
+	RewardManager.forgetPlayer(player)
 	states[player] = nil
 end)

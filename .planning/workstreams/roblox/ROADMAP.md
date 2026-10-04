@@ -67,14 +67,10 @@ Najpierw rozpoznanie ograniczeń publikacji i szkielet levelu, potem logika wybo
   2. Zdany test przyznaje wizualną kosmetyczną nagrodę 3D: Złotą Tarczę Scamerino (Accessory 3D) ze złotymi cząsteczkami
   3. Zgłoszenie trafia do skrzynki panelu opiekuna w formacie 1:1 zgodnym z panelem rodzica (source: game, attack_type, taken_actions, content)
 
-**Plans**: 0/3 plans executed in 2 waves
-- [ ] 03-03-PLAN.md
-
-**Wave 1**
-- [ ] 03-01-PLAN.md — wizualna nagroda 3D Accessory za zdany test (SCR-02), format zgłoszenia panelu i ekran podsumowania
-
-**Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — bezpieczny moduł serwerowy wysyłki do skrzynki panelu (SCR-03), obsługa doręczenia, fallback offline i raport testowy
+**Plans**: 3/3 plans executed in 2 waves
+- [x] 03-01-PLAN.md — uwierzytelniony endpoint ingest POST /api/reports/ingest i schemat idempotencyjności (SCR-03)
+- [x] 03-02-PLAN.md — wizualna nagroda 3D Accessory za zdany test (SCR-02), format zgłoszenia panelu i ekran podsumowania
+- [x] 03-03-PLAN.md — bezpieczny moduł serwerowy wysyłki do skrzynki panelu (SCR-03), obsługa doręczenia, fallback offline i raport testowy
 
 ---
 *Roadmap created: 2026-10-03*

@@ -343,6 +343,22 @@ render = function(snapshot)
 			then "Zdobywasz tarczę Scamerino!"
 			elseif snapshot.rewardEarned then "Tarcza Scamerino jest już Twoja."
 			else "Bezpieczna odmowa pozwoli zdobyć tarczę Scamerino."
+
+		if snapshot.deliveryStatus == "sending" then
+			deliveryText.Text = "Wysyłanie zgłoszenia do panelu opiekuna..."
+			deliveryText.TextColor3 = Color3.fromRGB(200, 200, 200)
+		elseif snapshot.deliveryStatus == "sent" then
+			local recipient = snapshot.deliveryRecipientName or "Opiekun"
+			local demoSuffix = if snapshot.deliveryRecipientIsDemo then " (profil demo)" else ""
+			deliveryText.Text = string.format("Odebrano w panelu opiekuna: %s%s", recipient, demoSuffix)
+			deliveryText.TextColor3 = Color3.fromRGB(80, 220, 100)
+		elseif snapshot.deliveryStatus == "failed" then
+			deliveryText.Text = "Nie udało się przekazać zgłoszenia do panelu."
+			deliveryText.TextColor3 = Color3.fromRGB(255, 140, 100)
+		else
+			deliveryText.Text = ""
+		end
+
 		resultReplay.Active = not pendingAction
 	end
 	panel:SetAttribute("Revision", snapshot.revision)

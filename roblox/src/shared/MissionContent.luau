@@ -21,6 +21,7 @@ export type RuleCardInfo = {
 }
 
 export type ResultStatus = "none" | "passed" | "failed"
+export type DeliveryStatus = "idle" | "sending" | "sent" | "failed"
 
 export type MissionSnapshot = {
 	revision: number,
@@ -38,6 +39,10 @@ export type MissionSnapshot = {
 	resultStatus: ResultStatus,
 	rewardEarned: boolean,
 	rewardJustEarned: boolean,
+	deliveryStatus: DeliveryStatus?,
+	deliveryRecipientName: string?,
+	deliveryRecipientIsDemo: boolean?,
+	deliveryAttemptId: string?,
 }
 
 local MissionContent = {}
