@@ -4,9 +4,19 @@ Scamerinio prowadzi dziecko przez sprawdzanie wybranej wiadomości. Zaznacz teks
 
 Rekin pozostaje widoczny, a otwarte okno przesuwa się razem z nim. Przeciąganie zachowuje tekst i fokus. Podpowiedzi oznaczone „Podpowiedź z wiadomości” nie zaznaczają odpowiedzi; dziecko wybiera je samodzielnie i klika „Dalej”. „Nie wiem” jest pełnoprawną odpowiedzią. „Wróć” i „Popraw odpowiedzi” zachowują wybory, a zmiany przeliczają wynik.
 
-**Zatwierdzenie w fazie 2 jest lokalne: nie wysłało niczego do rzeczywistego opiekuna.** Sprawa trafia do pamięci service workera, a reguły i odpowiedzi działają w pamięci karty. Nie ma API opiekuna, AI ani oceny reputacji linku. Teksty zapowiadające widoczność sprawy dla opiekuna opisują docelowy model kolejnej fazy, nie potwierdzenie doręczenia.
+**Zatwierdzenie w fazie 2 jest lokalne: nie wysłało niczego do rzeczywistego opiekuna.** Sprawa trafia do pamięci service workera, a reguły i odpowiedzi działają w pamięci karty. Po ukończeniu pytań osobny przycisk na wyniku „Poproś opiekuna o sprawdzenie” uruchamia lokalny mock na potrzeby prezentacji. Dopiero udany zapis zatwierdzonej sprawy i aktualnego wyniku pokazuje „Przekazano opiekunowi — demo”. Samo zatwierdzenie, wyświetlenie wyniku lub poprawienie odpowiedzi nie uruchamia prośby. Nie ma rzeczywistego doręczenia, API opiekuna, AI ani oceny reputacji linku.
 
-Przeniesiona decyzja dla fazy 3: po zatwierdzeniu sprawa ma być od razu przekazywana opiekunowi, a wynik dopisywany później. Starszy `.planning/shared/CONTRACT.md` i HND-02 nie odzwierciedlają jeszcze tego modelu i wymagają uzgodnienia przez właściciela kontraktu. Faza 2 nie dodaje przycisku wysyłki ani nie zmienia wspólnych materiałów.
+Przeniesiona decyzja dla fazy 3: po zatwierdzeniu sprawa ma być od razu przekazywana opiekunowi, a wynik dopisywany później. Starszy `.planning/shared/CONTRACT.md` i HND-02 nie odzwierciedlają jeszcze tego modelu i wymagają uzgodnienia przez właściciela kontraktu. Rzeczywiste API i odpowiedź opiekuna pozostają w fazie 3. Faza 2 udostępnia wyłącznie lokalny mock demo po jawnym kliknięciu na wyniku; nie zmienia wspólnych materiałów. Decyzja UAT P7 zachowuje teksty `guardianNotice` i `howToPrivacy` („…zobaczy Twój opiekun”) jako zapowiedź docelowej widoczności. Potwierdzenie demo wyraźnie wyjaśnia, że nie oznacza rzeczywistego doręczenia.
+
+## Lokalne przekazanie opiekunowi — demo
+
+1. Zatwierdź fikcyjną wiadomość, przejdź wskazówkę bezpieczeństwa i trzy pytania. Na wyniku pozostają trzy sekcje, jeden zalecany krok i początkowy fokus na „Popraw odpowiedzi”.
+2. Jeśli poprawisz odpowiedzi, ukończ pytania ponownie. Prośba przekazuje przeliczony wynik, nie wcześniejszą wersję. Kliknij „Poproś opiekuna o sprawdzenie” poza sekcjami wyniku. Z klawiatury przejdź do tego przycisku przez Tab i użyj Enter lub Spacji.
+3. Po lokalnym zapisie zobaczysz „Przekazano opiekunowi — demo” oraz wyjaśnienie, że sprawa i wynik są tylko w pamięci rozszerzenia, a prawdziwa wysyłka będzie w fazie 3. Fokus trafia na „Zamknij”. Podczas oczekiwania nie można ponownie poprosić, zmieniać odpowiedzi ani edytować treści; zamknięcie okna i schowanie rekina nadal działają. Błąd zapisu zachowuje wynik i pozwala ponowić prośbę.
+4. Wybierz „Zamknij”, usuń zaznaczenie na stronie i kliknij rekina. Wraca potwierdzenie demo bez ponownego przekazania. Zamknięcie podczas oczekiwania nie otwiera okna po odpowiedzi; późniejsze wznowienie pokazuje potwierdzenie po sukcesie lub zachowany wynik po błędzie.
+5. Przeładuj kartę, usuń zaznaczenie i kliknij rekina: menu jest puste, bez poprzedniej sesji. Przeładowanie karty usuwa stan UI, lecz nie musi usuwać rekordów mocka service workera. Restart service workera usuwa jego pamięć.
+
+Mock przyjmuje wiadomość `aura/guardian-request` ze sprawą i kluczami aktualnego wyniku, po sprawdzeniu nadawcy i danych. Rekordy można zobaczyć w konsoli service workera jako `self.__aura.guardianRequests` (maksymalnie 100). Zatwierdzenie zachowuje osobną kolekcję `self.__aura.cases`; prośba nie dodaje do niej drugiej sprawy. Te kolekcje są ulotne, bez sieci i trwałego zapisu. Pokazuj je wyłącznie na fikcyjnych treściach; nie są skrzynką ani odpowiedzią prawdziwego opiekuna.
 
 ## Roboczy pakiet treści i ograniczenia
 
@@ -78,7 +88,7 @@ Odczyt następuje tylko po kliknięciu awatara i dotyczy aktualnego zaznaczenia.
 
 Hasła i inne nietekstowe pola, ramki oraz pola wewnątrz shadow DOM innych komponentów nie są odczytywane. Można wkleić wybrany tekst ręcznie. Link pozostaje tekstem: rozszerzenie nie otwiera go i nie pobiera.
 
-Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina, zmiana karty i zmiana kanału SPA zachowują szkic oraz trwające sprawdzanie. Po kliknięciu rekina wraca ten sam ekran: wskazówka bezpieczeństwa, jedno z trzech pytań albo wynik. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz”, również z bfcache, kasują stan. Nowe zaznaczenie zastępuje niezatwierdzony szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. W trakcie sprawdzania przycisk „Sprawdź nowe zaznaczenie” otwiera osobny podgląd; stara sprawa i odpowiedzi zostają aż do udanego zatwierdzenia nowej treści.
+Szkic, bufor wklejania, odpowiedzi i wynik są tylko w pamięci karty. Zamknięcie okna, schowanie rekina, zmiana karty i zmiana kanału SPA zachowują szkic oraz trwające sprawdzanie. Po kliknięciu rekina wraca ten sam ekran: wskazówka bezpieczeństwa, jedno z trzech pytań, wynik albo potwierdzenie demo. Przeładowanie, opuszczenie dokumentu i powrót „Wstecz”, również z bfcache, kasują stan karty i unieważniają spóźnione odpowiedzi. Nie oznacza to usunięcia ulotnych rekordów osobnego service workera. Nowe zaznaczenie zastępuje niezatwierdzony szkic dopiero po kliknięciu „Wstaw nowe zaznaczenie”. W trakcie sprawdzania przycisk „Sprawdź nowe zaznaczenie” otwiera osobny podgląd; stara sprawa i odpowiedzi zostają aż do udanego zatwierdzenia nowej treści.
 
 „Edytuj wiadomość” otwiera kopię zatwierdzonego tekstu i linku. „Wróć do sprawdzania” anuluje edycję lub podgląd nowego zaznaczenia i wraca do poprzedniego pytania albo wyniku. Sama edycja, podgląd i anulowanie nie tworzą sprawy. Udane ponowne zatwierdzenie zmienionego tekstu **lub samego linku** rozpoczyna wskazówkę bezpieczeństwa i trzy puste pytania. Niezmieniona treść po normalizacji zachowuje postęp. Błąd zatwierdzenia zachowuje edytowaną kopię i starą sesję; przeładowanie zalecane przez komunikat usuwa je obie. Treści nie zapisują się w trwałej pamięci przeglądarki ani na dysku. W fazie 2 nie ma wysyłki sieciowej.
 
@@ -99,7 +109,7 @@ Uprawnienia: `activeTab` i `scripting`, do przywracania po kliknięciu ikony. Ni
 
 ## Retest ścieżki sprawdzania w Google Chrome
 
-Używaj pięciu fikcyjnych scenariuszy z tabeli powyżej. Zatwierdzenie nadal oznacza wyłącznie lokalne przyjęcie, bez wiadomości lub potwierdzenia od rzeczywistego opiekuna.
+Używaj pięciu fikcyjnych scenariuszy z tabeli powyżej. Zatwierdzenie nadal oznacza wyłącznie lokalne przyjęcie. Osobny przycisk na wyniku uruchamia opisane wyżej demo przekazania; oznaczone potwierdzenie dotyczy lokalnego mocka, bez wiadomości lub odpowiedzi od rzeczywistego opiekuna.
 
 1. Na wskazówce bezpieczeństwa, Q1, Q2, Q3 i wyniku zamknij okno przez ×, a następnie przez Escape i otwórz rekinem. Powinien wrócić ten sam ekran i wybrane odpowiedzi. Powtórz ze schowaniem rekina i przywróceniem ikoną rozszerzenia.
 2. Na Q2 wybierz dwie odpowiedzi i zmień kartę przeglądarki. Okno zostaje na pierwszej karcie; po powrocie oba wybory zostają. Zmiana kanału Discorda bez przeładowania również zachowuje postęp.
