@@ -5,7 +5,7 @@ import { STRINGS } from '../ui/strings.pl.js';
 const exactKeys = (value, keys) => value !== null && typeof value === 'object' && !Array.isArray(value)
   && Reflect.ownKeys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
 const keyedList = (value, copy) => Array.isArray(value) && value.length <= Object.keys(copy).length
-  && new Set(value).size === value.length && value.every(key => typeof key === 'string' && key !== 'none' && Object.hasOwn(copy, key));
+  && new Set(value).size === value.length && Array.from(value).every(key => typeof key === 'string' && key !== 'none' && Object.hasOwn(copy, key));
 function isValidResult(result) {
   if (!exactKeys(result, ['summaryKey', 'signals', 'unknowns', 'step', 'mismatches'])) return false;
   if (typeof result.summaryKey !== 'string' || !Object.hasOwn(STRINGS.checkSummaries, result.summaryKey)) return false;
@@ -15,7 +15,7 @@ function isValidResult(result) {
       || !Object.hasOwn(STRINGS.checkSteps, step.id) || step.id.endsWith('_how')
       || step.explanationKey !== step.id + '_how' || !Object.hasOwn(STRINGS.checkSteps, step.explanationKey)) return false;
   return Array.isArray(result.mismatches) && result.mismatches.length <= 2
-    && result.mismatches.every(m => exactKeys(m, ['questionId', 'answerId', 'messageKey'])
+    && Array.from(result.mismatches).every(m => exactKeys(m, ['questionId', 'answerId', 'messageKey'])
       && m.questionId === 'request' && ['password', 'code'].includes(m.answerId)
       && m.messageKey === 'credential_' + m.answerId && Object.hasOwn(STRINGS.checkMismatches, m.messageKey));
 }
