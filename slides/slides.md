@@ -39,6 +39,14 @@ Prowadzi je <b style="color: var(--shark-dark)">Scamerino Alertinio</b>, rekin z
 Make No Mistakes Team
 </div>
 
+<!--
+Sobota, wpół do dziesiątej wieczorem. Jedenastoletnia Ola gra w Robloxa. Ktoś do niej pisze: „Mam dla ciebie tysiąc pięćset Robuxów. Podaj mi tylko hasło. Szybko!”. Rodzice oglądają serial w pokoju obok i o niczym nie wiedzą.
+
+[pauza]
+
+Jesteśmy zespołem Make No Mistakes. A to [wskaż rekina] jest Scamerino Alertinio. Jego zadaniem jest być przy Oli właśnie w takiej chwili.
+-->
+
 ---
 
 <div class="kicker">Problem · świat dziecka</div>
@@ -66,6 +74,12 @@ Make No Mistakes Team
 <p class="mt-6 text-lg">
 Uwaga dziecka to <span class="ac-amber">krótkie formy, memy i&nbsp;gry</span>. Wiedza o&nbsp;bezpieczeństwie musi przyjść <span class="ac-blue">tym samym kanałem</span>, inaczej przegrywa z&nbsp;feedem.
 </p>
+
+<!--
+Ola nie jest wyjątkiem. Na slajdzie widzą Państwo trzy liczby, ale najważniejsza jest ostatnia. [wskaż „4,72 mln”]
+
+Z Robloxa korzysta w Polsce prawie pięć milionów osób. To najpopularniejsza gra w kraju. [pauza] Dzieci spędzają w niej wieczory i właśnie tam szukają ich oszuści. Dlatego tam wysłaliśmy rekina.
+-->
 
 ---
 
@@ -104,6 +118,14 @@ Uwaga dziecka to <span class="ac-amber">krótkie formy, memy i&nbsp;gry</span>. 
   <div class="card compact"><b class="ac-red">Nie w tym języku</b><div class="text-sm" style="color: var(--muted)">slajdy z&nbsp;regułkami dla pokolenia memów</div></div>
 </div>
 
+<!--
+Wróćmy do Oli. Gdyby podała hasło, jej rodzice najprawdopodobniej nigdy by się o tym nie dowiedzieli. [wskaż 13%] Zaledwie trzynaście procent rodziców wie, że ich dziecko padło ofiarą ataku. [pauza]
+
+A zajęcia w szkole? Pomagają, ale po miesiącu dziecko wraca do punktu wyjścia.
+
+Pogadanka nie jest zła. [wskaż dolny rząd] Po prostu odbywa się za rzadko, w niewłaściwym miejscu i w języku, którym dzieci nie mówią.
+-->
+
 ---
 
 <div class="kicker">Insight</div>
@@ -135,6 +157,14 @@ Uwaga dziecka to <span class="ac-amber">krótkie formy, memy i&nbsp;gry</span>. 
 </div>
 
 <div class="footer-src"><a href="https://corp.oup.com/news/brain-rot-named-oxford-word-of-the-year-2024/" target="_blank">Oxford University Press, XII 2024</a> · <a href="https://knowyourmeme.com/editorials/guides/what-does-the-tralalero-tralala-meme-mean-the-origins-of-the-italian-brainrot-tiktok-trend-featuring-a-shark-wearing-nikes-explained" target="_blank">Know Your Meme</a> · <a href="https://www.pocketgamer.biz/robloxs-steal-a-brainrot-becomes-first-game-to-surpass-25m-concurrent-players" target="_blank">PocketGamer.biz, X 2025</a></div>
+
+<!--
+Skoro problemem jest język, zadaliśmy sobie pytanie: jakim językiem mówi Ola?
+
+Odpowiedź brzmi: brainrot. Dorośli traktują go jak wroga, a dla dzieci to język, w którym poznają świat. Tralalero Tralala, rekin o włosko brzmiącym imieniu, jest dziś dla nich postacią bardziej rozpoznawalną niż niejeden nauczyciel.
+
+Dlatego nie wysłaliśmy do Oli kolejnego pana w garniturze. Wysłaliśmy rekina z kogutem alarmowym na głowie.
+-->
 
 ---
 
@@ -182,6 +212,14 @@ Uwaga dziecka to <span class="ac-amber">krótkie formy, memy i&nbsp;gry</span>. 
   </div>
 </div>
 
+<!--
+Jeden rekin w trzech miejscach.
+
+[wskaż lewą kartę] W grze Ola ćwiczy na niby. [wskaż prawą kartę] Kiedy oszust napisze do niej naprawdę, ten sam rekin czeka na nią w przeglądarce. [wskaż środek] A gdy coś pójdzie nie tak, wystarczy jedno kliknięcie, żeby dowiedziała się o tym mama.
+
+Trening, pomoc i wsparcie dorosłego. Całość spina jedno hasło, które Ola ma zapamiętać jak mem: **„Darmowe + link = pytam dorosłego”**.
+-->
+
 ---
 layout: default
 ---
@@ -206,6 +244,14 @@ layout: default
   </div>
 </div>
 
+<!--
+[Jeśli działa dźwięk, puść `public/roblox-mission.mp4`. Jeśli nie, mów na tle slajdu.]
+
+Tak wygląda trening Oli. Wiadomość, którą Państwo widzą, napisał przygotowany przez nas oszust. Najważniejsze jest jednak to, co dzieje się dalej: nikt nie podpowiada Oli, co ma zrobić. Jeśli odmówi, oszust zaczyna naciskać, dokładnie tak jak w życiu. Jeśli nie wie, co zrobić, może przywołać Scamerina.
+
+Ola uczy się na błędzie, który nic jej nie kosztuje. A mama dostaje informację, czy misja została zaliczona.
+-->
+
 ---
 
 <div class="kicker">Szczegół 2 · Codzienność</div>
@@ -224,6 +270,16 @@ layout: default
     </div>
   </div>
 </div>
+
+<!--
+Tydzień później ktoś pisze do Oli na Discordzie. Tym razem naprawdę.
+
+Ola już wie, na co zwracać uwagę. Na lekcji „Oszustwo czy nie?” z naszego pakietu dla nauczycieli ćwiczyła z klasą rozpoznawanie sygnałów: darmowe Robuxy, pośpiech, prośba o hasło.
+
+Teraz zaznacza wiadomość i klika ikonę rekina. Rekin nie wydaje wyroku. Zadaje jej trzy proste pytania: kto pisze, czego chce i jak można to sprawdzić. Pomaga jej w ten sposób samodzielnie dostrzec sygnały, które poznała w klasie, i na koniec podsuwa jeden bezpieczny krok.
+
+Dwie rzeczy są dla nas kluczowe. Po pierwsze, nic nie opuszcza komputera Oli, dopóki ona sama nie kliknie „Wyślij”. Po drugie, rekin nigdy nie mówi: „to jest bezpieczne”. Mówi za to: **„Darmowe + link = pytam dorosłego”**.
+-->
 
 ---
 
@@ -262,6 +318,14 @@ layout: default
   <div class="body-text"><span class="ac-amber">🔒 Nikt nie widzi czatów, historii przeglądania ani innych aplikacji dziecka.</span> Punkty są za umiejętności, nie za liczbę zgłoszeń. Bez rankingów i&nbsp;bez kar za proszenie o&nbsp;pomoc.</div>
 </div>
 
+<!--
+Ola kliknęła „Pokaż opiekunowi”.
+
+Mama nie widzi w panelu rozmów córki ani historii przeglądania. Widzi tę wiadomość i informację, czy Ola podała hasło. W razie potrzeby rodzic przekazuje sprawę nauczycielowi. Nauczyciel ma pod ręką gotową listę instytucji, którym można ją zgłosić, a gdy dziecku grozi niebezpieczeństwo, numer 112.
+
+Ola dostaje natomiast spokojny komunikat, na przykład: „Rodzic zobaczył, porozmawiajcie o tym”. Bez kar i bez szpiegowania.
+-->
+
 ---
 
 <div class="kicker">Klient · szkoła · model biznesowy</div>
@@ -299,6 +363,16 @@ layout: default
 
 <div class="footer-src"><a href="https://stat.gov.pl/dla-mediow/informacje-prasowe/polska-szkola-w-liczbach-jak-wyglada-edukacja-w-roku-szkolnym-20242025,36,1.html" target="_blank">GUS 2024/2025</a>. Szacunek: 3,2 mln uczniów SP / 8 roczników × 4.</div>
 
+<!--
+Kto podejmie decyzję o zakupie? Rodzice Oli. Nie pojedynczo, lecz jako rada rodziców, która w każdej szkole ma własny fundusz i sama decyduje, na co go przeznaczyć.
+
+Dlatego nasz marketing kierujemy przede wszystkim do rodziców. To ich dzieci padają ofiarą oszustów i to oni, jak Państwo pamiętają, w większości o tym nie wiedzą. Docieramy do nich tam, gdzie już są: na zebraniach klasowych, przez poradnik dla rodziców i przez kartę do domu, którą dziecko przynosi po każdej lekcji z naszego pakietu.
+
+Przekonani rodzice łatwo przekonają szkołę, bo szkoła i tak musi działać. Od sierpnia 2024 roku ustawa „Kamilka” zobowiązuje ją do wprowadzenia procedur chroniących dzieci przed zagrożeniami w sieci i do oceniania ich co najmniej raz na dwa lata. [pauza] Szkoły dostały obowiązek, ale nie dostały narzędzi. Rodzice przychodzą do dyrektora z gotowym rozwiązaniem.
+
+Szkoła może zacząć już jutro, nawet bez komputerów: wystarczą trzy gotowe lekcje, wydruki i rzutnik. Dla samej Oli wszystko jest bezpłatne.
+-->
+
 ---
 layout: image-right
 image: /scamerinio2.jpg
@@ -325,3 +399,17 @@ backgroundSize: contain
   <div class="text-lg font-bold" style="color: var(--shark-dark)">„Darmowe + link = pytam dorosłego”</div>
   <div class="stat-label">Scamerino przypomina o&nbsp;tym w&nbsp;grze i&nbsp;poza nią.</div>
 </div>
+
+<!--
+Co dalej? Dziś Scamerino pomaga rozpoznać próby wyłudzenia hasła i przejęcia konta. Oszuści nie są jednak jedynym zagrożeniem, z którym dziecko zostaje w sieci samo. W kolejnych wersjach chcemy, żeby rekin pomagał rozpoznać także hejt i mowę nienawiści oraz sytuacje, w których ktoś namawia dziecko do czegoś złego: do niebezpiecznego wyzwania, do zrobienia sobie krzywdy albo do spotkania w tajemnicy przed rodzicami.
+
+Zasada pozostanie ta sama: rekin nie wydaje wyroku, tylko pomaga dziecku się zatrzymać i pójść z tym do dorosłego.
+
+Zanim jednak rozbudujemy rozwiązanie, powiedzmy uczciwie: nie wiemy jeszcze, czy nasze rozwiązanie działa lepiej niż zwykła lekcja. Zresztą w tej dziedzinie mało kto to wie: [wskaż „5 z 57”] spośród pięćdziesięciu siedmiu badań tylko pięć miało grupę kontrolną.
+
+Plan pilotażu widzą Państwo na slajdzie. Najważniejszy jest w nim ostatni punkt: powtórny test po kilku tygodniach. Właśnie po takim czasie efekt zwykłej lekcji znika. Chcemy sprawdzić, czy po miesiącu Ola nadal będzie pamiętać.
+
+[pauza] Wróćmy na koniec do tamtej soboty. Wpół do dziesiątej wieczorem Ola znów dostaje wiadomość o darmowych Robuxach. Tym razem nie podaje hasła. Mówi pod nosem: **„Darmowe + link = pytam dorosłego”** i idzie do pokoju obok, do rodziców.
+
+Właśnie po to zbudowaliśmy BezpiecznąAurę. Dziękujemy za uwagę.
+-->
