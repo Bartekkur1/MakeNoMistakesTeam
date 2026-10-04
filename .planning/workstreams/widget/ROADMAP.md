@@ -75,14 +75,14 @@ Plans:
   3. Odpowiedź opiekuna jest widoczna u dziecka
   4. Pusta treść, brak backendu i nieudany zapis pokazują czytelny komunikat bez fałszywego potwierdzenia
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 Plans:
 **Wave 1**
 - [x] 03-01-PLAN.md — Logowanie rodzica, sesja i transport w service workerze; korekta wymagań D-16
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-PLAN.md — Dokładny podgląd, świadoma wysyłka, potwierdzenie i uczciwe błędy zamiast mocka
+- [x] 03-02-PLAN.md — Dokładny podgląd, świadoma wysyłka, potwierdzenie i uczciwe błędy zamiast mocka
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 03-03-PLAN.md — Statusy w „Moje zgłoszenia”, osobne instrukcje platform i końcowe sprawdzenie Chrome
