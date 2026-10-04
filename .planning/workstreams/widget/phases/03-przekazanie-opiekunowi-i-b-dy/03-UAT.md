@@ -1,8 +1,8 @@
 ---
-status: complete
+status: diagnosed
 phase: 03-przekazanie-opiekunowi-i-b-dy
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md]
-started: 2026-10-04T08:00:00Z
+started: 2026-10-04T05:00:00Z
 updated: 2026-10-04T05:43:28Z
 ---
 
@@ -149,7 +149,13 @@ blocked: 0
   reason: "User reported: z offline ustawionym w network i tak dostaje info, ze wyslane"
   severity: major
   test: 13
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Likely test procedure, not a code bug (Codex static diagnosis, medium confidence): a new confirmation requires a validated server response (projects/widget/src/background/sw.js:375-376), so either the SW-inspector Offline toggle did not block the worker fetch (request reached the server, 'Wysłano' honest) or an already-sent case from test 7 was reopened (sent cases reopen as confirmation, projects/widget/src/core/draft.js:142-144). Side finding: a rejected fetch while navigator.onLine is true yields 'unknown' instead of 'offline' (sw.js:114, 130-131)."
+  classification: test_procedure
+  artifacts:
+    - path: "projects/widget/src/background/sw.js"
+      issue: "Only navigator.onLine=false yields offline (114); fetch rejection -> unknown (130-131); success only from validated saved report (375-376)"
+    - path: "projects/widget/src/core/draft.js"
+      issue: "Already-sent case reopens as confirmation (142-144), resend blocked (251)"
+  missing:
+    - "Retest with a fresh unsent case and a verified worker-level network failure (navigator.onLine false in SW console)"
+  debug_session: "codex exec read-only diagnosis, 2026-10-04"
