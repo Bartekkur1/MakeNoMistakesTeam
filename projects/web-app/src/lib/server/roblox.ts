@@ -4,7 +4,7 @@
 // StorageUnavailableError (503), never a 2xx.
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, REPORT_STATES, type RobloxAccount, type RobloxIngestResponse } from "@/lib/contract/types";
+import { ROBLOX_ACCOUNT_FIELDS, ROBLOX_MAX_SCORE, REPORT_STATES, type RobloxAccount, type RobloxIngestAck } from "@/lib/contract/types";
 import { StorageUnavailableError } from "./errors";
 import { toIsoUtc } from "./reports";
 import { getSupabase } from "./supabase";
@@ -124,7 +124,7 @@ export function ingestContent(input: RobloxIngestInput): string {
   return `${parts.join(" ")}\n\n${input.content}`;
 }
 
-export type RobloxIngestAck = Omit<RobloxIngestResponse, "ok">;
+export type { RobloxIngestAck } from "@/lib/contract/types";
 
 export class RobloxIngestIdempotencyConflictError extends Error {
   constructor() {

@@ -3,7 +3,7 @@
 // this test or the contract.
 
 import { readdirSync, readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   ACCOUNT_ROLES,
   ACTOR_ROLES,
@@ -179,6 +179,8 @@ describe("migrations keep history append-only, comments edit-proof and both clos
 
 describe("Roblox ingest contract and atomic schema", () => {
   it("keeps the public help flag and runtime validator at exactly 0 or 1 without requiring score", () => {
+    expectTypeOf<RobloxIngestRequest["attempt_id"]>().toEqualTypeOf<string>();
+    expectTypeOf<RobloxIngestRequest["hints_used"]>().toEqualTypeOf<0 | 1 | undefined>();
     expect(ROBLOX_MAX_HINTS).toBe(1);
     const input: RobloxIngestRequest = {
       attempt_id: "a0000000-0000-4000-8000-000000000003",

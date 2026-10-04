@@ -427,31 +427,43 @@ export interface SetRobloxAccountRequest {
 export const ROBLOX_OUTCOMES = ["safe_refusal", "compromised_password"] as const;
 export type RobloxOutcome = (typeof ROBLOX_OUTCOMES)[number];
 
-export const ROBLOX_MAX_HINTS = 2;
+export const ROBLOX_MAX_HINTS = 1;
 export const ROBLOX_MAX_SCORE = 3;
 
 // Wire body of POST /api/reports/ingest (sent by the Roblox game server, header x-ingest-secret).
 export interface RobloxIngestRequest {
+  // UUID generated once per completed attempt; every retry reuses the same payload.
+  attempt_id: string;
   roblox_username: string;
   roblox_user_id?: number;
   attack_type: AttackType;
   source?: "game";
   taken_actions?: TakenAction[];
   content: string;
-  hints_used?: number;
+  // Exact helpReceived flag. The exercise sends [] actions and omits score.
+  hints_used?: 0 | 1;
   score?: number;
   outcome?: RobloxOutcome;
 }
 
-// The ingest endpoint answers in its own envelope, agreed with the Roblox workstream.
-export interface RobloxIngestResponse {
-  ok: true;
+// Stored recipient/state snapshot, returned unchanged on retries even after panel transitions.
+export interface RobloxIngestAck {
   report_id: string;
   child_name: string;
   parent_name: string;
   state: ReportState;
   // false when the nick is not linked to any child and the report went to the demo fallback child.
   matched: boolean;
+}
+
+// The ingest endpoint answers in its own envelope, agreed with the Roblox workstream.
+export interface RobloxIngestResponse extends RobloxIngestAck {
+  ok: true;
+}
+
+export interface RobloxIngestConflictBody {
+  ok: false;
+  error: "idempotency_conflict";
 }
 
 export interface RobloxIngestErrorBody {

@@ -11,6 +11,7 @@ import {
   REPORT_STATES,
   ROBLOX_MAX_SCORE,
   ROBLOX_OUTCOMES,
+  ROBLOX_MAX_HINTS,
   ROBLOX_USERNAME_PATTERN,
   TAKEN_ACTIONS,
   TRANSITION_ACTIONS,
@@ -424,7 +425,7 @@ export function parseRobloxIngest(body: Record<string, unknown>): ValidationResu
       errors.push({ field: "outcome", message: "Nieznany wynik szkolenia." });
     }
   }
-  const hintsUsed = optionalIntInRange(body, "hints_used", 1, errors);
+  const hintsUsed = optionalIntInRange(body, "hints_used", ROBLOX_MAX_HINTS, errors);
   const score = optionalIntInRange(body, "score", ROBLOX_MAX_SCORE, errors);
 
   const content = typeof body.content === "string" ? body.content.trim() : "";
