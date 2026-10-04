@@ -41,6 +41,17 @@ export const LOGIN = {
   backHome: "Wróć na stronę główną",
 };
 
+// The informational demo accounts dialog on /login. The only panel copy allowed to say "demo"
+// (tests/panel/guardrails.test.ts exempts this object).
+export const DEMO_INFO = {
+  open: "Zobacz konta demo",
+  title: "Konta demo",
+  intro: "To wersja demonstracyjna z fikcyjnymi danymi. Zaloguj się jednym z kont poniżej.",
+  use: "Użyj",
+  codeLabel: "Kod logowania dla każdego konta:",
+  close: "Zamknij",
+};
+
 export const LIST = {
   title: "Zgłoszenia",
   subtitle: {
