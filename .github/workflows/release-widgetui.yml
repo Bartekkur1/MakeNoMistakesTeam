@@ -1,0 +1,85 @@
+name: Release WidgetUI
+
+on:
+  push:
+    tags:
+      - 'widgetui-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag, e.g. widgetui-v0.1.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-widgetui-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Validate release tag
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^widgetui-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'Expected tag widgetui-vX.Y.Z' >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: projects/widget/package-lock.json
+
+      - name: Check release version
+        working-directory: projects/widget
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const version = process.env.RELEASE_TAG.slice('widgetui-v'.length);
+          for (const file of ['package.json', 'manifest.json']) {
+            if (JSON.parse(fs.readFileSync(file, 'utf8')).version !== version) {
+              throw new Error(`${file} version must match ${process.env.RELEASE_TAG}`);
+            }
+          }
+          NODE
+
+      - name: Install dependencies
+        working-directory: projects/widget
+        run: npm ci
+
+      - name: Build extension
+        working-directory: projects/widget
+        env:
+          AURA_API: https://bezpieczna-aura.pl
+        run: npm run build
+
+      - name: Package extension
+        working-directory: projects/widget/dist
+        run: zip -r "$GITHUB_WORKSPACE/$RELEASE_TAG.zip" .
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$RELEASE_TAG.zip" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$RELEASE_TAG.zip" \
+              --verify-tag --title "WidgetUI ${RELEASE_TAG#widgetui-v}" \
+              --notes 'Rozpakuj ZIP i załaduj folder w chrome://extensions przez „Załaduj rozpakowane” (Tryb dewelopera).'
+          fi

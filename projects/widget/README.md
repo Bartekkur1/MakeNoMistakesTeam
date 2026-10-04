@@ -79,6 +79,19 @@ npm run build
 
 Wynik: `projects/widget/dist/`. Zależności są przypięte w lockfile; wykonanie tej fazy nie dodaje ani nie aktualizuje pakietów.
 
+## Release WidgetUI w GitHub Actions
+
+Workflow `.github/workflows/release-widgetui.yml` publikuje ZIP rozszerzenia w GitHub Releases po wypchnięciu taga `widgetui-vX.Y.Z`. Wersje w `projects/widget/package.json`, `projects/widget/package-lock.json` (pakiet główny) i `projects/widget/manifest.json` powinny odpowiadać tagowi; workflow sprawdza `package.json` i manifest. Zmiany wersji zatwierdź przed utworzeniem taga.
+
+```sh
+git tag widgetui-v0.1.0
+git push origin widgetui-v0.1.0
+```
+
+Workflow musi znajdować się w tagowanym commicie. Można też wybrać **Actions → Release WidgetUI → Run workflow**, podając istniejący tag (ręczne uruchamianie wymaga workflow na domyślnej gałęzi). Budowanie używa Node.js 22, `npm ci` i API `https://bezpieczna-aura.pl`; wystarcza wbudowany `GITHUB_TOKEN`, bez dodatkowych sekretów. Ponowne uruchomienie zastępuje ZIP istniejącego release'u.
+
+Pobierz `widgetui-vX.Y.Z.zip` z release'u, rozpakuj do osobnego folderu i załaduj go przez **Załaduj rozpakowane** w `chrome://extensions` w Trybie dewelopera. `manifest.json` znajduje się bezpośrednio w rozpakowanym folderze. ZIP zawiera wyłącznie wynik budowania, bez źródeł i `node_modules`.
+
 ## Uruchomienie w Google Chrome
 
 1. Otwórz `chrome://extensions` i włącz **Tryb dewelopera**.
