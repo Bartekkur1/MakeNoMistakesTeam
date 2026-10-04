@@ -86,4 +86,4 @@ end;
 $$;
 
 revoke execute on function public.create_roblox_ingest_report(uuid, text, uuid, uuid, text, text[], text, text, text, boolean) from public, anon, authenticated;
-grant execute on function public.create_roblox_ingest_report(uuid, text, uuid, uuid, text, text[], text, text, text, text, boolean) to service_role;
+grant execute on function public.create_roblox_ingest_report(uuid, text, uuid, uuid, text, text[], text, text, text, boolean) to service_role;
