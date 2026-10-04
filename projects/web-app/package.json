@@ -1,0 +1,39 @@
+{
+  "name": "web-app",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p ${PORT:-3000}",
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke-api.mjs",
+    "seed:build": "node scripts/build-seed.mjs",
+    "seed:check": "node scripts/build-seed.mjs --check"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "vite": "^7.0.0"
+  }
+}

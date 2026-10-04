@@ -2,12 +2,12 @@
 
 ## Overview
 
-Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na regułach, po przekazanie opiekunowi z obsługą błędów i wersję mobilną. Zależy od kontraktu i backendu z `api-ui` oraz treści z `shared/content/`.
+Od szkieletu rozszerzenia z awatarem, przez ścieżkę sprawdzania opartą na regułach, po przekazanie opiekunowi z obsługą błędów i wersję mobilną. Zależy od kontraktu i backendu z `web-app` oraz treści z `shared/content/`.
 
 ## Phases
 
 - [x] **Phase 1: Rozszerzenie i przekazanie treści** - awatar, zaznaczenie lub wklejenie wiadomości (completed 2026-10-03)
-- [ ] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok
+- [x] **Phase 2: Ścieżka sprawdzania** - pytania, sygnały, proponowany krok (completed 2026-10-04)
 - [ ] **Phase 3: Przekazanie opiekunowi i błędy** - podgląd, wysyłka, odpowiedź, obsługa awarii
 - [ ] **Phase 4: Wersja mobilna** - ta sama ścieżka jako strona w przeglądarce telefonu
 
@@ -57,12 +57,17 @@ Plans:
   3. Uczciwa fikcyjna wiadomość nie dostaje fałszywego alarmu; przy braku pewności pomocnik to mówi
 
 **Plans**: TBD
+- [x] 02-04-PLAN.md
+- [x] 02-01-PLAN.md
+- [x] 02-02-PLAN.md
+- [x] 02-03-PLAN.md
+
 **UI hint**: yes
 
 ### Phase 3: Przekazanie opiekunowi i błędy
 
 **Goal**: Dziecko świadomie wysyła sprawę i widzi odpowiedź; awarie nie udają sukcesu
-**Depends on**: Phase 2, `api-ui` Phase 1 (API spraw)
+**Depends on**: Phase 2, `web-app` Phase 1 (API spraw)
 **Requirements**: HND-01, HND-02, HND-03, ERR-01
 **Success Criteria** (what must be TRUE):
   1. Przed wysłaniem dziecko widzi dokładnie, co udostępnia, i potwierdza

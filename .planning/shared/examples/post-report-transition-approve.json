@@ -1,0 +1,41 @@
+{
+  "description": "Mama Oli w panelu zatwierdza zgłoszenie R1 (prośba o kod z SMS-a w grze). Zgłoszenie przechodzi z „czeka na rodzica” do „u nauczyciela”, a historia dostaje wpis „approve”. Odpowiedź 201 zawiera zgłoszenie po zmianie i nowy wpis historii. Powtórzenie tego samego żądania zwróci 409 invalid_transition, bo zgłoszenie jest już u nauczyciela.",
+  "method": "POST",
+  "route": "/api/reports/{id}/transitions",
+  "path": "/api/reports/00000000-0000-4000-8000-0000000d0001/transitions",
+  "auth": {
+    "email": "rodzic.ola@bezpiecznaaura.example",
+    "scope": "panel"
+  },
+  "request": {
+    "action": "approve"
+  },
+  "response": {
+    "status": 201,
+    "body": {
+      "report": {
+        "id": "00000000-0000-4000-8000-0000000d0001",
+        "child_id": "00000000-0000-4000-8000-0000000c0001",
+        "parent_id": "00000000-0000-4000-8000-0000000a0001",
+        "attack_type": "data_request",
+        "taken_actions": [],
+        "source": "game",
+        "content": "Na czacie w grze ktoś napisał: „Rozdaję 10 000 diamentów za darmo! Podaj tylko kod z SMS-a, który zaraz ci przyjdzie.” Nie znam tego gracza.",
+        "state": "with_teacher",
+        "created_at": "2026-10-03T08:05:00.000Z",
+        "updated_at": "2026-10-03T12:00:00.000Z"
+      },
+      "entry": {
+        "id": "00000000-0000-4000-8000-0000000e0012",
+        "report_id": "00000000-0000-4000-8000-0000000d0001",
+        "action": "approve",
+        "from_state": "pending_parent",
+        "to_state": "with_teacher",
+        "actor_id": "00000000-0000-4000-8000-0000000a0001",
+        "actor_role": "parent",
+        "comment": null,
+        "created_at": "2026-10-03T12:00:00.000Z"
+      }
+    }
+  }
+}

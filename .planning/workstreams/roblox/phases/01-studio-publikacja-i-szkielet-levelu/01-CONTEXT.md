@@ -86,7 +86,7 @@ Faza 1 NIE obejmuje: pełnych wyborów i konsekwencji, logiki i wyjaśnień pomo
 - `assets/Scamerino_Alertinio.png`: jedyny asset graficzny do użycia.
 
 ### Established Patterns
-- Repo dzieli pracę na workstreamy z osobnymi katalogami kodu (`projects/roblox/`, `projects/api-ui/`, `projects/widget/`, `projects/presentation/`).
+- Repo dzieli pracę na workstreamy z osobnymi katalogami kodu (`projects/roblox/`, `projects/web-app/`, `projects/widget/`, `projects/presentation/`).
 - Commity dokumentacji: `docs(...)`.
 
 ### Integration Points

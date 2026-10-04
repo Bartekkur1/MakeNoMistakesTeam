@@ -3,6 +3,7 @@ import { normalizeText, capCodePoints, buildCase, isValidCase } from '../../src/
 import { captureSelection } from '../../src/content/capture.js';
 import { createPanel } from '../../src/ui/panel.js';
 import { STRINGS } from '../../src/ui/strings.pl.js';
+import { createDraftStore } from '../../src/core/draft.js';
 afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();window.dispatchEvent(new Event('pagehide'));document.querySelectorAll('bezpieczna-aura-widget').forEach(el=>el.remove());});
 test('NBSP, empty and single-character content',()=>{
  expect(normalizeText('\u00a0\u00a0 ')).toBe('');expect(normalizeText('a\u00a0b')).toBe('a b');
@@ -29,14 +30,19 @@ test('preview guards empty, explains truncation and keeps links as plain text',(
  panel.render({view:'preview',draft:{text:'   ',link:'',truncated:true},error:'submit'},{host:'example.test'});
  expect([...root.querySelectorAll('button')].find(b=>b.textContent===STRINGS.approve).disabled).toBe(true);expect(root.textContent).toContain(STRINGS.truncatedNotice);expect(root.textContent).toContain(STRINGS.submitError);
  expect(root.querySelector('textarea').value).toBe('   ');
- for(const view of ['menu','paste','howto','preview','confirmation']){panel.render({view,paste:{text:'',link:''},draft:{text:'x',link:'https://x.example'}},{host:'example.test'});expect(root.querySelectorAll('a')).toHaveLength(0);}
+ for(const view of ['menu','paste','howto','preview']){panel.render({view,paste:{text:'',link:''},draft:{text:'x',link:'https://x.example'}},{host:'example.test'});expect(root.querySelectorAll('a')).toHaveLength(0);}
+ const store=createDraftStore();store.submitPaste({text:'<a href="https://trap.example">Fictional</a><img src=x onerror=alert(1)>',link:'javascript:alert(1)'});
+ const c=buildCase(store.get().draft);store.approved(store.beginSubmit(),c);
+ for(const advance of [()=>{},()=>store.startQuestions(),()=>{for(const id of ['sender','request','verify']){store.answer(id,'unknown');store.nextQuestion();}}]){
+  advance();panel.render(store.get(),{host:'example.test'});expect(root.querySelectorAll('a, img, script')).toHaveLength(0);expect(root.querySelectorAll('[href], [onerror]')).toHaveLength(0);
+ }
 });
 for(const late of [false,true])test(`integration failure and late answer, pagehide=${late}`,async()=>{
  vi.resetModules();let resolve;const send=late?vi.fn(()=>new Promise(r=>{resolve=r;})):vi.fn(async()=>{throw new Error('Extension context invalidated.');});
  vi.stubGlobal('chrome',{runtime:{id:'test-ext',sendMessage:send,onMessage:{addListener:vi.fn()}}});vi.spyOn(document,'getSelection').mockReturnValue({toString:()=> 'Fictional'});
  await import('../../src/content/main.js');const root=document.querySelector('bezpieczna-aura-widget').shadowRoot;root.querySelector('.avatar').click();[...root.querySelectorAll('button')].find(b=>b.textContent===STRINGS.approve).click();
- if(late){window.dispatchEvent(new Event('pagehide'));resolve({ok:true});await new Promise(r=>setTimeout(r,10));expect(root.querySelector('.panel').hidden).toBe(true);expect(root.textContent).not.toContain(STRINGS.confirmationHeading);}
- else{await vi.waitFor(()=>expect(root.textContent).toContain(STRINGS.submitError));expect(root.querySelector('textarea').value).toBe('Fictional');expect(root.textContent).not.toContain(STRINGS.confirmationHeading);}
+ if(late){window.dispatchEvent(new Event('pagehide'));resolve({ok:true});await new Promise(r=>setTimeout(r,10));expect(root.querySelector('.panel').hidden).toBe(true);expect(root.textContent).not.toContain(STRINGS.safetyNotice);}
+ else{await vi.waitFor(()=>expect(root.textContent).toContain(STRINGS.submitError));expect(root.querySelector('textarea').value).toBe('Fictional');expect(root.textContent).not.toContain(STRINGS.safetyNotice);}
 });
 test('active iframe never reads a stale top-document selection',()=>{
  const selection=vi.fn(()=>({toString:()=> 'Stale top-page selection'}));

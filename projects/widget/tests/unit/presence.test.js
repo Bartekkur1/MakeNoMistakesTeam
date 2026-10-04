@@ -31,7 +31,7 @@ test('form keeps avatar usable and retains draft after close and Escape', async 
   c.runtime.onMessage.addListener.mock.calls[0][0]({type:'aura/show'}, {id:'test-ext'}, vi.fn()); check(false, false);
   root.querySelector('.avatar').click(); check(true); expect(root.querySelector('textarea').value).toBe('Fikcyjny szkic');
 });
-test('selection preview keeps avatar usable during pending and failed submit and confirmation', async () => {
+test('selection preview keeps avatar usable during pending and failed submit and safety', async () => {
   const { c, root, click, check } = await bootForm();
   document.getSelection.mockReturnValue({ toString: () => 'Fikcyjne zaznaczenie' });
   root.querySelector('.avatar').click(); check(true);
@@ -40,7 +40,7 @@ test('selection preview keeps avatar usable during pending and failed submit and
   click(STRINGS.approve); check(true); expect(root.querySelector('textarea').readOnly).toBe(true);
   resolve({ ok: false }); await vi.waitFor(() => expect(root.querySelector('.error')).not.toBeNull()); check(true);
   click(STRINGS.approve); check(true); resolve({ ok: true });
-  await vi.waitFor(() => expect(root.textContent).toContain(STRINGS.confirmationHeading)); check(false);
+  await vi.waitFor(() => expect(root.textContent).toContain(STRINGS.safetyNotice)); check(false);
 });
 afterEach(() => { for (const fn of cleanup.splice(0)) fn(); vi.restoreAllMocks(); vi.unstubAllGlobals(); document.querySelectorAll('bezpieczna-aura-widget').forEach(el => el.remove()); });
 test('drag threshold and viewport clamp', () => {

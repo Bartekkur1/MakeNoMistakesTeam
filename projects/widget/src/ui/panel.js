@@ -33,11 +33,18 @@ export function createPanel({ root, strings, handlers }) {
   const button = (text, className, handler) => {
     const b = node('button', text, className); b.type = 'button'; b.addEventListener('click', handler); return b;
   };
+  const appendReplacement = state => {
+    if (!normalizeText(state.pendingSelection?.text)) return;
+    const replace = button(strings.checkNewSelection, 'btn-secondary', () => handlers.onCheckNewSelection());
+    replace.disabled = Boolean(state.submitting);
+    body.append(replace);
+  };
   return {
     el,
     render(state, ctx) {
+      const focusedId = state.view === 'question' ? root.activeElement?.id : undefined;
       body.replaceChildren();
-      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation'].includes(state.view);
+      el.hidden = !['menu', 'paste', 'howto', 'preview', 'confirmation', 'safety', 'question', 'result'].includes(state.view);
       if (el.hidden) return;
       if (state.view === 'menu') {
         const menu = node('div', undefined, 'menu');
@@ -69,9 +76,95 @@ export function createPanel({ root, strings, handlers }) {
         done.type = 'button';
         done.addEventListener('click', () => handlers.onClose());
         body.append(node('h2', strings.confirmationHeading), node('p', strings.confirmationBody), done);
+        body.append(button(strings.confirmationBackToMenu, 'btn-secondary', () => handlers.onFinishCheck()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
+        done.focus();
         return;
       }
-      if (state.pendingSelection) {
+      if (state.view === 'safety') {
+        body.append(node('p', strings.safetyNotice, 'notice'), button(strings.next, 'btn-primary', () => handlers.onSafetyNext()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
+        body.querySelector('button').focus();
+        return;
+      }
+      if (state.view === 'question') {
+        const question = strings.checkQuestions.find(q => q.id === state.check.step);
+        const selected = state.check.answers[question.id];
+        const group = node('fieldset', undefined, 'question-options');
+        group.append(node('legend', question.title));
+        for (const option of question.options) {
+          const row = node('div', undefined, 'question-option');
+          const input = node('input');
+          input.type = question.multiple ? 'checkbox' : 'radio';
+          input.name = question.id;
+          input.id = 'check-' + question.id + '-' + option.id;
+          input.value = option.id;
+          input.checked = selected.includes(option.id);
+          input.addEventListener('change', () => handlers.onAnswer(question.id, option.id));
+          const label = node('label');
+          label.htmlFor = input.id;
+          label.append(input, node('span', option.label));
+          row.append(label);
+          // A message link is evidence about the text, not the child's independent channels.
+          if (question.id !== 'verify' && state.check.hints[question.id].includes(option.id)) row.append(node('span', strings.hintBadge, 'hint-badge'));
+          group.append(row);
+        }
+        const next = button(strings.next, 'btn-primary', () => handlers.onQuestionNext(false));
+        next.disabled = !selected.length;
+        const row = node('div', undefined, 'row');
+        row.append(button(strings.back, 'btn-secondary', () => handlers.onQuestionBack()), next);
+        body.append(group, row, button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
+        if (state.check.discrepancy) {
+          const mismatch = state.check.discrepancy;
+          const prompt = node('div', undefined, 'notice');
+          prompt.setAttribute('role', 'alert');
+          prompt.append(node('p', strings.checkMismatches[mismatch.messageKey]),
+            button(strings.correctAnswer, 'btn-secondary', () => handlers.onAnswer(mismatch.questionId, mismatch.answerId)),
+            button(strings.keepAnswer, 'btn-primary', () => handlers.onQuestionNext(true)));
+          body.append(prompt);
+        }
+        const focused = [...group.querySelectorAll('input')].find(input => input.id === focusedId);
+        (focused ?? group.querySelector('input:checked') ?? group.querySelector('input')).focus();
+        return;
+      }
+      if (state.view === 'result') {
+        const result = state.check.result;
+        body.append(node('h2', strings.checkSummaries[result.summaryKey]));
+        for (const key of ['signals', 'unknowns']) {
+          const section = node('section', undefined, 'result-section');
+          const list = node('ul');
+          const copy = key === 'signals' ? strings.checkSignals : strings.checkUnknowns;
+          for (const id of result[key].length ? result[key] : ['none']) list.append(node('li', copy[id]));
+          const title = node('h3', strings.resultSections[key]);
+          title.id = 'check-result-' + key;
+          section.setAttribute('aria-labelledby', title.id);
+          section.append(title, list);
+          body.append(section);
+        }
+        const step = node('section', undefined, 'result-section result-step');
+        const title = node('h3', strings.resultSections.step);
+        title.id = 'check-result-step';
+        step.setAttribute('aria-labelledby', title.id);
+        step.append(title, node('p', strings.checkSteps[result.step.id]), node('p', strings.checkSteps[result.step.explanationKey]));
+        body.append(step, button(strings.fixAnswers, 'btn-secondary', () => handlers.onFixAnswers()),
+          button(strings.editCheckContent, 'btn-secondary', () => handlers.onEditCheckContent()));
+        appendReplacement(state);
+        const request = button(strings.requestGuardianVerification, 'btn-primary', () => handlers.onRequestGuardianVerification());
+        body.append(request);
+        for (const action of body.querySelectorAll('button')) action.disabled = Boolean(state.submitting);
+        if (['guardianRequest', 'guardianRequestContextInvalidated'].includes(state.error)) {
+          const error = node('p', state.error === 'guardianRequestContextInvalidated'
+            ? strings.guardianRequestContextInvalidated : strings.guardianRequestError, 'error');
+          error.setAttribute('role', 'alert');
+          body.append(error);
+        }
+        (state.submitting ? close : body.querySelector('button')).focus();
+        return;
+      }
+      if (state.pendingSelection && !state.candidateKind) {
         const insert = button(strings.insertNewSelection, 'btn-secondary', () => handlers.onInsertSelection());
         insert.disabled = Boolean(state.submitting);
         body.append(node('p', strings.newSelectionHint, 'hint'), insert);
@@ -102,6 +195,11 @@ export function createPanel({ root, strings, handlers }) {
       if (state.error === 'submit') body.append(node('p', strings.submitError, 'error'));
       if (state.draft.truncated) body.append(node('p', strings.truncatedNotice, 'hint'));
       body.append(approve);
+      if (state.candidateKind) {
+        const cancel = button(strings.cancelCheckEdit, 'btn-secondary', () => handlers.onCancelCheckEdit());
+        cancel.disabled = Boolean(state.submitting);
+        body.append(cancel);
+      }
       textarea.focus();
     },
     place(avatarRect, viewport) {

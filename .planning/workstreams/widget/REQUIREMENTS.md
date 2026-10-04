@@ -2,7 +2,7 @@
 
 **Defined:** 2026-10-03
 **Core Value:** Dziecko przekazuje podejrzaną treść, przechodzi krótkie pytania, dostaje wskazówki i świadomie wysyła sprawę opiekunowi.
-**Scope:** rozszerzenie przeglądarkowe + mobilna strona do wklejenia treści (osoba 3, W2–W7). Backend należy do `api-ui`; kontrakt: `.planning/shared/CONTRACT.md`. Reguły i treści: `.planning/shared/content/`.
+**Scope:** rozszerzenie przeglądarkowe + mobilna strona do wklejenia treści (osoba 3, W2–W7). Backend należy do `web-app`; kontrakt: `.planning/shared/CONTRACT.md`. Reguły i treści: `.planning/shared/content/`.
 
 ## v1 Requirements
 
@@ -13,9 +13,9 @@
 
 ### Ścieżka sprawdzania
 
-- [ ] **CHK-01**: Pomocnik zadaje pytania: kto wysłał, czego żąda, czy jest presja czasu, czy można sprawdzić oficjalnym kanałem (reguły i treści z `shared/content/`)
-- [ ] **CHK-02**: Wynik pokazuje sygnały, brakujące informacje i proponowany krok, bez gwarancji bezpieczeństwa lub wiarygodności
-- [ ] **CHK-03**: Uczciwa wiadomość i brak pewności pomocnika są obsłużone bez fałszywego alarmu
+- [x] **CHK-01**: Pomocnik zadaje pytania: kto wysłał, czego żąda, czy jest presja czasu, czy można sprawdzić oficjalnym kanałem (reguły i treści z `shared/content/`)
+- [x] **CHK-02**: Wynik pokazuje sygnały, brakujące informacje i proponowany krok, bez gwarancji bezpieczeństwa lub wiarygodności
+- [x] **CHK-03**: Uczciwa wiadomość i brak pewności pomocnika są obsłużone bez fałszywego alarmu
 
 ### Przekazanie opiekunowi
 
@@ -48,9 +48,9 @@
 |-------------|-------|--------|
 | WID-01 | Phase 1 | Complete |
 | WID-02 | Phase 1 | Complete |
-| CHK-01 | Phase 2 | Pending |
-| CHK-02 | Phase 2 | Pending |
-| CHK-03 | Phase 2 | Pending |
+| CHK-01 | Phase 2 | Complete |
+| CHK-02 | Phase 2 | Complete |
+| CHK-03 | Phase 2 | Complete |
 | HND-01 | Phase 3 | Pending |
 | HND-02 | Phase 3 | Pending |
 | HND-03 | Phase 3 | Pending |

@@ -1,4 +1,5 @@
 import { test, expect, assertOnlyLocal } from './extension.fixture.mjs';
+import { STRINGS } from '../../src/ui/strings.pl.js';
 
 const url = 'http://127.0.0.1:4173/chat-like.html';
 const guardianNotice = 'Gdy zatwierdzisz, tę wiadomość i wynik sprawdzania zobaczy Twój opiekun.';
@@ -23,8 +24,8 @@ test('zaznaczenie → podgląd → zatwierdzenie; nic nie wysłane wcześniej', 
   const edited = 'Darmowe Nitro! Kliknij szybko: https://discord-nitro-free.example/gift';
   await box.fill(edited);
   await approve.click();
-  await expect(page.getByText('Gotowe!', { exact: true })).toBeVisible();
-  await expect(page.getByText('Sprawa jest przygotowana do sprawdzenia.', { exact: true })).toBeVisible();
+  await expect(page.getByText(STRINGS.safetyNotice, { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: STRINGS.next, exact: true })).toBeVisible();
   const cases = await serviceWorker.evaluate(() => self.__aura.cases);
   expect(cases).toHaveLength(1);
   expect(cases[0]).toMatchObject({ content: edited, source: '127.0.0.1', origin: 'selection' });
