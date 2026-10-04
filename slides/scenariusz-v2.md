@@ -34,9 +34,9 @@ Zasady:
 
 ## 2. Problem: świat dziecka · ~20 s
 
-> Zosia nie jest wyjątkiem. Na slajdzie widzą Państwo trzy liczby, ale najważniejsza jest środkowa. [wskaż „20+ razy”]
+> Zosia nie jest wyjątkiem. Na slajdzie widzą Państwo trzy liczby, ale najważniejsza jest ostatnia. [wskaż „4,72 mln”]
 >
-> Ćwierć miliona dzieci w wieku od siedmiu do dwunastu lat otwiera TikToka ponad dwadzieścia razy dziennie. [pauza] Lekcja o bezpieczeństwie dostaje jedną szansę w roku. Aplikacja dostaje ich dwadzieścia każdego dnia.
+> Z Robloxa korzysta w Polsce prawie pięć milionów osób. To najpopularniejsza gra w kraju. [pauza] Dzieci spędzają w niej wieczory i właśnie tam szukają ich oszuści. Dlatego tam wysłaliśmy rekina.
 
 ## 3. Problem: zagrożenie i bezradna lekcja · ~30 s
 
@@ -111,7 +111,7 @@ Zasady:
 ## Wersja skrócona (gdy mamy tylko 3 minuty)
 
 - Slajd 1: scena z Zosią w dwóch zdaniach.
-- Slajdy 2-3: tylko „ponad dwadzieścia razy dziennie” i „trzynaście procent rodziców wie”, a potem jedno zdanie: pogadanka odbywa się za rzadko, w niewłaściwym miejscu i w obcym dla dzieci języku.
+- Slajdy 2-3: tylko „prawie pięć milionów osób w Robloxie” i „trzynaście procent rodziców wie”, a potem jedno zdanie: pogadanka odbywa się za rzadko, w niewłaściwym miejscu i w obcym dla dzieci języku.
 - Slajd 4: jedno zdanie: „Brainrot to język Zosi, więc wysłaliśmy do niej rekina”.
 - Slajdy 6-8: po jednym zdaniu na slajd: w grze Zosia ćwiczy, wtyczka pomaga jej przy prawdziwej wiadomości, a mama wie o problemie, nie czytając rozmów córki.
 - Slajd 9: „O zakupie decyduje rada rodziców, więc to rodziców przekonujemy. Szkoła i tak musi działać, a rodzice przynoszą jej gotowe narzędzie”, bez liczb dotyczących rynku.
@@ -122,7 +122,7 @@ Liczby i szczegóły, które w v2 zostały tylko na slajdach, znajdują się tut
 
 | Pytanie | Krótka odpowiedź |
 |---|---|
-| Ile dzieci korzysta z TikToka i Robloxa? | 34% dzieci w wieku 7-12 lat regularnie korzysta z TikToka (800 tys.), choć jest on dozwolony od 13 lat. Roblox ma w Polsce 4,72 mln użytkowników. 45% uczniów klas 7-8 miało smartfon przed 9. urodzinami. |
+| Ile dzieci korzysta z TikToka i Robloxa? | 34% dzieci w wieku 7-12 lat regularnie korzysta z TikToka (800 tys.), choć jest on dozwolony od 13 lat, a około 250 tys. z nich otwiera go ponad 20 razy dziennie. Roblox ma w Polsce 4,72 mln użytkowników (Mediapanel VIII 2025). To liczba wszystkich użytkowników, nie tylko dzieci, i nie mamy jej podziału według wieku. 45% uczniów klas 7-8 miało smartfon przed 9. urodzinami. |
 | Jak częste są ataki? | Według NASK 28% nastolatków padło ofiarą cyberataku, a 12% straciło konto. CERT Orange odnotował 610 tys. przejętych kont w Robloxie w ciągu 4 miesięcy. |
 | Skąd wiecie, że efekt szkoleń znika? | Z badania przeprowadzonego w Holandii (Lastdrager i in., SOUPS 2017): po szkoleniu dzieci radziły sobie o 14% lepiej, a po miesiącu efekt zniknął. |
 | Czy brainrot nie szkodzi? Po co go wzmacniać? | Nie wytwarzamy brainrotu. Zapożyczamy jego formę: postać, krótkie hasło i humor. Treść pozostaje konkretna: trzy pytania i jeden bezpieczny krok. Na tej samej zasadzie od lat działają maskotki kampanii społecznych. Gra „Steal a Brainrot” zgromadziła w Robloxie jednocześnie ponad 25 mln graczy, więc to ta sama widownia. |
